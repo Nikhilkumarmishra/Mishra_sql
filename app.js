@@ -3528,6 +3528,8 @@ INSERT INTO employees VALUES
 
 let SQL = null;
 let currentQ = 0;
+let filteredQuestions = QUESTIONS;
+let activeTag = "ALL";
 let solvedSet = new Set();
 let editor = null;
 
@@ -3539,6 +3541,7 @@ async function init() {
     });
     document.getElementById('loadingScreen').style.display = 'none';
     buildPills();
+    buildTopicFilters();
     buildLandingCards();
     updateHeroCount();
     showLanding();
@@ -3579,8 +3582,20 @@ function updateHeroCount() {
 
 function buildLandingCards() {
   const wrap = document.getElementById('landingQCards');
+
   if (!wrap) return;
-  wrap.innerHTML = QUESTIONS.map((q, i) => `
+
+  // EMPTY STATE
+  if (filteredQuestions.length === 0) {
+    wrap.innerHTML = `
+      <div class="empty-state">
+        No questions found for this topic.
+      </div>
+    `;
+    return;
+  }
+
+  wrap.innerHTML = filteredQuestions.map((q, i) => `
     <div class="q-card" onclick="showApp(${i})">
       <div class="q-card-num">${q.num}</div>
       <div class="q-card-title">${q.title}</div>
@@ -3596,7 +3611,7 @@ function buildPills() {
   const wrap = document.getElementById('qPillsWrap');
   if (!wrap) return;
   wrap.innerHTML = '';
-  QUESTIONS.forEach((q, i) => {
+  filteredQuestions.forEach((q, i) => {
     const btn = document.createElement('button');
     btn.className = 'q-pill';
     btn.id = `pill-${i}`;
@@ -3740,13 +3755,55 @@ function renderTable(result) {
   return `<div class="res-table-wrap"><table class="res-table"><tr>${ths}</tr>${trs}</table></div>`;
 }
 
+function buildTopicFilters() {
+  const wrap = document.getElementById("topicFilters");
+
+  if (!wrap) return;
+
+  const allTags = [
+    "ALL",
+    ...new Set(
+      QUESTIONS.flatMap(q => q.tags || [])
+    )
+  ];
+
+  wrap.innerHTML = allTags.map(tag => `
+    <button
+      class="topic-filter ${tag === activeTag ? "active" : ""}"
+      onclick="filterQuestions('${tag}')"
+    >
+      ${tag}
+    </button>
+  `).join("");
+}
+
+function filterQuestions(tag) {
+  activeTag = tag;
+
+  if (tag === "ALL") {
+    filteredQuestions = QUESTIONS;
+  } else {
+    filteredQuestions = QUESTIONS.filter(q =>
+      q.tags && q.tags.includes(tag)
+    );
+  }
+
+  currentQ = 0;
+
+  buildTopicFilters();
+  buildLandingCards();
+  buildQuestionPills();
+  renderQuestion();
+  
+}
+
 // ── RUN ───────────────────────────────────────────────────────────
 function runQuery() {
   if (!SQL) { showOutputErr('SQL engine not ready yet.'); return; }
   const query = editor.getValue().trim();
   if (!query) { showOutputErr('Write a SQL query first.'); return; }
 
-  const q = QUESTIONS[currentQ];
+  const q = filteredQuestions[currentQ];
   document.getElementById('outputLabel').textContent = 'Output';
   document.getElementById('tcWrap').style.display = 'none';
 
@@ -3768,7 +3825,7 @@ function submitQuery() {
   const query = editor.getValue().trim();
   if (!query) { showOutputErr('Write a SQL query first.'); return; }
 
-  const q = QUESTIONS[currentQ];
+  const q = filteredQuestions[currentQ];
   document.getElementById('outputLabel').textContent = 'Submission';
   document.getElementById('outputBody').innerHTML = '';
 
