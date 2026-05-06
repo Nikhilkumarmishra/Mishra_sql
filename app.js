@@ -845,6 +845,753 @@ INSERT INTO weather VALUES
     },
   ]
 },
+
+{
+  id: 12,
+  num: "13",
+  title: "Employees Earning More Than Average Salary",
+  difficulty: "Medium",
+  tags: ["SUBQUERY", "AVG", "WHERE"],
+
+  desc: `<p>You are given an <strong>employees</strong> table containing employee salaries.</p>
+         <p>Write a query to find employees earning <strong>more than the average salary</strong>.</p>
+         <p>Return columns: <code>name</code>, <code>salary</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "salary", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,name TEXT,salary INTEGER);
+INSERT INTO employees VALUES
+(1,'Alice',50000),
+(2,'Bob',40000),
+(3,'Carol',70000),
+(4,'David',30000),
+(5,'Eve',80000);`,
+
+  example: {
+    cols: ["name", "salary"],
+    rows: [["Carol",70000],["Eve",80000]]
+  },
+
+  hint: "Use a <strong>subquery</strong> with <strong>AVG(salary)</strong> inside the WHERE clause.",
+
+  testCases: [
+    {
+      name: "Correct employees returned",
+      seed: null,
+      check: (rows) => rows.length === 2
+    },
+    {
+      name: "Carol included",
+      seed: null,
+      check: (rows) => rows.some(r => r.name === "Carol")
+    },
+    {
+      name: "Eve salary correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.name === "Eve");
+        return r && Number(r.salary) === 80000;
+      }
+    },
+  ]
+},
+
+{
+  id: 13,
+  num: "14",
+  title: "Products Priced Above Category Average",
+  difficulty: "Hard",
+  tags: ["SUBQUERY", "CORRELATED SUBQUERY", "AVG"],
+
+  desc: `<p>You are given a <strong>products</strong> table containing category and price information.</p>
+         <p>Write a query to find products priced <strong>above the average price of their category</strong>.</p>
+         <p>Return columns: <code>product_name</code>, <code>category</code>, <code>price</code>.</p>`,
+
+  schema: {
+    products: [
+      { col: "product_id", type: "INTEGER", note: "pk" },
+      { col: "product_name", type: "TEXT", note: "" },
+      { col: "category", type: "TEXT", note: "" },
+      { col: "price", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE products(product_id INTEGER,product_name TEXT,category TEXT,price INTEGER);
+INSERT INTO products VALUES
+(1,'iPhone','Electronics',900),
+(2,'Laptop','Electronics',1200),
+(3,'Chair','Furniture',200),
+(4,'Table','Furniture',500),
+(5,'Sofa','Furniture',700);`,
+
+  example: {
+    cols: ["product_name", "category", "price"],
+    rows: [["Laptop","Electronics",1200],["Sofa","Furniture",700]]
+  },
+
+  hint: "Use a <strong>correlated subquery</strong> with AVG(price) filtered by category.",
+
+  testCases: [
+    {
+      name: "Two products returned",
+      seed: null,
+      check: (rows) => rows.length === 2
+    },
+    {
+      name: "Laptop included",
+      seed: null,
+      check: (rows) => rows.some(r => r.product_name === "Laptop")
+    },
+    {
+      name: "Sofa price correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.product_name === "Sofa");
+        return r && Number(r.price) === 700;
+      }
+    },
+  ]
+},
+
+{
+  id: 14,
+  num: "15",
+  title: "Customers With Highest Order Amount",
+  difficulty: "Medium",
+  tags: ["SUBQUERY", "MAX", "WHERE"],
+
+  desc: `<p>You are given an <strong>orders</strong> table containing customer order details.</p>
+         <p>Write a query to find customers who placed the <strong>highest order amount</strong>.</p>
+         <p>Return columns: <code>customer_name</code>, <code>amount</code>.</p>`,
+
+  schema: {
+    orders: [
+      { col: "order_id", type: "INTEGER", note: "pk" },
+      { col: "customer_name", type: "TEXT", note: "" },
+      { col: "amount", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE orders(order_id INTEGER,customer_name TEXT,amount INTEGER);
+INSERT INTO orders VALUES
+(1,'Alice',5000),
+(2,'Bob',7000),
+(3,'Carol',7000),
+(4,'David',4500);`,
+
+  example: {
+    cols: ["customer_name", "amount"],
+    rows: [["Bob",7000],["Carol",7000]]
+  },
+
+  hint: "Use a subquery with <strong>MAX(amount)</strong> inside the WHERE clause.",
+
+  testCases: [
+    {
+      name: "Top customers returned",
+      seed: null,
+      check: (rows) => rows.length === 2
+    },
+    {
+      name: "Bob included",
+      seed: null,
+      check: (rows) => rows.some(r => r.customer_name === "Bob")
+    },
+    {
+      name: "All returned amounts are highest",
+      seed: null,
+      check: (rows) => rows.every(r => Number(r.amount) === 7000)
+    },
+  ]
+},
+
+{
+  id: 15,
+  num: "16",
+  title: "Departments With More Employees Than HR",
+  difficulty: "Hard",
+  tags: ["SUBQUERY", "GROUP BY", "HAVING"],
+
+  desc: `<p>You are given an <strong>employees</strong> table containing department information.</p>
+         <p>Write a query to find departments having <strong>more employees than the HR department</strong>.</p>
+         <p>Return columns: <code>department</code>, <code>employee_count</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "department", type: "TEXT", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,name TEXT,department TEXT);
+INSERT INTO employees VALUES
+(1,'Alice','HR'),
+(2,'Bob','HR'),
+(3,'Carol','Engineering'),
+(4,'David','Engineering'),
+(5,'Eve','Engineering'),
+(6,'Frank','Sales');`,
+
+  example: {
+    cols: ["department", "employee_count"],
+    rows: [["Engineering",3]]
+  },
+
+  hint: "First calculate HR employee count using a subquery, then compare using HAVING.",
+
+  testCases: [
+    {
+      name: "Engineering returned",
+      seed: null,
+      check: (rows) => rows.length === 1 && rows[0].department === "Engineering"
+    },
+    {
+      name: "Engineering count correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.department === "Engineering");
+        return r && Number(r.employee_count) === 3;
+      }
+    },
+    {
+      name: "HR not included",
+      seed: null,
+      check: (rows) => !rows.some(r => r.department === "HR")
+    },
+  ]
+},
+
+{
+  id: 16,
+  num: "17",
+  title: "Second Highest Salary",
+  difficulty: "Medium",
+  tags: ["SUBQUERY", "MAX", "NESTED QUERY"],
+
+  desc: `<p>You are given an <strong>employees</strong> table containing employee salaries.</p>
+         <p>Write a query to find the <strong>second highest salary</strong>.</p>
+         <p>Return columns: <code>name</code>, <code>salary</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "salary", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,name TEXT,salary INTEGER);
+INSERT INTO employees VALUES
+(1,'Alice',90000),
+(2,'Bob',70000),
+(3,'Carol',85000),
+(4,'David',60000);`,
+
+  example: {
+    cols: ["name", "salary"],
+    rows: [["Carol",85000]]
+  },
+
+  hint: "Use nested subqueries with <strong>MAX(salary)</strong>.",
+
+  testCases: [
+    {
+      name: "One employee returned",
+      seed: null,
+      check: (rows) => rows.length === 1
+    },
+    {
+      name: "Carol returned",
+      seed: null,
+      check: (rows) => rows[0].name === "Carol"
+    },
+    {
+      name: "Second highest salary correct",
+      seed: null,
+      check: (rows) => Number(rows[0].salary) === 85000
+    },
+  ]
+},
+
+{
+  id: 17,
+  num: "18",
+  title: "Average Salary By Department Using CTE",
+  difficulty: "Medium",
+  tags: ["CTE", "AVG", "GROUP BY"],
+
+  desc: `<p>You are given an <strong>employees</strong> table containing department and salary information.</p>
+         <p>Write a query using a <strong>CTE</strong> to calculate the average salary for each department.</p>
+         <p>Return columns: <code>department</code>, <code>avg_salary</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "department", type: "TEXT", note: "" },
+      { col: "salary", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,name TEXT,department TEXT,salary INTEGER);
+INSERT INTO employees VALUES
+(1,'Alice','Engineering',90000),
+(2,'Bob','Engineering',70000),
+(3,'Carol','HR',60000),
+(4,'David','HR',50000),
+(5,'Eve','Sales',80000);`,
+
+  example: {
+    cols: ["department", "avg_salary"],
+    rows: [["Engineering",80000],["HR",55000],["Sales",80000]]
+  },
+
+  hint: "Create a CTE first, then calculate <strong>AVG(salary)</strong> using <strong>GROUP BY department</strong>.",
+
+  testCases: [
+    {
+      name: "All departments returned",
+      seed: null,
+      check: (rows) => rows.length === 3
+    },
+    {
+      name: "Engineering average correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.department === "Engineering");
+        return r && Number(r.avg_salary) === 80000;
+      }
+    },
+    {
+      name: "HR average correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.department === "HR");
+        return r && Number(r.avg_salary) === 55000;
+      }
+    },
+  ]
+},
+
+{
+  id: 18,
+  num: "19",
+  title: "Top Customer By Total Spending",
+  difficulty: "Medium",
+  tags: ["CTE", "SUM", "ORDER BY"],
+
+  desc: `<p>You are given an <strong>orders</strong> table containing customer order data.</p>
+         <p>Write a query using a <strong>CTE</strong> to find the customer with the <strong>highest total spending</strong>.</p>
+         <p>Return columns: <code>customer_name</code>, <code>total_spent</code>.</p>`,
+
+  schema: {
+    orders: [
+      { col: "order_id", type: "INTEGER", note: "pk" },
+      { col: "customer_name", type: "TEXT", note: "" },
+      { col: "amount", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE orders(order_id INTEGER,customer_name TEXT,amount INTEGER);
+INSERT INTO orders VALUES
+(1,'Alice',5000),
+(2,'Bob',7000),
+(3,'Alice',3000),
+(4,'Carol',4000),
+(5,'Bob',2000);`,
+
+  example: {
+    cols: ["customer_name", "total_spent"],
+    rows: [["Bob",9000]]
+  },
+
+  hint: "Use a CTE to calculate total spending per customer, then sort in descending order.",
+
+  testCases: [
+    {
+      name: "One customer returned",
+      seed: null,
+      check: (rows) => rows.length === 1
+    },
+    {
+      name: "Bob returned",
+      seed: null,
+      check: (rows) => rows[0].customer_name === "Bob"
+    },
+    {
+      name: "Total spending correct",
+      seed: null,
+      check: (rows) => Number(rows[0].total_spent) === 9000
+    },
+  ]
+},
+
+
+{
+  id: 19,
+  num: "20",
+  title: "Employees Above Department Average",
+  difficulty: "Hard",
+  tags: ["CTE", "AVG", "JOIN"],
+
+  desc: `<p>You are given an <strong>employees</strong> table.</p>
+         <p>Write a query using a <strong>CTE</strong> to find employees earning more than their department's average salary.</p>
+         <p>Return columns: <code>name</code>, <code>department</code>, <code>salary</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "department", type: "TEXT", note: "" },
+      { col: "salary", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,name TEXT,department TEXT,salary INTEGER);
+INSERT INTO employees VALUES
+(1,'Alice','Engineering',90000),
+(2,'Bob','Engineering',70000),
+(3,'Carol','HR',60000),
+(4,'David','HR',50000),
+(5,'Eve','Sales',85000),
+(6,'Frank','Sales',75000);`,
+
+  example: {
+    cols: ["name", "department", "salary"],
+    rows: [["Alice","Engineering",90000],["Carol","HR",60000],["Eve","Sales",85000]]
+  },
+
+  hint: "Create a CTE with department average salary and join it back with employees table.",
+
+  testCases: [
+    {
+      name: "Correct number of employees returned",
+      seed: null,
+      check: (rows) => rows.length === 3
+    },
+    {
+      name: "Alice included",
+      seed: null,
+      check: (rows) => rows.some(r => r.name === "Alice")
+    },
+    {
+      name: "Frank not included",
+      seed: null,
+      check: (rows) => !rows.some(r => r.name === "Frank")
+    },
+  ]
+},
+
+{
+  id: 20,
+  num: "21",
+  title: "Monthly Sales Summary Using CTE",
+  difficulty: "Medium",
+  tags: ["CTE", "SUM", "GROUP BY"],
+
+  desc: `<p>You are given a <strong>sales</strong> table containing monthly sales records.</p>
+         <p>Write a query using a <strong>CTE</strong> to calculate total monthly sales.</p>
+         <p>Return columns: <code>month</code>, <code>total_sales</code>.</p>`,
+
+  schema: {
+    sales: [
+      { col: "sale_id", type: "INTEGER", note: "pk" },
+      { col: "month", type: "TEXT", note: "" },
+      { col: "amount", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE sales(sale_id INTEGER,month TEXT,amount INTEGER);
+INSERT INTO sales VALUES
+(1,'January',5000),
+(2,'January',7000),
+(3,'February',4000),
+(4,'February',6000),
+(5,'March',8000);`,
+
+  example: {
+    cols: ["month", "total_sales"],
+    rows: [["January",12000],["February",10000],["March",8000]]
+  },
+
+  hint: "Use a CTE with <strong>GROUP BY month</strong> and <strong>SUM(amount)</strong>.",
+
+  testCases: [
+    {
+      name: "Three months returned",
+      seed: null,
+      check: (rows) => rows.length === 3
+    },
+    {
+      name: "January sales correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.month === "January");
+        return r && Number(r.total_sales) === 12000;
+      }
+    },
+    {
+      name: "February sales correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.month === "February");
+        return r && Number(r.total_sales) === 10000;
+      }
+    },
+  ]
+},
+
+{
+  id: 21,
+  num: "22",
+  title: "Second Highest Product Price Using CTE",
+  difficulty: "Hard",
+  tags: ["CTE", "DENSE_RANK", "WINDOW FUNCTION"],
+
+  desc: `<p>You are given a <strong>products</strong> table containing product prices.</p>
+         <p>Write a query using a <strong>CTE</strong> to find the product with the <strong>second highest price</strong>.</p>
+         <p>Return columns: <code>product_name</code>, <code>price</code>.</p>`,
+
+  schema: {
+    products: [
+      { col: "product_id", type: "INTEGER", note: "pk" },
+      { col: "product_name", type: "TEXT", note: "" },
+      { col: "price", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE products(product_id INTEGER,product_name TEXT,price INTEGER);
+INSERT INTO products VALUES
+(1,'Laptop',90000),
+(2,'Phone',70000),
+(3,'Tablet',85000),
+(4,'Monitor',50000);`,
+
+  example: {
+    cols: ["product_name", "price"],
+    rows: [["Tablet",85000]]
+  },
+
+  hint: "Use a CTE with <strong>DENSE_RANK()</strong> ordered by price descending.",
+
+  testCases: [
+    {
+      name: "One product returned",
+      seed: null,
+      check: (rows) => rows.length === 1
+    },
+    {
+      name: "Tablet returned",
+      seed: null,
+      check: (rows) => rows[0].product_name === "Tablet"
+    },
+    {
+      name: "Price correct",
+      seed: null,
+      check: (rows) => Number(rows[0].price) === 85000
+    },
+  ]
+},
+
+{
+  id: 22,
+  num: "23",
+  title: "Top 2 Highest Paid Employees Per Department",
+  difficulty: "Hard",
+  tags: ["CTE", "WINDOW FUNCTION", "ROW_NUMBER"],
+
+  desc: `<p>You are given an <strong>employees</strong> table containing department and salary details.</p>
+         <p>Write a query using a <strong>CTE</strong> and window function to find the <strong>top 2 highest paid employees</strong> in each department.</p>
+         <p>Return columns: <code>department</code>, <code>name</code>, <code>salary</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "department", type: "TEXT", note: "" },
+      { col: "salary", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,name TEXT,department TEXT,salary INTEGER);
+INSERT INTO employees VALUES
+(1,'Alice','Engineering',95000),
+(2,'Bob','Engineering',85000),
+(3,'Carol','Engineering',75000),
+(4,'David','HR',70000),
+(5,'Eve','HR',65000),
+(6,'Frank','HR',50000);`,
+
+  example: {
+    cols: ["department", "name", "salary"],
+    rows: [
+      ["Engineering","Alice",95000],
+      ["Engineering","Bob",85000],
+      ["HR","David",70000],
+      ["HR","Eve",65000]
+    ]
+  },
+
+  hint: "Use a CTE with <strong>ROW_NUMBER() OVER(PARTITION BY department ORDER BY salary DESC)</strong>.",
+
+  testCases: [
+    {
+      name: "Four rows returned",
+      seed: null,
+      check: (rows) => rows.length === 4
+    },
+    {
+      name: "Top Engineering employee correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.department === "Engineering" && r.name === "Alice");
+        return r && Number(r.salary) === 95000;
+      }
+    },
+    {
+      name: "Lowest ranked employees excluded",
+      seed: null,
+      check: (rows) => !rows.some(r => r.name === "Carol" || r.name === "Frank")
+    },
+  ]
+},
+
+
+{
+  id: 23,
+  num: "24",
+  title: "Running Total Of Customer Orders",
+  difficulty: "Medium",
+  tags: ["CTE", "WINDOW FUNCTION", "SUM OVER"],
+
+  desc: `<p>You are given an <strong>orders</strong> table containing customer order amounts.</p>
+         <p>Write a query using a <strong>CTE</strong> and window function to calculate the <strong>running total</strong> of orders for each customer.</p>
+         <p>Return columns: <code>customer_name</code>, <code>order_id</code>, <code>amount</code>, <code>running_total</code>.</p>`,
+
+  schema: {
+    orders: [
+      { col: "order_id", type: "INTEGER", note: "pk" },
+      { col: "customer_name", type: "TEXT", note: "" },
+      { col: "amount", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE orders(order_id INTEGER,customer_name TEXT,amount INTEGER);
+INSERT INTO orders VALUES
+(1,'Alice',1000),
+(2,'Alice',2000),
+(3,'Alice',1500),
+(4,'Bob',3000),
+(5,'Bob',1000);`,
+
+  example: {
+    cols: ["customer_name", "order_id", "amount", "running_total"],
+    rows: [
+      ["Alice",1,1000,1000],
+      ["Alice",2,2000,3000],
+      ["Alice",3,1500,4500],
+      ["Bob",4,3000,3000],
+      ["Bob",5,1000,4000]
+    ]
+  },
+
+  hint: "Use <strong>SUM(amount) OVER(PARTITION BY customer_name ORDER BY order_id)</strong> inside a CTE.",
+
+  testCases: [
+    {
+      name: "All rows returned",
+      seed: null,
+      check: (rows) => rows.length === 5
+    },
+    {
+      name: "Alice final running total correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.customer_name === "Alice" && Number(r.order_id) === 3);
+        return r && Number(r.running_total) === 4500;
+      }
+    },
+    {
+      name: "Bob running total correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.customer_name === "Bob" && Number(r.order_id) === 5);
+        return r && Number(r.running_total) === 4000;
+      }
+    },
+  ]
+},
+
+{
+  id: 24,
+  num: "25",
+  title: "Latest Order For Each Customer",
+  difficulty: "Hard",
+  tags: ["CTE", "WINDOW FUNCTION", "RANK"],
+
+  desc: `<p>You are given an <strong>orders</strong> table containing customer orders.</p>
+         <p>Write a query using a <strong>CTE</strong> and window function to find the <strong>latest order</strong> placed by each customer.</p>
+         <p>Return columns: <code>customer_name</code>, <code>order_date</code>, <code>amount</code>.</p>`,
+
+  schema: {
+    orders: [
+      { col: "order_id", type: "INTEGER", note: "pk" },
+      { col: "customer_name", type: "TEXT", note: "" },
+      { col: "order_date", type: "TEXT", note: "" },
+      { col: "amount", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE orders(order_id INTEGER,customer_name TEXT,order_date TEXT,amount INTEGER);
+INSERT INTO orders VALUES
+(1,'Alice','2025-01-01',1000),
+(2,'Alice','2025-01-05',2000),
+(3,'Bob','2025-01-03',1500),
+(4,'Bob','2025-01-08',3000),
+(5,'Carol','2025-01-02',2500);`,
+
+  example: {
+    cols: ["customer_name", "order_date", "amount"],
+    rows: [
+      ["Alice","2025-01-05",2000],
+      ["Bob","2025-01-08",3000],
+      ["Carol","2025-01-02",2500]
+    ]
+  },
+
+  hint: "Use a CTE with <strong>RANK() OVER(PARTITION BY customer_name ORDER BY order_date DESC)</strong>.",
+
+  testCases: [
+    {
+      name: "One latest order per customer",
+      seed: null,
+      check: (rows) => rows.length === 3
+    },
+    {
+      name: "Bob latest order correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.customer_name === "Bob");
+        return r && r.order_date === "2025-01-08";
+      }
+    },
+    {
+      name: "Alice latest amount correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.customer_name === "Alice");
+        return r && Number(r.amount) === 2000;
+      }
+    },
+  ]
+},
   // ── ADD MORE QUESTIONS HERE ───────────────────────────────────
   // Copy the template from the top of this file and paste it here.
   // The site will automatically pick it up — nav pills, landing
