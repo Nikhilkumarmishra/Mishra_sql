@@ -323,3 +323,70 @@ footer{padding:40px 80px;border-top:1px solid var(--border);display:flex;align-i
   .left-panel{width:100%;max-width:100%;border-right:none;border-bottom:1px solid var(--border)}
   .workspace{flex-direction:column;overflow:auto}
 }
+
+.CodeMirror {
+  height: 100% !important;
+  font-family: var(--mono);
+  font-size: 13.5px;
+  background: transparent !important;
+  color: var(--text);
+  padding-top: 6px;
+}
+
+.CodeMirror-gutters {
+  background: var(--bg2) !important;
+  border-right: 1px solid var(--border) !important;
+}
+
+.CodeMirror-linenumber {
+  color: var(--hint) !important;
+  font-size: 12px;
+}
+
+.CodeMirror-cursor {
+  border-left: 2px solid var(--accent) !important;
+}
+
+.CodeMirror-selected {
+  background: rgba(255,255,255,0.08) !important;
+}
+
+.cm-s-material-darker.CodeMirror {
+  background: transparent !important;
+}
+
+.cm-keyword {
+  color: #c792ea !important;
+  font-weight: 600;
+}
+
+.cm-operator {
+  color: #89ddff !important;
+}
+
+.cm-number {
+  color: #f78c6c !important;
+}
+
+.cm-string {
+  color: #c3e88d !important;
+}
+
+.cm-comment {
+  color: #676e95 !important;
+  font-style: italic;
+}
+
+.cm-variable,
+.cm-variable-2,
+.cm-def {
+  color: #e8e6e0 !important;
+}
+
+.cm-builtin {
+  color: #82aaff !important;
+}
+
+.cm-atom {
+  color: #ffcb6b !important;
+}

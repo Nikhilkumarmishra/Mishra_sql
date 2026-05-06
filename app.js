@@ -3529,6 +3529,7 @@ INSERT INTO employees VALUES
 let SQL = null;
 let currentQ = 0;
 let solvedSet = new Set();
+let editor = null;
 
 // ── INIT ─────────────────────────────────────────────────────────
 async function init() {
@@ -3541,6 +3542,7 @@ async function init() {
     buildLandingCards();
     updateHeroCount();
     showLanding();
+    initEditor();
   } catch(e) {
     document.getElementById('loadingScreen').innerHTML =
       `<div style="color:#e55;font-family:monospace;font-size:14px;padding:24px">
@@ -3549,6 +3551,26 @@ async function init() {
   }
 }
 
+function initEditor() {
+  const textarea = document.getElementById('sqlEditor');
+
+  editor = CodeMirror.fromTextArea(textarea, {
+    mode: 'text/x-sql',
+    theme: 'material-darker',
+    lineNumbers: true,
+    matchBrackets: true,
+    autoCloseBrackets: true,
+    lineWrapping: true,
+    smartIndent: true,
+    indentUnit: 2,
+    tabSize: 2,
+  });
+
+  editor.setSize('100%', '100%');
+
+  editor.setValue(`-- Write your SQL query here...
+-- Press ▶ Run to test, Submit to check all cases`);
+}
 // ── LANDING PAGE BUILDERS ─────────────────────────────────────────
 function updateHeroCount() {
   const el = document.getElementById('heroStatCount');
@@ -3623,7 +3645,7 @@ function renderQuestion(idx) {
   badge.className = `diff-badge diff-${q.difficulty.toLowerCase()}`;
 
   // Reset output area
-  document.getElementById('sqlEditor').value = '';
+  editor.setValue('');
   document.getElementById('outputBody').innerHTML = `
     <div class="empty-state">
       <div class="es-icon">◈</div>
@@ -3721,7 +3743,7 @@ function renderTable(result) {
 // ── RUN ───────────────────────────────────────────────────────────
 function runQuery() {
   if (!SQL) { showOutputErr('SQL engine not ready yet.'); return; }
-  const query = document.getElementById('sqlEditor').value.trim();
+  const query = editor.getValue().trim();
   if (!query) { showOutputErr('Write a SQL query first.'); return; }
 
   const q = QUESTIONS[currentQ];
@@ -3743,7 +3765,7 @@ function runQuery() {
 // ── SUBMIT ────────────────────────────────────────────────────────
 function submitQuery() {
   if (!SQL) return;
-  const query = document.getElementById('sqlEditor').value.trim();
+  const query = editor.getValue().trim();
   if (!query) { showOutputErr('Write a SQL query first.'); return; }
 
   const q = QUESTIONS[currentQ];
@@ -3799,8 +3821,8 @@ function updateProgress() {
 }
 
 function resetEditor() {
-  document.getElementById('sqlEditor').value = '';
-  document.getElementById('sqlEditor').focus();
+  editor.setValue('');
+  editor.focus();
 }
 
 function showOutputErr(msg) {
