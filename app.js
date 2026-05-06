@@ -1592,6 +1592,1059 @@ INSERT INTO orders VALUES
     },
   ]
 },
+
+{
+  id: 25,
+  num: "26",
+  title: "Show All Employee Names",
+  difficulty: "Easy",
+  tags: ["SELECT"],
+
+  desc: `<p>You are given an <strong>employees</strong> table.</p>
+         <p>Write a query to display all employee names.</p>
+         <p>Return column: <code>name</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "department", type: "TEXT", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,name TEXT,department TEXT);
+INSERT INTO employees VALUES
+(1,'Alice','HR'),
+(2,'Bob','Engineering'),
+(3,'Carol','Sales');`,
+
+  example: {
+    cols: ["name"],
+    rows: [["Alice"],["Bob"],["Carol"]]
+  },
+
+  hint: "Use <strong>SELECT name FROM employees</strong>.",
+
+  testCases: [
+    {
+      name: "All employee names returned",
+      seed: null,
+      check: (rows) => rows.length === 3
+    },
+    {
+      name: "Alice included",
+      seed: null,
+      check: (rows) => rows.some(r => r.name === "Alice")
+    },
+    {
+      name: "Only name column returned",
+      seed: null,
+      check: (rows) => Object.keys(rows[0]).length === 1
+    },
+  ]
+},
+
+{
+  id: 26,
+  num: "27",
+  title: "Find All Products",
+  difficulty: "Easy",
+  tags: ["SELECT"],
+
+  desc: `<p>You are given a <strong>products</strong> table.</p>
+         <p>Write a query to display all product details.</p>`,
+
+  schema: {
+    products: [
+      { col: "product_id", type: "INTEGER", note: "pk" },
+      { col: "product_name", type: "TEXT", note: "" },
+      { col: "price", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE products(product_id INTEGER,product_name TEXT,price INTEGER);
+INSERT INTO products VALUES
+(1,'Laptop',80000),
+(2,'Phone',50000),
+(3,'Tablet',30000);`,
+
+  example: {
+    cols: ["product_id", "product_name", "price"],
+    rows: [
+      [1,"Laptop",80000],
+      [2,"Phone",50000],
+      [3,"Tablet",30000]
+    ]
+  },
+
+  hint: "Use <strong>SELECT *</strong> to display all columns.",
+
+  testCases: [
+    {
+      name: "All rows returned",
+      seed: null,
+      check: (rows) => rows.length === 3
+    },
+    {
+      name: "Laptop exists",
+      seed: null,
+      check: (rows) => rows.some(r => r.product_name === "Laptop")
+    },
+    {
+      name: "All columns returned",
+      seed: null,
+      check: (rows) => Object.keys(rows[0]).length === 3
+    },
+  ]
+},
+
+
+{
+  id: 27,
+  num: "28",
+  title: "Show Customer Cities",
+  difficulty: "Easy",
+  tags: ["SELECT"],
+
+  desc: `<p>You are given a <strong>customers</strong> table.</p>
+         <p>Write a query to display customer names and their cities.</p>
+         <p>Return columns: <code>name</code>, <code>city</code>.</p>`,
+
+  schema: {
+    customers: [
+      { col: "customer_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "city", type: "TEXT", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE customers(customer_id INTEGER,name TEXT,city TEXT);
+INSERT INTO customers VALUES
+(1,'Alice','Delhi'),
+(2,'Bob','Mumbai'),
+(3,'Carol','Pune');`,
+
+  example: {
+    cols: ["name", "city"],
+    rows: [["Alice","Delhi"],["Bob","Mumbai"],["Carol","Pune"]]
+  },
+
+  hint: "Select multiple columns using <strong>SELECT name, city</strong>.",
+
+  testCases: [
+    {
+      name: "All customers returned",
+      seed: null,
+      check: (rows) => rows.length === 3
+    },
+    {
+      name: "Mumbai present",
+      seed: null,
+      check: (rows) => rows.some(r => r.city === "Mumbai")
+    },
+    {
+      name: "Correct columns returned",
+      seed: null,
+      check: (rows) => rows[0].name && rows[0].city
+    },
+  ]
+},
+
+{
+  id: 28,
+  num: "29",
+  title: "Display Student Marks",
+  difficulty: "Easy",
+  tags: ["SELECT"],
+
+  desc: `<p>You are given a <strong>students</strong> table.</p>
+         <p>Write a query to display student names and marks.</p>
+         <p>Return columns: <code>name</code>, <code>marks</code>.</p>`,
+
+  schema: {
+    students: [
+      { col: "student_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "marks", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE students(student_id INTEGER,name TEXT,marks INTEGER);
+INSERT INTO students VALUES
+(1,'Alice',85),
+(2,'Bob',72),
+(3,'Carol',91);`,
+
+  example: {
+    cols: ["name", "marks"],
+    rows: [["Alice",85],["Bob",72],["Carol",91]]
+  },
+
+  hint: "Use <strong>SELECT name, marks FROM students</strong>.",
+
+  testCases: [
+    {
+      name: "All students returned",
+      seed: null,
+      check: (rows) => rows.length === 3
+    },
+    {
+      name: "Carol marks correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.name === "Carol");
+        return r && Number(r.marks) === 91;
+      }
+    },
+    {
+      name: "Marks column returned",
+      seed: null,
+      check: (rows) => "marks" in rows[0]
+    },
+  ]
+},
+
+{
+  id: 29,
+  num: "30",
+  title: "Show Employee Departments",
+  difficulty: "Easy",
+  tags: ["SELECT"],
+
+  desc: `<p>You are given an <strong>employees</strong> table.</p>
+         <p>Write a query to display employee names and departments.</p>
+         <p>Return columns: <code>name</code>, <code>department</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "department", type: "TEXT", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,name TEXT,department TEXT);
+INSERT INTO employees VALUES
+(1,'Alice','HR'),
+(2,'Bob','Engineering'),
+(3,'Carol','Finance');`,
+
+  example: {
+    cols: ["name", "department"],
+    rows: [["Alice","HR"],["Bob","Engineering"],["Carol","Finance"]]
+  },
+
+  hint: "Use <strong>SELECT name, department FROM employees</strong>.",
+
+  testCases: [
+    {
+      name: "All employees returned",
+      seed: null,
+      check: (rows) => rows.length === 3
+    },
+    {
+      name: "Engineering department exists",
+      seed: null,
+      check: (rows) => rows.some(r => r.department === "Engineering")
+    },
+    {
+      name: "Correct columns returned",
+      seed: null,
+      check: (rows) => rows[0].name && rows[0].department
+    },
+  ]
+},
+
+{
+  id: 30,
+  num: "31",
+  title: "Find Maximum Employee Salary",
+  difficulty: "Easy",
+  tags: ["MAX", "AGGREGATE FUNCTION"],
+
+  desc: `<p>You are given an <strong>employees</strong> table containing salary details.</p>
+         <p>Write a query to find the <strong>highest salary</strong>.</p>
+         <p>Return column: <code>highest_salary</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "salary", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,name TEXT,salary INTEGER);
+INSERT INTO employees VALUES
+(1,'Alice',50000),
+(2,'Bob',70000),
+(3,'Carol',65000);`,
+
+  example: {
+    cols: ["highest_salary"],
+    rows: [[70000]]
+  },
+
+  hint: "Use <strong>MAX(salary)</strong>.",
+
+  testCases: [
+    {
+      name: "Highest salary correct",
+      seed: null,
+      check: (rows) => Number(rows[0].highest_salary) === 70000
+    },
+    {
+      name: "Single row returned",
+      seed: null,
+      check: (rows) => rows.length === 1
+    },
+    {
+      name: "Correct column returned",
+      seed: null,
+      check: (rows) => "highest_salary" in rows[0]
+    },
+  ]
+},
+
+{
+  id: 31,
+  num: "32",
+  title: "Find Maximum Product Price",
+  difficulty: "Easy",
+  tags: ["MAX", "AGGREGATE FUNCTION"],
+
+  desc: `<p>You are given a <strong>products</strong> table.</p>
+         <p>Write a query to find the <strong>maximum product price</strong>.</p>
+         <p>Return column: <code>max_price</code>.</p>`,
+
+  schema: {
+    products: [
+      { col: "product_id", type: "INTEGER", note: "pk" },
+      { col: "product_name", type: "TEXT", note: "" },
+      { col: "price", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE products(product_id INTEGER,product_name TEXT,price INTEGER);
+INSERT INTO products VALUES
+(1,'Phone',50000),
+(2,'Laptop',90000),
+(3,'Tablet',30000);`,
+
+  example: {
+    cols: ["max_price"],
+    rows: [[90000]]
+  },
+
+  hint: "Use <strong>MAX(price)</strong>.",
+
+  testCases: [
+    {
+      name: "Maximum price correct",
+      seed: null,
+      check: (rows) => Number(rows[0].max_price) === 90000
+    },
+    {
+      name: "One row returned",
+      seed: null,
+      check: (rows) => rows.length === 1
+    },
+    {
+      name: "Correct column returned",
+      seed: null,
+      check: (rows) => "max_price" in rows[0]
+    },
+  ]
+},
+
+{
+  id: 32,
+  num: "33",
+  title: "Find Minimum Product Price",
+  difficulty: "Easy",
+  tags: ["MIN", "AGGREGATE FUNCTION"],
+
+  desc: `<p>You are given a <strong>products</strong> table.</p>
+         <p>Write a query to find the <strong>lowest product price</strong>.</p>
+         <p>Return column: <code>min_price</code>.</p>`,
+
+  schema: {
+    products: [
+      { col: "product_id", type: "INTEGER", note: "pk" },
+      { col: "product_name", type: "TEXT", note: "" },
+      { col: "price", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE products(product_id INTEGER,product_name TEXT,price INTEGER);
+INSERT INTO products VALUES
+(1,'Phone',50000),
+(2,'Laptop',90000),
+(3,'Keyboard',5000);`,
+
+  example: {
+    cols: ["min_price"],
+    rows: [[5000]]
+  },
+
+  hint: "Use <strong>MIN(price)</strong>.",
+
+  testCases: [
+    {
+      name: "Minimum price correct",
+      seed: null,
+      check: (rows) => Number(rows[0].min_price) === 5000
+    },
+    {
+      name: "Single row returned",
+      seed: null,
+      check: (rows) => rows.length === 1
+    },
+    {
+      name: "Correct column exists",
+      seed: null,
+      check: (rows) => "min_price" in rows[0]
+    },
+  ]
+},
+
+{
+  id: 33,
+  num: "34",
+  title: "Find Minimum Employee Age",
+  difficulty: "Easy",
+  tags: ["MIN", "AGGREGATE FUNCTION"],
+
+  desc: `<p>You are given an <strong>employees</strong> table containing employee ages.</p>
+         <p>Write a query to find the <strong>youngest employee age</strong>.</p>
+         <p>Return column: <code>youngest_age</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "age", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,name TEXT,age INTEGER);
+INSERT INTO employees VALUES
+(1,'Alice',28),
+(2,'Bob',35),
+(3,'Carol',24);`,
+
+  example: {
+    cols: ["youngest_age"],
+    rows: [[24]]
+  },
+
+  hint: "Use <strong>MIN(age)</strong>.",
+
+  testCases: [
+    {
+      name: "Youngest age correct",
+      seed: null,
+      check: (rows) => Number(rows[0].youngest_age) === 24
+    },
+    {
+      name: "One row returned",
+      seed: null,
+      check: (rows) => rows.length === 1
+    },
+    {
+      name: "Correct column returned",
+      seed: null,
+      check: (rows) => "youngest_age" in rows[0]
+    },
+  ]
+},
+
+{
+  id: 34,
+  num: "35",
+  title: "Count Total Employees",
+  difficulty: "Easy",
+  tags: ["COUNT", "AGGREGATE FUNCTION"],
+
+  desc: `<p>You are given an <strong>employees</strong> table.</p>
+         <p>Write a query to count the <strong>total number of employees</strong>.</p>
+         <p>Return column: <code>total_employees</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,name TEXT);
+INSERT INTO employees VALUES
+(1,'Alice'),
+(2,'Bob'),
+(3,'Carol'),
+(4,'David');`,
+
+  example: {
+    cols: ["total_employees"],
+    rows: [[4]]
+  },
+
+  hint: "Use <strong>COUNT(*)</strong>.",
+
+  testCases: [
+    {
+      name: "Employee count correct",
+      seed: null,
+      check: (rows) => Number(rows[0].total_employees) === 4
+    },
+    {
+      name: "One row returned",
+      seed: null,
+      check: (rows) => rows.length === 1
+    },
+    {
+      name: "Correct column exists",
+      seed: null,
+      check: (rows) => "total_employees" in rows[0]
+    },
+  ]
+},
+
+
+{
+  id: 35,
+  num: "36",
+  title: "Count Total Orders",
+  difficulty: "Easy",
+  tags: ["COUNT", "AGGREGATE FUNCTION"],
+
+  desc: `<p>You are given an <strong>orders</strong> table.</p>
+         <p>Write a query to count the <strong>total number of orders</strong>.</p>
+         <p>Return column: <code>total_orders</code>.</p>`,
+
+  schema: {
+    orders: [
+      { col: "order_id", type: "INTEGER", note: "pk" },
+      { col: "customer_name", type: "TEXT", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE orders(order_id INTEGER,customer_name TEXT);
+INSERT INTO orders VALUES
+(1,'Alice'),
+(2,'Bob'),
+(3,'Carol');`,
+
+  example: {
+    cols: ["total_orders"],
+    rows: [[3]]
+  },
+
+  hint: "Use <strong>COUNT(*)</strong>.",
+
+  testCases: [
+    {
+      name: "Order count correct",
+      seed: null,
+      check: (rows) => Number(rows[0].total_orders) === 3
+    },
+    {
+      name: "Single row returned",
+      seed: null,
+      check: (rows) => rows.length === 1
+    },
+    {
+      name: "Correct column returned",
+      seed: null,
+      check: (rows) => "total_orders" in rows[0]
+    },
+  ]
+},
+
+
+{
+  id: 36,
+  num: "37",
+  title: "Find Total Sales Amount",
+  difficulty: "Easy",
+  tags: ["SUM", "AGGREGATE FUNCTION"],
+
+  desc: `<p>You are given a <strong>sales</strong> table containing sales amounts.</p>
+         <p>Write a query to calculate the <strong>total sales amount</strong>.</p>
+         <p>Return column: <code>total_sales</code>.</p>`,
+
+  schema: {
+    sales: [
+      { col: "sale_id", type: "INTEGER", note: "pk" },
+      { col: "amount", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE sales(sale_id INTEGER,amount INTEGER);
+INSERT INTO sales VALUES
+(1,5000),
+(2,3000),
+(3,2000);`,
+
+  example: {
+    cols: ["total_sales"],
+    rows: [[10000]]
+  },
+
+  hint: "Use <strong>SUM(amount)</strong>.",
+
+  testCases: [
+    {
+      name: "Total sales correct",
+      seed: null,
+      check: (rows) => Number(rows[0].total_sales) === 10000
+    },
+    {
+      name: "One row returned",
+      seed: null,
+      check: (rows) => rows.length === 1
+    },
+    {
+      name: "Correct column exists",
+      seed: null,
+      check: (rows) => "total_sales" in rows[0]
+    },
+  ]
+},
+
+
+{
+  id: 37,
+  num: "38",
+  title: "Find Total Product Price",
+  difficulty: "Easy",
+  tags: ["SUM", "AGGREGATE FUNCTION"],
+
+  desc: `<p>You are given a <strong>products</strong> table.</p>
+         <p>Write a query to calculate the <strong>sum of all product prices</strong>.</p>
+         <p>Return column: <code>total_price</code>.</p>`,
+
+  schema: {
+    products: [
+      { col: "product_id", type: "INTEGER", note: "pk" },
+      { col: "price", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE products(product_id INTEGER,price INTEGER);
+INSERT INTO products VALUES
+(1,1000),
+(2,2000),
+(3,3000);`,
+
+  example: {
+    cols: ["total_price"],
+    rows: [[6000]]
+  },
+
+  hint: "Use <strong>SUM(price)</strong>.",
+
+  testCases: [
+    {
+      name: "Total price correct",
+      seed: null,
+      check: (rows) => Number(rows[0].total_price) === 6000
+    },
+    {
+      name: "Single row returned",
+      seed: null,
+      check: (rows) => rows.length === 1
+    },
+    {
+      name: "Correct column returned",
+      seed: null,
+      check: (rows) => "total_price" in rows[0]
+    },
+  ]
+},
+
+
+{
+  id: 38,
+  num: "39",
+  title: "Find Average Employee Salary",
+  difficulty: "Easy",
+  tags: ["AVG", "AGGREGATE FUNCTION"],
+
+  desc: `<p>You are given an <strong>employees</strong> table containing salaries.</p>
+         <p>Write a query to find the <strong>average employee salary</strong>.</p>
+         <p>Return column: <code>avg_salary</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "salary", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,salary INTEGER);
+INSERT INTO employees VALUES
+(1,40000),
+(2,60000),
+(3,50000);`,
+
+  example: {
+    cols: ["avg_salary"],
+    rows: [[50000]]
+  },
+
+  hint: "Use <strong>AVG(salary)</strong>.",
+
+  testCases: [
+    {
+      name: "Average salary correct",
+      seed: null,
+      check: (rows) => Number(rows[0].avg_salary) === 50000
+    },
+    {
+      name: "One row returned",
+      seed: null,
+      check: (rows) => rows.length === 1
+    },
+    {
+      name: "Correct column exists",
+      seed: null,
+      check: (rows) => "avg_salary" in rows[0]
+    },
+  ]
+},
+
+{
+  id: 39,
+  num: "40",
+  title: "Find Average Product Price",
+  difficulty: "Easy",
+  tags: ["AVG", "AGGREGATE FUNCTION"],
+
+  desc: `<p>You are given a <strong>products</strong> table containing product prices.</p>
+         <p>Write a query to find the <strong>average product price</strong>.</p>
+         <p>Return column: <code>avg_price</code>.</p>`,
+
+  schema: {
+    products: [
+      { col: "product_id", type: "INTEGER", note: "pk" },
+      { col: "price", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE products(product_id INTEGER,price INTEGER);
+INSERT INTO products VALUES
+(1,10000),
+(2,20000),
+(3,30000);`,
+
+  example: {
+    cols: ["avg_price"],
+    rows: [[20000]]
+  },
+
+  hint: "Use <strong>AVG(price)</strong>.",
+
+  testCases: [
+    {
+      name: "Average price correct",
+      seed: null,
+      check: (rows) => Number(rows[0].avg_price) === 20000
+    },
+    {
+      name: "Single row returned",
+      seed: null,
+      check: (rows) => rows.length === 1
+    },
+    {
+      name: "Correct column returned",
+      seed: null,
+      check: (rows) => "avg_price" in rows[0]
+    },
+  ]
+},
+
+
+{
+  id: 40,
+  num: "41",
+  title: "Employees With High Salary And HR Department",
+  difficulty: "Easy",
+  tags: ["WHERE", "AND", "OPERATORS"],
+
+  desc: `<p>You are given an <strong>employees</strong> table.</p>
+         <p>Write a query to find employees who belong to the <strong>HR department</strong> and have salary greater than <strong>50000</strong>.</p>
+         <p>Return columns: <code>name</code>, <code>salary</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "department", type: "TEXT", note: "" },
+      { col: "salary", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,name TEXT,department TEXT,salary INTEGER);
+INSERT INTO employees VALUES
+(1,'Alice','HR',60000),
+(2,'Bob','Engineering',70000),
+(3,'Carol','HR',45000),
+(4,'David','Sales',55000);`,
+
+  example: {
+    cols: ["name", "salary"],
+    rows: [["Alice",60000]]
+  },
+
+  hint: "Use <strong>AND</strong> inside the WHERE clause.",
+
+  testCases: [
+    {
+      name: "Only one employee returned",
+      seed: null,
+      check: (rows) => rows.length === 1
+    },
+    {
+      name: "Alice returned",
+      seed: null,
+      check: (rows) => rows[0].name === "Alice"
+    },
+    {
+      name: "Salary correct",
+      seed: null,
+      check: (rows) => Number(rows[0].salary) === 60000
+    },
+  ]
+},
+
+
+{
+  id: 41,
+  num: "42",
+  title: "Products In Electronics Or Furniture",
+  difficulty: "Easy",
+  tags: ["WHERE", "OR", "OPERATORS"],
+
+  desc: `<p>You are given a <strong>products</strong> table.</p>
+         <p>Write a query to display products belonging to <strong>Electronics</strong> or <strong>Furniture</strong> category.</p>
+         <p>Return columns: <code>product_name</code>, <code>category</code>.</p>`,
+
+  schema: {
+    products: [
+      { col: "product_id", type: "INTEGER", note: "pk" },
+      { col: "product_name", type: "TEXT", note: "" },
+      { col: "category", type: "TEXT", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE products(product_id INTEGER,product_name TEXT,category TEXT);
+INSERT INTO products VALUES
+(1,'Laptop','Electronics'),
+(2,'Chair','Furniture'),
+(3,'Pen','Stationery'),
+(4,'Phone','Electronics');`,
+
+  example: {
+    cols: ["product_name", "category"],
+    rows: [
+      ["Laptop","Electronics"],
+      ["Chair","Furniture"],
+      ["Phone","Electronics"]
+    ]
+  },
+
+  hint: "Use <strong>OR</strong> inside the WHERE clause.",
+
+  testCases: [
+    {
+      name: "Three products returned",
+      seed: null,
+      check: (rows) => rows.length === 3
+    },
+    {
+      name: "Stationery excluded",
+      seed: null,
+      check: (rows) => !rows.some(r => r.category === "Stationery")
+    },
+    {
+      name: "Laptop included",
+      seed: null,
+      check: (rows) => rows.some(r => r.product_name === "Laptop")
+    },
+  ]
+},
+
+
+{
+  id: 42,
+  num: "43",
+  title: "Students With Marks Between 70 And 90",
+  difficulty: "Easy",
+  tags: ["BETWEEN", "WHERE", "OPERATORS"],
+
+  desc: `<p>You are given a <strong>students</strong> table containing student marks.</p>
+         <p>Write a query to find students scoring between <strong>70 and 90</strong>.</p>
+         <p>Return columns: <code>name</code>, <code>marks</code>.</p>`,
+
+  schema: {
+    students: [
+      { col: "student_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "marks", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE students(student_id INTEGER,name TEXT,marks INTEGER);
+INSERT INTO students VALUES
+(1,'Alice',85),
+(2,'Bob',65),
+(3,'Carol',90),
+(4,'David',72);`,
+
+  example: {
+    cols: ["name", "marks"],
+    rows: [
+      ["Alice",85],
+      ["Carol",90],
+      ["David",72]
+    ]
+  },
+
+  hint: "Use <strong>BETWEEN 70 AND 90</strong>.",
+
+  testCases: [
+    {
+      name: "Three students returned",
+      seed: null,
+      check: (rows) => rows.length === 3
+    },
+    {
+      name: "Bob excluded",
+      seed: null,
+      check: (rows) => !rows.some(r => r.name === "Bob")
+    },
+    {
+      name: "Carol included",
+      seed: null,
+      check: (rows) => rows.some(r => r.name === "Carol")
+    },
+  ]
+},
+
+
+{
+  id: 43,
+  num: "44",
+  title: "Employees In Selected Departments",
+  difficulty: "Easy",
+  tags: ["IN", "WHERE", "OPERATORS"],
+
+  desc: `<p>You are given an <strong>employees</strong> table.</p>
+         <p>Write a query to display employees working in <strong>HR</strong> or <strong>Sales</strong> departments using the <strong>IN</strong> operator.</p>
+         <p>Return columns: <code>name</code>, <code>department</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "department", type: "TEXT", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,name TEXT,department TEXT);
+INSERT INTO employees VALUES
+(1,'Alice','HR'),
+(2,'Bob','Engineering'),
+(3,'Carol','Sales'),
+(4,'David','Finance');`,
+
+  example: {
+    cols: ["name", "department"],
+    rows: [
+      ["Alice","HR"],
+      ["Carol","Sales"]
+    ]
+  },
+
+  hint: "Use <strong>IN ('HR','Sales')</strong>.",
+
+  testCases: [
+    {
+      name: "Two employees returned",
+      seed: null,
+      check: (rows) => rows.length === 2
+    },
+    {
+      name: "Engineering excluded",
+      seed: null,
+      check: (rows) => !rows.some(r => r.department === "Engineering")
+    },
+    {
+      name: "Sales employee included",
+      seed: null,
+      check: (rows) => rows.some(r => r.department === "Sales")
+    },
+  ]
+},
+
+
+{
+  id: 44,
+  num: "45",
+  title: "Products Not In Electronics Category",
+  difficulty: "Easy",
+  tags: ["NOT IN", "WHERE", "OPERATORS"],
+
+  desc: `<p>You are given a <strong>products</strong> table.</p>
+         <p>Write a query to display products that are <strong>not in the Electronics category</strong>.</p>
+         <p>Return columns: <code>product_name</code>, <code>category</code>.</p>`,
+
+  schema: {
+    products: [
+      { col: "product_id", type: "INTEGER", note: "pk" },
+      { col: "product_name", type: "TEXT", note: "" },
+      { col: "category", type: "TEXT", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE products(product_id INTEGER,product_name TEXT,category TEXT);
+INSERT INTO products VALUES
+(1,'Laptop','Electronics'),
+(2,'Chair','Furniture'),
+(3,'Pen','Stationery'),
+(4,'Phone','Electronics');`,
+
+  example: {
+    cols: ["product_name", "category"],
+    rows: [
+      ["Chair","Furniture"],
+      ["Pen","Stationery"]
+    ]
+  },
+
+  hint: "Use <strong>NOT IN ('Electronics')</strong>.",
+
+  testCases: [
+    {
+      name: "Two products returned",
+      seed: null,
+      check: (rows) => rows.length === 2
+    },
+    {
+      name: "Electronics excluded",
+      seed: null,
+      check: (rows) => !rows.some(r => r.category === "Electronics")
+    },
+    {
+      name: "Furniture included",
+      seed: null,
+      check: (rows) => rows.some(r => r.category === "Furniture")
+    },
+  ]
+},
+
+
   // ── ADD MORE QUESTIONS HERE ───────────────────────────────────
   // Copy the template from the top of this file and paste it here.
   // The site will automatically pick it up — nav pills, landing
