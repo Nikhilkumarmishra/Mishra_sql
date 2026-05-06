@@ -455,6 +455,396 @@ INSERT INTO employees VALUES
     },
   ]
 },
+
+{
+  id: 6,
+  num: "07",
+  title: "Rank Employees By Salary",
+  difficulty: "Medium",
+  tags: ["WINDOW FUNCTION", "RANK", "ORDER BY"],
+
+  desc: `<p>You are given an <strong>employees</strong> table containing employee salaries.</p>
+         <p>Write a query to assign a salary rank to each employee using the <strong>RANK()</strong> window function.</p>
+         <p>Higher salary should get a better rank.</p>
+         <p>Return columns: <code>name</code>, <code>salary</code>, <code>salary_rank</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "salary", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,name TEXT,salary INTEGER);
+INSERT INTO employees VALUES
+(1,'Alice',90000),
+(2,'Bob',75000),
+(3,'Carol',90000),
+(4,'David',60000),
+(5,'Eve',50000);`,
+
+  example: {
+    cols: ["name", "salary", "salary_rank"],
+    rows: [
+      ["Alice",90000,1],
+      ["Carol",90000,1],
+      ["Bob",75000,3],
+      ["David",60000,4],
+      ["Eve",50000,5]
+    ]
+  },
+
+  hint: "Use <strong>RANK() OVER(ORDER BY salary DESC)</strong>.",
+
+  testCases: [
+    {
+      name: "All employees ranked",
+      seed: null,
+      check: (rows) => rows.length === 5
+    },
+    {
+      name: "Top salary rank is 1",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.name === "Alice");
+        return r && Number(r.salary_rank) === 1;
+      }
+    },
+    {
+      name: "Same salary gets same rank",
+      seed: null,
+      check: (rows) => {
+        const a = rows.find(r => r.name === "Alice");
+        const c = rows.find(r => r.name === "Carol");
+        return a && c && Number(a.salary_rank) === Number(c.salary_rank);
+      }
+    },
+  ]
+},
+
+{
+  id: 7,
+  num: "08",
+  title: "Running Total Of Daily Sales",
+  difficulty: "Medium",
+  tags: ["WINDOW FUNCTION", "SUM OVER", "ORDER BY"],
+
+  desc: `<p>You are given a <strong>sales</strong> table containing daily sales data.</p>
+         <p>Write a query to calculate the <strong>running total</strong> of sales ordered by date.</p>
+         <p>Return columns: <code>sale_date</code>, <code>amount</code>, <code>running_total</code>.</p>`,
+
+  schema: {
+    sales: [
+      { col: "sale_id", type: "INTEGER", note: "pk" },
+      { col: "sale_date", type: "TEXT", note: "" },
+      { col: "amount", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE sales(sale_id INTEGER,sale_date TEXT,amount INTEGER);
+INSERT INTO sales VALUES
+(1,'2025-01-01',1000),
+(2,'2025-01-02',1500),
+(3,'2025-01-03',2000),
+(4,'2025-01-04',1200);`,
+
+  example: {
+    cols: ["sale_date", "amount", "running_total"],
+    rows: [
+      ["2025-01-01",1000,1000],
+      ["2025-01-02",1500,2500],
+      ["2025-01-03",2000,4500],
+      ["2025-01-04",1200,5700]
+    ]
+  },
+
+  hint: "Use <strong>SUM(amount) OVER(ORDER BY sale_date)</strong>.",
+
+  testCases: [
+    {
+      name: "All rows returned",
+      seed: null,
+      check: (rows) => rows.length === 4
+    },
+    {
+      name: "Final running total correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.sale_date === "2025-01-04");
+        return r && Number(r.running_total) === 5700;
+      }
+    },
+    {
+      name: "Second row running total correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.sale_date === "2025-01-02");
+        return r && Number(r.running_total) === 2500;
+      }
+    },
+  ]
+},
+
+{
+  id: 8,
+  num: "09",
+  title: "Previous Month Sales Comparison",
+  difficulty: "Hard",
+  tags: ["WINDOW FUNCTION", "LAG", "ORDER BY"],
+
+  desc: `<p>You are given a <strong>monthly_sales</strong> table containing monthly revenue data.</p>
+         <p>Write a query to display the current month's sales along with the <strong>previous month's sales</strong> using the <strong>LAG()</strong> function.</p>
+         <p>Return columns: <code>month</code>, <code>sales</code>, <code>previous_month_sales</code>.</p>`,
+
+  schema: {
+    monthly_sales: [
+      { col: "month_id", type: "INTEGER", note: "pk" },
+      { col: "month", type: "TEXT", note: "" },
+      { col: "sales", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE monthly_sales(month_id INTEGER,month TEXT,sales INTEGER);
+INSERT INTO monthly_sales VALUES
+(1,'January',5000),
+(2,'February',7000),
+(3,'March',6500),
+(4,'April',8000);`,
+
+  example: {
+    cols: ["month", "sales", "previous_month_sales"],
+    rows: [
+      ["January",5000,null],
+      ["February",7000,5000],
+      ["March",6500,7000],
+      ["April",8000,6500]
+    ]
+  },
+
+  hint: "Use <strong>LAG(sales) OVER(ORDER BY month_id)</strong>.",
+
+  testCases: [
+    {
+      name: "All months returned",
+      seed: null,
+      check: (rows) => rows.length === 4
+    },
+    {
+      name: "February previous sales correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.month === "February");
+        return r && Number(r.previous_month_sales) === 5000;
+      }
+    },
+    {
+      name: "First month previous sales is null",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.month === "January");
+        return r && (r.previous_month_sales === null || r.previous_month_sales === undefined);
+      }
+    },
+  ]
+},
+
+{
+  id: 9,
+  num: "10",
+  title: "Top Scoring Student In Each Class",
+  difficulty: "Medium",
+  tags: ["WINDOW FUNCTION", "ROW_NUMBER", "PARTITION BY"],
+
+  desc: `<p>You are given a <strong>students</strong> table containing student marks.</p>
+         <p>Write a query to find the <strong>highest scoring student</strong> from each class using a window function.</p>
+         <p>Return columns: <code>class</code>, <code>name</code>, <code>marks</code>.</p>`,
+
+  schema: {
+    students: [
+      { col: "student_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "class", type: "TEXT", note: "" },
+      { col: "marks", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE students(student_id INTEGER,name TEXT,class TEXT,marks INTEGER);
+INSERT INTO students VALUES
+(1,'Alice','10A',88),
+(2,'Bob','10A',95),
+(3,'Carol','10B',91),
+(4,'David','10B',85),
+(5,'Eve','10C',97);`,
+
+  example: {
+    cols: ["class", "name", "marks"],
+    rows: [
+      ["10A","Bob",95],
+      ["10B","Carol",91],
+      ["10C","Eve",97]
+    ]
+  },
+
+  hint: "Use <strong>ROW_NUMBER() OVER(PARTITION BY class ORDER BY marks DESC)</strong>.",
+
+  testCases: [
+    {
+      name: "One student per class returned",
+      seed: null,
+      check: (rows) => rows.length === 3
+    },
+    {
+      name: "Bob selected for 10A",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.class === "10A");
+        return r && r.name === "Bob";
+      }
+    },
+    {
+      name: "Highest marks for 10B correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.class === "10B");
+        return r && Number(r.marks) === 91;
+      }
+    },
+  ]
+},
+
+{
+  id: 10,
+  num: "11",
+  title: "Dense Rank Products By Price",
+  difficulty: "Medium",
+  tags: ["WINDOW FUNCTION", "DENSE_RANK", "ORDER BY"],
+
+  desc: `<p>You are given a <strong>products</strong> table containing product prices.</p>
+         <p>Write a query to assign a <strong>dense rank</strong> based on product price in descending order.</p>
+         <p>Products with the same price should receive the same rank without skipping numbers.</p>
+         <p>Return columns: <code>product_name</code>, <code>price</code>, <code>price_rank</code>.</p>`,
+
+  schema: {
+    products: [
+      { col: "product_id", type: "INTEGER", note: "pk" },
+      { col: "product_name", type: "TEXT", note: "" },
+      { col: "price", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE products(product_id INTEGER,product_name TEXT,price INTEGER);
+INSERT INTO products VALUES
+(1,'Laptop',80000),
+(2,'Phone',50000),
+(3,'Tablet',50000),
+(4,'Monitor',30000),
+(5,'Keyboard',10000);`,
+
+  example: {
+    cols: ["product_name", "price", "price_rank"],
+    rows: [
+      ["Laptop",80000,1],
+      ["Phone",50000,2],
+      ["Tablet",50000,2],
+      ["Monitor",30000,3],
+      ["Keyboard",10000,4]
+    ]
+  },
+
+  hint: "Use <strong>DENSE_RANK() OVER(ORDER BY price DESC)</strong>.",
+
+  testCases: [
+    {
+      name: "All products ranked",
+      seed: null,
+      check: (rows) => rows.length === 5
+    },
+    {
+      name: "Same prices get same rank",
+      seed: null,
+      check: (rows) => {
+        const p1 = rows.find(r => r.product_name === "Phone");
+        const p2 = rows.find(r => r.product_name === "Tablet");
+        return p1 && p2 && Number(p1.price_rank) === Number(p2.price_rank);
+      }
+    },
+    {
+      name: "Ranks are dense",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.product_name === "Monitor");
+        return r && Number(r.price_rank) === 3;
+      }
+    },
+  ]
+},
+
+{
+  id: 11,
+  num: "12",
+  title: "Moving Average Of Temperatures",
+  difficulty: "Hard",
+  tags: ["WINDOW FUNCTION", "AVG OVER", "ROWS BETWEEN"],
+
+  desc: `<p>You are given a <strong>weather</strong> table containing daily temperatures.</p>
+         <p>Write a query to calculate the <strong>3-day moving average</strong> of temperature.</p>
+         <p>The moving average should include the current day and the previous 2 days.</p>
+         <p>Return columns: <code>day</code>, <code>temperature</code>, <code>moving_avg</code>.</p>`,
+
+  schema: {
+    weather: [
+      { col: "day_id", type: "INTEGER", note: "pk" },
+      { col: "day", type: "TEXT", note: "" },
+      { col: "temperature", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE weather(day_id INTEGER,day TEXT,temperature INTEGER);
+INSERT INTO weather VALUES
+(1,'Mon',30),
+(2,'Tue',33),
+(3,'Wed',36),
+(4,'Thu',39),
+(5,'Fri',42);`,
+
+  example: {
+    cols: ["day", "temperature", "moving_avg"],
+    rows: [
+      ["Mon",30,30],
+      ["Tue",33,31.5],
+      ["Wed",36,33],
+      ["Thu",39,36],
+      ["Fri",42,39]
+    ]
+  },
+
+  hint: "Use <strong>AVG(temperature) OVER(ORDER BY day_id ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)</strong>.",
+
+  testCases: [
+    {
+      name: "All days returned",
+      seed: null,
+      check: (rows) => rows.length === 5
+    },
+    {
+      name: "Wednesday moving average correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.day === "Wed");
+        return r && Number(r.moving_avg) === 33;
+      }
+    },
+    {
+      name: "Friday moving average correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.day === "Fri");
+        return r && Number(r.moving_avg) === 39;
+      }
+    },
+  ]
+},
   // ── ADD MORE QUESTIONS HERE ───────────────────────────────────
   // Copy the template from the top of this file and paste it here.
   // The site will automatically pick it up — nav pills, landing
