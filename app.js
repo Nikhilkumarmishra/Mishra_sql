@@ -2644,6 +2644,874 @@ INSERT INTO products VALUES
   ]
 },
 
+{
+  id: 46,
+  num: "47",
+  title: "Employee Department Names",
+  difficulty: "Easy",
+  tags: ["JOIN", "INNER JOIN"],
+
+  desc: `<p>You are given <strong>employees</strong> and <strong>departments</strong> tables.</p>
+         <p>Write a query to display employee names along with their department names.</p>
+         <p>Return columns: <code>name</code>, <code>department_name</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "dept_id", type: "INTEGER", note: "" },
+    ],
+    departments: [
+      { col: "dept_id", type: "INTEGER", note: "pk" },
+      { col: "department_name", type: "TEXT", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,name TEXT,dept_id INTEGER);
+CREATE TABLE departments(dept_id INTEGER,department_name TEXT);
+
+INSERT INTO employees VALUES
+(1,'Alice',1),
+(2,'Bob',2),
+(3,'Carol',1);
+
+INSERT INTO departments VALUES
+(1,'HR'),
+(2,'Engineering');`,
+
+  example: {
+    cols: ["name", "department_name"],
+    rows: [
+      ["Alice","HR"],
+      ["Bob","Engineering"],
+      ["Carol","HR"]
+    ]
+  },
+
+  hint: "Use <strong>INNER JOIN</strong> on <code>dept_id</code>.",
+
+  testCases: [
+    {
+      name: "All employees returned",
+      seed: null,
+      check: (rows) => rows.length === 3
+    },
+    {
+      name: "Bob department correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.name === "Bob");
+        return r && r.department_name === "Engineering";
+      }
+    },
+    {
+      name: "HR employees included",
+      seed: null,
+      check: (rows) => rows.filter(r => r.department_name === "HR").length === 2
+    },
+  ]
+},
+
+{
+  id: 47,
+  num: "48",
+  title: "Customers And Their Orders",
+  difficulty: "Easy",
+  tags: ["JOIN", "INNER JOIN"],
+
+  desc: `<p>You are given <strong>customers</strong> and <strong>orders</strong> tables.</p>
+         <p>Write a query to display customer names with their order amounts.</p>
+         <p>Return columns: <code>customer_name</code>, <code>amount</code>.</p>`,
+
+  schema: {
+    customers: [
+      { col: "customer_id", type: "INTEGER", note: "pk" },
+      { col: "customer_name", type: "TEXT", note: "" },
+    ],
+    orders: [
+      { col: "order_id", type: "INTEGER", note: "pk" },
+      { col: "customer_id", type: "INTEGER", note: "" },
+      { col: "amount", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE customers(customer_id INTEGER,customer_name TEXT);
+CREATE TABLE orders(order_id INTEGER,customer_id INTEGER,amount INTEGER);
+
+INSERT INTO customers VALUES
+(1,'Alice'),
+(2,'Bob');
+
+INSERT INTO orders VALUES
+(1,1,5000),
+(2,2,7000),
+(3,1,3000);`,
+
+  example: {
+    cols: ["customer_name", "amount"],
+    rows: [
+      ["Alice",5000],
+      ["Bob",7000],
+      ["Alice",3000]
+    ]
+  },
+
+  hint: "Join both tables using <code>customer_id</code>.",
+
+  testCases: [
+    {
+      name: "Three rows returned",
+      seed: null,
+      check: (rows) => rows.length === 3
+    },
+    {
+      name: "Bob order correct",
+      seed: null,
+      check: (rows) => rows.some(r => r.customer_name === "Bob" && Number(r.amount) === 7000)
+    },
+    {
+      name: "Alice has two orders",
+      seed: null,
+      check: (rows) => rows.filter(r => r.customer_name === "Alice").length === 2
+    },
+  ]
+},
+
+
+{
+  id: 48,
+  num: "49",
+  title: "Students And Their Courses",
+  difficulty: "Medium",
+  tags: ["JOIN", "LEFT JOIN"],
+
+  desc: `<p>You are given <strong>students</strong> and <strong>courses</strong> tables.</p>
+         <p>Write a query to display all students along with their course names.</p>
+         <p>Students without a course should also appear.</p>
+         <p>Return columns: <code>student_name</code>, <code>course_name</code>.</p>`,
+
+  schema: {
+    students: [
+      { col: "student_id", type: "INTEGER", note: "pk" },
+      { col: "student_name", type: "TEXT", note: "" },
+      { col: "course_id", type: "INTEGER", note: "" },
+    ],
+    courses: [
+      { col: "course_id", type: "INTEGER", note: "pk" },
+      { col: "course_name", type: "TEXT", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE students(student_id INTEGER,student_name TEXT,course_id INTEGER);
+CREATE TABLE courses(course_id INTEGER,course_name TEXT);
+
+INSERT INTO students VALUES
+(1,'Alice',1),
+(2,'Bob',2),
+(3,'Carol',NULL);
+
+INSERT INTO courses VALUES
+(1,'SQL'),
+(2,'Python');`,
+
+  example: {
+    cols: ["student_name", "course_name"],
+    rows: [
+      ["Alice","SQL"],
+      ["Bob","Python"],
+      ["Carol",null]
+    ]
+  },
+
+  hint: "Use <strong>LEFT JOIN</strong> to keep all students.",
+
+  testCases: [
+    {
+      name: "All students returned",
+      seed: null,
+      check: (rows) => rows.length === 3
+    },
+    {
+      name: "Carol included",
+      seed: null,
+      check: (rows) => rows.some(r => r.student_name === "Carol")
+    },
+    {
+      name: "Carol course is null",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.student_name === "Carol");
+        return r && (r.course_name === null || r.course_name === undefined);
+      }
+    },
+  ]
+},
+
+
+{
+  id: 49,
+  num: "50",
+  title: "Orders With Product Names",
+  difficulty: "Medium",
+  tags: ["JOIN", "INNER JOIN"],
+
+  desc: `<p>You are given <strong>orders</strong> and <strong>products</strong> tables.</p>
+         <p>Write a query to display order id, product name, and quantity ordered.</p>
+         <p>Return columns: <code>order_id</code>, <code>product_name</code>, <code>quantity</code>.</p>`,
+
+  schema: {
+    orders: [
+      { col: "order_id", type: "INTEGER", note: "pk" },
+      { col: "product_id", type: "INTEGER", note: "" },
+      { col: "quantity", type: "INTEGER", note: "" },
+    ],
+    products: [
+      { col: "product_id", type: "INTEGER", note: "pk" },
+      { col: "product_name", type: "TEXT", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE orders(order_id INTEGER,product_id INTEGER,quantity INTEGER);
+CREATE TABLE products(product_id INTEGER,product_name TEXT);
+
+INSERT INTO orders VALUES
+(1,1,2),
+(2,2,1),
+(3,1,4);
+
+INSERT INTO products VALUES
+(1,'Laptop'),
+(2,'Phone');`,
+
+  example: {
+    cols: ["order_id", "product_name", "quantity"],
+    rows: [
+      [1,"Laptop",2],
+      [2,"Phone",1],
+      [3,"Laptop",4]
+    ]
+  },
+
+  hint: "Join tables using <code>product_id</code>.",
+
+  testCases: [
+    {
+      name: "Three rows returned",
+      seed: null,
+      check: (rows) => rows.length === 3
+    },
+    {
+      name: "Laptop orders correct",
+      seed: null,
+      check: (rows) => rows.filter(r => r.product_name === "Laptop").length === 2
+    },
+    {
+      name: "Phone quantity correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.product_name === "Phone");
+        return r && Number(r.quantity) === 1;
+      }
+    },
+  ]
+},
+
+{
+  id: 50,
+  num: "51",
+  title: "Employees And Manager Names",
+  difficulty: "Hard",
+  tags: ["SELF JOIN", "JOIN"],
+
+  desc: `<p>You are given an <strong>employees</strong> table where each employee may have a manager.</p>
+         <p>Write a query to display employee names along with their manager names.</p>
+         <p>Return columns: <code>employee_name</code>, <code>manager_name</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "employee_name", type: "TEXT", note: "" },
+      { col: "manager_id", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,employee_name TEXT,manager_id INTEGER);
+
+INSERT INTO employees VALUES
+(1,'Alice',NULL),
+(2,'Bob',1),
+(3,'Carol',1),
+(4,'David',2);`,
+
+  example: {
+    cols: ["employee_name", "manager_name"],
+    rows: [
+      ["Bob","Alice"],
+      ["Carol","Alice"],
+      ["David","Bob"]
+    ]
+  },
+
+  hint: "Use a <strong>SELF JOIN</strong> on the employees table.",
+
+  testCases: [
+    {
+      name: "Three rows returned",
+      seed: null,
+      check: (rows) => rows.length === 3
+    },
+    {
+      name: "David manager correct",
+      seed: null,
+      check: (rows) => {
+        const r = rows.find(r => r.employee_name === "David");
+        return r && r.manager_name === "Bob";
+      }
+    },
+    {
+      name: "Alice not included as employee",
+      seed: null,
+      check: (rows) => !rows.some(r => r.employee_name === "Alice")
+    },
+  ]
+},
+
+{
+  id: 51,
+  num: "52",
+  title: "Employees Working In Same Department",
+  difficulty: "Medium",
+  tags: ["SELF JOIN", "JOIN"],
+
+  desc: `<p>You are given an <strong>employees</strong> table.</p>
+         <p>Write a query to find pairs of employees working in the <strong>same department</strong>.</p>
+         <p>Do not pair an employee with themselves.</p>
+         <p>Return columns: <code>employee1</code>, <code>employee2</code>, <code>department</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "department", type: "TEXT", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,name TEXT,department TEXT);
+
+INSERT INTO employees VALUES
+(1,'Alice','HR'),
+(2,'Bob','HR'),
+(3,'Carol','Engineering'),
+(4,'David','Engineering');`,
+
+  example: {
+    cols: ["employee1", "employee2", "department"],
+    rows: [
+      ["Alice","Bob","HR"],
+      ["Carol","David","Engineering"]
+    ]
+  },
+
+  hint: "Use a <strong>SELF JOIN</strong> on department and avoid matching same employee ids.",
+
+  testCases: [
+    {
+      name: "Two employee pairs returned",
+      seed: null,
+      check: (rows) => rows.length === 2
+    },
+    {
+      name: "HR pair exists",
+      seed: null,
+      check: (rows) => rows.some(r => r.department === "HR")
+    },
+    {
+      name: "No self pairing",
+      seed: null,
+      check: (rows) => rows.every(r => r.employee1 !== r.employee2)
+    },
+  ]
+},
+
+{
+  id: 52,
+  num: "53",
+  title: "Find Customers From Same City",
+  difficulty: "Medium",
+  tags: ["SELF JOIN", "JOIN"],
+
+  desc: `<p>You are given a <strong>customers</strong> table.</p>
+         <p>Write a query to find customers belonging to the <strong>same city</strong>.</p>
+         <p>Do not include duplicate or self pairs.</p>
+         <p>Return columns: <code>customer1</code>, <code>customer2</code>, <code>city</code>.</p>`,
+
+  schema: {
+    customers: [
+      { col: "customer_id", type: "INTEGER", note: "pk" },
+      { col: "customer_name", type: "TEXT", note: "" },
+      { col: "city", type: "TEXT", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE customers(customer_id INTEGER,customer_name TEXT,city TEXT);
+
+INSERT INTO customers VALUES
+(1,'Alice','Delhi'),
+(2,'Bob','Mumbai'),
+(3,'Carol','Delhi'),
+(4,'David','Mumbai');`,
+
+  example: {
+    cols: ["customer1", "customer2", "city"],
+    rows: [
+      ["Alice","Carol","Delhi"],
+      ["Bob","David","Mumbai"]
+    ]
+  },
+
+  hint: "Use a SELF JOIN on city and compare customer ids to avoid duplicates.",
+
+  testCases: [
+    {
+      name: "Two city pairs returned",
+      seed: null,
+      check: (rows) => rows.length === 2
+    },
+    {
+      name: "Delhi pair exists",
+      seed: null,
+      check: (rows) => rows.some(r => r.city === "Delhi")
+    },
+    {
+      name: "No duplicate reversed pairs",
+      seed: null,
+      check: (rows) => !rows.some(r => r.customer1 === "Carol" && r.customer2 === "Alice")
+    },
+  ]
+},
+
+
+{
+  id: 53,
+  num: "54",
+  title: "All Product And Color Combinations",
+  difficulty: "Easy",
+  tags: ["CROSS JOIN", "JOIN"],
+
+  desc: `<p>You are given <strong>products</strong> and <strong>colors</strong> tables.</p>
+         <p>Write a query to display all possible combinations of products and colors.</p>
+         <p>Return columns: <code>product_name</code>, <code>color_name</code>.</p>`,
+
+  schema: {
+    products: [
+      { col: "product_id", type: "INTEGER", note: "pk" },
+      { col: "product_name", type: "TEXT", note: "" },
+    ],
+    colors: [
+      { col: "color_id", type: "INTEGER", note: "pk" },
+      { col: "color_name", type: "TEXT", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE products(product_id INTEGER,product_name TEXT);
+CREATE TABLE colors(color_id INTEGER,color_name TEXT);
+
+INSERT INTO products VALUES
+(1,'Shirt'),
+(2,'Shoes');
+
+INSERT INTO colors VALUES
+(1,'Red'),
+(2,'Blue');`,
+
+  example: {
+    cols: ["product_name", "color_name"],
+    rows: [
+      ["Shirt","Red"],
+      ["Shirt","Blue"],
+      ["Shoes","Red"],
+      ["Shoes","Blue"]
+    ]
+  },
+
+  hint: "Use <strong>CROSS JOIN</strong> to generate all combinations.",
+
+  testCases: [
+    {
+      name: "Four combinations returned",
+      seed: null,
+      check: (rows) => rows.length === 4
+    },
+    {
+      name: "Shirt Red exists",
+      seed: null,
+      check: (rows) => rows.some(r => r.product_name === "Shirt" && r.color_name === "Red")
+    },
+    {
+      name: "Shoes Blue exists",
+      seed: null,
+      check: (rows) => rows.some(r => r.product_name === "Shoes" && r.color_name === "Blue")
+    },
+  ]
+},
+
+
+{
+  id: 54,
+  num: "55",
+  title: "Generate Food And Drink Combos",
+  difficulty: "Easy",
+  tags: ["CROSS JOIN", "JOIN"],
+
+  desc: `<p>You are given <strong>foods</strong> and <strong>drinks</strong> tables.</p>
+         <p>Write a query to generate all possible food and drink combinations.</p>
+         <p>Return columns: <code>food_name</code>, <code>drink_name</code>.</p>`,
+
+  schema: {
+    foods: [
+      { col: "food_id", type: "INTEGER", note: "pk" },
+      { col: "food_name", type: "TEXT", note: "" },
+    ],
+    drinks: [
+      { col: "drink_id", type: "INTEGER", note: "pk" },
+      { col: "drink_name", type: "TEXT", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE foods(food_id INTEGER,food_name TEXT);
+CREATE TABLE drinks(drink_id INTEGER,drink_name TEXT);
+
+INSERT INTO foods VALUES
+(1,'Pizza'),
+(2,'Burger');
+
+INSERT INTO drinks VALUES
+(1,'Coke'),
+(2,'Juice');`,
+
+  example: {
+    cols: ["food_name", "drink_name"],
+    rows: [
+      ["Pizza","Coke"],
+      ["Pizza","Juice"],
+      ["Burger","Coke"],
+      ["Burger","Juice"]
+    ]
+  },
+
+  hint: "Use <strong>CROSS JOIN</strong> between foods and drinks tables.",
+
+  testCases: [
+    {
+      name: "Four combinations returned",
+      seed: null,
+      check: (rows) => rows.length === 4
+    },
+    {
+      name: "Pizza Juice exists",
+      seed: null,
+      check: (rows) => rows.some(r => r.food_name === "Pizza" && r.drink_name === "Juice")
+    },
+    {
+      name: "Burger Coke exists",
+      seed: null,
+      check: (rows) => rows.some(r => r.food_name === "Burger" && r.drink_name === "Coke")
+    },
+  ]
+},
+
+
+{
+  id: 55,
+  num: "56",
+  title: "Second Highest Salary In Each Department",
+  difficulty: "Hard",
+  tags: ["WINDOW FUNCTION", "DENSE_RANK", "PARTITION BY"],
+
+  desc: `<p>You are given an <strong>employees</strong> table containing department and salary details.</p>
+         <p>Write a query to find the <strong>second highest salary</strong> in each department.</p>
+         <p>Return columns: <code>department</code>, <code>name</code>, <code>salary</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "department", type: "TEXT", note: "" },
+      { col: "salary", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,name TEXT,department TEXT,salary INTEGER);
+
+INSERT INTO employees VALUES
+(1,'Alice','HR',90000),
+(2,'Bob','HR',70000),
+(3,'Carol','HR',60000),
+(4,'David','Engineering',120000),
+(5,'Eve','Engineering',100000),
+(6,'Frank','Engineering',95000);`,
+
+  example: {
+    cols: ["department", "name", "salary"],
+    rows: [
+      ["HR","Bob",70000],
+      ["Engineering","Eve",100000]
+    ]
+  },
+
+  hint: "Use <strong>DENSE_RANK()</strong> partitioned by department.",
+
+  testCases: [
+    {
+      name: "Two rows returned",
+      seed: null,
+      check: (rows) => rows.length === 2
+    },
+    {
+      name: "HR second highest correct",
+      seed: null,
+      check: (rows) => rows.some(r => r.department === "HR" && r.name === "Bob")
+    },
+    {
+      name: "Engineering second highest correct",
+      seed: null,
+      check: (rows) => rows.some(r => r.department === "Engineering" && Number(r.salary) === 100000)
+    },
+  ]
+},
+
+
+{
+  id: 56,
+  num: "57",
+  title: "Find Duplicate Email Addresses",
+  difficulty: "Medium",
+  tags: ["GROUP BY", "HAVING", "COUNT"],
+
+  desc: `<p>You are given a <strong>users</strong> table.</p>
+         <p>Write a query to find duplicate email addresses.</p>
+         <p>Return columns: <code>email</code>, <code>duplicate_count</code>.</p>`,
+
+  schema: {
+    users: [
+      { col: "user_id", type: "INTEGER", note: "pk" },
+      { col: "name", type: "TEXT", note: "" },
+      { col: "email", type: "TEXT", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE users(user_id INTEGER,name TEXT,email TEXT);
+
+INSERT INTO users VALUES
+(1,'Alice','alice@gmail.com'),
+(2,'Bob','bob@gmail.com'),
+(3,'Carol','alice@gmail.com'),
+(4,'David','david@gmail.com'),
+(5,'Eve','bob@gmail.com');`,
+
+  example: {
+    cols: ["email", "duplicate_count"],
+    rows: [
+      ["alice@gmail.com",2],
+      ["bob@gmail.com",2]
+    ]
+  },
+
+  hint: "Use <strong>GROUP BY email</strong> with <strong>HAVING COUNT(*) > 1</strong>.",
+
+  testCases: [
+    {
+      name: "Two duplicate emails found",
+      seed: null,
+      check: (rows) => rows.length === 2
+    },
+    {
+      name: "alice@gmail.com exists",
+      seed: null,
+      check: (rows) => rows.some(r => r.email === "alice@gmail.com")
+    },
+    {
+      name: "Duplicate count correct",
+      seed: null,
+      check: (rows) => rows.every(r => Number(r.duplicate_count) === 2)
+    },
+  ]
+},
+
+
+{
+  id: 57,
+  num: "58",
+  title: "Customers Who Never Placed Orders",
+  difficulty: "Hard",
+  tags: ["LEFT JOIN", "NULL", "JOINS"],
+
+  desc: `<p>You are given <strong>customers</strong> and <strong>orders</strong> tables.</p>
+         <p>Write a query to find customers who <strong>never placed any order</strong>.</p>
+         <p>Return column: <code>customer_name</code>.</p>`,
+
+  schema: {
+    customers: [
+      { col: "customer_id", type: "INTEGER", note: "pk" },
+      { col: "customer_name", type: "TEXT", note: "" },
+    ],
+    orders: [
+      { col: "order_id", type: "INTEGER", note: "pk" },
+      { col: "customer_id", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE customers(customer_id INTEGER,customer_name TEXT);
+CREATE TABLE orders(order_id INTEGER,customer_id INTEGER);
+
+INSERT INTO customers VALUES
+(1,'Alice'),
+(2,'Bob'),
+(3,'Carol');
+
+INSERT INTO orders VALUES
+(1,1),
+(2,1),
+(3,2);`,
+
+  example: {
+    cols: ["customer_name"],
+    rows: [["Carol"]]
+  },
+
+  hint: "Use <strong>LEFT JOIN</strong> and check for NULL values.",
+
+  testCases: [
+    {
+      name: "One customer returned",
+      seed: null,
+      check: (rows) => rows.length === 1
+    },
+    {
+      name: "Carol returned",
+      seed: null,
+      check: (rows) => rows[0].customer_name === "Carol"
+    },
+    {
+      name: "Alice excluded",
+      seed: null,
+      check: (rows) => !rows.some(r => r.customer_name === "Alice")
+    },
+  ]
+},
+
+
+{
+  id: 58,
+  num: "59",
+  title: "Consecutive Login Days",
+  difficulty: "Hard",
+  tags: ["WINDOW FUNCTION", "LAG", "DATE"],
+
+  desc: `<p>You are given a <strong>logins</strong> table containing user login dates.</p>
+         <p>Write a query to find users who logged in on <strong>consecutive days</strong>.</p>
+         <p>Return columns: <code>user_id</code>, <code>login_date</code>.</p>`,
+
+  schema: {
+    logins: [
+      { col: "login_id", type: "INTEGER", note: "pk" },
+      { col: "user_id", type: "INTEGER", note: "" },
+      { col: "login_date", type: "TEXT", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE logins(login_id INTEGER,user_id INTEGER,login_date TEXT);
+
+INSERT INTO logins VALUES
+(1,101,'2025-01-01'),
+(2,101,'2025-01-02'),
+(3,101,'2025-01-05'),
+(4,102,'2025-01-03'),
+(5,102,'2025-01-04');`,
+
+  example: {
+    cols: ["user_id", "login_date"],
+    rows: [
+      [101,"2025-01-02"],
+      [102,"2025-01-04"]
+    ]
+  },
+
+  hint: "Use <strong>LAG()</strong> to compare previous login dates.",
+
+  testCases: [
+    {
+      name: "Two consecutive login rows returned",
+      seed: null,
+      check: (rows) => rows.length === 2
+    },
+    {
+      name: "User 101 included",
+      seed: null,
+      check: (rows) => rows.some(r => Number(r.user_id) === 101)
+    },
+    {
+      name: "Correct login date for user 102",
+      seed: null,
+      check: (rows) => rows.some(r => Number(r.user_id) === 102 && r.login_date === "2025-01-04")
+    },
+  ]
+},
+
+
+{
+  id: 59,
+  num: "60",
+  title: "Find Median Salary",
+  difficulty: "Hard",
+  tags: ["WINDOW FUNCTION", "CTE", "ROW_NUMBER"],
+
+  desc: `<p>You are given an <strong>employees</strong> table containing salaries.</p>
+         <p>Write a query to find the <strong>median salary</strong>.</p>
+         <p>Return column: <code>median_salary</code>.</p>`,
+
+  schema: {
+    employees: [
+      { col: "emp_id", type: "INTEGER", note: "pk" },
+      { col: "salary", type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE employees(emp_id INTEGER,salary INTEGER);
+
+INSERT INTO employees VALUES
+(1,30000),
+(2,40000),
+(3,50000),
+(4,60000),
+(5,70000);`,
+
+  example: {
+    cols: ["median_salary"],
+    rows: [[50000]]
+  },
+
+  hint: "Use <strong>ROW_NUMBER()</strong> and total row count inside a CTE.",
+
+  testCases: [
+    {
+      name: "Median salary correct",
+      seed: null,
+      check: (rows) => Number(rows[0].median_salary) === 50000
+    },
+    {
+      name: "Single row returned",
+      seed: null,
+      check: (rows) => rows.length === 1
+    },
+    {
+      name: "Correct column returned",
+      seed: null,
+      check: (rows) => "median_salary" in rows[0]
+    },
+  ]
+},
+
 
   // ── ADD MORE QUESTIONS HERE ───────────────────────────────────
   // Copy the template from the top of this file and paste it here.
