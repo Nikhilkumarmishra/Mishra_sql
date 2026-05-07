@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Clash+Display:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="style.css"/>
-
 <!-- CodeMirror -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
@@ -23,21 +22,83 @@
 </div>
 
 <!-- ══════════════════════════════════════════════════════════
+     AUTH MODAL
+══════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="authModalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal-box">
+
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tabLogin" onclick="switchTab('login')">Login</button>
+      <button class="modal-tab" id="tabSignup" onclick="switchTab('signup')">Sign Up</button>
+      <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="modal-form" id="formLogin">
+      <div class="modal-logo">Mishra<span>SQL</span></div>
+      <p class="modal-sub">Welcome back! Login to track your progress.</p>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" id="loginEmail" type="email" placeholder="you@example.com" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+      <div class="form-error" id="loginError"></div>
+      <button class="form-btn" id="loginBtn" onclick="handleLogin()">Login →</button>
+      <p class="modal-switch">No account? <span onclick="switchTab('signup')">Sign up free</span></p>
+    </div>
+
+    <!-- SIGNUP -->
+    <div class="modal-form" id="formSignup" style="display:none">
+      <div class="modal-logo">Mishra<span>SQL</span></div>
+      <p class="modal-sub">Create your free account and start solving.</p>
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" id="signupName" type="text" placeholder="Nikhil Mishra" autocomplete="name"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" id="signupEmail" type="email" placeholder="you@example.com" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="signupPassword" type="password" placeholder="Min 6 characters" autocomplete="new-password"/>
+      </div>
+      <div class="form-error" id="signupError"></div>
+      <button class="form-btn" id="signupBtn" onclick="handleSignup()">Create Account →</button>
+      <p class="modal-switch">Already have an account? <span onclick="switchTab('login')">Login</span></p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
      LANDING PAGE
 ══════════════════════════════════════════════════════════════ -->
 <div class="page" id="landing-page">
 
-  <!-- NAV -->
   <nav class="nav">
     <div class="nav-logo" onclick="showLanding()">Mishra<span>SQL</span></div>
     <div class="nav-links">
       <a class="nav-link" onclick="scrollToFeatures()">Features</a>
       <a class="nav-link" onclick="scrollToQuestions()">Problems</a>
     </div>
-    <button class="nav-cta" onclick="showApp()">Start Practicing →</button>
+    <!-- Logged OUT -->
+    <div class="nav-auth" id="landingNavAuth">
+      <button class="nav-cta-ghost" onclick="openAuthModal('login')">Login</button>
+      <button class="nav-cta" onclick="showApp()">Start Practicing →</button>
+    </div>
+    <!-- Logged IN -->
+    <div class="nav-user" id="landingNavUser" style="display:none">
+      <div class="user-avatar-sm" id="landingUserAvatar"></div>
+      <span class="user-name-sm" id="landingUserName"></span>
+      <button class="btn-logout-sm" onclick="logoutUser()">Logout</button>
+      <button class="nav-cta" onclick="showApp()">Start Practicing →</button>
+    </div>
   </nav>
 
-  <!-- HERO -->
   <section class="hero" id="hero">
     <div class="hero-bg"></div>
     <div class="hero-grid"></div>
@@ -55,10 +116,7 @@
         Write real SQL queries against live databases. Get instant feedback, run against multiple test cases, and level up your data skills one problem at a time.
       </p>
       <div class="hero-actions fade-up fade-up-4">
-        <button class="btn-primary" onclick="showApp()">
-          Start Solving
-          <span>→</span>
-        </button>
+        <button class="btn-primary" onclick="showApp()">Start Solving <span>→</span></button>
         <button class="btn-secondary" onclick="scrollToQuestions()">Browse Problems</button>
       </div>
       <div class="hero-stats fade-up fade-up-5">
@@ -77,7 +135,6 @@
       </div>
     </div>
 
-    <!-- HERO VISUAL -->
     <div class="hero-visual">
       <div class="code-window">
         <div class="code-win-bar">
@@ -111,7 +168,6 @@
     </div>
   </section>
 
-  <!-- FEATURES -->
   <section class="features" id="features-section">
     <div class="section-label">Why MishraSQL</div>
     <h2 class="section-title">Built for real learning.</h2>
@@ -150,16 +206,11 @@
     </div>
   </section>
 
-  <!-- PROBLEMS — auto-generated from QUESTIONS array in app.js -->
   <section class="questions-section" id="questions-section">
     <div class="section-label">Problem Set</div>
     <h2 class="section-title">Start with the fundamentals.</h2>
-
     <div class="topic-filters" id="topicFilters"></div>
-
-    <div class="q-cards" id="landingQCards">
-      <!-- Populated by buildLandingCards() in app.js -->
-    </div>
+    <div class="q-cards" id="landingQCards"></div>
   </section>
 
   <footer>
@@ -173,31 +224,31 @@
 ══════════════════════════════════════════════════════════════ -->
 <div class="page" id="app-page">
 
-  <!-- APP NAV -->
   <div class="app-nav">
     <div class="app-logo" onclick="showLanding()">Mishra<span>SQL</span></div>
     <div class="app-divider"></div>
     <div class="q-pills-wrap" id="qPillsWrap"></div>
     <div class="app-nav-right">
       <span class="diff-badge" id="diffBadge">Easy</span>
+      <!-- Logged OUT -->
+      <button class="btn-login-nav" id="appLoginBtn" onclick="openAuthModal('login')">Login</button>
+      <!-- Logged IN -->
+      <div class="app-user" id="appUser" style="display:none">
+        <div class="user-avatar-sm" id="appUserAvatar"></div>
+        <span class="user-name-sm" id="appUserName"></span>
+        <button class="btn-logout-sm" onclick="logoutUser()">Logout</button>
+      </div>
     </div>
   </div>
 
-  <!-- PROGRESS BAR -->
   <div class="progress-bar-wrap">
     <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
   </div>
 
-  <!-- WORKSPACE -->
   <div class="workspace">
-
-    <!-- LEFT: PROBLEM -->
     <div class="left-panel" id="leftPanel"></div>
 
-    <!-- RIGHT: EDITOR + OUTPUT -->
     <div class="right-panel">
-
-      <!-- EDITOR -->
       <div class="editor-wrap">
         <div class="editor-bar">
           <span class="editor-lang">SQL</span>
@@ -212,13 +263,11 @@
         </div>
       </div>
 
-      <!-- SOLVED BANNER -->
       <div class="solved-banner" id="solvedBanner">
         <div class="solved-check">✓</div>
         All test cases passed — question solved!
       </div>
 
-      <!-- OUTPUT -->
       <div class="output-wrap">
         <div class="output-bar">
           <span class="output-label-text" id="outputLabel">Output</span>
@@ -235,22 +284,17 @@
           <div class="tc-list" id="tcList"></div>
         </div>
       </div>
-
     </div>
   </div>
 </div>
 
-<!-- SQL.JS engine (WebAssembly) -->
+<!-- ── SCRIPTS ──────────────────────────────────────────── -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
-
-<!-- CodeMirror -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
-
-<!-- All questions + app logic -->
 <script src="app.js"></script>
 
 </body>

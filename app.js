@@ -3523,22 +3523,173 @@ INSERT INTO employees VALUES
 
 
 // ================================================================
-//  ENGINE — do not edit below unless you know what you're doing
+//  SUPABASE CONFIG — only edit these 2 lines
 // ================================================================
+const SUPABASE_URL  = 'https://wyxutuqckkdkraawyxff.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5eHV0dXFja2tka3JhYXd5eGZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMzQ3NzksImV4cCI6MjA5MzcxMDc3OX0.ale0hHkE36PPQwKiqo5ViS3bi28krpU8gHXiWCKyLAU';
 
-let SQL = null;
-let currentQ = 0;
+// ================================================================
+//  AUTH CLIENT  — pure fetch(), no SDK, no CDN dependency
+// ================================================================
+var Auth = (function () {
+  var AUTH = SUPABASE_URL + '/auth/v1';
+  var DB   = SUPABASE_URL + '/rest/v1';
+  var KEY  = 'msql_session'; // localStorage key
+
+  // ── helpers ────────────────────────────────────────────────
+  function baseHeaders() {
+    return { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON };
+  }
+  function authedHeaders(token) {
+    return Object.assign(baseHeaders(), { 'Authorization': 'Bearer ' + token });
+  }
+  function saveSession(s) { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch(e) {} }
+  function clearSession()  { try { localStorage.removeItem(KEY); } catch(e) {} }
+  function readSession()   { try { var s = localStorage.getItem(KEY); return s ? JSON.parse(s) : null; } catch(e) { return null; } }
+
+  var _listeners = [];
+  function emit(event, session) {
+    _listeners.forEach(function(cb) { try { cb(event, session); } catch(e) {} });
+  }
+
+  // ── session refresh ─────────────────────────────────────────
+  function refreshIfNeeded(session) {
+    if (!session || !session.access_token) return Promise.resolve(null);
+    var expiry = session.expires_at || 0;
+    if (Date.now() / 1000 < expiry - 60) return Promise.resolve(session); // still valid
+    if (!session.refresh_token) { clearSession(); return Promise.resolve(null); }
+    return fetch(AUTH + '/token?grant_type=refresh_token', {
+      method: 'POST', headers: baseHeaders(),
+      body: JSON.stringify({ refresh_token: session.refresh_token })
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      if (!d.access_token) { clearSession(); return null; }
+      d.expires_at = Math.floor(Date.now() / 1000) + (d.expires_in || 3600);
+      saveSession(d);
+      return d;
+    }).catch(function() { return session; }); // network error → keep old session
+  }
+
+  // ── public API (mirrors supabase-js surface used by this app) ─
+  return {
+    getSession: function() {
+      return refreshIfNeeded(readSession()).then(function(s) {
+        return { data: { session: s }, error: null };
+      });
+    },
+
+    signInWithPassword: function(creds) {
+      return fetch(AUTH + '/token?grant_type=password', {
+        method: 'POST', headers: baseHeaders(),
+        body: JSON.stringify({ email: creds.email, password: creds.password })
+      }).then(function(r) { return r.json(); }).then(function(d) {
+        if (!d.access_token) {
+          var msg = d.error_description || d.msg || d.message || 'Login failed.';
+          return { data: null, error: { message: msg } };
+        }
+        d.expires_at = Math.floor(Date.now() / 1000) + (d.expires_in || 3600);
+        saveSession(d);
+        emit('SIGNED_IN', d);
+        return { data: { session: d }, error: null };
+      }).catch(function(e) {
+        return { data: null, error: { message: 'Network error — check your connection.' } };
+      });
+    },
+
+    signUp: function(creds) {
+      var payload = { email: creds.email, password: creds.password };
+      if (creds.options && creds.options.data) payload.data = creds.options.data;
+      return fetch(AUTH + '/signup', {
+        method: 'POST', headers: baseHeaders(), body: JSON.stringify(payload)
+      }).then(function(r) { return r.json(); }).then(function(d) {
+        if (d.error || d.msg) {
+          return { data: null, error: { message: d.error_description || d.msg || 'Signup failed.' } };
+        }
+        if (d.access_token) {
+          d.expires_at = Math.floor(Date.now() / 1000) + (d.expires_in || 3600);
+          saveSession(d);
+          emit('SIGNED_IN', d);
+          return { data: { session: d }, error: null };
+        }
+        // Email confirmation required — no session yet
+        return { data: { session: null }, error: null };
+      }).catch(function(e) {
+        return { data: null, error: { message: 'Network error — check your connection.' } };
+      });
+    },
+
+    signOut: function() {
+      var s = readSession();
+      clearSession();
+      emit('SIGNED_OUT', null);
+      if (s && s.access_token) {
+        fetch(AUTH + '/logout', { method: 'POST', headers: authedHeaders(s.access_token) }).catch(function(){});
+      }
+      return Promise.resolve({ error: null });
+    },
+
+    onAuthStateChange: function(cb) {
+      _listeners.push(cb);
+    },
+
+    // ── database ───────────────────────────────────────────────
+    from: function(table) {
+      var s = readSession();
+      var token = s && s.access_token ? s.access_token : SUPABASE_ANON;
+      var _cols = '*', _filters = [];
+
+      var q = {
+        select: function(cols) { _cols = cols || '*'; return q; },
+        eq:     function(col, val) { _filters.push(col + '=eq.' + val); return q; },
+        upsert: function(body, opts) {
+          return fetch(DB + '/' + table, {
+            method: 'POST',
+            headers: Object.assign(authedHeaders(token), {
+              'Prefer': 'resolution=merge-duplicates,return=minimal'
+            }),
+            body: JSON.stringify(body)
+          }).then(function(r) {
+            return r.ok ? { data: body, error: null }
+                        : r.json().then(function(e) { return { data: null, error: e }; });
+          }).catch(function(e) { return { data: null, error: { message: e.message } }; });
+        },
+        // Make thenable so `await supabase.from(...).select(...).eq(...)` works
+        then: function(resolve, reject) {
+          var url = DB + '/' + table + '?select=' + _cols;
+          if (_filters.length) url += '&' + _filters.join('&');
+          return fetch(url, { headers: authedHeaders(token) })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+              resolve(Array.isArray(d) ? { data: d, error: null } : { data: [], error: d });
+            }).catch(reject);
+        }
+      };
+      return q;
+    }
+  };
+})();
+
+// ================================================================
+//  ENGINE STATE
+// ================================================================
+let SQL               = null;
+let currentQ          = 0;
 let filteredQuestions = QUESTIONS;
-let activeTag = "ALL";
-let solvedSet = new Set();
-let editor = null;
+let activeTag         = 'ALL';
+let solvedSet         = new Set();
+let editor            = null;
+let currentUser       = null;
 
-// ── INIT ─────────────────────────────────────────────────────────
+// ================================================================
+//  INIT
+// ================================================================
 async function init() {
   try {
+    // Step 1: Load SQL engine — this is the only blocker for the loading screen.
     SQL = await initSqlJs({
-      locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}`
+      locateFile: function(f) { return 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/' + f; }
     });
+
+    // Step 2: Site is ready — show it immediately.
     document.getElementById('loadingScreen').style.display = 'none';
     buildPills();
     buildTopicFilters();
@@ -3546,17 +3697,52 @@ async function init() {
     updateHeroCount();
     showLanding();
     initEditor();
+
+    // Step 3: Load Supabase in the background — never blocks the site.
+    initAuth();
+
   } catch(e) {
     document.getElementById('loadingScreen').innerHTML =
-      `<div style="color:#e55;font-family:monospace;font-size:14px;padding:24px">
-        Failed to load SQL engine: ${e.message}
-      </div>`;
+      '<div style="color:#e55;font-family:monospace;font-size:14px;padding:24px;text-align:center">' +
+      '<div style="font-size:28px;margin-bottom:12px">⚠️</div>' +
+      'Failed to load SQL engine: ' + e.message + '</div>';
   }
 }
 
+async function initAuth() {
+  try {
+    Auth.onAuthStateChange(async function(event, session) {
+      if (event === 'SIGNED_IN' && session && session.user) {
+        currentUser = session.user;
+        await loadUserProgress(currentUser.id);
+        updateAuthUI(currentUser);
+        closeAuthModal();
+      } else if (event === 'SIGNED_OUT') {
+        currentUser = null;
+        solvedSet   = new Set();
+        updateAuthUI(null);
+        updateProgress();
+        buildPills();
+      }
+    });
+
+    var sessionResult = await Auth.getSession();
+    var session = sessionResult.data && sessionResult.data.session;
+    if (session && session.user) {
+      currentUser = session.user;
+      await loadUserProgress(currentUser.id);
+      updateAuthUI(currentUser);
+    }
+  } catch(e) {
+    console.warn('Auth init failed:', e.message);
+  }
+}
+
+// ================================================================
+//  CODEMIRROR
+// ================================================================
 function initEditor() {
   const textarea = document.getElementById('sqlEditor');
-
   editor = CodeMirror.fromTextArea(textarea, {
     mode: 'text/x-sql',
     theme: 'material-darker',
@@ -3568,60 +3754,201 @@ function initEditor() {
     indentUnit: 2,
     tabSize: 2,
   });
-
   editor.setSize('100%', '100%');
-
-  editor.setValue(`-- Write your SQL query here...
--- Press ▶ Run to test, Submit to check all cases`);
+  editor.setValue('-- Write your SQL query here...\n-- Press ▶ Run to test, Submit to check all cases');
 }
-// ── LANDING PAGE BUILDERS ─────────────────────────────────────────
+
+// ================================================================
+//  AUTH UI
+// ================================================================
+function updateAuthUI(user) {
+  var loggedIn = !!user;
+  var meta     = (user && user.user_metadata) ? user.user_metadata : {};
+  var initials = loggedIn ? getInitials(meta.full_name || user.email) : '';
+  var name     = loggedIn ? (meta.full_name || user.email.split('@')[0]) : '';
+
+  document.getElementById('landingNavAuth').style.display = loggedIn ? 'none' : 'flex';
+  document.getElementById('landingNavUser').style.display = loggedIn ? 'flex' : 'none';
+  if (loggedIn) {
+    document.getElementById('landingUserAvatar').textContent = initials;
+    document.getElementById('landingUserName').textContent   = name;
+  }
+  document.getElementById('appLoginBtn').style.display = loggedIn ? 'none' : 'flex';
+  document.getElementById('appUser').style.display     = loggedIn ? 'flex' : 'none';
+  if (loggedIn) {
+    document.getElementById('appUserAvatar').textContent = initials;
+    document.getElementById('appUserName').textContent   = name;
+  }
+}
+
+function getInitials(str) {
+  if (!str) return '?';
+  return str.split(/\s+/).map(function(w) { return w[0] || ''; }).join('').toUpperCase().slice(0, 2) || '?';
+}
+
+// ================================================================
+//  AUTH MODAL
+// ================================================================
+function openAuthModal(tab) {
+  tab = tab || 'login';
+  switchTab(tab);
+  document.getElementById('authModalOverlay').classList.add('open');
+  setTimeout(function() {
+    var el = tab === 'login'
+      ? document.getElementById('loginEmail')
+      : document.getElementById('signupName');
+    if (el) el.focus();
+  }, 120);
+}
+
+function closeAuthModal() {
+  document.getElementById('authModalOverlay').classList.remove('open');
+  clearAuthErrors();
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('authModalOverlay')) closeAuthModal();
+}
+
+function switchTab(tab) {
+  document.getElementById('formLogin').style.display  = tab === 'login'  ? 'block' : 'none';
+  document.getElementById('formSignup').style.display = tab === 'signup' ? 'block' : 'none';
+  document.getElementById('tabLogin').classList.toggle('active',  tab === 'login');
+  document.getElementById('tabSignup').classList.toggle('active', tab === 'signup');
+  clearAuthErrors();
+}
+
+function clearAuthErrors() {
+  document.getElementById('loginError').textContent  = '';
+  document.getElementById('signupError').textContent = '';
+}
+
+function setLoading(btnId, loading) {
+  var btn       = document.getElementById(btnId);
+  btn.disabled  = loading;
+  btn.style.opacity = loading ? '0.6' : '1';
+  btn.textContent   = loading ? 'Please wait...'
+    : (btnId === 'loginBtn' ? 'Login →' : 'Create Account →');
+}
+
+// ================================================================
+//  LOGIN / SIGNUP / LOGOUT
+// ================================================================
+async function handleLogin() {
+  var errEl    = document.getElementById('loginError');
+  var email    = document.getElementById('loginEmail').value.trim();
+  var password = document.getElementById('loginPassword').value;
+  if (!email || !password) { errEl.textContent = 'Please fill in all fields.'; return; }
+  errEl.textContent = '';
+  setLoading('loginBtn', true);
+  var result = await Auth.signInWithPassword({ email: email, password: password });
+  setLoading('loginBtn', false);
+  if (result.error) {
+    errEl.textContent = result.error.message;
+  }
+  // On success, onAuthStateChange handles closing modal and updating UI
+}
+
+async function handleSignup() {
+  var errEl    = document.getElementById('signupError');
+  var name     = document.getElementById('signupName').value.trim();
+  var email    = document.getElementById('signupEmail').value.trim();
+  var password = document.getElementById('signupPassword').value;
+  if (!name || !email || !password) { errEl.textContent = 'Please fill in all fields.'; return; }
+  if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  errEl.textContent = '';
+  setLoading('signupBtn', true);
+  var result = await Auth.signUp({ email: email, password: password, options: { data: { full_name: name } } });
+  setLoading('signupBtn', false);
+  if (result.error) {
+    errEl.textContent = result.error.message;
+  } else if (result.data && result.data.session) {
+    // Logged in immediately (email confirmation disabled in Supabase)
+    errEl.style.color = '#00c896';
+    errEl.textContent = '✓ Account created! You are now logged in.';
+  } else {
+    // Email confirmation required
+    errEl.style.color = '#00c896';
+    errEl.textContent = '✓ Account created! Check your email to confirm, then log in.';
+  }
+}
+
+async function logoutUser() {
+  await Auth.signOut();
+}
+
+// ================================================================
+//  USER PROGRESS
+// ================================================================
+async function loadUserProgress(userId) {
+  try {
+    var result = await Auth.from('user_progress').select('question_id').eq('user_id', userId);
+    if (result.error) { console.error('Progress load error:', result.error); return; }
+    solvedSet = new Set((result.data || []).map(function(r) { return r.question_id; }));
+    updateProgress();
+    buildPills();
+  } catch(e) { console.warn('Progress load failed:', e.message); }
+}
+
+async function saveUserProgress(questionId) {
+  if (!currentUser) return;
+  try {
+    var result = await Auth.from('user_progress').upsert(
+      { user_id: currentUser.id, question_id: questionId },
+      { onConflict: 'user_id,question_id' }
+    );
+    if (result.error) console.error('Progress save error:', result.error);
+  } catch(e) { console.warn('Progress save failed:', e.message); }
+}
+
+// ================================================================
+//  LANDING BUILDERS
+// ================================================================
 function updateHeroCount() {
-  const el = document.getElementById('heroStatCount');
+  var el = document.getElementById('heroStatCount');
   if (el) el.textContent = QUESTIONS.length;
 }
 
 function buildLandingCards() {
-  const wrap = document.getElementById('landingQCards');
-
+  var wrap = document.getElementById('landingQCards');
   if (!wrap) return;
-
-  // EMPTY STATE
   if (filteredQuestions.length === 0) {
-    wrap.innerHTML = `
-      <div class="empty-state">
-        No questions found for this topic.
-      </div>
-    `;
+    wrap.innerHTML = '<div class="empty-state">No questions found for this topic.</div>';
     return;
   }
-
-  wrap.innerHTML = filteredQuestions.map((q, i) => `
-    <div class="q-card" onclick="showApp(${i})">
-      <div class="q-card-num">${q.num}</div>
-      <div class="q-card-title">${q.title}</div>
-      <div class="q-card-topic">${q.tags.join(' · ')}</div>
-      <div class="badge ${q.difficulty.toLowerCase()}">${q.difficulty}</div>
-      <div class="q-card-arrow">→</div>
-    </div>
-  `).join('');
+  wrap.innerHTML = filteredQuestions.map(function(q, i) {
+    return '<div class="q-card" onclick="showApp(' + i + ')">' +
+      '<div class="q-card-num">' + q.num + '</div>' +
+      '<div class="q-card-title">' + q.title + '</div>' +
+      '<div class="q-card-topic">' + q.tags.join(' · ') + '</div>' +
+      '<div class="badge ' + q.difficulty.toLowerCase() + '">' + q.difficulty + '</div>' +
+      '<div class="q-card-arrow">→</div>' +
+      '</div>';
+  }).join('');
 }
 
-// ── NAV PILLS ─────────────────────────────────────────────────────
+// ================================================================
+//  NAV PILLS
+// ================================================================
 function buildPills() {
-  const wrap = document.getElementById('qPillsWrap');
+  var wrap = document.getElementById('qPillsWrap');
   if (!wrap) return;
   wrap.innerHTML = '';
-  filteredQuestions.forEach((q, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'q-pill';
-    btn.id = `pill-${i}`;
-    btn.textContent = `${q.num}  ${q.title}`;
-    btn.onclick = () => renderQuestion(i);
+  filteredQuestions.forEach(function(q, i) {
+    var btn = document.createElement('button');
+    btn.className   = 'q-pill' + (solvedSet.has(q.id) ? ' solved' : '') + (i === currentQ ? ' active' : '');
+    btn.id          = 'pill-' + i;
+    btn.textContent = q.num + '  ' + q.title;
+    btn.onclick     = function() { renderQuestion(i); };
     wrap.appendChild(btn);
   });
 }
 
-// ── NAVIGATION ────────────────────────────────────────────────────
+function buildQuestionPills() { buildPills(); }
+
+// ================================================================
+//  NAVIGATION
+// ================================================================
 function showLanding() {
   document.getElementById('landing-page').classList.add('active');
   document.getElementById('app-page').classList.remove('active');
@@ -3642,102 +3969,104 @@ function scrollToQuestions() {
   document.getElementById('questions-section').scrollIntoView({ behavior: 'smooth' });
 }
 
-// ── RENDER QUESTION ───────────────────────────────────────────────
-function renderQuestion(idx) {
-  currentQ = idx;
-  const q = filteredQuestions[idx];
+// ================================================================
+//  TOPIC FILTERS
+// ================================================================
+function buildTopicFilters() {
+  var wrap = document.getElementById('topicFilters');
+  if (!wrap) return;
+  var allTags = ['ALL'].concat(Array.from(new Set(QUESTIONS.reduce(function(acc, q) { return acc.concat(q.tags || []); }, []))));
+  wrap.innerHTML = allTags.map(function(tag) {
+    return '<button class="topic-filter ' + (tag === activeTag ? 'active' : '') + '" onclick="filterQuestions(\'' + tag + '\')">' + tag + '</button>';
+  }).join('');
+}
 
-  // Update pills
-  document.querySelectorAll('.q-pill').forEach((p, i) => {
-    p.className = 'q-pill'
-      + (solvedSet.has(i) ? ' solved' : '')
-      + (i === idx ? ' active' : '');
+function filterQuestions(tag) {
+  activeTag         = tag;
+  filteredQuestions = tag === 'ALL' ? QUESTIONS : QUESTIONS.filter(function(q) { return q.tags && q.tags.includes(tag); });
+  currentQ          = 0;
+  buildTopicFilters();
+  buildLandingCards();
+  buildPills();
+  renderQuestion(0);
+}
+
+// ================================================================
+//  RENDER QUESTION
+// ================================================================
+function renderQuestion(idx) {
+  if (idx === undefined) idx = currentQ;
+  currentQ  = idx;
+  var q     = filteredQuestions[idx];
+
+  document.querySelectorAll('.q-pill').forEach(function(p, i) {
+    p.className = 'q-pill' +
+      (filteredQuestions[i] && solvedSet.has(filteredQuestions[i].id) ? ' solved' : '') +
+      (i === idx ? ' active' : '');
   });
 
-  // Difficulty badge
-  const badge = document.getElementById('diffBadge');
+  var badge       = document.getElementById('diffBadge');
   badge.textContent = q.difficulty;
-  badge.className = `diff-badge diff-${q.difficulty.toLowerCase()}`;
+  badge.className   = 'diff-badge diff-' + q.difficulty.toLowerCase();
 
-  // Reset output area
-  editor.setValue('');
-  document.getElementById('outputBody').innerHTML = `
-    <div class="empty-state">
-      <div class="es-icon">◈</div>
-      Run your query to see results
-    </div>`;
+  if (editor) editor.setValue('');
+  document.getElementById('outputBody').innerHTML =
+    '<div class="empty-state"><div class="es-icon">◈</div>Run your query to see results</div>';
   document.getElementById('outputStatus').textContent = '';
-  document.getElementById('outputLabel').textContent = 'Output';
-  document.getElementById('tcWrap').style.display = 'none';
-  document.getElementById('solvedBanner').className = 'solved-banner';
+  document.getElementById('outputLabel').textContent  = 'Output';
+  document.getElementById('tcWrap').style.display     = 'none';
+  document.getElementById('solvedBanner').className   = 'solved-banner';
 
-  // Build schema HTML
-  const schemaHTML = Object.entries(q.schema).map(([tbl, cols]) => `
-    <div class="schema-box">
-      <div class="schema-header">⊞ ${tbl}</div>
-      <table class="schema-tbl">
-        <tr><th>Column</th><th>Type</th><th></th></tr>
-        ${cols.map(c => `
-          <tr>
-            <td>${c.col}</td>
-            <td class="col-type">${c.type}</td>
-            <td>${c.note === 'pk' ? '<span class="col-pk">PK</span>' : ''}</td>
-          </tr>`).join('')}
-      </table>
-    </div>`).join('');
+  var schemaHTML = Object.entries(q.schema).map(function(entry) {
+    var tbl = entry[0]; var cols = entry[1];
+    return '<div class="schema-box"><div class="schema-header">⊞ ' + tbl + '</div>' +
+      '<table class="schema-tbl"><tr><th>Column</th><th>Type</th><th></th></tr>' +
+      cols.map(function(c) {
+        return '<tr><td>' + c.col + '</td><td class="col-type">' + c.type + '</td><td>' +
+          (c.note === 'pk' ? '<span class="col-pk">PK</span>' : '') + '</td></tr>';
+      }).join('') + '</table></div>';
+  }).join('');
 
-  // Build example output HTML
-  const exHTML = `
-    <div class="example-section">
-      <div class="example-label">Expected output (sample data)</div>
-      <div class="example-wrap">
-        <table class="ex-table">
-          <tr>${q.example.cols.map(c => `<th>${c}</th>`).join('')}</tr>
-          ${q.example.rows.map(r => `<tr>${r.map(v => `<td>${v}</td>`).join('')}</tr>`).join('')}
-        </table>
-      </div>
-    </div>`;
+  var exHTML = '<div class="example-section"><div class="example-label">Expected output (sample data)</div>' +
+    '<div class="example-wrap"><table class="ex-table"><tr>' +
+    q.example.cols.map(function(c) { return '<th>' + c + '</th>'; }).join('') + '</tr>' +
+    q.example.rows.map(function(r) {
+      return '<tr>' + r.map(function(v) { return '<td>' + v + '</td>'; }).join('') + '</tr>';
+    }).join('') + '</table></div></div>';
 
-  // Build tags HTML
-  const tagsHTML = q.tags.map(t => `<span class="prob-tag">${t}</span>`).join('');
+  var tagsHTML = q.tags.map(function(t) { return '<span class="prob-tag">' + t + '</span>'; }).join('');
 
-  // Render left panel
-  document.getElementById('leftPanel').innerHTML = `
-    <div class="prob-header">
-      <div class="prob-num">Problem ${q.num}</div>
-      <div class="prob-title">${q.title}</div>
-      <div class="prob-tags">${tagsHTML}</div>
-    </div>
-    <div class="prob-body">
-      ${q.desc}
-      ${schemaHTML}
-      ${exHTML}
-      <div class="hint-wrap">
-        <button class="hint-btn" onclick="toggleHint()">💡 Show hint</button>
-        <div class="hint-text" id="hintText">${q.hint}</div>
-      </div>
-    </div>`;
+  document.getElementById('leftPanel').innerHTML =
+    '<div class="prob-header">' +
+    '<div class="prob-num">Problem ' + q.num + '</div>' +
+    '<div class="prob-title">' + q.title + '</div>' +
+    '<div class="prob-tags">' + tagsHTML + '</div></div>' +
+    '<div class="prob-body">' + q.desc + schemaHTML + exHTML +
+    '<div class="hint-wrap"><button class="hint-btn" onclick="toggleHint()">💡 Show hint</button>' +
+    '<div class="hint-text" id="hintText">' + q.hint + '</div></div></div>';
 }
 
 function toggleHint() {
   document.getElementById('hintText').classList.toggle('open');
 }
 
-// ── SQL HELPERS ───────────────────────────────────────────────────
+// ================================================================
+//  SQL HELPERS
+// ================================================================
 function execQuery(seed, query) {
-  const db = new SQL.Database();
+  var db  = new SQL.Database();
   db.run(seed);
-  const res = db.exec(query);
+  var res = db.exec(query);
   db.close();
   return res;
 }
 
 function toRows(result) {
   if (!result || result.length === 0) return [];
-  const { columns, values } = result[0];
-  return values.map(v => {
-    const obj = {};
-    columns.forEach((c, i) => obj[c] = v[i]);
+  var columns = result[0].columns; var values = result[0].values;
+  return values.map(function(v) {
+    var obj = {};
+    columns.forEach(function(c, i) { obj[c] = v[i]; });
     return obj;
   });
 }
@@ -3745,147 +4074,114 @@ function toRows(result) {
 function renderTable(result) {
   if (!result || result.length === 0)
     return '<div class="empty-state" style="padding:12px 0">Query returned 0 rows.</div>';
-  const { columns, values } = result[0];
-  const ths = columns.map(c => `<th>${c}</th>`).join('');
-  const trs = values.map(v =>
-    `<tr>${v.map(cell =>
-      `<td>${cell === null ? '<em style="color:var(--hint)">NULL</em>' : cell}</td>`
-    ).join('')}</tr>`
-  ).join('');
-  return `<div class="res-table-wrap"><table class="res-table"><tr>${ths}</tr>${trs}</table></div>`;
+  var columns = result[0].columns; var values = result[0].values;
+  var ths = columns.map(function(c) { return '<th>' + c + '</th>'; }).join('');
+  var trs = values.map(function(v) {
+    return '<tr>' + v.map(function(cell) {
+      return '<td>' + (cell === null ? '<em style="color:var(--hint)">NULL</em>' : cell) + '</td>';
+    }).join('') + '</tr>';
+  }).join('');
+  return '<div class="res-table-wrap"><table class="res-table"><tr>' + ths + '</tr>' + trs + '</table></div>';
 }
 
-function buildTopicFilters() {
-  const wrap = document.getElementById("topicFilters");
-
-  if (!wrap) return;
-
-  const allTags = [
-    "ALL",
-    ...new Set(
-      QUESTIONS.flatMap(q => q.tags || [])
-    )
-  ];
-
-  wrap.innerHTML = allTags.map(tag => `
-    <button
-      class="topic-filter ${tag === activeTag ? "active" : ""}"
-      onclick="filterQuestions('${tag}')"
-    >
-      ${tag}
-    </button>
-  `).join("");
-}
-
-function filterQuestions(tag) {
-  activeTag = tag;
-
-  if (tag === "ALL") {
-    filteredQuestions = QUESTIONS;
-  } else {
-    filteredQuestions = QUESTIONS.filter(q =>
-      q.tags && q.tags.includes(tag)
-    );
-  }
-
-  currentQ = 0;
-
-  buildTopicFilters();
-  buildLandingCards();
-  buildQuestionPills();
-  renderQuestion();
-  
-}
-
-// ── RUN ───────────────────────────────────────────────────────────
+// ================================================================
+//  RUN (no login required)
+// ================================================================
 function runQuery() {
   if (!SQL) { showOutputErr('SQL engine not ready yet.'); return; }
-  const query = editor.getValue().trim();
+  var query = editor.getValue().trim();
   if (!query) { showOutputErr('Write a SQL query first.'); return; }
-
-  const q = filteredQuestions[currentQ];
+  var q = filteredQuestions[currentQ];
   document.getElementById('outputLabel').textContent = 'Output';
-  document.getElementById('tcWrap').style.display = 'none';
-
+  document.getElementById('tcWrap').style.display    = 'none';
   try {
-    const res = execQuery(q.seed, query);
-    const count = res[0]?.values?.length ?? 0;
-    const status = document.getElementById('outputStatus');
-    status.textContent = `${count} row${count !== 1 ? 's' : ''}`;
-    status.className = 'output-status-text ost-ok';
+    var res    = execQuery(q.seed, query);
+    var count  = res[0] ? res[0].values.length : 0;
+    var status = document.getElementById('outputStatus');
+    status.textContent = count + ' row' + (count !== 1 ? 's' : '');
+    status.className   = 'output-status-text ost-ok';
     document.getElementById('outputBody').innerHTML = renderTable(res);
   } catch(e) {
     showOutputErr(e.message);
   }
 }
 
-// ── SUBMIT ────────────────────────────────────────────────────────
+// ================================================================
+//  SUBMIT (login required)
+// ================================================================
 function submitQuery() {
+  if (!currentUser) {
+    openAuthModal('login');
+    document.getElementById('outputLabel').textContent  = 'Login required';
+    document.getElementById('outputStatus').textContent = '';
+    document.getElementById('outputBody').innerHTML =
+      '<div class="login-nudge">' +
+      '<div class="login-nudge-icon">🔒</div>' +
+      '<div class="login-nudge-title">Login to Submit</div>' +
+      '<div class="login-nudge-sub">Run is free for everyone. Login to submit and save your progress.</div>' +
+      '<button class="login-nudge-btn" onclick="openAuthModal(\'login\')">Login / Sign Up</button></div>';
+    return;
+  }
   if (!SQL) return;
-  const query = editor.getValue().trim();
+  var query = editor.getValue().trim();
   if (!query) { showOutputErr('Write a SQL query first.'); return; }
-
-  const q = filteredQuestions[currentQ];
+  var q = filteredQuestions[currentQ];
   document.getElementById('outputLabel').textContent = 'Submission';
-  document.getElementById('outputBody').innerHTML = '';
-
-  let allPass = true;
-  const results = [];
-
-  q.testCases.forEach(tc => {
-    const seed = tc.seed || q.seed;
+  document.getElementById('outputBody').innerHTML    = '';
+  var allPass = true;
+  var results = [];
+  q.testCases.forEach(function(tc) {
+    var seed = tc.seed || q.seed;
     try {
-      const res = execQuery(seed, query);
-      const rows = toRows(res);
-      const pass = tc.check(rows);
-      allPass = allPass && pass;
-      results.push({ name: tc.name, pass, err: null });
+      var res  = execQuery(seed, query);
+      var rows = toRows(res);
+      var pass = tc.check(rows);
+      allPass  = allPass && pass;
+      results.push({ name: tc.name, pass: pass, err: null });
     } catch(e) {
       allPass = false;
       results.push({ name: tc.name, pass: false, err: e.message });
     }
   });
-
-  const passed = results.filter(r => r.pass).length;
-  const statusEl = document.getElementById('outputStatus');
-  statusEl.textContent = `${passed}/${results.length} passed`;
-  statusEl.className = `output-status-text ${allPass ? 'ost-pass' : 'ost-fail'}`;
-
-  document.getElementById('tcList').innerHTML = results.map(r => `
-    <div class="tc-row">
-      <div class="tc-dot ${r.pass ? 'pass' : 'fail'}"></div>
-      <div class="tc-name">${r.name}</div>
-      <div class="tc-res ${r.pass ? 'pass' : 'fail'}">${r.pass ? '✓ Passed' : (r.err ? '⚠ Error' : '✗ Failed')}</div>
-    </div>
-    ${r.err ? `<div class="tc-err">${r.err}</div>` : ''}
-  `).join('');
-
+  var passed   = results.filter(function(r) { return r.pass; }).length;
+  var statusEl = document.getElementById('outputStatus');
+  statusEl.textContent = passed + '/' + results.length + ' passed';
+  statusEl.className   = 'output-status-text ' + (allPass ? 'ost-pass' : 'ost-fail');
+  document.getElementById('tcList').innerHTML = results.map(function(r) {
+    return '<div class="tc-row"><div class="tc-dot ' + (r.pass ? 'pass' : 'fail') + '"></div>' +
+      '<div class="tc-name">' + r.name + '</div>' +
+      '<div class="tc-res ' + (r.pass ? 'pass' : 'fail') + '">' + (r.pass ? '✓ Passed' : (r.err ? '⚠ Error' : '✗ Failed')) + '</div></div>' +
+      (r.err ? '<div class="tc-err">' + r.err + '</div>' : '');
+  }).join('');
   document.getElementById('tcWrap').style.display = 'block';
-
   if (allPass) {
-    solvedSet.add(currentQ);
+    solvedSet.add(q.id);
     document.getElementById('solvedBanner').className = 'solved-banner show';
-    const pill = document.getElementById(`pill-${currentQ}`);
+    var pill = document.getElementById('pill-' + currentQ);
     if (pill) pill.classList.add('solved');
     updateProgress();
+    saveUserProgress(q.id);
   }
 }
 
-// ── UTILS ─────────────────────────────────────────────────────────
+// ================================================================
+//  UTILS
+// ================================================================
 function updateProgress() {
-  const pct = (solvedSet.size / QUESTIONS.length) * 100;
+  var pct = (solvedSet.size / QUESTIONS.length) * 100;
   document.getElementById('progressBar').style.width = pct + '%';
 }
 
 function resetEditor() {
-  editor.setValue('');
-  editor.focus();
+  if (editor) { editor.setValue(''); editor.focus(); }
 }
 
 function showOutputErr(msg) {
   document.getElementById('outputStatus').textContent = '';
-  document.getElementById('outputBody').innerHTML = `<div class="err-block">${msg}</div>`;
+  document.getElementById('outputBody').innerHTML = '<div class="err-block">' + msg + '</div>';
 }
 
-// ── START ─────────────────────────────────────────────────────────
+// ================================================================
+//  START
+// ================================================================
 init();
