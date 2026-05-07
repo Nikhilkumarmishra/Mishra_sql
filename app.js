@@ -3645,7 +3645,7 @@ function scrollToQuestions() {
 // ── RENDER QUESTION ───────────────────────────────────────────────
 function renderQuestion(idx) {
   currentQ = idx;
-  const q = QUESTIONS[idx];
+  const q = filteredQuestions[idx];
 
   // Update pills
   document.querySelectorAll('.q-pill').forEach((p, i) => {
