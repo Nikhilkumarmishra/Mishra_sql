@@ -92,8 +92,9 @@
     </div>
     <!-- Logged IN -->
     <div class="nav-user" id="landingNavUser" style="display:none">
-      <div class="user-avatar-sm" id="landingUserAvatar"></div>
+      <div class="user-avatar-sm" id="landingUserAvatar" onclick="showProfile()" style="cursor:pointer"></div>
       <span class="user-name-sm" id="landingUserName"></span>
+      <button class="btn-profile-sm" onclick="showProfile()">My Profile</button>
       <button class="btn-logout-sm" onclick="logoutUser()">Logout</button>
       <button class="nav-cta" onclick="showApp()">Start Practicing →</button>
     </div>
@@ -234,8 +235,9 @@
       <button class="btn-login-nav" id="appLoginBtn" onclick="openAuthModal('login')">Login</button>
       <!-- Logged IN -->
       <div class="app-user" id="appUser" style="display:none">
-        <div class="user-avatar-sm" id="appUserAvatar"></div>
+        <div class="user-avatar-sm" id="appUserAvatar" onclick="showProfile()" style="cursor:pointer"></div>
         <span class="user-name-sm" id="appUserName"></span>
+        <button class="btn-profile-sm" onclick="showProfile()">My Profile</button>
         <button class="btn-logout-sm" onclick="logoutUser()">Logout</button>
       </div>
     </div>
@@ -284,6 +286,130 @@
           <div class="tc-list" id="tcList"></div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PROFILE PAGE
+══════════════════════════════════════════════════════════════ -->
+<div class="page" id="profile-page">
+
+  <!-- PROFILE NAV -->
+  <div class="app-nav">
+    <div class="app-logo" onclick="showLanding()">Mishra<span>SQL</span></div>
+    <div class="app-divider"></div>
+    <div style="flex:1"></div>
+    <div class="app-nav-right">
+      <button class="ebtn ebtn-run" onclick="goBackFromProfile()" style="font-size:13px">← Back to Practice</button>
+    </div>
+  </div>
+
+  <!-- PROFILE BODY -->
+  <div class="profile-page-body">
+
+    <!-- LEFT — User Card + Edit Form -->
+    <div class="profile-left">
+
+      <!-- USER CARD -->
+      <div class="profile-card">
+        <div class="profile-avatar" id="profileAvatar"></div>
+        <div class="profile-card-info">
+          <div class="profile-display-name" id="profileDisplayName"></div>
+          <div class="profile-email" id="profileEmail"></div>
+          <div class="profile-joined" id="profileJoined"></div>
+        </div>
+      </div>
+
+      <!-- EDIT FORM -->
+      <div class="profile-section">
+        <div class="profile-section-title">Edit Profile</div>
+
+        <div class="form-group">
+          <label class="form-label">Display Name</label>
+          <input class="form-input" id="pfDisplayName" type="text" placeholder="How you want to be known"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input class="form-input" id="pfFullName" type="text" placeholder="Your full name"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Highest Qualification</label>
+          <input class="form-input" id="pfQualification" type="text" placeholder="e.g. B.Tech CSE, MBA, etc."/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">LinkedIn URL</label>
+          <input class="form-input" id="pfLinkedin" type="url" placeholder="https://linkedin.com/in/yourname"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Resume URL</label>
+          <input class="form-input" id="pfResume" type="url" placeholder="https://drive.google.com/..."/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bio</label>
+          <textarea class="form-input form-textarea" id="pfBio" placeholder="Tell us a bit about yourself..." rows="3"></textarea>
+        </div>
+
+        <div class="profile-save-row">
+          <div class="form-error" id="profileSaveError" style="margin:0"></div>
+          <button class="form-btn" id="profileSaveBtn" onclick="saveProfile()" style="width:auto;padding:10px 28px">
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT — Progress Dashboard -->
+    <div class="profile-right">
+
+      <!-- STATS ROW -->
+      <div class="profile-stats-row" id="profileStatsRow">
+        <div class="profile-stat-card">
+          <div class="profile-stat-num" id="statSolved">0</div>
+          <div class="profile-stat-label">Solved</div>
+        </div>
+        <div class="profile-stat-card">
+          <div class="profile-stat-num" id="statTotal">0</div>
+          <div class="profile-stat-label">Total</div>
+        </div>
+        <div class="profile-stat-card">
+          <div class="profile-stat-num" id="statPercent">0%</div>
+          <div class="profile-stat-label">Completion</div>
+        </div>
+        <div class="profile-stat-card">
+          <div class="profile-stat-num" id="statEasy">0</div>
+          <div class="profile-stat-label">Easy Solved</div>
+        </div>
+        <div class="profile-stat-card">
+          <div class="profile-stat-num" id="statMedium">0</div>
+          <div class="profile-stat-label">Medium Solved</div>
+        </div>
+        <div class="profile-stat-card">
+          <div class="profile-stat-num" id="statHard">0</div>
+          <div class="profile-stat-label">Hard Solved</div>
+        </div>
+      </div>
+
+      <!-- PROGRESS BAR -->
+      <div class="profile-section">
+        <div class="profile-section-title">Overall Progress</div>
+        <div class="profile-progress-track">
+          <div class="profile-progress-fill" id="profileProgressFill"></div>
+        </div>
+        <div class="profile-progress-label" id="profileProgressLabel"></div>
+      </div>
+
+      <!-- QUESTION LIST -->
+      <div class="profile-section">
+        <div class="profile-section-title">All Problems</div>
+        <div class="profile-q-filters">
+          <button class="profile-q-filter active" id="filterAll" onclick="filterProfileQ('all')">All</button>
+          <button class="profile-q-filter" id="filterSolved" onclick="filterProfileQ('solved')">Solved</button>
+          <button class="profile-q-filter" id="filterUnsolved" onclick="filterProfileQ('unsolved')">Unsolved</button>
+        </div>
+        <div class="profile-q-list" id="profileQList"></div>
+      </div>
+
     </div>
   </div>
 </div>

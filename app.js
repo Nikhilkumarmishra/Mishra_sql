@@ -3521,150 +3521,126 @@ INSERT INTO employees VALUES
 
 ]; // ← end of QUESTIONS array
 
-
 // ================================================================
-//  SUPABASE CONFIG — only edit these 2 lines
+//  SUPABASE CONFIG
+//  !! ONLY EDIT THESE TWO LINES !!
 // ================================================================
 const SUPABASE_URL  = 'https://wyxutuqckkdkraawyxff.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5eHV0dXFja2tka3JhYXd5eGZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMzQ3NzksImV4cCI6MjA5MzcxMDc3OX0.ale0hHkE36PPQwKiqo5ViS3bi28krpU8gHXiWCKyLAU';
 
 // ================================================================
-//  AUTH CLIENT  — pure fetch(), no SDK, no CDN dependency
+//  AUTH CLIENT — pure fetch(), zero CDN dependency
 // ================================================================
 var Auth = (function () {
-  var AUTH = SUPABASE_URL + '/auth/v1';
-  var DB   = SUPABASE_URL + '/rest/v1';
-  var KEY  = 'msql_session'; // localStorage key
-
-  // ── helpers ────────────────────────────────────────────────
-  function baseHeaders() {
-    return { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON };
-  }
-  function authedHeaders(token) {
-    return Object.assign(baseHeaders(), { 'Authorization': 'Bearer ' + token });
-  }
-  function saveSession(s) { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch(e) {} }
-  function clearSession()  { try { localStorage.removeItem(KEY); } catch(e) {} }
-  function readSession()   { try { var s = localStorage.getItem(KEY); return s ? JSON.parse(s) : null; } catch(e) { return null; } }
-
+  var A   = SUPABASE_URL + '/auth/v1';
+  var DB  = SUPABASE_URL + '/rest/v1';
+  var KEY = 'msql_sess';
   var _listeners = [];
-  function emit(event, session) {
-    _listeners.forEach(function(cb) { try { cb(event, session); } catch(e) {} });
+
+  function bh()        { return { 'Content-Type':'application/json', 'apikey': SUPABASE_ANON }; }
+  function ah(tok)     { return Object.assign(bh(), { 'Authorization':'Bearer '+tok }); }
+  function save(s)     { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch(e){} }
+  function clear()     { try { localStorage.removeItem(KEY); } catch(e){} }
+  function read()      { try { var s=localStorage.getItem(KEY); return s?JSON.parse(s):null; } catch(e){return null;} }
+  function emit(ev, s) { _listeners.forEach(function(cb){ try{cb(ev,s);}catch(e){} }); }
+
+  function refresh(sess) {
+    if (!sess || !sess.access_token) return Promise.resolve(null);
+    if (Date.now()/1000 < (sess.expires_at||0) - 60) return Promise.resolve(sess);
+    if (!sess.refresh_token) { clear(); return Promise.resolve(null); }
+    return fetch(A+'/token?grant_type=refresh_token', {
+      method:'POST', headers:bh(), body:JSON.stringify({refresh_token:sess.refresh_token})
+    }).then(function(r){return r.json();}).then(function(d){
+      if (!d.access_token){ clear(); return null; }
+      d.expires_at = Math.floor(Date.now()/1000)+(d.expires_in||3600);
+      save(d); return d;
+    }).catch(function(){ return sess; });
   }
 
-  // ── session refresh ─────────────────────────────────────────
-  function refreshIfNeeded(session) {
-    if (!session || !session.access_token) return Promise.resolve(null);
-    var expiry = session.expires_at || 0;
-    if (Date.now() / 1000 < expiry - 60) return Promise.resolve(session); // still valid
-    if (!session.refresh_token) { clearSession(); return Promise.resolve(null); }
-    return fetch(AUTH + '/token?grant_type=refresh_token', {
-      method: 'POST', headers: baseHeaders(),
-      body: JSON.stringify({ refresh_token: session.refresh_token })
-    }).then(function(r) { return r.json(); }).then(function(d) {
-      if (!d.access_token) { clearSession(); return null; }
-      d.expires_at = Math.floor(Date.now() / 1000) + (d.expires_in || 3600);
-      saveSession(d);
-      return d;
-    }).catch(function() { return session; }); // network error → keep old session
+  // chainable query builder
+  function fromTable(table) {
+    var sess  = read();
+    var tok   = sess && sess.access_token ? sess.access_token : SUPABASE_ANON;
+    var cols  = '*';
+    var filts = [];
+    var isSingle = false;
+
+    var q = {
+      select: function(c){ cols=c||'*'; return q; },
+      eq:     function(col,val){ filts.push(col+'=eq.'+encodeURIComponent(val)); return q; },
+      single: function(){ isSingle=true; return q; },
+      // thenable — lets `await Auth.from(...).select(...).eq(...)` work
+      then: function(res, rej) {
+        var url = DB+'/'+table+'?select='+cols+(filts.length?'&'+filts.join('&'):'');
+        var hdrs = ah(tok);
+        if (isSingle) hdrs['Accept'] = 'application/vnd.pgrst.object+json';
+        return fetch(url, {headers:hdrs})
+          .then(function(r){return r.json();})
+          .then(function(d){
+            if (isSingle) {
+              res(d && !d.code ? {data:d, error:null} : {data:null, error:d});
+            } else {
+              res(Array.isArray(d) ? {data:d,error:null} : {data:[],error:d});
+            }
+          }).catch(rej);
+      },
+      upsert: function(body) {
+        return fetch(DB+'/'+table, {
+          method:'POST',
+          headers: Object.assign(ah(tok), {'Prefer':'resolution=merge-duplicates,return=minimal'}),
+          body: JSON.stringify(body)
+        }).then(function(r){
+          return r.ok ? {data:body,error:null} : r.json().then(function(e){return {data:null,error:e};});
+        }).catch(function(e){return {data:null,error:{message:e.message}};});
+      }
+    };
+    return q;
   }
 
-  // ── public API (mirrors supabase-js surface used by this app) ─
   return {
     getSession: function() {
-      return refreshIfNeeded(readSession()).then(function(s) {
-        return { data: { session: s }, error: null };
-      });
+      return refresh(read()).then(function(s){ return {data:{session:s},error:null}; });
     },
-
+    onAuthStateChange: function(cb) { _listeners.push(cb); },
     signInWithPassword: function(creds) {
-      return fetch(AUTH + '/token?grant_type=password', {
-        method: 'POST', headers: baseHeaders(),
-        body: JSON.stringify({ email: creds.email, password: creds.password })
-      }).then(function(r) { return r.json(); }).then(function(d) {
-        if (!d.access_token) {
-          var msg = d.error_description || d.msg || d.message || 'Login failed.';
-          return { data: null, error: { message: msg } };
-        }
-        d.expires_at = Math.floor(Date.now() / 1000) + (d.expires_in || 3600);
-        saveSession(d);
-        emit('SIGNED_IN', d);
-        return { data: { session: d }, error: null };
-      }).catch(function(e) {
-        return { data: null, error: { message: 'Network error — check your connection.' } };
-      });
+      return fetch(A+'/token?grant_type=password', {
+        method:'POST', headers:bh(),
+        body:JSON.stringify({email:creds.email, password:creds.password})
+      }).then(function(r){return r.json();}).then(function(d){
+        if (!d.access_token) return {data:null, error:{message:d.error_description||d.msg||'Login failed.'}};
+        d.expires_at = Math.floor(Date.now()/1000)+(d.expires_in||3600);
+        save(d); emit('SIGNED_IN', d);
+        return {data:{session:d}, error:null};
+      }).catch(function(e){return {data:null,error:{message:'Network error — check your connection.'}};});
     },
-
     signUp: function(creds) {
-      var payload = { email: creds.email, password: creds.password };
-      if (creds.options && creds.options.data) payload.data = creds.options.data;
-      return fetch(AUTH + '/signup', {
-        method: 'POST', headers: baseHeaders(), body: JSON.stringify(payload)
-      }).then(function(r) { return r.json(); }).then(function(d) {
-        if (d.error || d.msg) {
-          return { data: null, error: { message: d.error_description || d.msg || 'Signup failed.' } };
-        }
-        if (d.access_token) {
-          d.expires_at = Math.floor(Date.now() / 1000) + (d.expires_in || 3600);
-          saveSession(d);
-          emit('SIGNED_IN', d);
-          return { data: { session: d }, error: null };
-        }
-        // Email confirmation required — no session yet
-        return { data: { session: null }, error: null };
-      }).catch(function(e) {
-        return { data: null, error: { message: 'Network error — check your connection.' } };
-      });
+      var body = {email:creds.email, password:creds.password};
+      if (creds.options && creds.options.data) body.data = creds.options.data;
+      return fetch(A+'/signup', {method:'POST',headers:bh(),body:JSON.stringify(body)})
+        .then(function(r){return r.json();}).then(function(d){
+          if (d.error||d.msg) return {data:null,error:{message:d.error_description||d.msg||'Signup failed.'}};
+          if (d.access_token){
+            d.expires_at=Math.floor(Date.now()/1000)+(d.expires_in||3600);
+            save(d); emit('SIGNED_IN',d);
+            return {data:{session:d},error:null};
+          }
+          return {data:{session:null},error:null}; // email confirmation needed
+        }).catch(function(e){return {data:null,error:{message:'Network error — check your connection.'}};});
     },
-
     signOut: function() {
-      var s = readSession();
-      clearSession();
-      emit('SIGNED_OUT', null);
-      if (s && s.access_token) {
-        fetch(AUTH + '/logout', { method: 'POST', headers: authedHeaders(s.access_token) }).catch(function(){});
-      }
-      return Promise.resolve({ error: null });
+      var s=read(); clear(); emit('SIGNED_OUT',null);
+      if (s && s.access_token)
+        fetch(A+'/logout',{method:'POST',headers:ah(s.access_token)}).catch(function(){});
+      return Promise.resolve({error:null});
     },
-
-    onAuthStateChange: function(cb) {
-      _listeners.push(cb);
+    updateUser: function(payload) {
+      var s=read(); if (!s||!s.access_token) return Promise.resolve({error:{message:'Not logged in'}});
+      return fetch(A+'/user',{method:'PUT',headers:ah(s.access_token),body:JSON.stringify(payload)})
+        .then(function(r){return r.json();})
+        .then(function(d){ return d.id ? {data:{user:d},error:null} : {data:null,error:d}; })
+        .catch(function(e){return {error:{message:e.message}};});
     },
-
-    // ── database ───────────────────────────────────────────────
-    from: function(table) {
-      var s = readSession();
-      var token = s && s.access_token ? s.access_token : SUPABASE_ANON;
-      var _cols = '*', _filters = [];
-
-      var q = {
-        select: function(cols) { _cols = cols || '*'; return q; },
-        eq:     function(col, val) { _filters.push(col + '=eq.' + val); return q; },
-        upsert: function(body, opts) {
-          return fetch(DB + '/' + table, {
-            method: 'POST',
-            headers: Object.assign(authedHeaders(token), {
-              'Prefer': 'resolution=merge-duplicates,return=minimal'
-            }),
-            body: JSON.stringify(body)
-          }).then(function(r) {
-            return r.ok ? { data: body, error: null }
-                        : r.json().then(function(e) { return { data: null, error: e }; });
-          }).catch(function(e) { return { data: null, error: { message: e.message } }; });
-        },
-        // Make thenable so `await supabase.from(...).select(...).eq(...)` works
-        then: function(resolve, reject) {
-          var url = DB + '/' + table + '?select=' + _cols;
-          if (_filters.length) url += '&' + _filters.join('&');
-          return fetch(url, { headers: authedHeaders(token) })
-            .then(function(r) { return r.json(); })
-            .then(function(d) {
-              resolve(Array.isArray(d) ? { data: d, error: null } : { data: [], error: d });
-            }).catch(reject);
-        }
-      };
-      return q;
-    }
+    from: fromTable
   };
 })();
 
@@ -3674,22 +3650,52 @@ var Auth = (function () {
 let SQL               = null;
 let currentQ          = 0;
 let filteredQuestions = QUESTIONS;
-let activeTag         = 'ALL';
+let activeTag         = "ALL";
 let solvedSet         = new Set();
+let solvedAtMap       = {};
 let editor            = null;
 let currentUser       = null;
+let userProfile       = null;
+let profileQFilter    = 'all';
+let prevPage          = 'landing';
 
 // ================================================================
-//  INIT
+//  INIT — SQL engine + auth
 // ================================================================
 async function init() {
   try {
-    // Step 1: Load SQL engine — this is the only blocker for the loading screen.
     SQL = await initSqlJs({
-      locateFile: function(f) { return 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/' + f; }
+      locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}`
     });
 
-    // Step 2: Site is ready — show it immediately.
+    // Auth runs in background — never blocks site from appearing
+    Auth.onAuthStateChange(async function(event, session) {
+      if (event === 'SIGNED_IN' && session && session.user) {
+        currentUser = session.user;
+        await loadUserProgress(currentUser.id);
+        await loadUserProfile(currentUser.id);
+        updateAuthUI(currentUser);
+        closeAuthModal();
+      } else if (event === 'SIGNED_OUT') {
+        currentUser = null;
+        userProfile  = null;
+        solvedSet    = new Set();
+        solvedAtMap  = {};
+        updateAuthUI(null);
+        updateProgress();
+        buildPills();
+      }
+    });
+    Auth.getSession().then(async function(res) {
+      var session = res.data && res.data.session;
+      if (session && session.user) {
+        currentUser = session.user;
+        await loadUserProgress(currentUser.id);
+        await loadUserProfile(currentUser.id);
+        updateAuthUI(currentUser);
+      }
+    }).catch(function(e) { console.warn('Auth session check failed:', e.message); });
+
     document.getElementById('loadingScreen').style.display = 'none';
     buildPills();
     buildTopicFilters();
@@ -3698,48 +3704,17 @@ async function init() {
     showLanding();
     initEditor();
 
-    // Step 3: Load Supabase in the background — never blocks the site.
-    initAuth();
-
   } catch(e) {
     document.getElementById('loadingScreen').innerHTML =
-      '<div style="color:#e55;font-family:monospace;font-size:14px;padding:24px;text-align:center">' +
-      '<div style="font-size:28px;margin-bottom:12px">⚠️</div>' +
-      'Failed to load SQL engine: ' + e.message + '</div>';
-  }
-}
-
-async function initAuth() {
-  try {
-    Auth.onAuthStateChange(async function(event, session) {
-      if (event === 'SIGNED_IN' && session && session.user) {
-        currentUser = session.user;
-        await loadUserProgress(currentUser.id);
-        updateAuthUI(currentUser);
-        closeAuthModal();
-      } else if (event === 'SIGNED_OUT') {
-        currentUser = null;
-        solvedSet   = new Set();
-        updateAuthUI(null);
-        updateProgress();
-        buildPills();
-      }
-    });
-
-    var sessionResult = await Auth.getSession();
-    var session = sessionResult.data && sessionResult.data.session;
-    if (session && session.user) {
-      currentUser = session.user;
-      await loadUserProgress(currentUser.id);
-      updateAuthUI(currentUser);
-    }
-  } catch(e) {
-    console.warn('Auth init failed:', e.message);
+      `<div style="color:#e55;font-family:monospace;font-size:14px;padding:24px;text-align:center">
+        <div style="font-size:24px;margin-bottom:12px">⚠️</div>
+        Failed to load: ${e.message}
+      </div>`;
   }
 }
 
 // ================================================================
-//  CODEMIRROR
+//  CODEMIRROR EDITOR
 // ================================================================
 function initEditor() {
   const textarea = document.getElementById('sqlEditor');
@@ -3762,10 +3737,9 @@ function initEditor() {
 //  AUTH UI
 // ================================================================
 function updateAuthUI(user) {
-  var loggedIn = !!user;
-  var meta     = (user && user.user_metadata) ? user.user_metadata : {};
-  var initials = loggedIn ? getInitials(meta.full_name || user.email) : '';
-  var name     = loggedIn ? (meta.full_name || user.email.split('@')[0]) : '';
+  const loggedIn = !!user;
+  const initials = loggedIn ? getInitials(user.user_metadata?.full_name || user.email) : '';
+  const name     = loggedIn ? (user.user_metadata?.full_name || user.email.split('@')[0]) : '';
 
   document.getElementById('landingNavAuth').style.display = loggedIn ? 'none' : 'flex';
   document.getElementById('landingNavUser').style.display = loggedIn ? 'flex' : 'none';
@@ -3773,6 +3747,7 @@ function updateAuthUI(user) {
     document.getElementById('landingUserAvatar').textContent = initials;
     document.getElementById('landingUserName').textContent   = name;
   }
+
   document.getElementById('appLoginBtn').style.display = loggedIn ? 'none' : 'flex';
   document.getElementById('appUser').style.display     = loggedIn ? 'flex' : 'none';
   if (loggedIn) {
@@ -3782,19 +3757,17 @@ function updateAuthUI(user) {
 }
 
 function getInitials(str) {
-  if (!str) return '?';
-  return str.split(/\s+/).map(function(w) { return w[0] || ''; }).join('').toUpperCase().slice(0, 2) || '?';
+  return str.split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
 }
 
 // ================================================================
 //  AUTH MODAL
 // ================================================================
-function openAuthModal(tab) {
-  tab = tab || 'login';
+function openAuthModal(tab = 'login') {
   switchTab(tab);
   document.getElementById('authModalOverlay').classList.add('open');
-  setTimeout(function() {
-    var el = tab === 'login'
+  setTimeout(() => {
+    const el = tab === 'login'
       ? document.getElementById('loginEmail')
       : document.getElementById('signupName');
     if (el) el.focus();
@@ -3824,8 +3797,8 @@ function clearAuthErrors() {
 }
 
 function setLoading(btnId, loading) {
-  var btn       = document.getElementById(btnId);
-  btn.disabled  = loading;
+  const btn = document.getElementById(btnId);
+  btn.disabled      = loading;
   btn.style.opacity = loading ? '0.6' : '1';
   btn.textContent   = loading ? 'Please wait...'
     : (btnId === 'loginBtn' ? 'Login →' : 'Create Account →');
@@ -3835,39 +3808,37 @@ function setLoading(btnId, loading) {
 //  LOGIN / SIGNUP / LOGOUT
 // ================================================================
 async function handleLogin() {
-  var errEl    = document.getElementById('loginError');
-  var email    = document.getElementById('loginEmail').value.trim();
-  var password = document.getElementById('loginPassword').value;
+  const errEl    = document.getElementById('loginError');
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
   if (!email || !password) { errEl.textContent = 'Please fill in all fields.'; return; }
   errEl.textContent = '';
   setLoading('loginBtn', true);
-  var result = await Auth.signInWithPassword({ email: email, password: password });
+  const result = await Auth.signInWithPassword({ email, password });
   setLoading('loginBtn', false);
   if (result.error) {
-    errEl.textContent = result.error.message;
+    errEl.textContent = result.error.message.includes('Invalid') ? 'Wrong email or password.' : result.error.message;
   }
-  // On success, onAuthStateChange handles closing modal and updating UI
+  // On success, onAuthStateChange fires and closes the modal + updates UI
 }
 
 async function handleSignup() {
-  var errEl    = document.getElementById('signupError');
-  var name     = document.getElementById('signupName').value.trim();
-  var email    = document.getElementById('signupEmail').value.trim();
-  var password = document.getElementById('signupPassword').value;
+  const errEl    = document.getElementById('signupError');
+  const name     = document.getElementById('signupName').value.trim();
+  const email    = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
   if (!name || !email || !password) { errEl.textContent = 'Please fill in all fields.'; return; }
-  if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  if (password.length < 6)          { errEl.textContent = 'Password must be at least 6 characters.'; return; }
   errEl.textContent = '';
   setLoading('signupBtn', true);
-  var result = await Auth.signUp({ email: email, password: password, options: { data: { full_name: name } } });
+  const result = await Auth.signUp({ email, password, options: { data: { full_name: name } } });
   setLoading('signupBtn', false);
   if (result.error) {
     errEl.textContent = result.error.message;
   } else if (result.data && result.data.session) {
-    // Logged in immediately (email confirmation disabled in Supabase)
     errEl.style.color = '#00c896';
     errEl.textContent = '✓ Account created! You are now logged in.';
   } else {
-    // Email confirmation required
     errEl.style.color = '#00c896';
     errEl.textContent = '✓ Account created! Check your email to confirm, then log in.';
   }
@@ -3882,64 +3853,67 @@ async function logoutUser() {
 // ================================================================
 async function loadUserProgress(userId) {
   try {
-    var result = await Auth.from('user_progress').select('question_id').eq('user_id', userId);
-    if (result.error) { console.error('Progress load error:', result.error); return; }
-    solvedSet = new Set((result.data || []).map(function(r) { return r.question_id; }));
+    const { data, error } = await Auth.from('user_progress').select('question_id,solved_at').eq('user_id', userId);
+    if (error) { console.error('Progress load error:', error); return; }
+    solvedSet   = new Set((data || []).map(r => r.question_id));
+    solvedAtMap = {};
+    (data || []).forEach(r => { solvedAtMap[r.question_id] = r.solved_at; });
     updateProgress();
     buildPills();
-  } catch(e) { console.warn('Progress load failed:', e.message); }
+  } catch(e) { console.warn('loadUserProgress failed:', e.message); }
 }
 
 async function saveUserProgress(questionId) {
   if (!currentUser) return;
   try {
-    var result = await Auth.from('user_progress').upsert(
-      { user_id: currentUser.id, question_id: questionId },
-      { onConflict: 'user_id,question_id' }
+    const { error } = await Auth.from('user_progress').upsert(
+      { user_id: currentUser.id, question_id: questionId, solved_at: new Date().toISOString() }
     );
-    if (result.error) console.error('Progress save error:', result.error);
-  } catch(e) { console.warn('Progress save failed:', e.message); }
+    if (error) console.error('Progress save error:', error);
+  } catch(e) { console.warn('saveUserProgress failed:', e.message); }
 }
 
 // ================================================================
 //  LANDING BUILDERS
 // ================================================================
 function updateHeroCount() {
-  var el = document.getElementById('heroStatCount');
+  const el = document.getElementById('heroStatCount');
   if (el) el.textContent = QUESTIONS.length;
 }
 
 function buildLandingCards() {
-  var wrap = document.getElementById('landingQCards');
+  const wrap = document.getElementById('landingQCards');
   if (!wrap) return;
   if (filteredQuestions.length === 0) {
     wrap.innerHTML = '<div class="empty-state">No questions found for this topic.</div>';
     return;
   }
-  wrap.innerHTML = filteredQuestions.map(function(q, i) {
-    return '<div class="q-card" onclick="showApp(' + i + ')">' +
-      '<div class="q-card-num">' + q.num + '</div>' +
-      '<div class="q-card-title">' + q.title + '</div>' +
-      '<div class="q-card-topic">' + q.tags.join(' · ') + '</div>' +
-      '<div class="badge ' + q.difficulty.toLowerCase() + '">' + q.difficulty + '</div>' +
-      '<div class="q-card-arrow">→</div>' +
-      '</div>';
-  }).join('');
+  wrap.innerHTML = filteredQuestions.map((q, i) => `
+    <div class="q-card" onclick="showApp(${i})">
+      <div class="q-card-num">${q.num}</div>
+      <div class="q-card-title">${q.title}</div>
+      <div class="q-card-topic">${q.tags.join(' · ')}</div>
+      <div class="badge ${q.difficulty.toLowerCase()}">${q.difficulty}</div>
+      <div class="q-card-arrow">→</div>
+    </div>
+  `).join('');
 }
 
 // ================================================================
 //  NAV PILLS
 // ================================================================
 function buildPills() {
-  var wrap = document.getElementById('qPillsWrap');
+  const wrap = document.getElementById('qPillsWrap');
   if (!wrap) return;
   wrap.innerHTML = '';
-  filteredQuestions.forEach(function(q, i) {
-    var btn = document.createElement('button');
-    btn.className   = 'q-pill' + (solvedSet.has(q.id) ? ' solved' : '') + (i === currentQ ? ' active' : '');
-    btn.id          = 'pill-' + i;
-    btn.textContent = q.num + '  ' + q.title;
-    btn.onclick     = function() { renderQuestion(i); };
+  filteredQuestions.forEach((q, i) => {
+    const btn = document.createElement('button');
+    btn.className   = 'q-pill'
+      + (solvedSet.has(q.id) ? ' solved' : '')
+      + (i === currentQ      ? ' active'  : '');
+    btn.id          = `pill-${i}`;
+    btn.textContent = `${q.num}  ${q.title}`;
+    btn.onclick     = () => renderQuestion(i);
     wrap.appendChild(btn);
   });
 }
@@ -3952,12 +3926,14 @@ function buildQuestionPills() { buildPills(); }
 function showLanding() {
   document.getElementById('landing-page').classList.add('active');
   document.getElementById('app-page').classList.remove('active');
+  document.getElementById('profile-page').classList.remove('active');
 }
 
 function showApp(qIdx) {
   if (qIdx !== undefined) currentQ = qIdx;
   document.getElementById('landing-page').classList.remove('active');
   document.getElementById('app-page').classList.add('active');
+  document.getElementById('profile-page').classList.remove('active');
   renderQuestion(currentQ);
 }
 
@@ -3973,17 +3949,20 @@ function scrollToQuestions() {
 //  TOPIC FILTERS
 // ================================================================
 function buildTopicFilters() {
-  var wrap = document.getElementById('topicFilters');
+  const wrap = document.getElementById('topicFilters');
   if (!wrap) return;
-  var allTags = ['ALL'].concat(Array.from(new Set(QUESTIONS.reduce(function(acc, q) { return acc.concat(q.tags || []); }, []))));
-  wrap.innerHTML = allTags.map(function(tag) {
-    return '<button class="topic-filter ' + (tag === activeTag ? 'active' : '') + '" onclick="filterQuestions(\'' + tag + '\')">' + tag + '</button>';
-  }).join('');
+  const allTags = ['ALL', ...new Set(QUESTIONS.flatMap(q => q.tags || []))];
+  wrap.innerHTML = allTags.map(tag => `
+    <button class="topic-filter ${tag === activeTag ? 'active' : ''}"
+            onclick="filterQuestions('${tag}')">
+      ${tag}
+    </button>
+  `).join('');
 }
 
 function filterQuestions(tag) {
   activeTag         = tag;
-  filteredQuestions = tag === 'ALL' ? QUESTIONS : QUESTIONS.filter(function(q) { return q.tags && q.tags.includes(tag); });
+  filteredQuestions = tag === 'ALL' ? QUESTIONS : QUESTIONS.filter(q => q.tags && q.tags.includes(tag));
   currentQ          = 0;
   buildTopicFilters();
   buildLandingCards();
@@ -3997,53 +3976,71 @@ function filterQuestions(tag) {
 function renderQuestion(idx) {
   if (idx === undefined) idx = currentQ;
   currentQ  = idx;
-  var q     = filteredQuestions[idx];
+  const q   = filteredQuestions[idx];
 
-  document.querySelectorAll('.q-pill').forEach(function(p, i) {
-    p.className = 'q-pill' +
-      (filteredQuestions[i] && solvedSet.has(filteredQuestions[i].id) ? ' solved' : '') +
-      (i === idx ? ' active' : '');
+  document.querySelectorAll('.q-pill').forEach((p, i) => {
+    p.className = 'q-pill'
+      + (solvedSet.has(filteredQuestions[i]?.id) ? ' solved' : '')
+      + (i === idx ? ' active' : '');
   });
 
-  var badge       = document.getElementById('diffBadge');
+  const badge       = document.getElementById('diffBadge');
   badge.textContent = q.difficulty;
-  badge.className   = 'diff-badge diff-' + q.difficulty.toLowerCase();
+  badge.className   = `diff-badge diff-${q.difficulty.toLowerCase()}`;
 
   if (editor) editor.setValue('');
-  document.getElementById('outputBody').innerHTML =
-    '<div class="empty-state"><div class="es-icon">◈</div>Run your query to see results</div>';
+  document.getElementById('outputBody').innerHTML = `
+    <div class="empty-state">
+      <div class="es-icon">◈</div>
+      Run your query to see results
+    </div>`;
   document.getElementById('outputStatus').textContent = '';
   document.getElementById('outputLabel').textContent  = 'Output';
   document.getElementById('tcWrap').style.display     = 'none';
   document.getElementById('solvedBanner').className   = 'solved-banner';
 
-  var schemaHTML = Object.entries(q.schema).map(function(entry) {
-    var tbl = entry[0]; var cols = entry[1];
-    return '<div class="schema-box"><div class="schema-header">⊞ ' + tbl + '</div>' +
-      '<table class="schema-tbl"><tr><th>Column</th><th>Type</th><th></th></tr>' +
-      cols.map(function(c) {
-        return '<tr><td>' + c.col + '</td><td class="col-type">' + c.type + '</td><td>' +
-          (c.note === 'pk' ? '<span class="col-pk">PK</span>' : '') + '</td></tr>';
-      }).join('') + '</table></div>';
-  }).join('');
+  const schemaHTML = Object.entries(q.schema).map(([tbl, cols]) => `
+    <div class="schema-box">
+      <div class="schema-header">⊞ ${tbl}</div>
+      <table class="schema-tbl">
+        <tr><th>Column</th><th>Type</th><th></th></tr>
+        ${cols.map(c => `
+          <tr>
+            <td>${c.col}</td>
+            <td class="col-type">${c.type}</td>
+            <td>${c.note === 'pk' ? '<span class="col-pk">PK</span>' : ''}</td>
+          </tr>`).join('')}
+      </table>
+    </div>`).join('');
 
-  var exHTML = '<div class="example-section"><div class="example-label">Expected output (sample data)</div>' +
-    '<div class="example-wrap"><table class="ex-table"><tr>' +
-    q.example.cols.map(function(c) { return '<th>' + c + '</th>'; }).join('') + '</tr>' +
-    q.example.rows.map(function(r) {
-      return '<tr>' + r.map(function(v) { return '<td>' + v + '</td>'; }).join('') + '</tr>';
-    }).join('') + '</table></div></div>';
+  const exHTML = `
+    <div class="example-section">
+      <div class="example-label">Expected output (sample data)</div>
+      <div class="example-wrap">
+        <table class="ex-table">
+          <tr>${q.example.cols.map(c => `<th>${c}</th>`).join('')}</tr>
+          ${q.example.rows.map(r => `<tr>${r.map(v => `<td>${v}</td>`).join('')}</tr>`).join('')}
+        </table>
+      </div>
+    </div>`;
 
-  var tagsHTML = q.tags.map(function(t) { return '<span class="prob-tag">' + t + '</span>'; }).join('');
+  const tagsHTML = q.tags.map(t => `<span class="prob-tag">${t}</span>`).join('');
 
-  document.getElementById('leftPanel').innerHTML =
-    '<div class="prob-header">' +
-    '<div class="prob-num">Problem ' + q.num + '</div>' +
-    '<div class="prob-title">' + q.title + '</div>' +
-    '<div class="prob-tags">' + tagsHTML + '</div></div>' +
-    '<div class="prob-body">' + q.desc + schemaHTML + exHTML +
-    '<div class="hint-wrap"><button class="hint-btn" onclick="toggleHint()">💡 Show hint</button>' +
-    '<div class="hint-text" id="hintText">' + q.hint + '</div></div></div>';
+  document.getElementById('leftPanel').innerHTML = `
+    <div class="prob-header">
+      <div class="prob-num">Problem ${q.num}</div>
+      <div class="prob-title">${q.title}</div>
+      <div class="prob-tags">${tagsHTML}</div>
+    </div>
+    <div class="prob-body">
+      ${q.desc}
+      ${schemaHTML}
+      ${exHTML}
+      <div class="hint-wrap">
+        <button class="hint-btn" onclick="toggleHint()">💡 Show hint</button>
+        <div class="hint-text" id="hintText">${q.hint}</div>
+      </div>
+    </div>`;
 }
 
 function toggleHint() {
@@ -4054,19 +4051,19 @@ function toggleHint() {
 //  SQL HELPERS
 // ================================================================
 function execQuery(seed, query) {
-  var db  = new SQL.Database();
+  const db  = new SQL.Database();
   db.run(seed);
-  var res = db.exec(query);
+  const res = db.exec(query);
   db.close();
   return res;
 }
 
 function toRows(result) {
   if (!result || result.length === 0) return [];
-  var columns = result[0].columns; var values = result[0].values;
-  return values.map(function(v) {
-    var obj = {};
-    columns.forEach(function(c, i) { obj[c] = v[i]; });
+  const { columns, values } = result[0];
+  return values.map(v => {
+    const obj = {};
+    columns.forEach((c, i) => obj[c] = v[i]);
     return obj;
   });
 }
@@ -4074,14 +4071,14 @@ function toRows(result) {
 function renderTable(result) {
   if (!result || result.length === 0)
     return '<div class="empty-state" style="padding:12px 0">Query returned 0 rows.</div>';
-  var columns = result[0].columns; var values = result[0].values;
-  var ths = columns.map(function(c) { return '<th>' + c + '</th>'; }).join('');
-  var trs = values.map(function(v) {
-    return '<tr>' + v.map(function(cell) {
-      return '<td>' + (cell === null ? '<em style="color:var(--hint)">NULL</em>' : cell) + '</td>';
-    }).join('') + '</tr>';
-  }).join('');
-  return '<div class="res-table-wrap"><table class="res-table"><tr>' + ths + '</tr>' + trs + '</table></div>';
+  const { columns, values } = result[0];
+  const ths = columns.map(c => `<th>${c}</th>`).join('');
+  const trs = values.map(v =>
+    `<tr>${v.map(cell =>
+      `<td>${cell === null ? '<em style="color:var(--hint)">NULL</em>' : cell}</td>`
+    ).join('')}</tr>`
+  ).join('');
+  return `<div class="res-table-wrap"><table class="res-table"><tr>${ths}</tr>${trs}</table></div>`;
 }
 
 // ================================================================
@@ -4089,16 +4086,18 @@ function renderTable(result) {
 // ================================================================
 function runQuery() {
   if (!SQL) { showOutputErr('SQL engine not ready yet.'); return; }
-  var query = editor.getValue().trim();
+  const query = editor.getValue().trim();
   if (!query) { showOutputErr('Write a SQL query first.'); return; }
-  var q = filteredQuestions[currentQ];
+
+  const q = filteredQuestions[currentQ];
   document.getElementById('outputLabel').textContent = 'Output';
   document.getElementById('tcWrap').style.display    = 'none';
+
   try {
-    var res    = execQuery(q.seed, query);
-    var count  = res[0] ? res[0].values.length : 0;
-    var status = document.getElementById('outputStatus');
-    status.textContent = count + ' row' + (count !== 1 ? 's' : '');
+    const res    = execQuery(q.seed, query);
+    const count  = res[0]?.values?.length ?? 0;
+    const status = document.getElementById('outputStatus');
+    status.textContent = `${count} row${count !== 1 ? 's' : ''}`;
     status.className   = 'output-status-text ost-ok';
     document.getElementById('outputBody').innerHTML = renderTable(res);
   } catch(e) {
@@ -4114,50 +4113,61 @@ function submitQuery() {
     openAuthModal('login');
     document.getElementById('outputLabel').textContent  = 'Login required';
     document.getElementById('outputStatus').textContent = '';
-    document.getElementById('outputBody').innerHTML =
-      '<div class="login-nudge">' +
-      '<div class="login-nudge-icon">🔒</div>' +
-      '<div class="login-nudge-title">Login to Submit</div>' +
-      '<div class="login-nudge-sub">Run is free for everyone. Login to submit and save your progress.</div>' +
-      '<button class="login-nudge-btn" onclick="openAuthModal(\'login\')">Login / Sign Up</button></div>';
+    document.getElementById('outputBody').innerHTML = `
+      <div class="login-nudge">
+        <div class="login-nudge-icon">🔒</div>
+        <div class="login-nudge-title">Login to Submit</div>
+        <div class="login-nudge-sub">Run is free for everyone. Login to submit and save your progress.</div>
+        <button class="login-nudge-btn" onclick="openAuthModal('login')">Login / Sign Up</button>
+      </div>`;
     return;
   }
+
   if (!SQL) return;
-  var query = editor.getValue().trim();
+  const query = editor.getValue().trim();
   if (!query) { showOutputErr('Write a SQL query first.'); return; }
-  var q = filteredQuestions[currentQ];
+
+  const q = filteredQuestions[currentQ];
   document.getElementById('outputLabel').textContent = 'Submission';
   document.getElementById('outputBody').innerHTML    = '';
-  var allPass = true;
-  var results = [];
-  q.testCases.forEach(function(tc) {
-    var seed = tc.seed || q.seed;
+
+  let allPass = true;
+  const results = [];
+
+  q.testCases.forEach(tc => {
+    const seed = tc.seed || q.seed;
     try {
-      var res  = execQuery(seed, query);
-      var rows = toRows(res);
-      var pass = tc.check(rows);
-      allPass  = allPass && pass;
-      results.push({ name: tc.name, pass: pass, err: null });
+      const res  = execQuery(seed, query);
+      const rows = toRows(res);
+      const pass = tc.check(rows);
+      allPass    = allPass && pass;
+      results.push({ name: tc.name, pass, err: null });
     } catch(e) {
       allPass = false;
       results.push({ name: tc.name, pass: false, err: e.message });
     }
   });
-  var passed   = results.filter(function(r) { return r.pass; }).length;
-  var statusEl = document.getElementById('outputStatus');
-  statusEl.textContent = passed + '/' + results.length + ' passed';
-  statusEl.className   = 'output-status-text ' + (allPass ? 'ost-pass' : 'ost-fail');
-  document.getElementById('tcList').innerHTML = results.map(function(r) {
-    return '<div class="tc-row"><div class="tc-dot ' + (r.pass ? 'pass' : 'fail') + '"></div>' +
-      '<div class="tc-name">' + r.name + '</div>' +
-      '<div class="tc-res ' + (r.pass ? 'pass' : 'fail') + '">' + (r.pass ? '✓ Passed' : (r.err ? '⚠ Error' : '✗ Failed')) + '</div></div>' +
-      (r.err ? '<div class="tc-err">' + r.err + '</div>' : '');
-  }).join('');
+
+  const passed   = results.filter(r => r.pass).length;
+  const statusEl = document.getElementById('outputStatus');
+  statusEl.textContent = `${passed}/${results.length} passed`;
+  statusEl.className   = `output-status-text ${allPass ? 'ost-pass' : 'ost-fail'}`;
+
+  document.getElementById('tcList').innerHTML = results.map(r => `
+    <div class="tc-row">
+      <div class="tc-dot ${r.pass ? 'pass' : 'fail'}"></div>
+      <div class="tc-name">${r.name}</div>
+      <div class="tc-res ${r.pass ? 'pass' : 'fail'}">${r.pass ? '✓ Passed' : (r.err ? '⚠ Error' : '✗ Failed')}</div>
+    </div>
+    ${r.err ? `<div class="tc-err">${r.err}</div>` : ''}
+  `).join('');
+
   document.getElementById('tcWrap').style.display = 'block';
+
   if (allPass) {
     solvedSet.add(q.id);
     document.getElementById('solvedBanner').className = 'solved-banner show';
-    var pill = document.getElementById('pill-' + currentQ);
+    const pill = document.getElementById(`pill-${currentQ}`);
     if (pill) pill.classList.add('solved');
     updateProgress();
     saveUserProgress(q.id);
@@ -4168,7 +4178,7 @@ function submitQuery() {
 //  UTILS
 // ================================================================
 function updateProgress() {
-  var pct = (solvedSet.size / QUESTIONS.length) * 100;
+  const pct = (solvedSet.size / QUESTIONS.length) * 100;
   document.getElementById('progressBar').style.width = pct + '%';
 }
 
@@ -4178,10 +4188,282 @@ function resetEditor() {
 
 function showOutputErr(msg) {
   document.getElementById('outputStatus').textContent = '';
-  document.getElementById('outputBody').innerHTML = '<div class="err-block">' + msg + '</div>';
+  document.getElementById('outputBody').innerHTML = `<div class="err-block">${msg}</div>`;
 }
 
 // ================================================================
 //  START
 // ================================================================
 init();
+
+// ================================================================
+//  PROFILE — NAVIGATION
+// ================================================================
+function showProfile() {
+  if (!currentUser) { openAuthModal('login'); return; }
+  // Remember where we came from
+  const landingActive = document.getElementById('landing-page').classList.contains('active');
+  prevPage = landingActive ? 'landing' : 'app';
+
+  document.getElementById('landing-page').classList.remove('active');
+  document.getElementById('app-page').classList.remove('active');
+  document.getElementById('profile-page').classList.add('active');
+
+  renderProfilePage();
+}
+
+function goBackFromProfile() {
+  document.getElementById('profile-page').classList.remove('active');
+  if (prevPage === 'app') {
+    document.getElementById('app-page').classList.add('active');
+  } else {
+    document.getElementById('landing-page').classList.add('active');
+  }
+}
+
+// ================================================================
+//  PROFILE — LOAD FROM SUPABASE
+// ================================================================
+async function loadUserProfile(userId) {
+  if (!userId) return;
+  try {
+    const { data, error } = await Auth.from('user_profiles').select('*').eq('id', userId).single();
+    if (error && error.code !== 'PGRST116') { console.error('Profile load error:', error); return; }
+    userProfile = data || null;
+  } catch(e) { console.warn('loadUserProfile failed:', e.message); }
+}
+
+// ================================================================
+//  PROFILE — SAVE TO SUPABASE
+// ================================================================
+async function saveProfile() {
+  if (!currentUser) return;
+
+  const displayName  = document.getElementById('pfDisplayName').value.trim();
+  const fullName     = document.getElementById('pfFullName').value.trim();
+  const qualification = document.getElementById('pfQualification').value.trim();
+  const linkedin     = document.getElementById('pfLinkedin').value.trim();
+  const resume       = document.getElementById('pfResume').value.trim();
+  const bio          = document.getElementById('pfBio').value.trim();
+  const errEl        = document.getElementById('profileSaveError');
+  const btn          = document.getElementById('profileSaveBtn');
+
+  // Validate URLs
+  if (linkedin && !isValidUrl(linkedin)) {
+    errEl.style.color = 'var(--red)';
+    errEl.textContent = 'LinkedIn URL is not valid.';
+    return;
+  }
+  if (resume && !isValidUrl(resume)) {
+    errEl.style.color = 'var(--red)';
+    errEl.textContent = 'Resume URL is not valid.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  errEl.textContent = '';
+
+  const profileData = {
+    id: currentUser.id,
+    full_name: fullName || null,
+    display_name: displayName || null,
+    qualification: qualification || null,
+    linkedin_url: linkedin || null,
+    resume_url: resume || null,
+    bio: bio || null,
+    updated_at: new Date().toISOString()
+  };
+
+  const { error } = await Auth.from('user_profiles').upsert(profileData);
+
+  btn.disabled = false;
+  btn.textContent = 'Save Changes';
+
+  if (error) {
+    errEl.style.color = 'var(--red)';
+    errEl.textContent = 'Save failed: ' + error.message;
+  } else {
+    userProfile = profileData;
+    errEl.style.color = '#00c896';
+    errEl.textContent = '✓ Profile saved!';
+    setTimeout(() => { if (errEl.textContent === '✓ Profile saved!') errEl.textContent = ''; }, 3000);
+    // Also update Supabase auth metadata for display name
+    if (fullName) {
+      await Auth.updateUser({ data: { full_name: fullName } });
+      if (!currentUser.user_metadata) currentUser.user_metadata = {};
+      currentUser.user_metadata.full_name = fullName;
+    }
+    // Refresh the profile card
+    renderProfileCard();
+  }
+}
+
+function isValidUrl(str) {
+  try { new URL(str); return true; } catch { return false; }
+}
+
+// ================================================================
+//  PROFILE — RENDER FULL PAGE
+// ================================================================
+function renderProfilePage() {
+  renderProfileCard();
+  renderProfileForm();
+  renderProfileStats();
+  renderProfileQList('all');
+}
+
+// ================================================================
+//  PROFILE — USER CARD (top left)
+// ================================================================
+function renderProfileCard() {
+  if (!currentUser) return;
+
+  const name     = userProfile?.display_name
+                || userProfile?.full_name
+                || currentUser.user_metadata?.full_name
+                || currentUser.email.split('@')[0];
+  const initials = getInitials(name);
+  const email    = currentUser.email;
+  const joined   = new Date(currentUser.created_at).toLocaleDateString('en-IN', {
+    year: 'numeric', month: 'long', day: 'numeric'
+  });
+
+  document.getElementById('profileAvatar').textContent      = initials;
+  document.getElementById('profileDisplayName').textContent = name;
+  document.getElementById('profileEmail').textContent       = email;
+  document.getElementById('profileJoined').textContent      = 'Joined ' + joined;
+
+  // Show links if available
+  let linksHTML = '';
+  if (userProfile?.linkedin_url) {
+    linksHTML += `<a class="profile-link-btn" href="${userProfile.linkedin_url}" target="_blank" rel="noopener">🔗 LinkedIn</a>`;
+  }
+  if (userProfile?.resume_url) {
+    linksHTML += `<a class="profile-link-btn" href="${userProfile.resume_url}" target="_blank" rel="noopener">📄 Resume</a>`;
+  }
+  if (linksHTML) {
+    // Append links below email if not already there
+    const cardInfo = document.getElementById('profileJoined').parentElement;
+    const existing = cardInfo.querySelector('.profile-links');
+    if (existing) existing.remove();
+    const linksDiv = document.createElement('div');
+    linksDiv.className = 'profile-links';
+    linksDiv.innerHTML = linksHTML;
+    cardInfo.appendChild(linksDiv);
+  }
+
+  // Show bio if available
+  if (userProfile?.bio) {
+    const card = document.getElementById('profileAvatar').parentElement;
+    const existing = card.querySelector('.profile-bio-text');
+    if (existing) existing.remove();
+    const bioEl = document.createElement('div');
+    bioEl.className = 'profile-bio-text';
+    bioEl.style.cssText = 'width:100%;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);line-height:1.7;';
+    bioEl.textContent = userProfile.bio;
+    card.style.flexWrap = 'wrap';
+    card.appendChild(bioEl);
+  }
+}
+
+// ================================================================
+//  PROFILE — EDIT FORM (pre-fill)
+// ================================================================
+function renderProfileForm() {
+  document.getElementById('pfDisplayName').value  = userProfile?.display_name  || '';
+  document.getElementById('pfFullName').value     = userProfile?.full_name
+    || currentUser?.user_metadata?.full_name || '';
+  document.getElementById('pfQualification').value = userProfile?.qualification || '';
+  document.getElementById('pfLinkedin').value     = userProfile?.linkedin_url  || '';
+  document.getElementById('pfResume').value       = userProfile?.resume_url    || '';
+  document.getElementById('pfBio').value          = userProfile?.bio           || '';
+  document.getElementById('profileSaveError').textContent = '';
+}
+
+// ================================================================
+//  PROFILE — STATS
+// ================================================================
+function renderProfileStats() {
+  const total   = QUESTIONS.length;
+  const solved  = solvedSet.size;
+  const pct     = total > 0 ? Math.round((solved / total) * 100) : 0;
+
+  const easySolved   = QUESTIONS.filter(q => q.difficulty === 'Easy'   && solvedSet.has(q.id)).length;
+  const mediumSolved = QUESTIONS.filter(q => q.difficulty === 'Medium' && solvedSet.has(q.id)).length;
+  const hardSolved   = QUESTIONS.filter(q => q.difficulty === 'Hard'   && solvedSet.has(q.id)).length;
+
+  document.getElementById('statSolved').textContent  = solved;
+  document.getElementById('statTotal').textContent   = total;
+  document.getElementById('statPercent').textContent = pct + '%';
+  document.getElementById('statEasy').textContent    = easySolved;
+  document.getElementById('statMedium').textContent  = mediumSolved;
+  document.getElementById('statHard').textContent    = hardSolved;
+
+  document.getElementById('profileProgressFill').style.width = pct + '%';
+  document.getElementById('profileProgressLabel').textContent =
+    `${solved} of ${total} problems solved (${pct}%)`;
+}
+
+// ================================================================
+//  PROFILE — QUESTION LIST
+// ================================================================
+function filterProfileQ(filter) {
+  profileQFilter = filter;
+  ['filterAll', 'filterSolved', 'filterUnsolved'].forEach(id => {
+    document.getElementById(id).classList.remove('active');
+  });
+  const map = { all: 'filterAll', solved: 'filterSolved', unsolved: 'filterUnsolved' };
+  document.getElementById(map[filter]).classList.add('active');
+  renderProfileQList(filter);
+}
+
+function renderProfileQList(filter) {
+  const wrap = document.getElementById('profileQList');
+  if (!wrap) return;
+
+  let qs = QUESTIONS;
+  if (filter === 'solved')   qs = QUESTIONS.filter(q => solvedSet.has(q.id));
+  if (filter === 'unsolved') qs = QUESTIONS.filter(q => !solvedSet.has(q.id));
+
+  if (qs.length === 0) {
+    wrap.innerHTML = `<div class="profile-q-empty">
+      <div class="es-icon">${filter === 'solved' ? '🎯' : '○'}</div>
+      ${filter === 'solved' ? 'No questions solved yet. Start practicing!' : 'All questions solved! 🎉'}
+    </div>`;
+    return;
+  }
+
+  wrap.innerHTML = qs.map(q => {
+    const isSolved  = solvedSet.has(q.id);
+    const solvedAt  = solvedAtMap[q.id]
+      ? new Date(solvedAtMap[q.id]).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })
+      : '';
+    const diffClass = q.difficulty.toLowerCase();
+
+    return `<div class="profile-q-row" onclick="goToProblem(${q.id})">
+      <div class="profile-q-status ${isSolved ? 'solved' : 'unsolved'}">${isSolved ? '✓' : ''}</div>
+      <div class="profile-q-num">${q.num}</div>
+      <div class="profile-q-title">${q.title}</div>
+      <div class="profile-q-tags">${q.tags.slice(0,2).join(' · ')}</div>
+      <div class="badge ${diffClass}" style="font-size:10px;padding:2px 8px">${q.difficulty}</div>
+      ${isSolved && solvedAt ? `<div class="profile-q-solved-at">${solvedAt}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ================================================================
+//  PROFILE — GO TO PROBLEM (from profile list)
+// ================================================================
+function goToProblem(questionId) {
+  const idx = QUESTIONS.findIndex(q => q.id === questionId);
+  if (idx === -1) return;
+  // Reset filteredQuestions to ALL so the question is visible
+  filteredQuestions = QUESTIONS;
+  activeTag = 'ALL';
+  currentQ  = idx;
+  document.getElementById('profile-page').classList.remove('active');
+  document.getElementById('app-page').classList.add('active');
+  buildPills();
+  renderQuestion(idx);
+}
