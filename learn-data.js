@@ -29,7 +29,7 @@ var LEARN_DATA = [
     ]
   },
   {
-    id: 'mod3', icon: '🗄️', title: 'Database & Table Basics',
+    id: 'mod3', icon: '📖', title: 'Database & Table Basics',
     topics: [
       { id: 'mod3-t1', title: 'CREATE DATABASE' },
       { id: 'mod3-t2', title: 'DROP DATABASE' },
@@ -42,7 +42,7 @@ var LEARN_DATA = [
     ]
   },
   {
-    id: 'mod4', icon: '🔍', title: 'Querying Data (SELECT)',
+    id: 'mod4', icon: '📖', title: 'Querying Data (SELECT)',
     topics: [
       { id: 'mod4-t1',  title: 'SELECT Statement' },
       { id: 'mod4-t2',  title: 'WHERE Clause' },
@@ -59,7 +59,7 @@ var LEARN_DATA = [
     ]
   },
   {
-    id: 'mod5', icon: '✏️', title: 'Modifying Data',
+    id: 'mod5', icon: '📖', title: 'Modifying Data',
     topics: [
       { id: 'mod5-t1', title: 'INSERT INTO' },
       { id: 'mod5-t2', title: 'UPDATE' },
@@ -68,7 +68,7 @@ var LEARN_DATA = [
     ]
   },
   {
-    id: 'mod6', icon: '📊', title: 'Aggregate Functions',
+    id: 'mod6', icon: '📖', title: 'Aggregate Functions',
     topics: [
       { id: 'mod6-t1', title: 'COUNT()' },
       { id: 'mod6-t2', title: 'SUM()' },
@@ -82,7 +82,7 @@ var LEARN_DATA = [
     ]
   },
   {
-    id: 'mod7', icon: '🔗', title: 'Joins',
+    id: 'mod7', icon: '📖', title: 'Joins',
     topics: [
       { id: 'mod7-t1', title: 'What are Joins?' },
       { id: 'mod7-t2', title: 'INNER JOIN' },
@@ -96,7 +96,7 @@ var LEARN_DATA = [
     ]
   },
   {
-    id: 'mod8', icon: '🔄', title: 'Subqueries',
+    id: 'mod8', icon: '📖', title: 'Subqueries',
     topics: [
       { id: 'mod8-t1', title: 'What is a Subquery?' },
       { id: 'mod8-t2', title: 'Subquery in WHERE' },
@@ -108,7 +108,7 @@ var LEARN_DATA = [
     ]
   },
   {
-    id: 'mod9', icon: '🧩', title: 'CTEs & Advanced Queries',
+    id: 'mod9', icon: '📖', title: 'CTEs & Advanced Queries',
     topics: [
       { id: 'mod9-t1', title: 'Common Table Expressions (CTEs)' },
       { id: 'mod9-t2', title: 'Recursive CTEs' },
@@ -117,7 +117,7 @@ var LEARN_DATA = [
     ]
   },
   {
-    id: 'mod10', icon: '🪟', title: 'Window Functions',
+    id: 'mod10', icon: '📖', title: 'Window Functions',
     topics: [
       { id: 'mod10-t1',  title: 'Introduction to Window Functions' },
       { id: 'mod10-t2',  title: 'OVER() Clause' },
@@ -132,7 +132,7 @@ var LEARN_DATA = [
     ]
   },
   {
-    id: 'mod11', icon: '🔡', title: 'String & Date Functions',
+    id: 'mod11', icon: '📖', title: 'String & Date Functions',
     topics: [
       { id: 'mod11-t1', title: 'Common String Functions Overview' },
       { id: 'mod11-t2', title: 'CONCAT, LENGTH, UPPER, LOWER' },
@@ -143,7 +143,7 @@ var LEARN_DATA = [
     ]
   },
   {
-    id: 'mod12', icon: '⚙️', title: 'Stored Procedures & Functions',
+    id: 'mod12', icon: '📖', title: 'Stored Procedures & Functions',
     topics: [
       { id: 'mod12-t1', title: 'What are Stored Procedures?' },
       { id: 'mod12-t2', title: 'Creating a Stored Procedure' },
@@ -155,7 +155,7 @@ var LEARN_DATA = [
     ]
   },
   {
-    id: 'mod13', icon: '⚡', title: 'Indexes & Performance',
+    id: 'mod13', icon: '📖', title: 'Indexes & Performance',
     topics: [
       { id: 'mod13-t1', title: 'What is an Index?' },
       { id: 'mod13-t2', title: 'Clustered vs Non-Clustered Index' },
@@ -166,7 +166,7 @@ var LEARN_DATA = [
     ]
   },
   {
-    id: 'mod14', icon: '🔒', title: 'Transactions & ACID',
+    id: 'mod14', icon: '📖', title: 'Transactions & ACID',
     topics: [
       { id: 'mod14-t1', title: 'What is a Transaction?' },
       { id: 'mod14-t2', title: 'ACID Properties' },
@@ -177,7 +177,7 @@ var LEARN_DATA = [
     ]
   },
   {
-    id: 'mod15', icon: '📐', title: 'Database Design',
+    id: 'mod15', icon: '📖', title: 'Database Design',
     topics: [
       { id: 'mod15-t1', title: 'Entity-Relationship (ER) Model' },
       { id: 'mod15-t2', title: 'Normalization (1NF, 2NF, 3NF)' },
@@ -188,7 +188,7 @@ var LEARN_DATA = [
     ]
   },
   {
-    id: 'mod16', icon: '🎯', title: 'Interview Prep',
+    id: 'mod16', icon: '📖', title: 'Interview Prep',
     topics: [
       { id: 'mod16-t1', title: 'Top SQL Interview Questions' },
       { id: 'mod16-t2', title: 'Window Functions Interview Q&A' },
