@@ -3526,12 +3526,133 @@ INSERT INTO employees VALUES
 //  ENGINE — do not edit below unless you know what you're doing
 // ================================================================
 
-let SQL = null;
-let currentQ = 0;
+// ── SUPABASE CONFIG ───────────────────────────────────────────────
+const SUPABASE_URL  = 'https://wyxutuqckkdkraawyxff.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5eHV0dXFja2tka3JhYXd5eGZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMzQ3NzksImV4cCI6MjA5MzcxMDc3OX0.ale0hHkE36PPQwKiqo5ViS3bi28krpU8gHXiWCKyLAU';
+
+// ── AUTH CLIENT — pure fetch(), zero CDN dependency ───────────────
+var Auth = (function () {
+  var A   = SUPABASE_URL + '/auth/v1';
+  var DB  = SUPABASE_URL + '/rest/v1';
+  var KEY = 'msql_sess';
+  var _listeners = [];
+
+  function bh()        { return { 'Content-Type':'application/json', 'apikey': SUPABASE_ANON }; }
+  function ah(tok)     { return Object.assign(bh(), { 'Authorization':'Bearer '+tok }); }
+  function save(s)     { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch(e){} }
+  function clear()     { try { localStorage.removeItem(KEY); } catch(e){} }
+  function read()      { try { var s=localStorage.getItem(KEY); return s?JSON.parse(s):null; } catch(e){return null;} }
+  function emit(ev, s) { _listeners.forEach(function(cb){ try{cb(ev,s);}catch(e){} }); }
+
+  function refresh(sess) {
+    if (!sess || !sess.access_token) return Promise.resolve(null);
+    if (Date.now()/1000 < (sess.expires_at||0) - 60) return Promise.resolve(sess);
+    if (!sess.refresh_token) { clear(); return Promise.resolve(null); }
+    return fetch(A+'/token?grant_type=refresh_token', {
+      method:'POST', headers:bh(), body:JSON.stringify({refresh_token:sess.refresh_token})
+    }).then(function(r){return r.json();}).then(function(d){
+      if (!d.access_token){ clear(); return null; }
+      d.expires_at = Math.floor(Date.now()/1000)+(d.expires_in||3600);
+      save(d); return d;
+    }).catch(function(){ return sess; });
+  }
+
+  function fromTable(table) {
+    var sess  = read();
+    var tok   = sess && sess.access_token ? sess.access_token : SUPABASE_ANON;
+    var cols  = '*';
+    var filts = [];
+    var isSingle = false;
+    var q = {
+      select: function(c){ cols=c||'*'; return q; },
+      eq:     function(col,val){ filts.push(col+'=eq.'+encodeURIComponent(val)); return q; },
+      single: function(){ isSingle=true; return q; },
+      then: function(res, rej) {
+        var url = DB+'/'+table+'?select='+cols+(filts.length?'&'+filts.join('&'):'');
+        var hdrs = ah(tok);
+        if (isSingle) hdrs['Accept'] = 'application/vnd.pgrst.object+json';
+        return fetch(url, {headers:hdrs})
+          .then(function(r){return r.json();})
+          .then(function(d){
+            if (isSingle) {
+              res(d && !d.code ? {data:d, error:null} : {data:null, error:d});
+            } else {
+              res(Array.isArray(d) ? {data:d,error:null} : {data:[],error:d});
+            }
+          }).catch(rej);
+      },
+      upsert: function(body) {
+        return fetch(DB+'/'+table, {
+          method:'POST',
+          headers: Object.assign(ah(tok), {'Prefer':'resolution=merge-duplicates,return=minimal'}),
+          body: JSON.stringify(body)
+        }).then(function(r){
+          return r.ok ? {data:body,error:null} : r.json().then(function(e){return {data:null,error:e};});
+        }).catch(function(e){return {data:null,error:{message:e.message}};});
+      }
+    };
+    return q;
+  }
+
+  return {
+    getSession: function() {
+      return refresh(read()).then(function(s){ return {data:{session:s},error:null}; });
+    },
+    onAuthStateChange: function(cb) { _listeners.push(cb); },
+    signInWithPassword: function(creds) {
+      return fetch(A+'/token?grant_type=password', {
+        method:'POST', headers:bh(),
+        body:JSON.stringify({email:creds.email, password:creds.password})
+      }).then(function(r){return r.json();}).then(function(d){
+        if (!d.access_token) return {data:null, error:{message:d.error_description||d.msg||'Login failed.'}};
+        d.expires_at = Math.floor(Date.now()/1000)+(d.expires_in||3600);
+        save(d); emit('SIGNED_IN', d);
+        return {data:{session:d}, error:null};
+      }).catch(function(){ return {data:null,error:{message:'Network error — check your connection.'}}; });
+    },
+    signUp: function(creds) {
+      var body = {email:creds.email, password:creds.password};
+      if (creds.options && creds.options.data) body.data = creds.options.data;
+      return fetch(A+'/signup', {method:'POST',headers:bh(),body:JSON.stringify(body)})
+        .then(function(r){return r.json();}).then(function(d){
+          if (d.error||d.msg) return {data:null,error:{message:d.error_description||d.msg||'Signup failed.'}};
+          if (d.access_token){
+            d.expires_at=Math.floor(Date.now()/1000)+(d.expires_in||3600);
+            save(d); emit('SIGNED_IN',d);
+            return {data:{session:d},error:null};
+          }
+          return {data:{session:null},error:null};
+        }).catch(function(){ return {data:null,error:{message:'Network error — check your connection.'}}; });
+    },
+    signOut: function() {
+      var s=read(); clear(); emit('SIGNED_OUT',null);
+      if (s && s.access_token)
+        fetch(A+'/logout',{method:'POST',headers:ah(s.access_token)}).catch(function(){});
+      return Promise.resolve({error:null});
+    },
+    updateUser: function(payload) {
+      var s=read(); if (!s||!s.access_token) return Promise.resolve({error:{message:'Not logged in'}});
+      return fetch(A+'/user',{method:'PUT',headers:ah(s.access_token),body:JSON.stringify(payload)})
+        .then(function(r){return r.json();})
+        .then(function(d){ return d.id ? {data:{user:d},error:null} : {data:null,error:d}; })
+        .catch(function(e){return {error:{message:e.message}};});
+    },
+    from: fromTable
+  };
+})();
+
+// ── STATE ─────────────────────────────────────────────────────────
+let SQL               = null;
+let currentQ          = 0;
 let filteredQuestions = QUESTIONS;
-let activeTag = "ALL";
-let solvedSet = new Set();
-let editor = null;
+let activeTag         = "ALL";
+let solvedSet         = new Set();
+let solvedAtMap       = {};
+let editor            = null;
+let currentUser       = null;
+let userProfile       = null;
+let profileQFilter    = 'all';
+let prevPage          = 'landing';
 
 // ── INIT ─────────────────────────────────────────────────────────
 async function init() {
@@ -3539,6 +3660,36 @@ async function init() {
     SQL = await initSqlJs({
       locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}`
     });
+
+    // Auth runs in background — never blocks site from appearing
+    Auth.onAuthStateChange(async function(event, session) {
+      if (event === 'SIGNED_IN' && session && session.user) {
+        currentUser = session.user;
+        await loadUserProgress(currentUser.id);
+        await loadUserProfile(currentUser.id);
+        updateAuthUI(currentUser);
+        closeAuthModal();
+      } else if (event === 'SIGNED_OUT') {
+        currentUser = null;
+        userProfile  = null;
+        solvedSet    = new Set();
+        solvedAtMap  = {};
+        updateAuthUI(null);
+        updateProgress();
+        buildPills();
+      }
+    });
+
+    Auth.getSession().then(async function(res) {
+      var session = res.data && res.data.session;
+      if (session && session.user) {
+        currentUser = session.user;
+        await loadUserProgress(currentUser.id);
+        await loadUserProfile(currentUser.id);
+        updateAuthUI(currentUser);
+      }
+    }).catch(function(e) { console.warn('Auth session check failed:', e.message); });
+
     document.getElementById('loadingScreen').style.display = 'none';
     buildPills();
     buildTopicFilters();
@@ -3546,9 +3697,11 @@ async function init() {
     updateHeroCount();
     showLanding();
     initEditor();
+
   } catch(e) {
     document.getElementById('loadingScreen').innerHTML =
-      `<div style="color:#e55;font-family:monospace;font-size:14px;padding:24px">
+      `<div style="color:#e55;font-family:monospace;font-size:14px;padding:24px;text-align:center">
+        <div style="font-size:24px;margin-bottom:12px">⚠️</div>
         Failed to load SQL engine: ${e.message}
       </div>`;
   }
@@ -3621,14 +3774,314 @@ function buildPills() {
   });
 }
 
+// ── AUTH UI ───────────────────────────────────────────────────────
+function updateAuthUI(user) {
+  const loggedIn = !!user;
+  const initials = loggedIn ? getInitials(user.user_metadata?.full_name || user.email) : '';
+  const name     = loggedIn ? (user.user_metadata?.full_name || user.email.split('@')[0]) : '';
+
+  document.getElementById('landingNavAuth').style.display = loggedIn ? 'none' : 'flex';
+  document.getElementById('landingNavUser').style.display = loggedIn ? 'flex' : 'none';
+  if (loggedIn) {
+    document.getElementById('landingUserAvatar').textContent = initials;
+    document.getElementById('landingUserName').textContent   = name;
+  }
+
+  document.getElementById('appLoginBtn').style.display = loggedIn ? 'none' : 'flex';
+  document.getElementById('appUser').style.display     = loggedIn ? 'flex' : 'none';
+  if (loggedIn) {
+    document.getElementById('appUserAvatar').textContent = initials;
+    document.getElementById('appUserName').textContent   = name;
+  }
+}
+
+function getInitials(str) {
+  return str.split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
+// ── AUTH MODAL ────────────────────────────────────────────────────
+function openAuthModal(tab = 'login') {
+  switchTab(tab);
+  document.getElementById('authModalOverlay').classList.add('open');
+  setTimeout(() => {
+    const el = tab === 'login'
+      ? document.getElementById('loginEmail')
+      : document.getElementById('signupName');
+    if (el) el.focus();
+  }, 120);
+}
+
+function closeAuthModal() {
+  document.getElementById('authModalOverlay').classList.remove('open');
+  clearAuthErrors();
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('authModalOverlay')) closeAuthModal();
+}
+
+function switchTab(tab) {
+  document.getElementById('formLogin').style.display  = tab === 'login'  ? 'block' : 'none';
+  document.getElementById('formSignup').style.display = tab === 'signup' ? 'block' : 'none';
+  document.getElementById('tabLogin').classList.toggle('active',  tab === 'login');
+  document.getElementById('tabSignup').classList.toggle('active', tab === 'signup');
+  clearAuthErrors();
+}
+
+function clearAuthErrors() {
+  document.getElementById('loginError').textContent  = '';
+  document.getElementById('signupError').textContent = '';
+}
+
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  btn.disabled      = loading;
+  btn.style.opacity = loading ? '0.6' : '1';
+  btn.textContent   = loading ? 'Please wait...'
+    : (btnId === 'loginBtn' ? 'Login →' : 'Create Account →');
+}
+
+// ── LOGIN / SIGNUP / LOGOUT ───────────────────────────────────────
+async function handleLogin() {
+  const errEl    = document.getElementById('loginError');
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !password) { errEl.textContent = 'Please fill in all fields.'; return; }
+  errEl.textContent = '';
+  setLoading('loginBtn', true);
+  const result = await Auth.signInWithPassword({ email, password });
+  setLoading('loginBtn', false);
+  if (result.error) {
+    errEl.textContent = result.error.message.includes('Invalid') ? 'Wrong email or password.' : result.error.message;
+  }
+}
+
+async function handleSignup() {
+  const errEl    = document.getElementById('signupError');
+  const name     = document.getElementById('signupName').value.trim();
+  const email    = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  if (!name || !email || !password) { errEl.textContent = 'Please fill in all fields.'; return; }
+  if (password.length < 6)          { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  errEl.textContent = '';
+  setLoading('signupBtn', true);
+  const result = await Auth.signUp({ email, password, options: { data: { full_name: name } } });
+  setLoading('signupBtn', false);
+  if (result.error) {
+    errEl.textContent = result.error.message;
+  } else if (result.data && result.data.session) {
+    errEl.style.color = '#00c896';
+    errEl.textContent = '✓ Account created! You are now logged in.';
+  } else {
+    errEl.style.color = '#00c896';
+    errEl.textContent = '✓ Account created! Check your email to confirm, then log in.';
+  }
+}
+
+async function logoutUser() {
+  await Auth.signOut();
+}
+
+// ── USER PROGRESS ─────────────────────────────────────────────────
+async function loadUserProgress(userId) {
+  try {
+    const { data, error } = await Auth.from('user_progress').select('question_id,solved_at').eq('user_id', userId);
+    if (error) { console.error('Progress load error:', error); return; }
+    solvedSet   = new Set((data || []).map(r => r.question_id));
+    solvedAtMap = {};
+    (data || []).forEach(r => { solvedAtMap[r.question_id] = r.solved_at; });
+    updateProgress();
+    buildPills();
+  } catch(e) { console.warn('loadUserProgress failed:', e.message); }
+}
+
+async function saveUserProgress(questionId) {
+  if (!currentUser) return;
+  try {
+    const { error } = await Auth.from('user_progress').upsert(
+      { user_id: currentUser.id, question_id: questionId, solved_at: new Date().toISOString() }
+    );
+    if (error) console.error('Progress save error:', error);
+  } catch(e) { console.warn('saveUserProgress failed:', e.message); }
+}
+
+// ── USER PROFILE ──────────────────────────────────────────────────
+async function loadUserProfile(userId) {
+  if (!userId) return;
+  try {
+    const { data, error } = await Auth.from('user_profiles').select('*').eq('id', userId).single();
+    if (error && error.code !== 'PGRST116') { console.error('Profile load error:', error); return; }
+    userProfile = data || null;
+  } catch(e) { console.warn('loadUserProfile failed:', e.message); }
+}
+
+async function saveProfile() {
+  if (!currentUser) return;
+  const displayName   = document.getElementById('pfDisplayName').value.trim();
+  const fullName      = document.getElementById('pfFullName').value.trim();
+  const qualification = document.getElementById('pfQualification').value.trim();
+  const linkedin      = document.getElementById('pfLinkedin').value.trim();
+  const resume        = document.getElementById('pfResume').value.trim();
+  const bio           = document.getElementById('pfBio').value.trim();
+  const errEl         = document.getElementById('profileSaveError');
+  const btn           = document.getElementById('profileSaveBtn');
+
+  if (linkedin && !isValidUrl(linkedin)) { errEl.style.color='var(--red)'; errEl.textContent='LinkedIn URL is not valid.'; return; }
+  if (resume  && !isValidUrl(resume))   { errEl.style.color='var(--red)'; errEl.textContent='Resume URL is not valid.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Saving...'; errEl.textContent = '';
+
+  const profileData = {
+    id: currentUser.id,
+    full_name: fullName || null,
+    display_name: displayName || null,
+    qualification: qualification || null,
+    linkedin_url: linkedin || null,
+    resume_url: resume || null,
+    bio: bio || null,
+    updated_at: new Date().toISOString()
+  };
+
+  const { error } = await Auth.from('user_profiles').upsert(profileData);
+  btn.disabled = false; btn.textContent = 'Save Changes';
+
+  if (error) {
+    errEl.style.color = 'var(--red)';
+    errEl.textContent = 'Save failed: ' + error.message;
+  } else {
+    userProfile = profileData;
+    errEl.style.color = '#00c896';
+    errEl.textContent = '✓ Profile saved!';
+    setTimeout(() => { if (errEl.textContent === '✓ Profile saved!') errEl.textContent = ''; }, 3000);
+    if (fullName) {
+      await Auth.updateUser({ data: { full_name: fullName } });
+      if (!currentUser.user_metadata) currentUser.user_metadata = {};
+      currentUser.user_metadata.full_name = fullName;
+      updateAuthUI(currentUser);
+    }
+    renderProfileCard();
+  }
+}
+
+function isValidUrl(str) {
+  try { new URL(str); return true; } catch { return false; }
+}
+
+// ── PROFILE PAGE RENDER ───────────────────────────────────────────
+function renderProfilePage() {
+  renderProfileCard();
+  renderProfileForm();
+  renderProfileStats();
+  renderProfileQList('all');
+}
+
+function renderProfileCard() {
+  if (!currentUser) return;
+  const name     = userProfile?.display_name || userProfile?.full_name
+                || currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+  const initials = getInitials(name);
+  const joined   = new Date(currentUser.created_at).toLocaleDateString('en-IN', { year:'numeric', month:'long', day:'numeric' });
+
+  document.getElementById('profileAvatar').textContent      = initials;
+  document.getElementById('profileDisplayName').textContent = name;
+  document.getElementById('profileEmail').textContent       = currentUser.email;
+  document.getElementById('profileJoined').textContent      = 'Joined ' + joined;
+
+  let linksHTML = '';
+  if (userProfile?.linkedin_url) linksHTML += `<a class="profile-link-btn" href="${userProfile.linkedin_url}" target="_blank" rel="noopener">🔗 LinkedIn</a>`;
+  if (userProfile?.resume_url)   linksHTML += `<a class="profile-link-btn" href="${userProfile.resume_url}" target="_blank" rel="noopener">📄 Resume</a>`;
+  if (linksHTML) {
+    const cardInfo = document.getElementById('profileJoined').parentElement;
+    const existing = cardInfo.querySelector('.profile-links');
+    if (existing) existing.remove();
+    const linksDiv = document.createElement('div');
+    linksDiv.className = 'profile-links';
+    linksDiv.innerHTML = linksHTML;
+    cardInfo.appendChild(linksDiv);
+  }
+}
+
+function renderProfileForm() {
+  document.getElementById('pfDisplayName').value   = userProfile?.display_name || '';
+  document.getElementById('pfFullName').value      = userProfile?.full_name || currentUser?.user_metadata?.full_name || '';
+  document.getElementById('pfQualification').value = userProfile?.qualification || '';
+  document.getElementById('pfLinkedin').value      = userProfile?.linkedin_url || '';
+  document.getElementById('pfResume').value        = userProfile?.resume_url || '';
+  document.getElementById('pfBio').value           = userProfile?.bio || '';
+  document.getElementById('profileSaveError').textContent = '';
+}
+
+function renderProfileStats() {
+  const total  = QUESTIONS.length;
+  const solved = solvedSet.size;
+  const pct    = total > 0 ? Math.round((solved / total) * 100) : 0;
+  const easySolved   = QUESTIONS.filter(q => q.difficulty === 'Easy'   && solvedSet.has(q.id)).length;
+  const mediumSolved = QUESTIONS.filter(q => q.difficulty === 'Medium' && solvedSet.has(q.id)).length;
+  const hardSolved   = QUESTIONS.filter(q => q.difficulty === 'Hard'   && solvedSet.has(q.id)).length;
+
+  document.getElementById('statSolved').textContent  = solved;
+  document.getElementById('statTotal').textContent   = total;
+  document.getElementById('statPercent').textContent = pct + '%';
+  document.getElementById('statEasy').textContent    = easySolved;
+  document.getElementById('statMedium').textContent  = mediumSolved;
+  document.getElementById('statHard').textContent    = hardSolved;
+  document.getElementById('profileProgressFill').style.width = pct + '%';
+  document.getElementById('profileProgressLabel').textContent = `${solved} of ${total} problems solved (${pct}%)`;
+}
+
+function filterProfileQ(filter) {
+  profileQFilter = filter;
+  ['filterAll','filterSolved','filterUnsolved'].forEach(id => document.getElementById(id).classList.remove('active'));
+  const map = { all:'filterAll', solved:'filterSolved', unsolved:'filterUnsolved' };
+  document.getElementById(map[filter]).classList.add('active');
+  renderProfileQList(filter);
+}
+
+function renderProfileQList(filter) {
+  const wrap = document.getElementById('profileQList');
+  if (!wrap) return;
+  let qs = QUESTIONS;
+  if (filter === 'solved')   qs = QUESTIONS.filter(q => solvedSet.has(q.id));
+  if (filter === 'unsolved') qs = QUESTIONS.filter(q => !solvedSet.has(q.id));
+
+  if (qs.length === 0) {
+    wrap.innerHTML = `<div class="profile-q-empty"><div class="es-icon">${filter==='solved'?'🎯':'○'}</div>${filter==='solved'?'No questions solved yet. Start practicing!':'All questions solved! 🎉'}</div>`;
+    return;
+  }
+  wrap.innerHTML = qs.map(q => {
+    const isSolved  = solvedSet.has(q.id);
+    const solvedAt  = solvedAtMap[q.id]
+      ? new Date(solvedAtMap[q.id]).toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'})
+      : '';
+    return `<div class="profile-q-row" onclick="goToProblem(${q.id})">
+      <div class="profile-q-status ${isSolved?'solved':'unsolved'}">${isSolved?'✓':''}</div>
+      <div class="profile-q-num">${q.num}</div>
+      <div class="profile-q-title">${q.title}</div>
+      <div class="profile-q-tags">${q.tags.slice(0,2).join(' · ')}</div>
+      <div class="badge ${q.difficulty.toLowerCase()}" style="font-size:10px;padding:2px 8px">${q.difficulty}</div>
+      ${isSolved && solvedAt ? `<div class="profile-q-solved-at">${solvedAt}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function goToProblem(questionId) {
+  const idx = QUESTIONS.findIndex(q => q.id === questionId);
+  if (idx === -1) return;
+  filteredQuestions = QUESTIONS;
+  activeTag = 'ALL';
+  currentQ  = idx;
+  _hideAllPages();
+  document.getElementById('app-page').classList.add('active');
+  buildPills();
+  renderQuestion(idx);
+}
+
 // ── NAVIGATION ────────────────────────────────────────────────────
 function _hideAllPages() {
-  ['landing-page','app-page','learn-page'].forEach(function(id) {
+  ['landing-page','app-page','learn-page','profile-page'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });
-  var pp = document.getElementById('profile-page');
-  if (pp) pp.classList.remove('active');
 }
 
 function showLanding() {
@@ -3641,6 +4094,24 @@ function showApp(qIdx) {
   _hideAllPages();
   document.getElementById('app-page').classList.add('active');
   renderQuestion(currentQ);
+}
+
+function showProfile() {
+  if (!currentUser) { openAuthModal('login'); return; }
+  const landingActive = document.getElementById('landing-page').classList.contains('active');
+  prevPage = landingActive ? 'landing' : 'app';
+  _hideAllPages();
+  document.getElementById('profile-page').classList.add('active');
+  renderProfilePage();
+}
+
+function goBackFromProfile() {
+  _hideAllPages();
+  if (prevPage === 'app') {
+    document.getElementById('app-page').classList.add('active');
+  } else {
+    document.getElementById('landing-page').classList.add('active');
+  }
 }
 
 function scrollToFeatures() {
@@ -3830,13 +4301,27 @@ function runQuery() {
 
 // ── SUBMIT ────────────────────────────────────────────────────────
 function submitQuery() {
+  if (!currentUser) {
+    openAuthModal('login');
+    document.getElementById('outputLabel').textContent  = 'Login required';
+    document.getElementById('outputStatus').textContent = '';
+    document.getElementById('outputBody').innerHTML = `
+      <div class="login-nudge">
+        <div class="login-nudge-icon">🔒</div>
+        <div class="login-nudge-title">Login to Submit</div>
+        <div class="login-nudge-sub">Run is free for everyone. Login to submit and save your progress.</div>
+        <button class="login-nudge-btn" onclick="openAuthModal('login')">Login / Sign Up</button>
+      </div>`;
+    return;
+  }
+
   if (!SQL) return;
   const query = editor.getValue().trim();
   if (!query) { showOutputErr('Write a SQL query first.'); return; }
 
   const q = filteredQuestions[currentQ];
   document.getElementById('outputLabel').textContent = 'Submission';
-  document.getElementById('outputBody').innerHTML = '';
+  document.getElementById('outputBody').innerHTML    = '';
 
   let allPass = true;
   const results = [];
@@ -3844,10 +4329,10 @@ function submitQuery() {
   q.testCases.forEach(tc => {
     const seed = tc.seed || q.seed;
     try {
-      const res = execQuery(seed, query);
+      const res  = execQuery(seed, query);
       const rows = toRows(res);
       const pass = tc.check(rows);
-      allPass = allPass && pass;
+      allPass    = allPass && pass;
       results.push({ name: tc.name, pass, err: null });
     } catch(e) {
       allPass = false;
@@ -3855,10 +4340,10 @@ function submitQuery() {
     }
   });
 
-  const passed = results.filter(r => r.pass).length;
+  const passed   = results.filter(r => r.pass).length;
   const statusEl = document.getElementById('outputStatus');
   statusEl.textContent = `${passed}/${results.length} passed`;
-  statusEl.className = `output-status-text ${allPass ? 'ost-pass' : 'ost-fail'}`;
+  statusEl.className   = `output-status-text ${allPass ? 'ost-pass' : 'ost-fail'}`;
 
   document.getElementById('tcList').innerHTML = results.map(r => `
     <div class="tc-row">
@@ -3872,11 +4357,12 @@ function submitQuery() {
   document.getElementById('tcWrap').style.display = 'block';
 
   if (allPass) {
-    solvedSet.add(currentQ);
+    solvedSet.add(q.id);
     document.getElementById('solvedBanner').className = 'solved-banner show';
     const pill = document.getElementById(`pill-${currentQ}`);
     if (pill) pill.classList.add('solved');
     updateProgress();
+    saveUserProgress(q.id);
   }
 }
 
