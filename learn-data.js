@@ -579,12 +579,821 @@ var LEARN_CONTENT = {
     <p>Most students struggle in SQL because they directly jump into commands without understanding why databases exist in the first place. You are building the right foundation.</p>`,
 
   // ── Module 2 ─────────────────────────────────────────────────
-  'mod2-t1': `<h1>What is SQL?</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod2-t2': `<h1>History of SQL</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod2-t3': `<h1>SQL Sublanguages (DDL, DML, DCL, TCL)</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod2-t4': `<h1>SQL vs NoSQL</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod2-t5': `<h1>Setting Up a SQL Environment</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod2-t6': `<h1>Your First SQL Query</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod2-t1': `
+    <h1>What is SQL?</h1>
+
+    <h2>Introduction</h2>
+    <p>Imagine you walk into a huge supermarket like D-Mart or Reliance Fresh. Thousands of products are placed on shelves — Rice, Biscuits, Shampoo, Maggi, Cold drinks, Chips.</p>
+    <p>Now imagine the manager suddenly asks: <em>"How many packets of Maggi were sold today?"</em></p>
+    <p>Will the staff start counting packets manually one by one? Of course not. They use a database. And to talk with that database, they use a language called <strong>SQL</strong>.</p>
+    <p>SQL is one of the most important skills in the world of data. Whether you become a Data Analyst, Data Scientist, Backend Developer, Software Engineer, Business Analyst, or AI Engineer — SQL will follow you everywhere like that one relative who asks: <em>"Beta... package kitna hai?"</em></p>
+
+    <h2>So, What Exactly is SQL?</h2>
+    <p>SQL stands for <strong>Structured Query Language</strong>.</p>
+    <p>It is a language used to:</p>
+    <ul>
+      <li>Store data</li>
+      <li>Retrieve data</li>
+      <li>Update data</li>
+      <li>Delete data</li>
+      <li>Manage databases</li>
+    </ul>
+    <p>In simple words: <strong>SQL helps us talk to databases.</strong> Just like Hindi helps us talk to people.</p>
+
+    <h2>Real-Life Example</h2>
+    <p>Suppose Zomato stores millions of orders daily. If the company wants answers like — Which food sells the most? Which city orders the most biryani? Which restaurant earns the highest revenue? — they use SQL.</p>
+    <pre><code>SELECT *
+FROM orders;</code></pre>
+    <p>Meaning: <em>"Show me all orders."</em> Simple.</p>
+
+    <h2>Why SQL is So Popular</h2>
+    <table>
+      <tr><th>Feature</th><th>Why It Matters</th></tr>
+      <tr><td>Easy to Learn</td><td>English-like syntax</td></tr>
+      <tr><td>Powerful</td><td>Can handle millions of rows</td></tr>
+      <tr><td>Fast</td><td>Retrieves data quickly</td></tr>
+      <tr><td>Industry Standard</td><td>Used everywhere</td></tr>
+      <tr><td>Beginner Friendly</td><td>Great first tech skill</td></tr>
+    </table>
+
+    <h2>SQL Works with Tables</h2>
+    <p>Databases store data in tables. Example:</p>
+    <table>
+      <tr><th>customer_id</th><th>name</th><th>city</th></tr>
+      <tr><td>1</td><td>Rahul</td><td>Delhi</td></tr>
+      <tr><td>2</td><td>Priya</td><td>Mumbai</td></tr>
+      <tr><td>3</td><td>Aman</td><td>Jaipur</td></tr>
+    </table>
+    <p>Rows = records &nbsp;·&nbsp; Columns = fields. SQL helps us work with these tables.</p>
+
+    <h2>Common Things You Can Do Using SQL</h2>
+    <h3>1. Read Data</h3>
+    <pre><code>SELECT * FROM customers;</code></pre>
+    <h3>2. Filter Data</h3>
+    <pre><code>SELECT *
+FROM customers
+WHERE city = 'Delhi';</code></pre>
+    <h3>3. Add New Data</h3>
+    <pre><code>INSERT INTO customers
+VALUES (4, 'Riya', 'Pune');</code></pre>
+    <h3>4. Update Existing Data</h3>
+    <pre><code>UPDATE customers
+SET city = 'Bangalore'
+WHERE customer_id = 1;</code></pre>
+    <h3>5. Delete Data</h3>
+    <pre><code>DELETE FROM customers
+WHERE customer_id = 4;</code></pre>
+
+    <h2>Where SQL is Used in Real World</h2>
+    <table>
+      <tr><th>Industry</th><th>Usage</th></tr>
+      <tr><td>Banking</td><td>Transaction records</td></tr>
+      <tr><td>E-commerce</td><td>Orders &amp; customers</td></tr>
+      <tr><td>Healthcare</td><td>Patient records</td></tr>
+      <tr><td>Social Media</td><td>User activity</td></tr>
+      <tr><td>Education</td><td>Student management</td></tr>
+      <tr><td>Food Delivery</td><td>Order tracking</td></tr>
+      <tr><td>OTT Platforms</td><td>Watch history</td></tr>
+    </table>
+    <p>Even when you book train tickets on IRCTC… SQL is silently working in the background. Hopefully not crashing during Tatkal booking.</p>
+
+    <h2>Is SQL Difficult?</h2>
+    <p>Not at all. SQL is one of the easiest technical skills to start with. Most beginners fear coding because programming languages look scary. But SQL feels almost like English.</p>
+    <pre><code>SELECT name
+FROM students;</code></pre>
+    <p>Even someone seeing SQL for the first time can guess what it does.</p>
+
+    <h2>SQL vs Excel</h2>
+    <table>
+      <tr><th>Excel</th><th>SQL</th></tr>
+      <tr><td>Good for small data</td><td>Good for huge data</td></tr>
+      <tr><td>Manual work</td><td>Automated querying</td></tr>
+      <tr><td>Slower for large datasets</td><td>Much faster</td></tr>
+      <tr><td>Limited scalability</td><td>Enterprise-level scalability</td></tr>
+    </table>
+    <p>Excel is like a scooter. SQL is like a metro train. Both useful. But different scale.</p>
+
+    <h2>Quick Revision</h2>
+    <ul>
+      <li>SQL stands for Structured Query Language</li>
+      <li>SQL is used to communicate with databases</li>
+      <li>SQL works mainly with tables</li>
+      <li>SQL can read, insert, update, and delete data</li>
+      <li>SQL is used in almost every industry</li>
+      <li>SQL is beginner friendly</li>
+    </ul>
+
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>What does SQL stand for?</li>
+      <li>Why do companies use SQL?</li>
+      <li>What is a database table?</li>
+      <li>Write a query to display all records from a table called <code>employees</code>.</li>
+      <li>Name three industries where SQL is used.</li>
+    </ol>`,
+
+  'mod2-t2': `
+    <h1>History of SQL</h1>
+
+    <h2>Introduction</h2>
+    <p>Today SQL is everywhere. But have you ever wondered — Who created SQL? Why was it invented? What problem was it trying to solve?</p>
+    <p>To understand SQL deeply, we should know its history. And the story is actually very interesting.</p>
+
+    <h2>Before SQL Existed</h2>
+    <p>In the early days of computers (1960s), storing data was painful. Companies used file systems — data was stored in separate files.</p>
+    <p>Problems:</p>
+    <ul>
+      <li>Very slow</li>
+      <li>Difficult to manage</li>
+      <li>Data duplication</li>
+      <li>Hard to search data</li>
+      <li>No proper relationships</li>
+    </ul>
+    <p>Imagine keeping <code>customer.txt</code>, <code>orders.txt</code>, <code>payment.txt</code> and then manually connecting everything. Basically like trying to find one Aadhaar photocopy in an Indian government office. Possible? Yes. Easy? Absolutely not.</p>
+
+    <h2>The Big Revolution: Relational Model</h2>
+    <p>In 1970, a computer scientist named <strong>Edgar F. Codd</strong>, working at IBM, introduced a revolutionary idea:</p>
+    <p><strong>The Relational Database Model.</strong></p>
+    <p>He said: <em>"Instead of storing data randomly, let us store it in related tables."</em></p>
+    <p>This idea completely changed the database world.</p>
+    <p>Before this, data was messy, complex to maintain, and difficult to query. Codd's model introduced Tables, Rows, Columns, and Relationships — which made databases cleaner, faster, and easier to manage.</p>
+
+    <h2>Birth of SQL</h2>
+    <p>IBM wanted to implement Codd's relational model. So in the 1970s, IBM researchers created a language called <strong>SEQUEL</strong> — Structured English Query Language.</p>
+    <p>Later, due to trademark issues, the name became <strong>SQL</strong>.</p>
+    <p>Pronounced as <em>"Ess Queue Ell"</em> or <em>"Sequel"</em> — both are accepted. Although saying "Sequel" sounds cooler.</p>
+
+    <h2>Major Milestones in SQL History</h2>
+    <table>
+      <tr><th>Year</th><th>Event</th></tr>
+      <tr><td>1970</td><td>Relational model proposed by Edgar F. Codd</td></tr>
+      <tr><td>1974</td><td>SQL developed at IBM</td></tr>
+      <tr><td>1979</td><td>Oracle released commercial SQL database</td></tr>
+      <tr><td>1986</td><td>SQL became ANSI standard</td></tr>
+      <tr><td>1987</td><td>ISO standardized SQL</td></tr>
+      <tr><td>1990s</td><td>SQL became industry standard</td></tr>
+      <tr><td>Today</td><td>Used worldwide</td></tr>
+    </table>
+
+    <h2>What is ANSI Standard?</h2>
+    <p>ANSI stands for <strong>American National Standards Institute</strong>. When SQL became a standard, different companies could support similar syntax and developers could switch databases easily.</p>
+    <p>MySQL, PostgreSQL, SQL Server, and Oracle all use SQL — though each has some small differences.</p>
+
+    <h2>Popular Databases That Use SQL</h2>
+    <table>
+      <tr><th>Database</th><th>Company</th></tr>
+      <tr><td>MySQL</td><td>Oracle</td></tr>
+      <tr><td>PostgreSQL</td><td>Open Source</td></tr>
+      <tr><td>SQL Server</td><td>Microsoft</td></tr>
+      <tr><td>Oracle Database</td><td>Oracle</td></tr>
+      <tr><td>SQLite</td><td>Open Source</td></tr>
+    </table>
+
+    <h2>Why SQL Survived for So Long</h2>
+    <p>Technology changes fast. But SQL has survived for decades. Because it is Simple, Reliable, Powerful, Scalable, and Easy to understand.</p>
+    <p>Even modern companies like Google, Amazon, Netflix, Swiggy, and Flipkart still use SQL databases heavily.</p>
+    <p>SQL is older than many people learning it today. Yet it is still one of the most demanded skills in tech. That's legendary consistency. Even Bollywood reboots don't survive this long.</p>
+
+    <h2>Quick Revision</h2>
+    <ul>
+      <li>Earlier systems stored data in files — slow and messy</li>
+      <li>Edgar F. Codd introduced the relational model in 1970</li>
+      <li>IBM created SQL in the 1970s (originally called SEQUEL)</li>
+      <li>SQL became an international ANSI/ISO standard in 1986–87</li>
+      <li>SQL is still widely used today across every industry</li>
+    </ul>
+
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Who introduced the relational database model?</li>
+      <li>What was SQL originally called?</li>
+      <li>Why were old file systems problematic?</li>
+      <li>What is ANSI?</li>
+      <li>Name three popular SQL databases.</li>
+    </ol>`,
+  'mod2-t3': `
+    <h1>SQL Sublanguages (DDL, DML, DCL, TCL)</h1>
+
+    <h2>Introduction</h2>
+    <p>SQL is huge. And instead of putting every command into one big confusing bucket, SQL is divided into smaller categories called <strong>SQL Sublanguages</strong>.</p>
+    <p>Think of it like Indian cuisine. We don't call everything simply "food." We separate North Indian, South Indian, Street Food, Desserts. Similarly, SQL commands are grouped based on what they do.</p>
+
+    <h2>Main Types of SQL Commands</h2>
+    <table>
+      <tr><th>Type</th><th>Full Form</th><th>Purpose</th></tr>
+      <tr><td>DDL</td><td>Data Definition Language</td><td>Structure management</td></tr>
+      <tr><td>DML</td><td>Data Manipulation Language</td><td>Working with data</td></tr>
+      <tr><td>DCL</td><td>Data Control Language</td><td>Permissions &amp; security</td></tr>
+      <tr><td>TCL</td><td>Transaction Control Language</td><td>Managing transactions</td></tr>
+    </table>
+
+    <h2>1. DDL — Data Definition Language</h2>
+    <p>DDL is used to define database structure — creating tables, modifying tables, deleting tables.</p>
+    <table>
+      <tr><th>Command</th><th>Purpose</th></tr>
+      <tr><td>CREATE</td><td>Create objects</td></tr>
+      <tr><td>ALTER</td><td>Modify structure</td></tr>
+      <tr><td>DROP</td><td>Delete objects</td></tr>
+      <tr><td>TRUNCATE</td><td>Remove all records</td></tr>
+    </table>
+    <h3>CREATE TABLE</h3>
+    <pre><code>CREATE TABLE students (
+    student_id INT,
+    name VARCHAR(50),
+    city VARCHAR(50)
+);</code></pre>
+    <h3>ALTER TABLE</h3>
+    <pre><code>ALTER TABLE students
+ADD age INT;</code></pre>
+    <p>Adds a new column to an existing table.</p>
+    <h3>DROP TABLE</h3>
+    <pre><code>DROP TABLE students;</code></pre>
+    <p>Deletes the table completely. Dangerous command. Like giving scissors to a toddler.</p>
+
+    <h2>What is TRUNCATE?</h2>
+    <p>Many beginners confuse DELETE, TRUNCATE, and DROP. Let us simplify.</p>
+    <table>
+      <tr><th>Command</th><th>What It Does</th></tr>
+      <tr><td>DELETE</td><td>Removes selected rows</td></tr>
+      <tr><td>TRUNCATE</td><td>Removes all rows only</td></tr>
+      <tr><td>DROP</td><td>Removes entire table</td></tr>
+    </table>
+    <pre><code>TRUNCATE TABLE students;</code></pre>
+    <p>The table structure remains. But all data disappears.</p>
+
+    <h2>2. DML — Data Manipulation Language</h2>
+    <p>DML is used to work with data inside tables. This is the category you will use most often.</p>
+    <table>
+      <tr><th>Command</th><th>Purpose</th></tr>
+      <tr><td>INSERT</td><td>Add data</td></tr>
+      <tr><td>UPDATE</td><td>Modify data</td></tr>
+      <tr><td>DELETE</td><td>Remove data</td></tr>
+      <tr><td>SELECT</td><td>Retrieve data</td></tr>
+    </table>
+    <h3>INSERT</h3>
+    <pre><code>INSERT INTO students
+VALUES (1, 'Rahul', 'Delhi');</code></pre>
+    <h3>SELECT</h3>
+    <pre><code>SELECT *
+FROM students;</code></pre>
+    <h3>UPDATE</h3>
+    <pre><code>UPDATE students
+SET city = 'Mumbai'
+WHERE student_id = 1;</code></pre>
+    <h3>DELETE</h3>
+    <pre><code>DELETE FROM students
+WHERE student_id = 1;</code></pre>
+
+    <h2>Why WHERE Clause is Important</h2>
+    <p>Imagine writing:</p>
+    <pre><code>DELETE FROM students;</code></pre>
+    <p>Without WHERE — entire table data gets deleted. One missing WHERE has destroyed more careers than Monday morning meetings. Always be careful.</p>
+
+    <h2>3. DCL — Data Control Language</h2>
+    <p>DCL controls permissions, access, and security. Imagine a company database — should every employee be allowed to delete data? Absolutely not. Otherwise one frustrated intern can accidentally delete production tables. Then suddenly everyone becomes "in a meeting."</p>
+    <table>
+      <tr><th>Command</th><th>Purpose</th></tr>
+      <tr><td>GRANT</td><td>Give permissions</td></tr>
+      <tr><td>REVOKE</td><td>Remove permissions</td></tr>
+    </table>
+    <pre><code>GRANT SELECT ON students TO analyst;</code></pre>
+    <p>Meaning: "Allow analyst to view data."</p>
+    <pre><code>REVOKE SELECT ON students FROM analyst;</code></pre>
+    <p>Meaning: "Remove viewing permission."</p>
+    <p>Data security is extremely important for bank records, Aadhaar data, and customer transactions. DCL helps control who can do what.</p>
+
+    <h2>4. TCL — Transaction Control Language</h2>
+    <p>TCL manages transactions. A transaction is a group of SQL operations. Example: money transferred from one bank account to another. If one step fails, we should reverse everything — otherwise money can disappear midway. And people become very emotional when money disappears.</p>
+    <table>
+      <tr><th>Command</th><th>Purpose</th></tr>
+      <tr><td>COMMIT</td><td>Save changes permanently</td></tr>
+      <tr><td>ROLLBACK</td><td>Undo changes</td></tr>
+      <tr><td>SAVEPOINT</td><td>Create checkpoints</td></tr>
+    </table>
+    <pre><code>START TRANSACTION;
+
+UPDATE accounts
+SET balance = balance - 500
+WHERE account_id = 1;
+
+UPDATE accounts
+SET balance = balance + 500
+WHERE account_id = 2;
+
+COMMIT;</code></pre>
+    <p>This ensures safe money transfer. If the second update fails, <code>ROLLBACK</code> cancels all changes and returns the database to the previous safe state.</p>
+
+    <h2>Easy Way to Remember All 4</h2>
+    <table>
+      <tr><th>Category</th><th>Think Like</th></tr>
+      <tr><td>DDL</td><td>Building the house</td></tr>
+      <tr><td>DML</td><td>Living inside the house</td></tr>
+      <tr><td>DCL</td><td>Security guard</td></tr>
+      <tr><td>TCL</td><td>Emergency control system</td></tr>
+    </table>
+
+    <h2>Quick Revision</h2>
+    <table>
+      <tr><th>Category</th><th>Main Purpose</th></tr>
+      <tr><td>DDL</td><td>Structure</td></tr>
+      <tr><td>DML</td><td>Data handling</td></tr>
+      <tr><td>DCL</td><td>Security</td></tr>
+      <tr><td>TCL</td><td>Transactions</td></tr>
+    </table>
+
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>What does DDL stand for?</li>
+      <li>Which command is used to modify table structure?</li>
+      <li>What is the difference between DELETE and TRUNCATE?</li>
+      <li>Which category handles permissions?</li>
+      <li>What is the purpose of COMMIT?</li>
+      <li>What does ROLLBACK do?</li>
+      <li>Why is the WHERE clause important in DELETE queries?</li>
+    </ol>`,
+
+  'mod2-t4': `
+    <h1>SQL vs NoSQL</h1>
+
+    <h2>Introduction</h2>
+    <p>As data started growing massively, companies realized: <em>"Traditional databases are great… but sometimes we need more flexibility."</em> This gave rise to <strong>NoSQL Databases</strong>.</p>
+    <p>Beginners often get confused between SQL, NoSQL, Relational, and Non-relational. Let us simplify everything.</p>
+
+    <h2>What is a SQL Database?</h2>
+    <p>SQL databases store data in <strong>Tables</strong>. Data is structured — fixed columns, defined schema, organized relationships.</p>
+    <table>
+      <tr><th>customer_id</th><th>name</th><th>city</th></tr>
+      <tr><td>1</td><td>Rahul</td><td>Delhi</td></tr>
+    </table>
+    <p><strong>Examples:</strong> MySQL, PostgreSQL, SQL Server</p>
+    <p><strong>What is Schema?</strong> Schema means the structure of the database. If a students table has student_id, name, and city — every row must follow that structure. SQL databases are strict about structure.</p>
+
+    <h2>What is a NoSQL Database?</h2>
+    <p>NoSQL databases are more flexible. They may store data as Documents, Key-value pairs, Graphs, or Collections.</p>
+    <pre><code>{
+  "name": "Rahul",
+  "city": "Delhi",
+  "skills": ["SQL", "Python"]
+}</code></pre>
+    <p><strong>Examples:</strong> MongoDB, Cassandra, Redis</p>
+
+    <h2>Main Differences</h2>
+    <table>
+      <tr><th>SQL</th><th>NoSQL</th></tr>
+      <tr><td>Structured data</td><td>Flexible data</td></tr>
+      <tr><td>Tables</td><td>Documents / collections</td></tr>
+      <tr><td>Fixed schema</td><td>Dynamic schema</td></tr>
+      <tr><td>Strong relationships</td><td>Flexible relationships</td></tr>
+      <tr><td>Vertical scaling</td><td>Horizontal scaling</td></tr>
+    </table>
+
+    <h2>Understanding Scaling</h2>
+    <p><strong>Vertical Scaling</strong> — adding more power to one machine (more RAM, better CPU).</p>
+    <p><strong>Horizontal Scaling</strong> — adding more machines. NoSQL databases are generally better for massive scaling.</p>
+
+    <h2>Real-Life Examples</h2>
+    <h3>SQL Example — Banking</h3>
+    <p>Banks need accuracy, consistency, and strong transactions. You cannot randomly lose ₹50,000 during a transfer. Therefore banks prefer SQL databases.</p>
+    <h3>NoSQL Example — Social Media</h3>
+    <p>Instagram user data changes constantly — Posts, Images, Comments, Likes, Stories. Flexible structure helps. So many modern apps use NoSQL.</p>
+
+    <h2>SQL Advantages</h2>
+    <ul>
+      <li><strong>Strong Structure</strong> — very organized</li>
+      <li><strong>ACID Properties</strong> — reliable transactions</li>
+      <li><strong>Powerful Querying</strong> — excellent for analytics</li>
+      <li><strong>Mature Ecosystem</strong> — used for decades</li>
+    </ul>
+
+    <h2>NoSQL Advantages</h2>
+    <ul>
+      <li><strong>Flexible Schema</strong> — easy to store changing data</li>
+      <li><strong>High Scalability</strong> — can handle massive traffic</li>
+      <li><strong>Faster for Certain Applications</strong> — especially real-time systems</li>
+    </ul>
+
+    <h2>Which One is Better?</h2>
+    <p>Neither. It depends on the problem.</p>
+    <table>
+      <tr><th>Use Case</th><th>Better Choice</th></tr>
+      <tr><td>Banking</td><td>SQL</td></tr>
+      <tr><td>Analytics</td><td>SQL</td></tr>
+      <tr><td>Social Media</td><td>NoSQL</td></tr>
+      <tr><td>Real-time apps</td><td>NoSQL</td></tr>
+      <tr><td>Complex joins</td><td>SQL</td></tr>
+    </table>
+    <p>Many companies use <strong>both</strong> — SQL for transactions, NoSQL for app activity. Like Indian weddings combining Punjabi songs, South Indian food, Gujarati dance, and one uncle forcing everyone to do bhangra.</p>
+
+    <h2>Final Thoughts</h2>
+    <p>As a beginner, focus on SQL first. It builds strong fundamentals, teaches data structure properly, and is widely used in analytics. Once SQL becomes comfortable, learning NoSQL becomes much easier.</p>
+
+    <h2>Quick Revision</h2>
+    <ul>
+      <li>SQL uses tables — NoSQL uses flexible structures</li>
+      <li>SQL is structured — NoSQL is flexible</li>
+      <li>SQL is better for transactions and analytics</li>
+      <li>NoSQL is better for scale and flexible data</li>
+      <li>Both are important in modern tech</li>
+    </ul>`,
+  'mod2-t5': `<h1>Setting Up a SQL Environment</h1>
+    <p>Now comes the exciting part.</p>
+    <p>Until now, we were only understanding theory. But SQL becomes truly fun when you actually start writing queries. For that, we need a SQL environment.</p>
+    <p>Think of it like setting up a cricket ground before playing. Bat ready. Pitch ready. Players ready. Now match can begin.</p>
+
+    <h2>What Do We Need?</h2>
+    <p>To practice SQL, we need two things:</p>
+    <table>
+      <thead><tr><th>Component</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>Database System</td><td>Stores data</td></tr>
+        <tr><td>SQL Tool / Editor</td><td>Write queries</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Best Option for Beginners</h2>
+    <p>For beginners, MySQL is a fantastic choice. Why? Because it is:</p>
+    <ul>
+      <li>Free</li>
+      <li>Popular</li>
+      <li>Beginner friendly</li>
+      <li>Widely used</li>
+    </ul>
+    <p>Many companies use MySQL in real projects. So learning it is a great investment.</p>
+
+    <h2>Understanding the Setup</h2>
+    <p>Many beginners think: <em>"Installing SQL means installing one software."</em></p>
+    <p>Actually, there are usually two parts:</p>
+    <table>
+      <thead><tr><th>Software</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>MySQL Server</td><td>Stores and manages databases</td></tr>
+        <tr><td>MySQL Workbench</td><td>Interface to write queries</td></tr>
+      </tbody>
+    </table>
+    <p>Think of it this way:</p>
+    <ul>
+      <li>MySQL Server = Kitchen</li>
+      <li>MySQL Workbench = Dining table where you interact</li>
+    </ul>
+
+    <h2>Step 1: Install MySQL Server</h2>
+    <p>MySQL Server is the actual database engine. It handles:</p>
+    <ul>
+      <li>Databases</li>
+      <li>Tables</li>
+      <li>Data storage</li>
+      <li>Query execution</li>
+    </ul>
+    <p>Without the server, there is no database.</p>
+
+    <h2>Step 2: Install MySQL Workbench</h2>
+    <p>Workbench is where you:</p>
+    <ul>
+      <li>Write SQL queries</li>
+      <li>Run queries</li>
+      <li>View outputs</li>
+      <li>Create databases</li>
+      <li>Manage tables</li>
+    </ul>
+    <p>It is basically your SQL playground.</p>
+
+    <h2>During Installation</h2>
+    <p>You may see many technical options. Do not panic.</p>
+    <p>Every beginner reaches that stage where the installer shows 35 checkboxes and suddenly confidence disappears.</p>
+    <p>Just:</p>
+    <ul>
+      <li>Choose default setup</li>
+      <li>Continue next</li>
+      <li>Set password carefully</li>
+      <li>Finish installation</li>
+    </ul>
+    <p>Done.</p>
+
+    <h2>Setting Root Password</h2>
+    <p>During installation, MySQL asks you to create a password. This password is important.</p>
+    <p>Please do not set:</p>
+    <pre><code>password123</code></pre>
+    <p>Hackers also passed kindergarten. Choose a proper password and save it safely.</p>
+
+    <h2>Opening MySQL Workbench</h2>
+    <p>After installation, open MySQL Workbench. You will usually connect using:</p>
+    <table>
+      <thead><tr><th>Field</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Username</td><td>root</td></tr>
+        <tr><td>Password</td><td>Your chosen password</td></tr>
+      </tbody>
+    </table>
+    <p>Once connected, you are officially inside MySQL.</p>
+    <p>Congratulations. You are now talking to databases. Very few people know how powerful that skill becomes later.</p>
+
+    <h2>Creating Your First Database</h2>
+    <p>Now let us create a database.</p>
+    <pre><code>CREATE DATABASE school;</code></pre>
+    <p>Meaning: <em>"Create a database named school."</em> Simple.</p>
+
+    <h2>Selecting the Database</h2>
+    <p>Before working inside a database, we must select it.</p>
+    <pre><code>USE school;</code></pre>
+    <p>Meaning: <em>"Now work inside the school database."</em></p>
+
+    <h2>Creating Your First Table</h2>
+    <pre><code>CREATE TABLE students (
+    student_id INT,
+    name VARCHAR(50),
+    city VARCHAR(50)
+);</code></pre>
+    <table>
+      <thead><tr><th>Part</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>CREATE TABLE</td><td>Create a new table</td></tr>
+        <tr><td>student_id INT</td><td>Integer column</td></tr>
+        <tr><td>name VARCHAR(50)</td><td>Text column (max 50 chars)</td></tr>
+        <tr><td>city VARCHAR(50)</td><td>Text column (max 50 chars)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Adding Data into Table</h2>
+    <pre><code>INSERT INTO students
+VALUES (1, 'Rahul', 'Delhi');</code></pre>
+    <p>Now one row gets inserted into the table.</p>
+
+    <h2>Viewing Data</h2>
+    <pre><code>SELECT *
+FROM students;</code></pre>
+    <p>Output:</p>
+    <table>
+      <thead><tr><th>student_id</th><th>name</th><th>city</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Rahul</td><td>Delhi</td></tr>
+      </tbody>
+    </table>
+    <p>And just like that… you interacted with your first database.</p>
+
+    <h2>Online SQL Platforms</h2>
+    <p>If your laptop is slow, or you do not want installation right now, you can practice online. Popular platforms:</p>
+    <ul>
+      <li>DB Fiddle</li>
+      <li>SQL Fiddle</li>
+      <li>SQLite Online</li>
+    </ul>
+    <p>These are useful for beginners. But eventually, working locally is better for serious learning.</p>
+
+    <h2>Common Beginner Mistakes</h2>
+    <h3>1. Forgetting Semicolon</h3>
+    <p>Wrong:</p>
+    <pre><code>SELECT * FROM students</code></pre>
+    <p>Correct:</p>
+    <pre><code>SELECT * FROM students;</code></pre>
+
+    <h3>2. Typing Mistakes</h3>
+    <pre><code>SELEC * FROM students;</code></pre>
+    <p>SQL: <em>"I have absolutely no idea what you mean."</em></p>
+
+    <h3>3. Wrong Database Selected</h3>
+    <p>Always check:</p>
+    <pre><code>USE database_name;</code></pre>
+    <p>Otherwise tables may get created somewhere else.</p>
+
+    <h3>4. Forgetting Password</h3>
+    <p>Every SQL learner eventually experiences this. You confidently set a password. Then after two days: <em>"What was it again?"</em> Classic developer moment.</p>
+
+    <h2>Best Learning Advice</h2>
+    <p>Do not just read SQL. Practice it. Because SQL is a practical skill.</p>
+    <p>Watching SQL tutorials without practice is like watching cooking videos and expecting biryani to appear automatically. Does not work.</p>
+
+    <h2>Why Practice Matters</h2>
+    <p>The more queries you write:</p>
+    <ul>
+      <li>Faster you learn</li>
+      <li>Better you remember</li>
+      <li>More confident you become</li>
+    </ul>
+    <p>SQL rewards consistency. Even 20 minutes daily is enough.</p>
+
+    <h2>Final Thoughts</h2>
+    <p>Setting up your SQL environment is the first real step into the world of databases. Once setup is complete, you can:</p>
+    <ul>
+      <li>Create databases</li>
+      <li>Build tables</li>
+      <li>Insert data</li>
+      <li>Run queries</li>
+      <li>Solve real business problems</li>
+    </ul>
+    <p>And this is where the real fun begins.</p>
+
+    <h2>Quick Revision</h2>
+    <ul>
+      <li>SQL environment is needed to practice SQL</li>
+      <li>MySQL Server stores data</li>
+      <li>MySQL Workbench helps execute queries</li>
+      <li><code>CREATE DATABASE</code> creates databases</li>
+      <li><code>USE</code> selects a database</li>
+      <li>Practice is extremely important</li>
+    </ul>
+
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Why do we need a SQL environment?</li>
+      <li>What is the role of MySQL Server?</li>
+      <li>What is MySQL Workbench used for?</li>
+      <li>Which command selects a database?</li>
+      <li>Write a query to create a database called <code>company</code>.</li>
+      <li>Why is practice important in SQL?</li>
+      <li>What happens if you forget to select the correct database?</li>
+    </ol>`,
+
+  'mod2-t6': `<h1>Your First SQL Query</h1>
+    <p>This is the moment every SQL learner waits for. Your first SQL query.</p>
+    <p>Think of it like your first cricket shot, your first bike ride, your first Maggi cooked without burning the pan. Once you write your first query, confidence starts building.</p>
+
+    <h2>The Most Famous SQL Query</h2>
+    <pre><code>SELECT *
+FROM students;</code></pre>
+    <p>This is probably the most written SQL query in history. And today, you will fully understand it.</p>
+
+    <h2>Breaking the Query into Parts</h2>
+
+    <h3>Understanding SELECT</h3>
+    <pre><code>SELECT</code></pre>
+    <p>Means: <em>"Choose data."</em> Whenever you want to retrieve data from a table, you use SELECT.</p>
+
+    <h3>Understanding *</h3>
+    <pre><code>*</code></pre>
+    <p>Means: <em>"All columns."</em> So instead of writing every column name manually, we use <code>*</code>.</p>
+
+    <h3>Understanding FROM</h3>
+    <pre><code>FROM students</code></pre>
+    <p>Means: <em>"Take data from the students table."</em></p>
+
+    <h3>Complete Meaning</h3>
+    <pre><code>SELECT *
+FROM students;</code></pre>
+    <p>Means: <em>"Show all columns from the students table."</em> Very simple.</p>
+
+    <h2>Example Table</h2>
+    <p>Suppose the students table contains:</p>
+    <table>
+      <thead><tr><th>student_id</th><th>name</th><th>city</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Rahul</td><td>Delhi</td></tr>
+        <tr><td>2</td><td>Priya</td><td>Mumbai</td></tr>
+        <tr><td>3</td><td>Aman</td><td>Jaipur</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Output of Query</h2>
+    <pre><code>SELECT *
+FROM students;</code></pre>
+    <p>Output:</p>
+    <table>
+      <thead><tr><th>student_id</th><th>name</th><th>city</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Rahul</td><td>Delhi</td></tr>
+        <tr><td>2</td><td>Priya</td><td>Mumbai</td></tr>
+        <tr><td>3</td><td>Aman</td><td>Jaipur</td></tr>
+      </tbody>
+    </table>
+    <p>SQL simply displays all records.</p>
+
+    <h2>Selecting Specific Columns</h2>
+    <p>Instead of all columns, you can choose specific columns.</p>
+    <pre><code>SELECT name, city
+FROM students;</code></pre>
+    <p>Output:</p>
+    <table>
+      <thead><tr><th>name</th><th>city</th></tr></thead>
+      <tbody>
+        <tr><td>Rahul</td><td>Delhi</td></tr>
+        <tr><td>Priya</td><td>Mumbai</td></tr>
+        <tr><td>Aman</td><td>Jaipur</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Why This is Useful</h2>
+    <p>In real companies, tables may contain 50 columns, 100 columns, even more. You usually only need relevant columns. So selecting specific columns improves:</p>
+    <ul>
+      <li>Readability</li>
+      <li>Speed</li>
+      <li>Performance</li>
+    </ul>
+
+    <h2>Filtering Data Using WHERE</h2>
+    <p>Suppose we only want students from Delhi.</p>
+    <pre><code>SELECT *
+FROM students
+WHERE city = 'Delhi';</code></pre>
+    <p>Now SQL returns only Delhi records.</p>
+    <p>WHERE acts like a filter. It tells SQL: <em>"Only show rows matching this condition."</em></p>
+
+    <h2>More Examples</h2>
+    <h3>Show only names</h3>
+    <pre><code>SELECT name
+FROM students;</code></pre>
+
+    <h3>Show only Mumbai students</h3>
+    <pre><code>SELECT *
+FROM students
+WHERE city = 'Mumbai';</code></pre>
+
+    <h3>Show student_id and name</h3>
+    <pre><code>SELECT student_id, name
+FROM students;</code></pre>
+
+    <h2>Reading SQL Like English</h2>
+    <p>This is the secret to learning SQL quickly. Read queries like sentences.</p>
+    <pre><code>SELECT name
+FROM students
+WHERE city = 'Mumbai';</code></pre>
+    <p>English version: <em>"Show names from students where city is Mumbai."</em> Suddenly SQL feels much easier.</p>
+
+    <h2>SQL Formatting Best Practice</h2>
+    <p>Good formatting improves readability.</p>
+    <p>Preferred:</p>
+    <pre><code>SELECT name, city
+FROM students
+WHERE city = 'Delhi';</code></pre>
+    <p>Avoid:</p>
+    <pre><code>select name,city from students where city='Delhi';</code></pre>
+    <p>Both work. But readable SQL is professional SQL.</p>
+
+    <h2>Common Beginner Errors</h2>
+
+    <h3>1. Missing Quotes</h3>
+    <p>Wrong:</p>
+    <pre><code>WHERE city = Delhi</code></pre>
+    <p>Correct:</p>
+    <pre><code>WHERE city = 'Delhi'</code></pre>
+    <p>Text values usually need quotes.</p>
+
+    <h3>2. Wrong Table Name</h3>
+    <p>Wrong:</p>
+    <pre><code>FROM student</code></pre>
+    <p>Correct:</p>
+    <pre><code>FROM students</code></pre>
+    <p>SQL gets confused if the table does not exist.</p>
+
+    <h3>3. Forgetting Semicolon</h3>
+    <p>Wrong:</p>
+    <pre><code>SELECT * FROM students</code></pre>
+    <p>Correct:</p>
+    <pre><code>SELECT * FROM students;</code></pre>
+
+    <h3>4. Typing Errors</h3>
+    <pre><code>SELEC * FROM students;</code></pre>
+    <p>SQL: <em>"Brother… at least spell SELECT correctly."</em></p>
+
+    <h2>Why SQL Queries Matter</h2>
+    <p>Queries help businesses answer questions. Examples:</p>
+    <ul>
+      <li>Which products sell most?</li>
+      <li>Which customers spend most?</li>
+      <li>Which city generates highest revenue?</li>
+      <li>Which employee has highest sales?</li>
+    </ul>
+    <p>SQL turns raw data into useful information.</p>
+
+    <h2>Real-World Example</h2>
+    <p>Suppose Swiggy wants to know: <em>"Which city orders the most biryani?"</em></p>
+    <p>SQL query can answer that within seconds. Without SQL, some poor employee would be counting orders manually until retirement.</p>
+
+    <h2>Best Way to Improve in SQL</h2>
+    <p>Practice daily. Even 20 minutes daily helps. Because SQL is learned by:</p>
+    <ul>
+      <li>Writing queries</li>
+      <li>Making mistakes</li>
+      <li>Fixing mistakes</li>
+      <li>Repeating practice</li>
+    </ul>
+    <p>Every SQL expert once wrote broken queries. Completely normal.</p>
+
+    <h2>Final Thoughts</h2>
+    <p>Your first SQL query is the beginning of your data journey. Today you learned how to:</p>
+    <ul>
+      <li>Retrieve all data</li>
+      <li>Select specific columns</li>
+      <li>Filter records</li>
+      <li>Read SQL logically</li>
+    </ul>
+    <p>This is the foundation for everything ahead. Soon you will write joins, aggregations, window functions, and advanced analytics queries. But every expert once started with:</p>
+    <pre><code>SELECT * FROM table_name;</code></pre>
+
+    <h2>Quick Revision</h2>
+    <ul>
+      <li><code>SELECT</code> retrieves data</li>
+      <li><code>*</code> means all columns</li>
+      <li><code>FROM</code> specifies the table</li>
+      <li><code>WHERE</code> filters records</li>
+      <li>SQL should be written cleanly</li>
+      <li>Practice improves SQL skills</li>
+    </ul>
+
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>What does SELECT do?</li>
+      <li>What does <code>*</code> represent?</li>
+      <li>Write a query to display only the <code>name</code> column from the students table.</li>
+    </ol>`,
 
   // ── Module 3 ─────────────────────────────────────────────────
   'mod3-t1': `<h1>CREATE DATABASE</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
