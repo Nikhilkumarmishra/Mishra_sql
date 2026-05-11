@@ -4097,7 +4097,7 @@ function goToProblem(questionId) {
 
 // ── NAVIGATION ────────────────────────────────────────────────────
 function _hideAllPages() {
-  ['landing-page','app-page','learn-page','profile-page','admin-page'].forEach(function(id) {
+  ['landing-page','app-page','learn-page','profile-page'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin — MishraSQL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── Admin panel overrides ────────────────────────── */
+    body { background: #0a0b0e; }
+    #adminLoadingState { display: flex; }
+    #adminContent      { display: none; }
+
+    #authGate {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      gap: 14px;
+      color: var(--dim, #888);
+    }
+    #authGate .gate-logo { font-size: 1.4rem; font-weight: 800; color: #e8e6e0; }
+    #authGate .gate-logo span { color: #8b5cf6; }
+    #authGate p { font-size: 0.9rem; }
+    #authGate .gate-spinner {
+      width: 28px; height: 28px;
+      border: 3px solid #222;
+      border-top-color: #8b5cf6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    :root {
+      --accent: #8b5cf6;
+      --fg:     #e8e6e0;
+      --dim:    #888;
+      --border: rgba(255,255,255,0.08);
+      --red:    #ef4444;
+    }
+  </style>
+</head>
+<body>
+
+<!-- AUTH GATE (shown while checking login) -->
+<div id="authGate">
+  <div class="gate-logo">Mishra<span>SQL</span></div>
+  <div class="gate-spinner"></div>
+  <p>Checking access…</p>
+</div>
+
+<!-- ADMIN SHELL (hidden until auth passes) -->
+<div id="adminShell" style="display:none">
+
+  <!-- NAV -->
+  <nav class="admin-top-nav">
+    <div class="admin-nav-left">
+      <button class="btn-back-admin" onclick="goHome()">← Back to Site</button>
+      <span class="admin-nav-title">⚙️ Admin Dashboard</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span id="adminWelcome" style="font-size:0.82rem;color:var(--dim)"></span>
+      <button class="btn-adm-refresh" onclick="AdminDash.refresh()">↻ Refresh</button>
+    </div>
+  </nav>
+
+  <!-- LOADING STATE -->
+  <div class="admin-loading" id="adminLoadingState">
+    <div class="admin-loading-spinner"></div>
+    <p>Loading admin data…</p>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="admin-body" id="adminContent">
+
+    <!-- KPI CARDS -->
+    <section class="adm-section">
+      <div class="adm-section-head"><h2>Overview</h2></div>
+      <div class="adm-kpi-grid">
+        <div class="adm-kpi-card">
+          <div class="adm-kpi-val" id="kadTotal">—</div>
+          <div class="adm-kpi-label">Total Signups</div>
+        </div>
+        <div class="adm-kpi-card kpi-dau">
+          <div class="adm-kpi-val" id="kadDAU">—</div>
+          <div class="adm-kpi-label">Active Today</div>
+          <div class="adm-kpi-sub">last 24 hours</div>
+        </div>
+        <div class="adm-kpi-card kpi-mau">
+          <div class="adm-kpi-val" id="kadMAU">—</div>
+          <div class="adm-kpi-label">Active This Month</div>
+          <div class="adm-kpi-sub">last 30 days</div>
+        </div>
+        <div class="adm-kpi-card kpi-eng">
+          <div class="adm-kpi-val" id="kadEngaged">—</div>
+          <div class="adm-kpi-label">Engaged Users</div>
+          <div class="adm-kpi-sub">solved ≥ 1 question</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SIGNUP TREND -->
+    <section class="adm-section">
+      <div class="adm-section-head"><h2>New Signups — Last 14 Days</h2></div>
+      <div class="adm-chart-wrap">
+        <div class="adm-chart" id="adminChart"></div>
+      </div>
+    </section>
+
+    <!-- ENGAGEMENT FILTER -->
+    <section class="adm-section">
+      <div class="adm-section-head"><h2>Engagement Filter</h2></div>
+      <div class="adm-eng-row">
+        <label class="adm-eng-label">
+          Users who solved at least
+          <input type="number" id="engN" value="1" min="1" max="999"
+                 oninput="AdminDash.setMinSolves(this.value)" class="adm-eng-input">
+          questions
+        </label>
+        <span class="adm-eng-count" id="engCount"></span>
+      </div>
+      <div class="adm-eng-pills" id="engList"></div>
+    </section>
+
+    <!-- USERS TABLE -->
+    <section class="adm-section">
+      <div class="adm-section-head">
+        <div class="adm-head-left">
+          <h2>All Users</h2>
+          <span class="adm-count-badge" id="adminUserCount"></span>
+        </div>
+        <div class="adm-head-right">
+          <input type="text" placeholder="Search name or email…" id="adminSearch"
+                 oninput="AdminDash.setSearch(this.value)" class="adm-search-input">
+          <button class="btn-adm-export" onclick="AdminDash.exportCSV()">↓ Export CSV</button>
+        </div>
+      </div>
+      <div class="adm-table-wrap">
+        <table class="adm-table">
+          <thead>
+            <tr>
+              <th style="width:44px"></th>
+              <th class="adm-sort-th" onclick="AdminDash.setSort('display_name')">Name ↕</th>
+              <th class="adm-sort-th" onclick="AdminDash.setSort('email')">Email ↕</th>
+              <th>Qualification</th>
+              <th class="adm-sort-th" onclick="AdminDash.setSort('created_at')">Joined ↕</th>
+              <th class="adm-sort-th" onclick="AdminDash.setSort('last_seen_at')">Last Active ↕</th>
+              <th class="adm-sort-th" onclick="AdminDash.setSort('solves')">Solved ↕</th>
+              <th style="width:32px"></th>
+            </tr>
+          </thead>
+          <tbody id="adminUsersBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- QUESTION ANALYTICS -->
+    <section class="adm-section">
+      <div class="adm-section-head"><h2>Question Analytics</h2></div>
+      <div class="adm-q-grid">
+        <div class="adm-q-panel">
+          <h3>Top 10 Most Solved</h3>
+          <div id="adminTopQ"></div>
+        </div>
+        <div class="adm-q-panel">
+          <h3>Zero-Solve Questions <span class="adm-warn-badge">needs attention</span></h3>
+          <div id="adminZeroQ"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ANNOUNCEMENT -->
+    <section class="adm-section">
+      <div class="adm-section-head"><h2>📢 Site Announcement</h2></div>
+      <p class="adm-section-desc">Write a message and click Publish — it appears as a dismissible banner to all users on the main site instantly. Leave empty to hide it.</p>
+      <textarea id="adminAnnouncementText" class="adm-ann-textarea"
+        placeholder="e.g. Module 3 is now live! Check it out 🎉" rows="3"></textarea>
+      <div class="adm-ann-actions">
+        <button id="adminAnnSaveBtn" class="btn-adm-publish" onclick="AdminDash.saveAnnouncement()">Publish</button>
+        <button class="btn-adm-clear" onclick="AdminDash.clearAnnouncement()">Clear</button>
+        <span class="adm-ann-status" id="adminAnnStatus"></span>
+      </div>
+    </section>
+
+  </div><!-- /adminContent -->
+</div><!-- /adminShell -->
+
+<script>
+// ================================================================
+//  SUPABASE CONFIG + AUTH CLIENT
+// ================================================================
+const SUPABASE_URL  = 'https://wyxutuqckkdkraawyxff.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5eHV0dXFja2tka3JhYXd5eGZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMzQ3NzksImV4cCI6MjA5MzcxMDc3OX0.ale0hHkE36PPQwKiqo5ViS3bi28krpU8gHXiWCKyLAU';
+
+var Auth = (function () {
+  var A   = SUPABASE_URL + '/auth/v1';
+  var DB  = SUPABASE_URL + '/rest/v1';
+  var KEY = 'msql_sess';
+
+  function bh()    { return { 'Content-Type':'application/json', 'apikey': SUPABASE_ANON }; }
+  function ah(tok) { return Object.assign(bh(), { 'Authorization':'Bearer '+tok }); }
+  function save(s) { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch(e){} }
+  function clear() { try { localStorage.removeItem(KEY); } catch(e){} }
+  function read()  { try { var s=localStorage.getItem(KEY); return s?JSON.parse(s):null; } catch(e){return null;} }
+
+  function refresh(sess) {
+    if (!sess || !sess.access_token) return Promise.resolve(null);
+    if (Date.now()/1000 < (sess.expires_at||0) - 60) return Promise.resolve(sess);
+    if (!sess.refresh_token) { clear(); return Promise.resolve(null); }
+    return fetch(A+'/token?grant_type=refresh_token', {
+      method:'POST', headers:bh(), body:JSON.stringify({refresh_token:sess.refresh_token})
+    }).then(function(r){return r.json();}).then(function(d){
+      if (!d.access_token){ clear(); return null; }
+      d.expires_at = Math.floor(Date.now()/1000)+(d.expires_in||3600);
+      save(d); return d;
+    }).catch(function(){ return sess; });
+  }
+
+  function fromTable(table) {
+    var sess  = read();
+    var tok   = sess && sess.access_token ? sess.access_token : SUPABASE_ANON;
+    var cols  = '*';
+    var filts = [];
+    var isSingle = false;
+    var q = {
+      select: function(c){ cols=c||'*'; return q; },
+      eq:     function(col,val){ filts.push(col+'=eq.'+encodeURIComponent(val)); return q; },
+      single: function(){ isSingle=true; return q; },
+      then:   function(res, rej) {
+        var url  = DB+'/'+table+'?select='+cols+(filts.length?'&'+filts.join('&'):'');
+        var hdrs = ah(tok);
+        if (isSingle) hdrs['Accept'] = 'application/vnd.pgrst.object+json';
+        return fetch(url, {headers:hdrs})
+          .then(function(r){return r.json();})
+          .then(function(d){
+            if (isSingle) {
+              res(d && !d.code ? {data:d,error:null} : {data:null,error:d});
+            } else {
+              res(Array.isArray(d) ? {data:d,error:null} : {data:[],error:d});
+            }
+          }).catch(rej);
+      },
+      upsert: function(body) {
+        return fetch(DB+'/'+table, {
+          method:'POST',
+          headers: Object.assign(ah(tok), {'Prefer':'resolution=merge-duplicates,return=minimal'}),
+          body: JSON.stringify(body)
+        }).then(function(r){
+          return r.ok ? {data:body,error:null} : r.json().then(function(e){return {data:null,error:e};});
+        }).catch(function(e){return {data:null,error:{message:e.message}};});
+      }
+    };
+    return q;
+  }
+
+  return {
+    getSession: function() {
+      return refresh(read()).then(function(s){ return {data:{session:s},error:null}; });
+    },
+    from: fromTable
+  };
+})();
+
+// ── HELPERS ───────────────────────────────────────────────────────
+function getInitials(str) {
+  if (!str) return '?';
+  return str.split(/\s+/).map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2) || str.slice(0,2).toUpperCase();
+}
+
+function goHome() {
+  window.location.href = 'index.html';
+}
+
+// ── ADMIN BOOT ────────────────────────────────────────────────────
+var currentUser  = null;
+var userProfile  = null;
+
+// These are stubs — admin.js uses QUESTIONS for analytics titles.
+// We set them as empty so admin.js gracefully shows question IDs only.
+var QUESTIONS = window.QUESTIONS || [];
+
+async function bootAdmin() {
+  try {
+    var res = await Auth.getSession();
+    var session = res.data && res.data.session;
+
+    if (!session || !session.user) {
+      showGate('You must be logged in on the main site first.', true);
+      return;
+    }
+
+    var user = session.user;
+
+    var profileRes = await Auth.from('user_profiles').select('*').eq('id', user.id).single();
+    if (!profileRes.data || !profileRes.data.is_admin) {
+      showGate('Access denied. Admin only.', true);
+      return;
+    }
+
+    currentUser = user;
+    userProfile = profileRes.data;
+
+    var name = userProfile.display_name || userProfile.full_name || user.email.split('@')[0];
+    document.getElementById('adminWelcome').textContent = 'Hello, ' + name;
+
+    document.getElementById('authGate').style.display  = 'none';
+    document.getElementById('adminShell').style.display = 'block';
+
+    AdminDash.init();
+  } catch(e) {
+    showGate('Something went wrong: ' + e.message, true);
+  }
+}
+
+function showGate(msg, showBtn) {
+  var gate = document.getElementById('authGate');
+  gate.innerHTML =
+    '<div class="gate-logo">Mishra<span>SQL</span></div>' +
+    '<p style="color:#ef4444">' + msg + '</p>' +
+    (showBtn ? '<a href="index.html" style="color:#8b5cf6;font-size:0.9rem;margin-top:8px">← Go to main site</a>' : '');
+}
+
+// Also expose updateAnnouncementBanner as a no-op since it's on the main site
+function updateAnnouncementBanner() {}
+
+bootAdmin();
+</script>
+
+<!-- Admin dashboard logic -->
+<script src="admin.js"></script>
+
+</body>
+</html>
