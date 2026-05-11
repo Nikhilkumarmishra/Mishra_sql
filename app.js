@@ -3637,7 +3637,18 @@ var Auth = (function () {
         .then(function(d){ return d.id ? {data:{user:d},error:null} : {data:null,error:d}; })
         .catch(function(e){return {error:{message:e.message}};});
     },
-    from: fromTable
+    from: fromTable,
+    rpc: function(fnName, params) {
+      var s   = (function(){ try{ var x=localStorage.getItem('msql_sess'); return x?JSON.parse(x):null; }catch(e){return null;} })();
+      var tok = s && s.access_token ? s.access_token : SUPABASE_ANON;
+      return fetch(SUPABASE_URL + '/rest/v1/rpc/' + fnName, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json','apikey':SUPABASE_ANON,'Authorization':'Bearer '+tok },
+        body: JSON.stringify(params || {})
+      }).then(function(r){ return r.json(); })
+        .then(function(d){ return Array.isArray(d) ? {data:d,error:null} : {data:null,error:d}; })
+        .catch(function(e){ return {data:null,error:{message:e.message}}; });
+    }
   };
 })();
 
@@ -3667,6 +3678,7 @@ async function init() {
         currentUser = session.user;
         await loadUserProgress(currentUser.id);
         await loadUserProfile(currentUser.id);
+        trackUserActivity(currentUser);
         updateAuthUI(currentUser);
         closeAuthModal();
       } else if (event === 'SIGNED_OUT') {
@@ -3686,9 +3698,12 @@ async function init() {
         currentUser = session.user;
         await loadUserProgress(currentUser.id);
         await loadUserProfile(currentUser.id);
+        trackUserActivity(currentUser);
         updateAuthUI(currentUser);
       }
     }).catch(function(e) { console.warn('Auth session check failed:', e.message); });
+
+    checkAnnouncement();
 
     document.getElementById('loadingScreen').style.display = 'none';
     buildPills();
@@ -3793,6 +3808,10 @@ function updateAuthUI(user) {
     document.getElementById('appUserAvatar').textContent = initials;
     document.getElementById('appUserName').textContent   = name;
   }
+
+  // Show admin nav link only to admins
+  var adminLink = document.getElementById('adminNavLink');
+  if (adminLink) adminLink.style.display = (loggedIn && userProfile && userProfile.is_admin) ? 'inline-flex' : 'none';
 }
 
 function getInitials(str) {
@@ -4078,7 +4097,7 @@ function goToProblem(questionId) {
 
 // ── NAVIGATION ────────────────────────────────────────────────────
 function _hideAllPages() {
-  ['landing-page','app-page','learn-page','profile-page'].forEach(function(id) {
+  ['landing-page','app-page','learn-page','profile-page','admin-page'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });
@@ -4112,6 +4131,44 @@ function goBackFromProfile() {
   } else {
     document.getElementById('landing-page').classList.add('active');
   }
+}
+
+// ── ACTIVITY TRACKING ─────────────────────────────────────────────
+function trackUserActivity(user) {
+  if (!user) return;
+  Auth.from('user_profiles').upsert({
+    id:           user.id,
+    email:        user.email,
+    last_seen_at: new Date().toISOString()
+  }).catch(function(){});
+}
+
+// ── ANNOUNCEMENT BANNER ───────────────────────────────────────────
+async function checkAnnouncement() {
+  try {
+    var dismissed = localStorage.getItem('msql_dismissed_ann') || '';
+    var result    = await Auth.from('site_config').select('*').eq('key','announcement').single();
+    var msg       = (result.data && result.data.value) ? result.data.value.trim() : '';
+    updateAnnouncementBanner(msg, dismissed);
+  } catch(e) {}
+}
+
+function updateAnnouncementBanner(msg, dismissed) {
+  var banner = document.getElementById('announcementBanner');
+  var textEl = document.getElementById('announcementText');
+  if (!banner) return;
+  if (!msg || msg === (dismissed !== undefined ? dismissed : localStorage.getItem('msql_dismissed_ann') || '')) {
+    banner.style.display = 'none';
+    return;
+  }
+  textEl.textContent   = msg;
+  banner.style.display = 'flex';
+}
+
+function dismissAnnouncement() {
+  var textEl = document.getElementById('announcementText');
+  localStorage.setItem('msql_dismissed_ann', textEl ? textEl.textContent : '');
+  document.getElementById('announcementBanner').style.display = 'none';
 }
 
 function scrollToFeatures() {
