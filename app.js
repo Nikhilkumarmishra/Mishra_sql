@@ -2645,6 +2645,60 @@ INSERT INTO products VALUES
 },
 
 {
+  id: 45,
+  num: "46",
+  title: "Orders Greater Than 5000",
+  difficulty: "Easy",
+  tags: ["WHERE", ">", "OPERATORS"],
+
+  desc: `<p>You are given an <strong>orders</strong> table.</p>
+         <p>Write a query to display orders having amount greater than <strong>5000</strong>.</p>
+         <p>Return columns: <code>order_id</code>, <code>amount</code>.</p>`,
+
+  schema: {
+    orders: [
+      { col: "order_id", type: "INTEGER", note: "pk" },
+      { col: "amount",   type: "INTEGER", note: "" },
+    ]
+  },
+
+  seed: `CREATE TABLE orders(order_id INTEGER,amount INTEGER);
+INSERT INTO orders VALUES
+(1,3000),
+(2,7000),
+(3,4500),
+(4,9000);`,
+
+  example: {
+    cols: ["order_id", "amount"],
+    rows: [
+      [2, 7000],
+      [4, 9000]
+    ]
+  },
+
+  hint: "Use <strong>WHERE amount > 5000</strong>.",
+
+  testCases: [
+    {
+      name: "Two orders returned",
+      seed: null,
+      check: (rows) => rows.length === 2
+    },
+    {
+      name: "7000 included",
+      seed: null,
+      check: (rows) => rows.some(r => Number(r.amount) === 7000)
+    },
+    {
+      name: "3000 excluded",
+      seed: null,
+      check: (rows) => !rows.some(r => Number(r.amount) === 3000)
+    },
+  ]
+},
+
+{
   id: 46,
   num: "47",
   title: "Employee Department Names",
