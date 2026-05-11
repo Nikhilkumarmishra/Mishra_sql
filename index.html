@@ -456,6 +456,9 @@
         <div class="profile-progress-label" id="profileProgressLabel"></div>
       </div>
 
+      <!-- CERTIFICATION BLOCK -->
+      <div id="certProfileBlock" style="display:none"></div>
+
       <!-- QUESTION LIST -->
       <div class="profile-section">
         <div class="profile-section-title">All Problems</div>
@@ -514,6 +517,148 @@
 
   </div>
 </div>
+
+<!-- ══════════════════════════════════════════════════════════
+     CERTIFICATION MODAL
+══════════════════════════════════════════════════════════════ -->
+<div id="certModal" class="cert-modal" style="display:none" onclick="if(event.target===this)CertFlow.close()">
+  <div class="cert-modal-box">
+
+    <!-- Step progress bar -->
+    <div class="cert-progress-steps" id="certProgressSteps" style="display:none">
+      <div class="cert-prog-step" id="certProg1">
+        <div class="cert-prog-dot">1</div>
+        <span>Aptitude Test</span>
+      </div>
+      <div class="cert-prog-line"></div>
+      <div class="cert-prog-step" id="certProg2">
+        <div class="cert-prog-dot">2</div>
+        <span>Feedback</span>
+      </div>
+      <div class="cert-prog-line"></div>
+      <div class="cert-prog-step" id="certProg3">
+        <div class="cert-prog-dot">3</div>
+        <span>Certificate</span>
+      </div>
+    </div>
+
+    <!-- ── Screen: Hub (eligible, hasn't started) ── -->
+    <div class="cert-screen" id="certScreenHub">
+      <button class="cert-close-btn" onclick="CertFlow.close()">✕</button>
+      <div class="cert-hero-icon">🎓</div>
+      <h2 class="cert-h2">You're Eligible!</h2>
+      <p class="cert-sub">You've solved all 60 SQL problems on MishraSQL. Pass the final aptitude test to earn your official <strong>SQL Analyst Certificate</strong>.</p>
+      <div class="cert-info-row">
+        <div class="cert-info-card">
+          <div class="cert-info-big">15</div>
+          <div class="cert-info-small">minutes</div>
+        </div>
+        <div class="cert-info-card">
+          <div class="cert-info-big">15</div>
+          <div class="cert-info-small">questions</div>
+        </div>
+        <div class="cert-info-card">
+          <div class="cert-info-big">10/15</div>
+          <div class="cert-info-small">to pass</div>
+        </div>
+      </div>
+      <p class="cert-topics-note"><strong>Topics covered:</strong> WHERE vs HAVING · JOINs · GROUP BY · Window Functions · NULL Handling · CTEs · Subqueries · SQL execution order</p>
+      <p class="cert-warn-note">⚠️ Once started, the 15-minute timer cannot be paused. A failed attempt has a 24-hour cooldown.</p>
+      <button class="cert-btn-primary cert-btn-big" onclick="CertFlow.startTest()">Start Certification Test →</button>
+    </div>
+
+    <!-- ── Screen: MCQ Test ── -->
+    <div class="cert-screen" id="certScreenTest">
+      <div class="cert-test-topbar">
+        <div class="cert-q-counter" id="certQCounter">Question 1 of 15</div>
+        <div class="cert-timer-wrap">
+          <span class="cert-timer-icon">⏱</span>
+          <span class="cert-timer-val" id="certTimerVal">15:00</span>
+        </div>
+      </div>
+      <div class="cert-timer-track">
+        <div class="cert-timer-fill" id="certTimerFill"></div>
+      </div>
+      <div class="cert-q-text" id="certQText"></div>
+      <div class="cert-options-list" id="certOptionsList"></div>
+      <button class="cert-btn-primary" id="certNextBtn" onclick="CertFlow.nextQ()" disabled>Next →</button>
+    </div>
+
+    <!-- ── Screen: Passed ── -->
+    <div class="cert-screen" id="certScreenPass">
+      <div class="cert-hero-icon">🎉</div>
+      <h2 class="cert-h2">You Passed!</h2>
+      <div class="cert-score-badge pass" id="certPassScore">— / 15</div>
+      <p class="cert-sub">Excellent work! You've demonstrated strong SQL knowledge. One last step — a quick feedback form to receive your certificate.</p>
+      <button class="cert-btn-primary cert-btn-big" onclick="CertFlow.showFeedback()">Continue to Feedback →</button>
+    </div>
+
+    <!-- ── Screen: Failed ── -->
+    <div class="cert-screen" id="certScreenFail">
+      <button class="cert-close-btn" onclick="CertFlow.close()">✕</button>
+      <div class="cert-hero-icon">😔</div>
+      <h2 class="cert-h2">Almost There</h2>
+      <div class="cert-score-badge fail" id="certFailScore">— / 15</div>
+      <p class="cert-sub">You need <strong>10 / 15</strong> to pass. Review the topics below, then try again after the cooldown.</p>
+      <div class="cert-weak-wrap" id="certWeakTopics"></div>
+      <div class="cert-cooldown-msg" id="certCooldownMsg"></div>
+      <button class="cert-btn-secondary" style="margin-top:20px" onclick="CertFlow.close()">Close</button>
+    </div>
+
+    <!-- ── Screen: Feedback ── -->
+    <div class="cert-screen" id="certScreenFeedback">
+      <h2 class="cert-h2">Almost There! 🚀</h2>
+      <p class="cert-sub">Share your experience — takes under a minute.</p>
+      <div class="cert-form">
+        <label class="cert-label">How would you rate MishraSQL?</label>
+        <div class="cert-stars" id="certStarsRow">
+          <span class="cert-star" onclick="CertFlow.setRating(1)">★</span>
+          <span class="cert-star" onclick="CertFlow.setRating(2)">★</span>
+          <span class="cert-star" onclick="CertFlow.setRating(3)">★</span>
+          <span class="cert-star" onclick="CertFlow.setRating(4)">★</span>
+          <span class="cert-star" onclick="CertFlow.setRating(5)">★</span>
+        </div>
+        <label class="cert-label">What did you enjoy most?</label>
+        <textarea id="certFbEnjoy" class="cert-textarea" rows="2" placeholder="e.g. The variety of problems, instant SQL execution..."></textarea>
+        <label class="cert-label">Any suggestions?</label>
+        <textarea id="certFbSuggest" class="cert-textarea" rows="2" placeholder="e.g. More hard problems, video explanations..."></textarea>
+        <label class="cert-label">Confirm your email (certificate will be sent here)</label>
+        <input type="email" id="certFbEmail" class="cert-input" placeholder="you@example.com">
+      </div>
+      <button class="cert-btn-primary cert-btn-big" id="certSubmitFbBtn" onclick="CertFlow.submitFeedback()">Submit & Get Certificate →</button>
+      <div class="cert-status-line" id="certFbStatus"></div>
+    </div>
+
+    <!-- ── Screen: Success / First-time certified ── -->
+    <div class="cert-screen" id="certScreenSuccess">
+      <button class="cert-close-btn" onclick="CertFlow.close()">✕</button>
+      <div class="cert-hero-icon">🏆</div>
+      <h2 class="cert-h2">Certified SQL Analyst!</h2>
+      <p class="cert-sub">Your certificate has been sent to <strong id="certSuccessEmail"></strong></p>
+      <canvas id="certCanvas" class="cert-canvas-preview"></canvas>
+      <div class="cert-success-btns">
+        <button class="cert-btn-primary" onclick="CertFlow.downloadCert()">↓ Download Certificate</button>
+        <button class="cert-btn-secondary" onclick="CertFlow.close()">Back to Platform</button>
+      </div>
+      <p class="cert-profile-note">Your profile now shows the <strong>Certified Analyst</strong> badge ✓</p>
+    </div>
+
+    <!-- ── Screen: View existing cert ── -->
+    <div class="cert-screen" id="certScreenView">
+      <button class="cert-close-btn" onclick="CertFlow.close()">✕</button>
+      <h2 class="cert-h2">Your Certificate 🏆</h2>
+      <canvas id="certCanvasView" class="cert-canvas-preview"></canvas>
+      <div class="cert-success-btns">
+        <button class="cert-btn-primary" onclick="CertFlow.downloadCert()">↓ Download Certificate</button>
+        <button class="cert-btn-secondary" onclick="CertFlow.close()">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- EmailJS SDK (optional — configure EMAILJS_* constants in app.js to activate) -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
 <!-- SQL.JS engine (WebAssembly) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>

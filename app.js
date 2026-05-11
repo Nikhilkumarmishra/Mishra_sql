@@ -3617,12 +3617,19 @@ var Auth = (function () {
     var cols  = '*';
     var filts = [];
     var isSingle = false;
+    var _order   = null;
+    var _limit   = null;
     var q = {
-      select: function(c){ cols=c||'*'; return q; },
-      eq:     function(col,val){ filts.push(col+'=eq.'+encodeURIComponent(val)); return q; },
-      single: function(){ isSingle=true; return q; },
+      select:  function(c){ cols=c||'*'; return q; },
+      eq:      function(col,val){ filts.push(col+'=eq.'+encodeURIComponent(val)); return q; },
+      neq:     function(col,val){ filts.push(col+'=neq.'+encodeURIComponent(val)); return q; },
+      order:   function(col,asc){ _order = col+'.'+(asc?'asc':'desc'); return q; },
+      limit:   function(n){ _limit = n; return q; },
+      single:  function(){ isSingle=true; return q; },
       then: function(res, rej) {
         var url = DB+'/'+table+'?select='+cols+(filts.length?'&'+filts.join('&'):'');
+        if (_order) url += '&order='+_order;
+        if (_limit) url += '&limit='+_limit;
         var hdrs = ah(tok);
         if (isSingle) hdrs['Accept'] = 'application/vnd.pgrst.object+json';
         return fetch(url, {headers:hdrs})
@@ -3634,6 +3641,25 @@ var Auth = (function () {
               res(Array.isArray(d) ? {data:d,error:null} : {data:[],error:d});
             }
           }).catch(rej);
+      },
+      insert: function(body) {
+        return fetch(DB+'/'+table, {
+          method:'POST',
+          headers: Object.assign(ah(tok), {'Prefer':'return=representation'}),
+          body: JSON.stringify(body)
+        }).then(function(r){
+          return r.ok ? r.json().then(function(d){return {data:d,error:null};}) : r.json().then(function(e){return {data:null,error:e};});
+        }).catch(function(e){return {data:null,error:{message:e.message}};});
+      },
+      update: function(body) {
+        var url = DB+'/'+table+(filts.length?'?'+filts.join('&'):'');
+        return fetch(url, {
+          method:'PATCH',
+          headers: Object.assign(ah(tok), {'Prefer':'return=minimal'}),
+          body: JSON.stringify(body)
+        }).then(function(r){
+          return r.ok ? {data:body,error:null} : r.json().then(function(e){return {data:null,error:e};});
+        }).catch(function(e){return {data:null,error:{message:e.message}};});
       },
       upsert: function(body) {
         return fetch(DB+'/'+table, {
@@ -4100,6 +4126,7 @@ function renderProfileStats() {
   document.getElementById('statHard').textContent    = hardSolved;
   document.getElementById('profileProgressFill').style.width = pct + '%';
   document.getElementById('profileProgressLabel').textContent = `${solved} of ${total} problems solved (${pct}%)`;
+  if (typeof CertFlow !== 'undefined') CertFlow.renderCertProfileBlock();
 }
 
 function filterProfileQ(filter) {
@@ -4492,6 +4519,812 @@ function showOutputErr(msg) {
   document.getElementById('outputStatus').textContent = '';
   document.getElementById('outputBody').innerHTML = `<div class="err-block">${msg}</div>`;
 }
+
+// ================================================================
+//  CERTIFICATION FLOW
+// ================================================================
+
+// ── EmailJS config — sign up free at emailjs.com, fill in below ──
+var EMAILJS_SERVICE_ID  = '';   // e.g. 'service_abc123'
+var EMAILJS_TEMPLATE_ID = '';   // e.g. 'template_xyz789'
+var EMAILJS_PUBLIC_KEY  = '';   // e.g. 'user_XXXXXXXXXXXX'
+
+// ── 15 MCQ questions ─────────────────────────────────────────────
+var CERT_MCQ = [
+  {
+    q: "What is the key difference between WHERE and HAVING?",
+    opts: [
+      "WHERE filters rows before aggregation; HAVING filters groups after GROUP BY",
+      "HAVING filters rows before aggregation; WHERE filters groups after GROUP BY",
+      "They are completely interchangeable",
+      "WHERE only works with numeric columns"
+    ],
+    ans: 0, topic: "Filtering"
+  },
+  {
+    q: "Which JOIN type returns all rows from the LEFT table and NULL-filled columns for unmatched rows in the RIGHT table?",
+    opts: ["INNER JOIN", "RIGHT JOIN", "LEFT JOIN", "CROSS JOIN"],
+    ans: 2, topic: "JOINs"
+  },
+  {
+    q: "What is the difference between COUNT(*) and COUNT(column_name)?",
+    opts: [
+      "COUNT(*) is faster; COUNT(column) is slower",
+      "COUNT(*) counts all rows including NULLs; COUNT(column) counts only non-NULL values",
+      "They always return the same result",
+      "COUNT(*) only works on numeric types"
+    ],
+    ans: 1, topic: "Aggregates"
+  },
+  {
+    q: "SELECT dept, SUM(salary) FROM employees GROUP BY dept HAVING SUM(salary) > 50000 — what does HAVING do here?",
+    opts: [
+      "Filters individual employees with salary > 50000 before grouping",
+      "Filters departments whose total salary exceeds 50000 after grouping",
+      "Sorts departments by total salary descending",
+      "Creates a new computed column in the output"
+    ],
+    ans: 1, topic: "HAVING"
+  },
+  {
+    q: "How does DENSE_RANK() differ from RANK()?",
+    opts: [
+      "DENSE_RANK() skips rank numbers after ties; RANK() does not",
+      "DENSE_RANK() does NOT skip rank numbers after ties; RANK() does skip them",
+      "They always return identical results",
+      "DENSE_RANK() only works with date columns"
+    ],
+    ans: 1, topic: "Window Functions"
+  },
+  {
+    q: "In SQL, what does the expression NULL = NULL evaluate to?",
+    opts: ["TRUE", "FALSE", "NULL", "0"],
+    ans: 2, topic: "NULL Handling"
+  },
+  {
+    q: "What does COALESCE(NULL, NULL, 7, 99) return?",
+    opts: ["NULL", "99", "7", "Error"],
+    ans: 2, topic: "NULL Handling"
+  },
+  {
+    q: "Which of the following is a correctly written subquery?",
+    opts: [
+      "SELECT * FROM (SELECT id FROM orders WHERE amount > 1000) AS high_orders",
+      "SELECT * SUBQUERY orders WHERE amount > 1000",
+      "SELECT * WHERE id IN QUERY (SELECT id FROM orders)",
+      "INNER SELECT id FROM orders WHERE amount > 1000"
+    ],
+    ans: 0, topic: "Subqueries"
+  },
+  {
+    q: "What is a CTE (Common Table Expression)?",
+    opts: [
+      "A permanent table stored in the database schema",
+      "A temporary named result set defined before the main query using the WITH keyword",
+      "A type of index that speeds up GROUP BY queries",
+      "A constraint that prevents duplicate column values"
+    ],
+    ans: 1, topic: "CTEs"
+  },
+  {
+    q: "SELECT * FROM orders WHERE amount BETWEEN 100 AND 500 — are the values 100 and 500 included in the results?",
+    opts: [
+      "No — BETWEEN is exclusive on both ends (101–499 only)",
+      "Yes — BETWEEN is inclusive on both ends (100 and 500 are included)",
+      "Only the lower bound 100 is included",
+      "Only the upper bound 500 is included"
+    ],
+    ans: 1, topic: "Operators"
+  },
+  {
+    q: "This query has a mistake: SELECT dept, name, COUNT(*) FROM employees GROUP BY dept — what is wrong?",
+    opts: [
+      "COUNT(*) cannot be used with GROUP BY",
+      "'name' is neither in the GROUP BY clause nor wrapped in an aggregate — this violates SQL rules",
+      "GROUP BY must appear before the WHERE clause",
+      "Nothing is wrong; this query is perfectly valid"
+    ],
+    ans: 1, topic: "GROUP BY"
+  },
+  {
+    q: "What does ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary DESC) assign?",
+    opts: [
+      "A unique sequential number to each row, restarting at 1 for each department, ordered by salary descending",
+      "The total count of rows per department",
+      "The department with the highest salary",
+      "It filters to keep only the top-salary row per department"
+    ],
+    ans: 0, topic: "Window Functions"
+  },
+  {
+    q: "Which statement about a LEFT JOIN is correct?",
+    opts: [
+      "Returns only rows with a match in both tables",
+      "Returns all rows from the right table; left rows with no match get NULL",
+      "Returns all rows from the left table; right-side columns are NULL when there is no match",
+      "LEFT JOIN and INNER JOIN always produce the same result"
+    ],
+    ans: 2, topic: "JOINs"
+  },
+  {
+    q: "You want rows from 'customers' that have at least one matching row in 'orders'. Which is most appropriate?",
+    opts: [
+      "SELECT * FROM customers WHERE NOT EXISTS (SELECT 1 FROM orders WHERE orders.customer_id = customers.id)",
+      "SELECT * FROM customers WHERE EXISTS (SELECT 1 FROM orders WHERE orders.customer_id = customers.id)",
+      "SELECT * FROM customers HAVING COUNT(orders) > 0",
+      "SELECT * FROM customers WHERE customer_id IN orders"
+    ],
+    ans: 1, topic: "Subqueries"
+  },
+  {
+    q: "What is the correct logical execution order of SQL clauses?",
+    opts: [
+      "SELECT → FROM → WHERE → GROUP BY → HAVING → ORDER BY",
+      "FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY",
+      "FROM → SELECT → WHERE → GROUP BY → HAVING → ORDER BY",
+      "WHERE → FROM → GROUP BY → SELECT → HAVING → ORDER BY"
+    ],
+    ans: 1, topic: "SQL Fundamentals"
+  }
+];
+
+// ── CertFlow module ───────────────────────────────────────────────
+var CertFlow = (function () {
+
+  var PASS_MARK    = 10;
+  var COOLDOWN_MS  = 24 * 60 * 60 * 1000;
+  var TOTAL_SEC    = 15 * 60;
+
+  var LS_STARTED = 'msql_cert_started';
+  var LS_ORDER   = 'msql_cert_order';
+  var LS_ANSWERS = 'msql_cert_answers';
+
+  var _state       = null;  // 'eligible'|'in_test'|'cooldown'|'pass_pending'|'certified'
+  var _qOrder      = [];    // shuffled MCQ indices
+  var _currentQ    = 0;
+  var _answers     = [];    // array of selected option indices
+  var _timerSec    = TOTAL_SEC;
+  var _timerRef    = null;
+  var _rating      = 0;
+  var _certDataUrl = null;
+  var _lastAttemptId = null;
+  var _lastScore   = 0;
+
+  // ── shuffle helper ──────────────────────────────────────────
+  function _shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  // ── screen switcher ──────────────────────────────────────────
+  function _show(screenId, stepNum) {
+    document.querySelectorAll('.cert-screen').forEach(function (el) {
+      el.classList.remove('active');
+    });
+    var el = document.getElementById(screenId);
+    if (el) el.classList.add('active');
+
+    var stepsEl = document.getElementById('certProgressSteps');
+    if (stepsEl) {
+      stepsEl.style.display = stepNum ? 'flex' : 'none';
+      if (stepNum) {
+        [1, 2, 3].forEach(function (n) {
+          var dot = document.getElementById('certProg' + n);
+          if (dot) {
+            dot.classList.toggle('active',   n === stepNum);
+            dot.classList.toggle('done',     n < stepNum);
+          }
+        });
+      }
+    }
+  }
+
+  // ── load cert status from DB + localStorage ──────────────────
+  async function _loadState() {
+    if (!currentUser) return;
+
+    // Already certified?
+    if (userProfile && userProfile.is_certified) { _state = 'certified'; return; }
+
+    // In-progress test in localStorage?
+    var savedStart = localStorage.getItem(LS_STARTED);
+    var savedOrder = localStorage.getItem(LS_ORDER);
+    if (savedStart && savedOrder) {
+      var elapsed = Date.now() - parseInt(savedStart, 10);
+      if (elapsed < TOTAL_SEC * 1000) {
+        _state      = 'in_test';
+        _timerSec   = Math.max(0, TOTAL_SEC - Math.floor(elapsed / 1000));
+        _qOrder     = JSON.parse(savedOrder);
+        _answers    = JSON.parse(localStorage.getItem(LS_ANSWERS) || '[]');
+        _currentQ   = _answers.length;
+        return;
+      }
+      // Timer expired while away — treat as failed attempt, clear
+      _clearLS();
+    }
+
+    // Check DB for latest attempt
+    try {
+      var r = await Auth.from('certification_attempts')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('created_at', false)
+        .limit(1);
+
+      var rows = r.data || [];
+      if (rows.length > 0) {
+        var latest = rows[0];
+        _lastAttemptId = latest.id;
+        _lastScore     = latest.score || 0;
+
+        if (latest.passed) {
+          _state = 'pass_pending'; // passed but feedback not submitted yet
+          return;
+        }
+        if (latest.submitted_at) {
+          var coolEnd = new Date(latest.submitted_at).getTime() + COOLDOWN_MS;
+          if (Date.now() < coolEnd) {
+            _state = 'cooldown';
+            return;
+          }
+        }
+      }
+    } catch (e) {}
+
+    _state = 'eligible';
+  }
+
+  // ── open modal ───────────────────────────────────────────────
+  async function open() {
+    if (!currentUser) { openAuthModal('login'); return; }
+    await _loadState();
+    document.getElementById('certModal').style.display = 'flex';
+
+    if (_state === 'certified') {
+      _drawCertificate('certCanvasView');
+      _show('certScreenView', null);
+    } else if (_state === 'in_test') {
+      _resumeTest();
+    } else if (_state === 'pass_pending') {
+      _prefillEmail();
+      _show('certScreenFeedback', 2);
+    } else if (_state === 'cooldown') {
+      _showCooldownScreen();
+    } else {
+      _show('certScreenHub', null);
+    }
+  }
+
+  function close() {
+    document.getElementById('certModal').style.display = 'none';
+    if (_timerRef) { clearInterval(_timerRef); _timerRef = null; }
+  }
+
+  // ── start / resume test ──────────────────────────────────────
+  async function startTest() {
+    // Create DB attempt row
+    try {
+      var prev = await Auth.from('certification_attempts')
+        .select('attempt_num')
+        .eq('user_id', currentUser.id)
+        .order('created_at', false)
+        .limit(1);
+      var prevRows = prev.data || [];
+      var attemptNum = prevRows.length > 0 ? (prevRows[0].attempt_num + 1) : 1;
+
+      var ins = await Auth.from('certification_attempts').insert({
+        user_id:     currentUser.id,
+        started_at:  new Date().toISOString(),
+        attempt_num: attemptNum
+      });
+      if (ins.data && ins.data[0]) _lastAttemptId = ins.data[0].id;
+    } catch (e) {}
+
+    _qOrder   = _shuffle(CERT_MCQ.map(function (_, i) { return i; }));
+    _answers  = [];
+    _currentQ = 0;
+    _timerSec = TOTAL_SEC;
+
+    localStorage.setItem(LS_STARTED, Date.now().toString());
+    localStorage.setItem(LS_ORDER,   JSON.stringify(_qOrder));
+    localStorage.setItem(LS_ANSWERS, '[]');
+
+    _show('certScreenTest', 1);
+    _renderQuestion();
+    _startTimer();
+  }
+
+  function _resumeTest() {
+    _show('certScreenTest', 1);
+    _renderQuestion();
+    _startTimer();
+  }
+
+  // ── timer ────────────────────────────────────────────────────
+  function _startTimer() {
+    if (_timerRef) clearInterval(_timerRef);
+    _updateTimerUI();
+    _timerRef = setInterval(function () {
+      _timerSec--;
+      _updateTimerUI();
+      if (_timerSec <= 0) {
+        clearInterval(_timerRef);
+        _timerRef = null;
+        _submitTest(true);
+      }
+    }, 1000);
+  }
+
+  function _updateTimerUI() {
+    var m   = Math.floor(_timerSec / 60);
+    var s   = _timerSec % 60;
+    var txt = m + ':' + (s < 10 ? '0' : '') + s;
+    var el  = document.getElementById('certTimerVal');
+    if (el) {
+      el.textContent = txt;
+      el.classList.toggle('cert-timer-warn', _timerSec <= 120);
+    }
+    var fill = document.getElementById('certTimerFill');
+    if (fill) {
+      var pct = (_timerSec / TOTAL_SEC) * 100;
+      fill.style.width = pct + '%';
+      fill.classList.toggle('cert-timer-fill-warn', _timerSec <= 120);
+    }
+  }
+
+  // ── render question ──────────────────────────────────────────
+  function _renderQuestion() {
+    var qIdx = _qOrder[_currentQ];
+    var mcq  = CERT_MCQ[qIdx];
+
+    var counter = document.getElementById('certQCounter');
+    if (counter) counter.textContent = 'Question ' + (_currentQ + 1) + ' of ' + CERT_MCQ.length;
+
+    var qText = document.getElementById('certQText');
+    if (qText) qText.textContent = mcq.q;
+
+    var optList = document.getElementById('certOptionsList');
+    if (optList) {
+      optList.innerHTML = mcq.opts.map(function (opt, i) {
+        return '<div class="cert-option" onclick="CertFlow.selectOpt(' + i + ')">' +
+          '<span class="cert-opt-letter">' + String.fromCharCode(65 + i) + '</span>' +
+          '<span class="cert-opt-text">' + opt + '</span>' +
+        '</div>';
+      }).join('');
+    }
+
+    var nextBtn = document.getElementById('certNextBtn');
+    if (nextBtn) {
+      nextBtn.disabled    = true;
+      nextBtn.textContent = _currentQ === CERT_MCQ.length - 1 ? 'Submit Test →' : 'Next →';
+    }
+  }
+
+  function selectOpt(i) {
+    document.querySelectorAll('.cert-option').forEach(function (el, idx) {
+      el.classList.toggle('selected', idx === i);
+    });
+    var nextBtn = document.getElementById('certNextBtn');
+    if (nextBtn) {
+      nextBtn.disabled   = false;
+      nextBtn._selected  = i;
+    }
+  }
+
+  function nextQ() {
+    var nextBtn = document.getElementById('certNextBtn');
+    var selected = nextBtn ? nextBtn._selected : null;
+    if (selected === null || selected === undefined) return;
+
+    _answers.push(selected);
+    localStorage.setItem(LS_ANSWERS, JSON.stringify(_answers));
+
+    _currentQ++;
+    if (_currentQ >= CERT_MCQ.length) {
+      if (_timerRef) { clearInterval(_timerRef); _timerRef = null; }
+      _submitTest(false);
+    } else {
+      _renderQuestion();
+    }
+  }
+
+  // ── submit & score ───────────────────────────────────────────
+  async function _submitTest(timedOut) {
+    var score = 0;
+    _answers.forEach(function (sel, i) {
+      var qIdx = _qOrder[i];
+      if (CERT_MCQ[qIdx] && sel === CERT_MCQ[qIdx].ans) score++;
+    });
+    _lastScore = score;
+
+    var passed = score >= PASS_MARK;
+    var now    = new Date().toISOString();
+
+    // Update DB attempt row
+    if (_lastAttemptId) {
+      try {
+        await Auth.from('certification_attempts')
+          .eq('id', _lastAttemptId)
+          .update({ submitted_at: now, score: score, passed: passed });
+      } catch (e) {}
+    }
+
+    _clearLS();
+
+    if (passed) {
+      _state = 'pass_pending';
+      document.getElementById('certPassScore').textContent = score + ' / ' + CERT_MCQ.length;
+      _show('certScreenPass', 1);
+    } else {
+      _state = 'cooldown';
+      _showFailScreen(score, timedOut);
+    }
+  }
+
+  function _showCooldownScreen() {
+    document.getElementById('certFailScore').textContent = _lastScore + ' / ' + CERT_MCQ.length;
+    _renderWeakTopics(_lastScore);
+    _renderCooldown();
+    _show('certScreenFail', null);
+  }
+
+  function _showFailScreen(score, timedOut) {
+    document.getElementById('certFailScore').textContent = score + ' / ' + CERT_MCQ.length;
+    _renderWeakTopics(score);
+    _renderCooldown();
+    if (timedOut) {
+      var msg = document.getElementById('certCooldownMsg');
+      if (msg) {
+        var existing = msg.innerHTML;
+        msg.innerHTML = '<p class="cert-timeout-note">⏱ Time ran out. ' + (existing || '') + '</p>';
+      }
+    }
+    _show('certScreenFail', null);
+  }
+
+  function _renderWeakTopics(score) {
+    var wrong = [];
+    _answers.forEach(function (sel, i) {
+      var qIdx = _qOrder[i];
+      if (CERT_MCQ[qIdx] && sel !== CERT_MCQ[qIdx].ans) wrong.push(CERT_MCQ[qIdx].topic);
+    });
+    // deduplicate
+    var topics = wrong.filter(function (t, i) { return wrong.indexOf(t) === i; });
+    var el = document.getElementById('certWeakTopics');
+    if (el) {
+      el.innerHTML = topics.length
+        ? '<p class="cert-weak-label">Topics to review:</p>' +
+          topics.map(function (t) { return '<span class="cert-weak-pill">' + t + '</span>'; }).join('')
+        : '';
+    }
+  }
+
+  function _renderCooldown() {
+    var el = document.getElementById('certCooldownMsg');
+    if (!el) return;
+    // Estimate cooldown from submitted_at in last DB row (we may not have it locally)
+    // So just show 24h message
+    var retakeDate = new Date(Date.now() + COOLDOWN_MS);
+    var retakeStr  = retakeDate.toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    el.innerHTML = '<p>Retake unlocks on <strong>' + retakeStr + '</strong></p>';
+  }
+
+  // ── feedback ─────────────────────────────────────────────────
+  function showFeedback() {
+    _prefillEmail();
+    _show('certScreenFeedback', 2);
+  }
+
+  function _prefillEmail() {
+    var emailEl = document.getElementById('certFbEmail');
+    if (emailEl && currentUser && currentUser.email) emailEl.value = currentUser.email;
+  }
+
+  function setRating(n) {
+    _rating = n;
+    document.querySelectorAll('.cert-star').forEach(function (star, i) {
+      star.classList.toggle('lit', i < n);
+    });
+  }
+
+  async function submitFeedback() {
+    var btn     = document.getElementById('certSubmitFbBtn');
+    var statusEl = document.getElementById('certFbStatus');
+    var email   = (document.getElementById('certFbEmail').value || '').trim();
+    var enjoyed  = (document.getElementById('certFbEnjoy').value || '').trim();
+    var suggest  = (document.getElementById('certFbSuggest').value || '').trim();
+
+    if (!email) { statusEl.textContent = 'Please enter your email.'; return; }
+    if (!_rating) { statusEl.textContent = 'Please rate the platform.'; return; }
+
+    btn.disabled    = true;
+    btn.textContent = 'Sending…';
+    statusEl.textContent = '';
+
+    // Save feedback
+    try {
+      await Auth.from('cert_feedback').insert({
+        user_id:    currentUser.id,
+        rating:     _rating,
+        enjoyed:    enjoyed,
+        suggestions: suggest
+      });
+    } catch (e) {}
+
+    // Mark certified in DB
+    try {
+      await Auth.from('user_profiles')
+        .eq('id', currentUser.id)
+        .update({
+          is_certified:        true,
+          certificate_sent_at: new Date().toISOString(),
+          certified_score:     _lastScore
+        });
+      if (userProfile) {
+        userProfile.is_certified        = true;
+        userProfile.certificate_sent_at = new Date().toISOString();
+      }
+    } catch (e) {}
+
+    _state = 'certified';
+    _clearLS();
+
+    // Draw certificate
+    var name = (userProfile && (userProfile.display_name || userProfile.full_name)) || currentUser.email.split('@')[0];
+    _certDataUrl = _drawCertificate('certCanvas', name);
+
+    // Send email
+    document.getElementById('certSuccessEmail').textContent = email;
+    _sendCertEmail(name, email);
+
+    _show('certScreenSuccess', 3);
+    btn.disabled    = false;
+    btn.textContent = 'Submit & Get Certificate →';
+
+    // Refresh profile cert block if visible
+    renderCertProfileBlock();
+  }
+
+  // ── certificate canvas ───────────────────────────────────────
+  function _drawCertificate(canvasId, name) {
+    var canvas = document.getElementById(canvasId);
+    if (!canvas) return null;
+    var W = 800, H = 560;
+    canvas.width = W; canvas.height = H;
+    var ctx = canvas.getContext('2d');
+
+    // Background
+    var grad = ctx.createLinearGradient(0, 0, W, H);
+    grad.addColorStop(0, '#0d0e17');
+    grad.addColorStop(1, '#121420');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Outer border
+    ctx.strokeStyle = '#8b5cf6';
+    ctx.lineWidth   = 3;
+    _roundRect(ctx, 16, 16, W - 32, H - 32, 12, false, true);
+
+    // Inner border (subtle)
+    ctx.strokeStyle = 'rgba(139,92,246,0.25)';
+    ctx.lineWidth   = 1;
+    _roundRect(ctx, 26, 26, W - 52, H - 52, 8, false, true);
+
+    // Top accent bar
+    var bar = ctx.createLinearGradient(80, 0, W - 80, 0);
+    bar.addColorStop(0, 'transparent');
+    bar.addColorStop(0.3, '#8b5cf6');
+    bar.addColorStop(0.7, '#a78bfa');
+    bar.addColorStop(1, 'transparent');
+    ctx.fillStyle = bar;
+    ctx.fillRect(80, 88, W - 160, 2);
+    ctx.fillRect(80, H - 96, W - 160, 2);
+
+    // Corner dots
+    [[60,60],[W-60,60],[60,H-60],[W-60,H-60]].forEach(function(pt){
+      ctx.beginPath();
+      ctx.arc(pt[0], pt[1], 4, 0, Math.PI*2);
+      ctx.fillStyle = '#8b5cf6';
+      ctx.fill();
+    });
+
+    // Platform name
+    ctx.fillStyle = '#8b5cf6';
+    ctx.font      = 'bold 22px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('MishraSQL  ·  Analyst World', W / 2, 66);
+
+    // Stars decoration
+    ctx.fillStyle = 'rgba(139,92,246,0.5)';
+    ctx.font = '14px Arial';
+    ctx.fillText('★  ★  ★  ★  ★', W / 2, 82);
+
+    // "Certificate of Achievement"
+    ctx.fillStyle = '#c4b5fd';
+    ctx.font      = '13px Arial, sans-serif';
+    ctx.letterSpacing = '3px';
+    ctx.fillText('CERTIFICATE  OF  ACHIEVEMENT', W / 2, 122);
+    ctx.letterSpacing = '0px';
+
+    // "This certifies that"
+    ctx.fillStyle = '#6b7280';
+    ctx.font      = '15px Arial, sans-serif';
+    ctx.fillText('This certifies that', W / 2, 162);
+
+    // Recipient name
+    var displayName = name || 'SQL Analyst';
+    ctx.fillStyle = '#f9f8f5';
+    ctx.font      = 'bold 44px Georgia, serif';
+    ctx.fillText(displayName, W / 2, 230);
+
+    // Name underline
+    var nw = ctx.measureText(displayName).width;
+    ctx.strokeStyle = '#8b5cf6';
+    ctx.lineWidth   = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(W/2 - nw/2 - 24, 243);
+    ctx.lineTo(W/2 + nw/2 + 24, 243);
+    ctx.stroke();
+
+    // Achievement text
+    ctx.fillStyle = '#d1d5db';
+    ctx.font      = '15px Arial, sans-serif';
+    ctx.fillText('has successfully completed the', W / 2, 278);
+
+    ctx.fillStyle = '#a78bfa';
+    ctx.font      = 'bold 20px Arial, sans-serif';
+    ctx.fillText('SQL Analyst Certification', W / 2, 308);
+
+    ctx.fillStyle = '#6b7280';
+    ctx.font      = '13px Arial, sans-serif';
+    ctx.fillText('Demonstrating proficiency in SQL querying, aggregation, JOINs,', W / 2, 342);
+    ctx.fillText('window functions, CTEs, subqueries, and data analysis.', W / 2, 360);
+
+    // Date
+    var dateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+    ctx.fillStyle = '#9ca3af';
+    ctx.font      = '13px Arial, sans-serif';
+    ctx.fillText('Issued on  ' + dateStr, W / 2, 412);
+
+    // Score badge
+    ctx.fillStyle = 'rgba(139,92,246,0.15)';
+    _roundRect(ctx, W/2 - 60, 424, 120, 30, 6, true, false);
+    ctx.fillStyle = '#a78bfa';
+    ctx.font      = '12px Arial, sans-serif';
+    ctx.fillText('Score: ' + _lastScore + ' / ' + CERT_MCQ.length, W / 2, 444);
+
+    // Footer
+    ctx.fillStyle = '#4b5563';
+    ctx.font      = '11px Arial, sans-serif';
+    ctx.fillText('mishra-sql.vercel.app  ·  analyst.world', W / 2, H - 36);
+
+    // Seal
+    ctx.beginPath();
+    ctx.arc(W / 2, H - 18, 8, 0, Math.PI * 2);
+    ctx.fillStyle = '#8b5cf6';
+    ctx.fill();
+
+    var dataUrl = canvas.toDataURL('image/png');
+    _certDataUrl = dataUrl;
+    return dataUrl;
+  }
+
+  function _roundRect(ctx, x, y, w, h, r, fill, stroke) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+    if (fill) ctx.fill();
+    if (stroke) ctx.stroke();
+  }
+
+  // ── email ────────────────────────────────────────────────────
+  function _sendCertEmail(name, email) {
+    if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) return;
+    try {
+      var dateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        to_name:    name,
+        to_email:   email,
+        cert_date:  dateStr,
+        score:      _lastScore + ' / ' + CERT_MCQ.length,
+        platform:   'MishraSQL · Analyst World',
+        profile_url: window.location.origin + '/index.html'
+      }, EMAILJS_PUBLIC_KEY);
+    } catch (e) {}
+  }
+
+  // ── download ─────────────────────────────────────────────────
+  function downloadCert() {
+    var dataUrl = _certDataUrl;
+    if (!dataUrl) {
+      var name = (userProfile && (userProfile.display_name || userProfile.full_name)) || 'certificate';
+      dataUrl = _drawCertificate(
+        document.getElementById('certCanvasView') ? 'certCanvasView' : 'certCanvas',
+        name
+      );
+    }
+    if (!dataUrl) return;
+    var a       = document.createElement('a');
+    a.href      = dataUrl;
+    a.download  = 'MishraSQL-Certificate.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  // ── profile block renderer ───────────────────────────────────
+  function renderCertProfileBlock() {
+    var block = document.getElementById('certProfileBlock');
+    if (!block) return;
+
+    var total  = QUESTIONS.length;
+    var solved = typeof solvedSet !== 'undefined' ? solvedSet.size : 0;
+
+    // Hide block entirely if neither eligible nor certified
+    if (solved < total && !(userProfile && userProfile.is_certified)) {
+      block.style.display = 'none';
+      return;
+    }
+
+    block.style.display = 'block';
+
+    if (userProfile && userProfile.is_certified) {
+      var certDate = userProfile.certificate_sent_at
+        ? new Date(userProfile.certificate_sent_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+        : '';
+      block.innerHTML =
+        '<div class="cert-profile-certified">' +
+          '<div class="cert-profile-badge">🏆 Certified SQL Analyst</div>' +
+          (certDate ? '<p class="cert-profile-date">Certified on ' + certDate + '</p>' : '') +
+          '<button class="cert-btn-small" onclick="CertFlow.open()">View Certificate</button>' +
+        '</div>';
+    } else if (solved >= total) {
+      block.innerHTML =
+        '<div class="cert-profile-eligible">' +
+          '<div class="cert-profile-eligible-text">' +
+            '<span class="cert-fire">🎓</span>' +
+            '<div>' +
+              '<strong>You\'ve solved all ' + total + ' problems!</strong>' +
+              '<p>Claim your official SQL Analyst Certificate.</p>' +
+            '</div>' +
+          '</div>' +
+          '<button class="cert-btn-claim" onclick="CertFlow.open()">Claim Certificate →</button>' +
+        '</div>';
+    }
+  }
+
+  // ── localStorage helpers ─────────────────────────────────────
+  function _clearLS() {
+    localStorage.removeItem(LS_STARTED);
+    localStorage.removeItem(LS_ORDER);
+    localStorage.removeItem(LS_ANSWERS);
+  }
+
+  return {
+    open:            open,
+    close:           close,
+    startTest:       startTest,
+    selectOpt:       selectOpt,
+    nextQ:           nextQ,
+    showFeedback:    showFeedback,
+    setRating:       setRating,
+    submitFeedback:  submitFeedback,
+    downloadCert:    downloadCert,
+    renderCertProfileBlock: renderCertProfileBlock
+  };
+})();
 
 // ── START ─────────────────────────────────────────────────────────
 if (!window.MISHRA_ADMIN_PANEL) init();
