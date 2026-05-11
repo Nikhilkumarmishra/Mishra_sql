@@ -24,6 +24,7 @@ var AdminDash = (function () {
 
   var _users       = [];
   var _progress    = [];
+  var _certReqs    = [];   // certified users pending email send
   var _solveMap    = {};
   var _userProgMap = {};
   var _minSolves   = 1;
@@ -59,6 +60,15 @@ var AdminDash = (function () {
       _userProgMap[p.user_id].push(p);
     });
 
+    // Cert requests: certified users whose email hasn't been sent yet
+    try {
+      var cr = await Auth.from('user_profiles')
+        .select('*')
+        .eq('is_certified', 'true')
+        .eq('cert_email_sent', 'false');
+      _certReqs = cr.data || [];
+    } catch (e) { _certReqs = []; }
+
     try {
       var cfg = await Auth.from('site_config').select('*').eq('key', 'announcement').single();
       if (cfg.data && cfg.data.value !== undefined) {
@@ -71,9 +81,92 @@ var AdminDash = (function () {
   function _render() {
     _renderKPIs();
     _renderChart();
+    _renderCertRequests();
     _renderEngagement();
     _renderUsersTable();
     _renderQuestionAnalytics();
+  }
+
+  // ── CERTIFICATE REQUESTS ──────────────────────────────────────
+  function _renderCertRequests() {
+    var pending = _certReqs.length;
+    var badgeEl = document.getElementById('certPendingBadge');
+    if (badgeEl) {
+      badgeEl.textContent = pending > 0 ? pending + ' pending' : 'All sent ✓';
+      badgeEl.style.background = pending > 0 ? '#f59e0b22' : '#16a34a22';
+      badgeEl.style.color      = pending > 0 ? '#f59e0b'   : '#4ade80';
+      badgeEl.style.border     = pending > 0 ? '1px solid #f59e0b44' : '1px solid #4ade8044';
+    }
+
+    var wrap = document.getElementById('certRequestsBody');
+    if (!wrap) return;
+
+    if (_certReqs.length === 0) {
+      wrap.innerHTML = '<p class="adm-no-data" style="padding:16px 0">No certificate requests yet.</p>';
+      return;
+    }
+
+    var pendingRows = _certReqs.filter(function(u){ return !u.cert_email_sent; });
+    var sentRows    = _certReqs.filter(function(u){ return  u.cert_email_sent; });
+
+    var html = '';
+
+    // ── Pending notification banner ──
+    if (pendingRows.length > 0) {
+      html += '<div class="cert-req-banner">' +
+        '<span class="cert-req-banner-icon">🔔</span>' +
+        '<strong>' + pendingRows.length + ' user' + (pendingRows.length > 1 ? 's have' : ' has') + ' earned a certificate and is waiting for it.</strong>' +
+        ' Send it manually to their email below.' +
+      '</div>';
+    }
+
+    // ── Pending table ──
+    if (pendingRows.length > 0) {
+      html += '<div class="cert-req-group-label">📨 Pending — needs email</div>';
+      html += '<div class="adm-table-wrap"><table class="adm-table"><thead><tr>' +
+        '<th>Name</th><th>Email</th><th>Score</th><th>Certified On</th><th>Action</th>' +
+      '</tr></thead><tbody>';
+      pendingRows.forEach(function(u) {
+        var name     = _esc(u.display_name || u.full_name || u.email || '—');
+        var email    = _esc(u.email || '—');
+        var score    = u.certified_score !== null && u.certified_score !== undefined ? u.certified_score + ' / 15' : '—';
+        var date     = u.certificate_sent_at ? _fmtDate(u.certificate_sent_at) : '—';
+        var mailLink = u.email
+          ? 'mailto:' + u.email + '?subject=Your%20MishraSQL%20Certificate&body=Hi%20' + encodeURIComponent(u.display_name || 'there') + '%2C%0A%0ACongratulations%20on%20completing%20the%20MishraSQL%20SQL%20Analyst%20Certification!%0A%0APlease%20find%20your%20certificate%20attached.%0A%0ABest%2C%0AMishraSQL%20Team'
+          : '#';
+        html += '<tr>' +
+          '<td><strong>' + name + '</strong></td>' +
+          '<td class="adm-dim">' + email + '</td>' +
+          '<td><span class="adm-solve-badge has-solves">' + score + '</span></td>' +
+          '<td>' + date + '</td>' +
+          '<td>' +
+            '<a href="' + mailLink + '" class="cert-req-mail-btn" target="_blank">✉ Open Email</a>' +
+            '<button class="cert-req-sent-btn" onclick="AdminDash.markCertSent(\'' + u.id + '\')">✓ Mark Sent</button>' +
+          '</td>' +
+        '</tr>';
+      });
+      html += '</tbody></table></div>';
+    }
+
+    // ── Sent table (collapsed summary) ──
+    if (sentRows.length > 0) {
+      html += '<details class="cert-req-sent-details"><summary class="cert-req-sent-summary">✅ Already sent (' + sentRows.length + ')</summary>';
+      html += '<div class="adm-table-wrap" style="margin-top:10px"><table class="adm-table"><thead><tr>' +
+        '<th>Name</th><th>Email</th><th>Score</th><th>Certified On</th><th>Sent At</th>' +
+      '</tr></thead><tbody>';
+      sentRows.forEach(function(u) {
+        html += '<tr>' +
+          '<td>' + _esc(u.display_name || u.full_name || u.email || '—') + '</td>' +
+          '<td class="adm-dim">' + _esc(u.email || '—') + '</td>' +
+          '<td><span class="adm-solve-badge has-solves">' + (u.certified_score !== null ? u.certified_score + '/15' : '—') + '</span></td>' +
+          '<td>' + (u.certificate_sent_at ? _fmtDate(u.certificate_sent_at) : '—') + '</td>' +
+          '<td style="color:#4ade80;font-size:0.82rem">' + (u.cert_email_sent_at ? _fmtDate(u.cert_email_sent_at) : '✓') + '</td>' +
+        '</tr>';
+      });
+      html += '</tbody></table></div></details>';
+    }
+
+    wrap.innerHTML = html;
   }
 
   // ── KPI CARDS ─────────────────────────────────────────────────
@@ -307,6 +400,20 @@ var AdminDash = (function () {
     },
     saveAnnouncement:  saveAnnouncement,
     clearAnnouncement: clearAnnouncement,
+    markCertSent: async function(userId) {
+      try {
+        await Auth.from('user_profiles')
+          .eq('id', userId)
+          .update({ cert_email_sent: true, cert_email_sent_at: new Date().toISOString() });
+        // Update local data and re-render
+        _certReqs = _certReqs.map(function(u) {
+          return u.id === userId ? Object.assign({}, u, { cert_email_sent: true, cert_email_sent_at: new Date().toISOString() }) : u;
+        });
+        _renderCertRequests();
+      } catch(e) {
+        alert('Failed to mark as sent. Try refreshing.');
+      }
+    },
     exportCSV: function () {
       var header = [['Name', 'Email', 'Qualification', 'Joined', 'Last Active', 'Questions Solved', 'Is Admin']];
       var rows   = header.concat(_users.map(function (u) {

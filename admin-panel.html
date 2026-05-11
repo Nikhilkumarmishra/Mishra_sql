@@ -172,6 +172,20 @@
       </div>
     </section>
 
+    <!-- CERTIFICATE REQUESTS -->
+    <section class="adm-section">
+      <div class="adm-section-head">
+        <div class="adm-head-left">
+          <h2>🎓 Certificate Requests</h2>
+          <span class="adm-count-badge" id="certPendingBadge"></span>
+        </div>
+        <div class="adm-head-right">
+          <span style="font-size:0.8rem;color:#888">Users who passed the certification test — send their certificate manually to their email.</span>
+        </div>
+      </div>
+      <div id="certRequestsBody"></div>
+    </section>
+
     <!-- ANNOUNCEMENT -->
     <section class="adm-section">
       <div class="adm-section-head"><h2>📢 Site Announcement</h2></div>
@@ -225,12 +239,19 @@ var Auth = (function () {
     var cols  = '*';
     var filts = [];
     var isSingle = false;
+    var _order = null;
+    var _limit = null;
     var q = {
       select: function(c){ cols=c||'*'; return q; },
       eq:     function(col,val){ filts.push(col+'=eq.'+encodeURIComponent(val)); return q; },
+      neq:    function(col,val){ filts.push(col+'=neq.'+encodeURIComponent(val)); return q; },
+      order:  function(col,asc){ _order=col+'.'+(asc?'asc':'desc'); return q; },
+      limit:  function(n){ _limit=n; return q; },
       single: function(){ isSingle=true; return q; },
       then:   function(res, rej) {
         var url  = DB+'/'+table+'?select='+cols+(filts.length?'&'+filts.join('&'):'');
+        if (_order) url += '&order='+_order;
+        if (_limit) url += '&limit='+_limit;
         var hdrs = ah(tok);
         if (isSingle) hdrs['Accept'] = 'application/vnd.pgrst.object+json';
         return fetch(url, {headers:hdrs})
@@ -242,6 +263,16 @@ var Auth = (function () {
               res(Array.isArray(d) ? {data:d,error:null} : {data:[],error:d});
             }
           }).catch(rej);
+      },
+      update: function(body) {
+        var url = DB+'/'+table+(filts.length?'?'+filts.join('&'):'');
+        return fetch(url, {
+          method:'PATCH',
+          headers: Object.assign(ah(tok), {'Prefer':'return=minimal'}),
+          body: JSON.stringify(body)
+        }).then(function(r){
+          return r.ok ? {data:body,error:null} : r.json().then(function(e){return {data:null,error:e};});
+        }).catch(function(e){return {data:null,error:{message:e.message}};});
       },
       upsert: function(body) {
         return fetch(DB+'/'+table, {
