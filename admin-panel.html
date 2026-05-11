@@ -275,12 +275,12 @@ function goHome() {
 }
 
 // ── ADMIN BOOT ────────────────────────────────────────────────────
+// Tell app.js not to run init() — we only need QUESTIONS data
+window.MISHRA_ADMIN_PANEL = true;
+
 var currentUser  = null;
 var userProfile  = null;
-
-// These are stubs — admin.js uses QUESTIONS for analytics titles.
-// We set them as empty so admin.js gracefully shows question IDs only.
-var QUESTIONS = window.QUESTIONS || [];
+var QUESTIONS    = [];
 
 async function bootAdmin() {
   try {

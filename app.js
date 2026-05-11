@@ -4440,4 +4440,4 @@ function showOutputErr(msg) {
 }
 
 // ── START ─────────────────────────────────────────────────────────
-init();
+if (!window.MISHRA_ADMIN_PANEL) init();
