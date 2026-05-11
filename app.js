@@ -4785,7 +4785,8 @@ var CertFlow = (function () {
     document.getElementById('certModal').style.display = 'flex';
 
     if (_state === 'certified') {
-      _drawCertificate('certCanvasView');
+      var _vName = (userProfile && (userProfile.display_name || userProfile.full_name)) || currentUser.email.split('@')[0];
+      _drawCertificate('certCanvasView', _vName);
       _show('certScreenView', null);
     } else if (_state === 'in_test') {
       _resumeTest();
@@ -5093,120 +5094,176 @@ var CertFlow = (function () {
   function _drawCertificate(canvasId, name) {
     var canvas = document.getElementById(canvasId);
     if (!canvas) return null;
-    var W = 800, H = 560;
-    canvas.width = W; canvas.height = H;
-    var ctx = canvas.getContext('2d');
 
-    // Background
-    var grad = ctx.createLinearGradient(0, 0, W, H);
-    grad.addColorStop(0, '#0d0e17');
-    grad.addColorStop(1, '#121420');
-    ctx.fillStyle = grad;
+    var W = 1000, H = 700;
+    canvas.width  = W;
+    canvas.height = H;
+    var ctx = canvas.getContext('2d');
+    ctx.textAlign = 'center';
+
+    // ── Deep navy background ────────────────────────────────────
+    var bg = ctx.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0,   '#08090f');
+    bg.addColorStop(0.5, '#0e0f1a');
+    bg.addColorStop(1,   '#0a0b14');
+    ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
 
-    // Outer border
-    ctx.strokeStyle = '#8b5cf6';
+    // ── Radial glow centre ──────────────────────────────────────
+    var glow = ctx.createRadialGradient(W/2, H/2, 80, W/2, H/2, 420);
+    glow.addColorStop(0,   'rgba(139,92,246,0.07)');
+    glow.addColorStop(1,   'rgba(139,92,246,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, W, H);
+
+    // ── Gold outer border ───────────────────────────────────────
+    var goldGrad = ctx.createLinearGradient(0, 0, W, H);
+    goldGrad.addColorStop(0,    '#c9a84c');
+    goldGrad.addColorStop(0.25, '#f0d060');
+    goldGrad.addColorStop(0.5,  '#c9a84c');
+    goldGrad.addColorStop(0.75, '#f0d060');
+    goldGrad.addColorStop(1,    '#c9a84c');
+    ctx.strokeStyle = goldGrad;
     ctx.lineWidth   = 3;
-    _roundRect(ctx, 16, 16, W - 32, H - 32, 12, false, true);
+    _roundRect(ctx, 18, 18, W - 36, H - 36, 14, false, true);
 
-    // Inner border (subtle)
-    ctx.strokeStyle = 'rgba(139,92,246,0.25)';
+    // ── Purple inner border ─────────────────────────────────────
+    ctx.strokeStyle = 'rgba(139,92,246,0.4)';
     ctx.lineWidth   = 1;
-    _roundRect(ctx, 26, 26, W - 52, H - 52, 8, false, true);
+    _roundRect(ctx, 30, 30, W - 60, H - 60, 10, false, true);
 
-    // Top accent bar
-    var bar = ctx.createLinearGradient(80, 0, W - 80, 0);
-    bar.addColorStop(0, 'transparent');
-    bar.addColorStop(0.3, '#8b5cf6');
-    bar.addColorStop(0.7, '#a78bfa');
-    bar.addColorStop(1, 'transparent');
-    ctx.fillStyle = bar;
-    ctx.fillRect(80, 88, W - 160, 2);
-    ctx.fillRect(80, H - 96, W - 160, 2);
-
-    // Corner dots
-    [[60,60],[W-60,60],[60,H-60],[W-60,H-60]].forEach(function(pt){
+    // ── Corner ornaments ────────────────────────────────────────
+    function _corner(cx, cy) {
+      ctx.strokeStyle = goldGrad;
+      ctx.lineWidth = 1.5;
+      var s = 22;
+      ctx.beginPath(); ctx.moveTo(cx - s, cy); ctx.lineTo(cx, cy); ctx.lineTo(cx, cy + s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx + s, cy); ctx.lineTo(cx, cy); ctx.lineTo(cx, cy - s); ctx.stroke();
       ctx.beginPath();
-      ctx.arc(pt[0], pt[1], 4, 0, Math.PI*2);
-      ctx.fillStyle = '#8b5cf6';
-      ctx.fill();
-    });
+      ctx.arc(cx, cy, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#f0d060'; ctx.fill();
+    }
+    _corner(54, 54); _corner(W - 54, 54); _corner(54, H - 54); _corner(W - 54, H - 54);
 
-    // Platform name
-    ctx.fillStyle = '#8b5cf6';
-    ctx.font      = 'bold 22px Arial, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('MishraSQL  ·  Analyst World', W / 2, 66);
+    // ── Top gold divider line ───────────────────────────────────
+    var divGrad = ctx.createLinearGradient(100, 0, W - 100, 0);
+    divGrad.addColorStop(0,    'transparent');
+    divGrad.addColorStop(0.2,  '#c9a84c');
+    divGrad.addColorStop(0.8,  '#c9a84c');
+    divGrad.addColorStop(1,    'transparent');
+    ctx.strokeStyle = divGrad;
+    ctx.lineWidth   = 1;
+    ctx.beginPath(); ctx.moveTo(100, 108); ctx.lineTo(W - 100, 108); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(100, H - 108); ctx.lineTo(W - 100, H - 108); ctx.stroke();
 
-    // Stars decoration
-    ctx.fillStyle = 'rgba(139,92,246,0.5)';
-    ctx.font = '14px Arial';
-    ctx.fillText('★  ★  ★  ★  ★', W / 2, 82);
+    // ── ANALYST WORLD brand ─────────────────────────────────────
+    ctx.fillStyle = '#f0d060';
+    ctx.font      = 'bold 13px Arial, sans-serif';
+    ctx.fillText('A N A L Y S T   W O R L D', W / 2, 72);
 
-    // "Certificate of Achievement"
-    ctx.fillStyle = '#c4b5fd';
-    ctx.font      = '13px Arial, sans-serif';
-    ctx.letterSpacing = '3px';
-    ctx.fillText('CERTIFICATE  OF  ACHIEVEMENT', W / 2, 122);
-    ctx.letterSpacing = '0px';
+    ctx.fillStyle = 'rgba(240,208,96,0.45)';
+    ctx.font      = '11px Arial';
+    ctx.fillText('India\'s Leading Analyst Platform', W / 2, 90);
 
-    // "This certifies that"
+    // ── CERTIFICATE OF ACHIEVEMENT ──────────────────────────────
+    ctx.fillStyle = 'rgba(196,181,253,0.9)';
+    ctx.font      = '11px Arial, sans-serif';
+    ctx.fillText('C E R T I F I C A T E   O F   A C H I E V E M E N T', W / 2, 138);
+
+    // ── Thin decorative rule under title ────────────────────────
+    ctx.strokeStyle = 'rgba(139,92,246,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(W/2 - 160, 148); ctx.lineTo(W/2 + 160, 148); ctx.stroke();
+
+    // ── This certifies that ─────────────────────────────────────
     ctx.fillStyle = '#6b7280';
-    ctx.font      = '15px Arial, sans-serif';
-    ctx.fillText('This certifies that', W / 2, 162);
+    ctx.font      = '15px Georgia, serif';
+    ctx.fillText('This proudly certifies that', W / 2, 188);
 
-    // Recipient name
-    var displayName = name || 'SQL Analyst';
-    ctx.fillStyle = '#f9f8f5';
-    ctx.font      = 'bold 44px Georgia, serif';
-    ctx.fillText(displayName, W / 2, 230);
+    // ── Recipient name ──────────────────────────────────────────
+    var displayName = (name && name.trim()) ? name.trim() : 'Analyst';
+    ctx.fillStyle = '#ffffff';
+    ctx.font      = 'bold 52px Georgia, serif';
+    ctx.fillText(displayName, W / 2, 268);
 
-    // Name underline
+    // Name gold underline
     var nw = ctx.measureText(displayName).width;
-    ctx.strokeStyle = '#8b5cf6';
-    ctx.lineWidth   = 1.5;
+    var uGrad = ctx.createLinearGradient(W/2 - nw/2, 0, W/2 + nw/2, 0);
+    uGrad.addColorStop(0, 'transparent');
+    uGrad.addColorStop(0.3, '#c9a84c');
+    uGrad.addColorStop(0.7, '#f0d060');
+    uGrad.addColorStop(1, 'transparent');
+    ctx.strokeStyle = uGrad;
+    ctx.lineWidth   = 2;
     ctx.beginPath();
-    ctx.moveTo(W/2 - nw/2 - 24, 243);
-    ctx.lineTo(W/2 + nw/2 + 24, 243);
+    ctx.moveTo(W/2 - nw/2 - 20, 282);
+    ctx.lineTo(W/2 + nw/2 + 20, 282);
     ctx.stroke();
 
-    // Achievement text
-    ctx.fillStyle = '#d1d5db';
-    ctx.font      = '15px Arial, sans-serif';
-    ctx.fillText('has successfully completed the', W / 2, 278);
-
-    ctx.fillStyle = '#a78bfa';
-    ctx.font      = 'bold 20px Arial, sans-serif';
-    ctx.fillText('SQL Analyst Certification', W / 2, 308);
-
-    ctx.fillStyle = '#6b7280';
-    ctx.font      = '13px Arial, sans-serif';
-    ctx.fillText('Demonstrating proficiency in SQL querying, aggregation, JOINs,', W / 2, 342);
-    ctx.fillText('window functions, CTEs, subqueries, and data analysis.', W / 2, 360);
-
-    // Date
-    var dateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+    // ── has successfully completed ──────────────────────────────
     ctx.fillStyle = '#9ca3af';
-    ctx.font      = '13px Arial, sans-serif';
-    ctx.fillText('Issued on  ' + dateStr, W / 2, 412);
+    ctx.font      = '16px Georgia, serif';
+    ctx.fillText('has successfully completed the', W / 2, 326);
 
-    // Score badge
-    ctx.fillStyle = 'rgba(139,92,246,0.15)';
-    _roundRect(ctx, W/2 - 60, 424, 120, 30, 6, true, false);
-    ctx.fillStyle = '#a78bfa';
-    ctx.font      = '12px Arial, sans-serif';
-    ctx.fillText('Score: ' + _lastScore + ' / ' + CERT_MCQ.length, W / 2, 444);
+    // ── Certification title ─────────────────────────────────────
+    ctx.fillStyle = '#c4b5fd';
+    ctx.font      = 'bold 26px Georgia, serif';
+    ctx.fillText('SQL Analyst Certification', W / 2, 368);
 
-    // Footer
+    // ── Description ─────────────────────────────────────────────
     ctx.fillStyle = '#4b5563';
-    ctx.font      = '11px Arial, sans-serif';
-    ctx.fillText('mishra-sql.vercel.app  ·  analyst.world', W / 2, H - 36);
+    ctx.font      = '13px Arial, sans-serif';
+    ctx.fillText('Demonstrating advanced proficiency in SQL querying, data aggregation,', W / 2, 406);
+    ctx.fillText('JOINs, window functions, CTEs, subqueries, and analytical problem-solving.', W / 2, 424);
 
-    // Seal
+    // ── Bottom section: date left | seal centre | score right ───
+    var dateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    // Left — Issue date
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#6b7280';
+    ctx.font      = '11px Arial, sans-serif';
+    ctx.fillText('DATE OF ISSUE', 220, 482);
+    ctx.fillStyle = '#e8e6e0';
+    ctx.font      = '13px Georgia, serif';
+    ctx.fillText(dateStr, 220, 500);
+    ctx.strokeStyle = 'rgba(240,208,96,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(140, 510); ctx.lineTo(300, 510); ctx.stroke();
+
+    // Right — Score
+    ctx.fillStyle = '#6b7280';
+    ctx.font      = '11px Arial, sans-serif';
+    ctx.fillText('APTITUDE SCORE', W - 220, 482);
+    ctx.fillStyle = '#a78bfa';
+    ctx.font      = 'bold 18px Georgia, serif';
+    ctx.fillText(_lastScore + ' / ' + CERT_MCQ.length, W - 220, 502);
+    ctx.strokeStyle = 'rgba(139,92,246,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(W - 300, 510); ctx.lineTo(W - 140, 510); ctx.stroke();
+
+    // Centre seal
     ctx.beginPath();
-    ctx.arc(W / 2, H - 18, 8, 0, Math.PI * 2);
-    ctx.fillStyle = '#8b5cf6';
+    ctx.arc(W / 2, 494, 32, 0, Math.PI * 2);
+    var sealGrad = ctx.createRadialGradient(W/2, 494, 4, W/2, 494, 32);
+    sealGrad.addColorStop(0,   '#a78bfa');
+    sealGrad.addColorStop(0.6, '#7c3aed');
+    sealGrad.addColorStop(1,   '#5b21b6');
+    ctx.fillStyle   = sealGrad;
     ctx.fill();
+    ctx.strokeStyle = '#f0d060';
+    ctx.lineWidth   = 2;
+    ctx.stroke();
+
+    // Seal star
+    ctx.fillStyle = '#f0d060';
+    ctx.font      = '22px Arial';
+    ctx.fillText('★', W / 2, 502);
+
+    // ── Footer ──────────────────────────────────────────────────
+    ctx.fillStyle = 'rgba(107,114,128,0.6)';
+    ctx.font      = '10px Arial, sans-serif';
+    ctx.fillText('analyst.world  ·  India\'s Leading Analyst Platform', W / 2, H - 42);
 
     var dataUrl = canvas.toDataURL('image/png');
     _certDataUrl = dataUrl;
