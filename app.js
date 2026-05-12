@@ -3758,6 +3758,27 @@ var Auth = (function () {
   };
 })();
 
+// ── THEME ─────────────────────────────────────────────────────────
+function initTheme() {
+  var t = localStorage.getItem('msql_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+}
+
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('msql_theme', theme);
+}
+
+function toggleTheme() {
+  var current = document.documentElement.getAttribute('data-theme') || 'dark';
+  var next    = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.classList.add('theme-transitioning');
+  setTheme(next);
+  setTimeout(function() {
+    document.documentElement.classList.remove('theme-transitioning');
+  }, 350);
+}
+
 // ── STATE ─────────────────────────────────────────────────────────
 let SQL               = null;
 let currentQ          = 0;
@@ -3773,6 +3794,7 @@ let prevPage          = 'landing';
 
 // ── INIT ─────────────────────────────────────────────────────────
 async function init() {
+  initTheme();
   try {
     SQL = await initSqlJs({
       locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}`
@@ -4267,6 +4289,23 @@ function renderProfileStats() {
   document.getElementById('profileProgressFill').style.width = pct + '%';
   document.getElementById('profileProgressLabel').textContent = `${solved} of ${total} problems solved (${pct}%)`;
   if (typeof CertFlow !== 'undefined') CertFlow.renderCertProfileBlock();
+  renderProfileThemeToggle();
+}
+
+function renderProfileThemeToggle() {
+  const el = document.getElementById('profileThemeRow');
+  if (!el) return;
+  const isDark = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
+  el.innerHTML = `
+    <div>
+      <div class="profile-theme-label">${isDark ? '🌙 Dark Mode' : '☀️ Light Mode'}</div>
+      <div class="profile-theme-desc">${isDark ? 'Easy on the eyes for long sessions' : 'Clean and bright for focus'}</div>
+    </div>
+    <button class="theme-toggle-lg" onclick="toggleTheme();renderProfileThemeToggle();" title="Switch theme">
+      <span class="tt-moon">🌙</span>
+      <span class="tt-sun">☀️</span>
+      <div class="tt-thumb"></div>
+    </button>`;
 }
 
 function filterProfileQ(filter) {
