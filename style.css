@@ -591,6 +591,11 @@ footer{padding:40px 80px;border-top:1px solid var(--border);display:flex;align-i
 .modal-switch{text-align:center;font-size:13px;color:var(--hint);margin-top:16px;}
 .modal-switch span{color:var(--accent);cursor:pointer;font-weight:500;}
 .modal-switch span:hover{text-decoration:underline}
+.auth-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:#555;font-size:12px}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.08)}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:11px 16px;background:#fff;color:#3c4043;border:1px solid #dadce0;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:box-shadow 0.15s,background 0.15s;font-family:inherit}
+.btn-google:hover{background:#f8f9fa;box-shadow:0 1px 6px rgba(0,0,0,0.25)}
+.btn-google:active{background:#f1f3f4}
 
 /* ══════════════════════════════════════════════════════════════
    NAV AUTH CONTROLS

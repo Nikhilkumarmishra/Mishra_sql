@@ -3717,6 +3717,24 @@ var Auth = (function () {
         .then(function(d){ return d.id ? {data:{user:d},error:null} : {data:null,error:d}; })
         .catch(function(e){return {error:{message:e.message}};});
     },
+    signInWithGoogle: function() {
+      var redirectTo = encodeURIComponent(window.location.origin + '/index.html');
+      window.location.href = A + '/authorize?provider=google&redirect_to=' + redirectTo;
+    },
+    handleOAuthCallback: function() {
+      var hash = window.location.hash;
+      if (!hash) return Promise.resolve(null);
+      var params = {};
+      hash.replace(/^#/, '').split('&').forEach(function(p) {
+        var kv = p.split('='); params[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]||'');
+      });
+      if (!params.access_token) return Promise.resolve(null);
+      params.expires_at = Math.floor(Date.now()/1000) + (parseInt(params.expires_in)||3600);
+      save(params);
+      emit('SIGNED_IN', params);
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+      return Promise.resolve(params);
+    },
     from: fromTable,
     rpc: function(fnName, params) {
       var s   = (function(){ try{ var x=localStorage.getItem('msql_sess'); return x?JSON.parse(x):null; }catch(e){return null;} })();
@@ -3751,6 +3769,9 @@ async function init() {
     SQL = await initSqlJs({
       locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}`
     });
+
+    // Handle OAuth redirect (Google login)
+    await Auth.handleOAuthCallback();
 
     // Auth runs in background — never blocks site from appearing
     Auth.onAuthStateChange(async function(event, session) {
