@@ -3819,6 +3819,7 @@ async function init() {
     buildTopicFilters();
     buildLandingCards();
     updateHeroCount();
+    initTestimonials();
     showLanding();
     initEditor();
 
@@ -4321,6 +4322,14 @@ function _hideAllPages() {
     var el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });
+}
+
+function initTestimonials() {
+  const track = document.getElementById('testimonialsTrack');
+  if (!track) return;
+  // Duplicate cards for seamless infinite loop
+  const clone = track.innerHTML;
+  track.innerHTML = clone + clone;
 }
 
 function showLanding() {
