@@ -3611,9 +3611,14 @@ var Auth = (function () {
     }).catch(function(){ return sess; });
   }
 
+  // Always refresh the token before use so expired JWTs never silently fail
+  async function getValidToken() {
+    var sess = await refresh(read());
+    if (sess) save(sess);
+    return sess && sess.access_token ? sess.access_token : SUPABASE_ANON;
+  }
+
   function fromTable(table) {
-    var sess  = read();
-    var tok   = sess && sess.access_token ? sess.access_token : SUPABASE_ANON;
     var cols  = '*';
     var filts = [];
     var isSingle = false;
@@ -3626,7 +3631,8 @@ var Auth = (function () {
       order:   function(col,asc){ _order = col+'.'+(asc?'asc':'desc'); return q; },
       limit:   function(n){ _limit = n; return q; },
       single:  function(){ isSingle=true; return q; },
-      then: function(res, rej) {
+      then: async function(res, rej) {
+        var tok = await getValidToken();
         var url = DB+'/'+table+'?select='+cols+(filts.length?'&'+filts.join('&'):'');
         if (_order) url += '&order='+_order;
         if (_limit) url += '&limit='+_limit;
@@ -3642,7 +3648,8 @@ var Auth = (function () {
             }
           }).catch(rej);
       },
-      insert: function(body) {
+      insert: async function(body) {
+        var tok = await getValidToken();
         return fetch(DB+'/'+table, {
           method:'POST',
           headers: Object.assign(ah(tok), {'Prefer':'return=representation'}),
@@ -3651,7 +3658,8 @@ var Auth = (function () {
           return r.ok ? r.json().then(function(d){return {data:d,error:null};}) : r.json().then(function(e){return {data:null,error:e};});
         }).catch(function(e){return {data:null,error:{message:e.message}};});
       },
-      update: function(body) {
+      update: async function(body) {
+        var tok = await getValidToken();
         var url = DB+'/'+table+(filts.length?'?'+filts.join('&'):'');
         return fetch(url, {
           method:'PATCH',
@@ -3661,7 +3669,8 @@ var Auth = (function () {
           return r.ok ? {data:body,error:null} : r.json().then(function(e){return {data:null,error:e};});
         }).catch(function(e){return {data:null,error:{message:e.message}};});
       },
-      upsert: function(body) {
+      upsert: async function(body) {
+        var tok = await getValidToken();
         return fetch(DB+'/'+table, {
           method:'POST',
           headers: Object.assign(ah(tok), {'Prefer':'resolution=merge-duplicates,return=minimal'}),
@@ -3744,9 +3753,8 @@ var Auth = (function () {
       return params;
     },
     from: fromTable,
-    rpc: function(fnName, params) {
-      var s   = (function(){ try{ var x=localStorage.getItem('msql_sess'); return x?JSON.parse(x):null; }catch(e){return null;} })();
-      var tok = s && s.access_token ? s.access_token : SUPABASE_ANON;
+    rpc: async function(fnName, params) {
+      var tok = await getValidToken();
       return fetch(SUPABASE_URL + '/rest/v1/rpc/' + fnName, {
         method: 'POST',
         headers: { 'Content-Type':'application/json','apikey':SUPABASE_ANON,'Authorization':'Bearer '+tok },
@@ -4158,12 +4166,20 @@ async function loadUserProgress(userId) {
 
 async function saveUserProgress(questionId) {
   if (!currentUser) return;
-  try {
-    const { error } = await Auth.from('user_progress').upsert(
-      { user_id: currentUser.id, question_id: questionId, solved_at: new Date().toISOString() }
-    );
-    if (error) console.error('Progress save error:', error);
-  } catch(e) { console.warn('saveUserProgress failed:', e.message); }
+  var payload = { user_id: currentUser.id, question_id: questionId, solved_at: new Date().toISOString() };
+  var attempts = 0;
+  while (attempts < 2) {
+    attempts++;
+    try {
+      var result = await Auth.from('user_progress').upsert(payload);
+      if (!result.error) return; // success
+      console.error('Progress save error (attempt ' + attempts + '):', result.error);
+    } catch(e) {
+      console.warn('saveUserProgress exception (attempt ' + attempts + '):', e.message);
+    }
+  }
+  // Both attempts failed — tell the user so they know the solve wasn't persisted
+  showToast('⚠ Progress could not be saved. Please refresh and try again.', 'error');
 }
 
 // ── USER PROFILE ──────────────────────────────────────────────────
@@ -4456,8 +4472,9 @@ function renderQuestion(idx) {
 
   // Update pills
   document.querySelectorAll('.q-pill').forEach((p, i) => {
+    const pq = filteredQuestions[i];
     p.className = 'q-pill'
-      + (solvedSet.has(i) ? ' solved' : '')
+      + (pq && solvedSet.has(pq.id) ? ' solved' : '')
       + (i === idx ? ' active' : '');
   });
 
@@ -4693,7 +4710,28 @@ function submitQuery() {
   }
 }
 
-// ── UTILS ─────────────────────────────────────────────────────────
+// ── TOAST ──────────────────────────────────────────────────────────
+function showToast(msg, type) {
+  var existing = document.getElementById('msql-toast');
+  if (existing) existing.remove();
+  var t = document.createElement('div');
+  t.id = 'msql-toast';
+  t.textContent = msg;
+  t.style.cssText = [
+    'position:fixed','bottom:28px','left:50%','transform:translateX(-50%)',
+    'padding:11px 22px','border-radius:10px','font-size:0.88rem','font-weight:500',
+    'z-index:99999','pointer-events:none','transition:opacity 0.4s',
+    'box-shadow:0 8px 32px rgba(0,0,0,0.4)',
+    type === 'error'
+      ? 'background:#ef4444;color:#fff;'
+      : 'background:#22c55e;color:#fff;'
+  ].join(';');
+  document.body.appendChild(t);
+  setTimeout(function() { t.style.opacity = '0'; }, 2800);
+  setTimeout(function() { if (t.parentNode) t.remove(); }, 3300);
+}
+
+// ── UTILS ──────────────────────────────────────────────────────────
 function updateProgress() {
   const pct = (solvedSet.size / QUESTIONS.length) * 100;
   document.getElementById('progressBar').style.width = pct + '%';
