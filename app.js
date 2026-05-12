@@ -3721,19 +3721,27 @@ var Auth = (function () {
       var redirectTo = encodeURIComponent(window.location.origin + '/index.html');
       window.location.href = A + '/authorize?provider=google&redirect_to=' + redirectTo;
     },
-    handleOAuthCallback: function() {
+    handleOAuthCallback: async function() {
       var hash = window.location.hash;
-      if (!hash) return Promise.resolve(null);
+      if (!hash || hash.indexOf('access_token') === -1) return null;
       var params = {};
       hash.replace(/^#/, '').split('&').forEach(function(p) {
         var kv = p.split('='); params[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]||'');
       });
-      if (!params.access_token) return Promise.resolve(null);
+      if (!params.access_token) return null;
       params.expires_at = Math.floor(Date.now()/1000) + (parseInt(params.expires_in)||3600);
+      // Fetch full user object so session.user exists for the rest of init()
+      try {
+        var r = await fetch(A + '/user', {
+          headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + params.access_token }
+        });
+        var u = await r.json();
+        if (u && u.id) params.user = u;
+      } catch(e) {}
       save(params);
-      emit('SIGNED_IN', params);
+      // Clean the URL — remove the token hash so refresh doesn't re-process it
       history.replaceState(null, '', window.location.pathname + window.location.search);
-      return Promise.resolve(params);
+      return params;
     },
     from: fromTable,
     rpc: function(fnName, params) {
