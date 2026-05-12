@@ -3857,6 +3857,113 @@ function updateHeroCount() {
   if (el) el.textContent = QUESTIONS.length;
 }
 
+// ── STREAK ────────────────────────────────────────────────────────
+function computeStreak() {
+  const vals = Object.values(solvedAtMap).filter(Boolean);
+  if (!vals.length) return 0;
+  const days = new Set(vals.map(ts => new Date(ts).toDateString()));
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayStr = today.toDateString();
+  const yestStr  = new Date(today - 864e5).toDateString();
+  if (!days.has(todayStr) && !days.has(yestStr)) return 0;
+  let streak = 0;
+  let cur = days.has(todayStr) ? new Date(today) : new Date(today - 864e5);
+  while (days.has(cur.toDateString())) { streak++; cur = new Date(cur - 864e5); }
+  return streak;
+}
+
+// ── DAILY CHALLENGE ───────────────────────────────────────────────
+function updateDailyChallenge() {
+  if (!QUESTIONS.length) return;
+  const start = new Date(new Date().getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((Date.now() - start) / 864e5);
+  const q = QUESTIONS[dayOfYear % QUESTIONS.length];
+  const solved = solvedSet.has(q.id);
+  const titleEl = document.getElementById('dcTitle');
+  const diffEl  = document.getElementById('dcDiff');
+  const topicEl = document.getElementById('dcTopic');
+  const hintEl  = document.getElementById('dcSolvedHint');
+  if (titleEl) titleEl.textContent = q.title;
+  if (diffEl)  { diffEl.textContent = q.difficulty; diffEl.className = 'badge ' + q.difficulty.toLowerCase(); }
+  if (topicEl) topicEl.textContent = q.tags[0];
+  if (hintEl)  hintEl.textContent = solved ? '✓ You solved this one!' : 'Fresh question every day';
+  if (hintEl)  hintEl.style.color = solved ? 'var(--accent)' : 'var(--hint)';
+  const btn = document.querySelector('#dailyChallengeSection .btn-primary');
+  if (btn) { btn.textContent = solved ? '✓ Solve Again →' : 'Solve It Now →'; }
+}
+
+function startDailyChallenge() {
+  const start = new Date(new Date().getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((Date.now() - start) / 864e5);
+  const q = QUESTIONS[dayOfYear % QUESTIONS.length];
+  const idx = filteredQuestions.findIndex(fq => fq.id === q.id);
+  showApp(idx >= 0 ? idx : 0);
+}
+
+// ── LANDING PERSONALISATION ───────────────────────────────────────
+function updateLandingPersonalization() {
+  const loggedIn = !!currentUser;
+  const guestEl  = document.getElementById('heroGuest');
+  const userEl   = document.getElementById('heroUser');
+  if (!guestEl || !userEl) return;
+
+  if (!loggedIn) {
+    guestEl.style.display = '';
+    userEl.style.display  = 'none';
+    const statsEl = document.getElementById('heroStats');
+    if (statsEl) statsEl.style.marginTop = '';
+    return;
+  }
+
+  guestEl.style.display = 'none';
+  userEl.style.display  = '';
+
+  // Name
+  const name = (userProfile && (userProfile.display_name || userProfile.full_name))
+    || (currentUser.user_metadata && (currentUser.user_metadata.full_name || currentUser.user_metadata.name))
+    || currentUser.email.split('@')[0];
+  const firstName = name.split(' ')[0];
+  const nameEl = document.getElementById('heroUserName');
+  if (nameEl) nameEl.textContent = firstName;
+
+  // Progress
+  const solved = solvedSet.size;
+  const total  = QUESTIONS.length;
+  const pct    = total ? Math.round((solved / total) * 100) : 0;
+  const solvedEl = document.getElementById('heroSolvedCount');
+  const fillEl   = document.getElementById('heroProgFill');
+  const pctEl    = document.getElementById('heroProgPct');
+  const msgEl    = document.getElementById('heroProgressMsg');
+  if (solvedEl) solvedEl.textContent = solved;
+  if (fillEl)   fillEl.style.width   = pct + '%';
+  if (pctEl)    pctEl.textContent    = pct + '%';
+  if (msgEl) {
+    if (solved === 0)         msgEl.textContent = 'Solve your first question today — it only takes 5 minutes.';
+    else if (pct < 25)        msgEl.textContent = 'Great start! Keep the momentum going.';
+    else if (pct < 50)        msgEl.textContent = 'You\'re in the top half — most people stop here. Don\'t.';
+    else if (pct < 75)        msgEl.textContent = 'Past the halfway mark. Your certificate is in sight.';
+    else if (solved < total)  msgEl.textContent = 'Almost there! ' + (total - solved) + ' questions left to earn your certificate.';
+    else                      msgEl.textContent = '🎉 All 60 done! Claim your certificate below.';
+  }
+
+  // Streak
+  const streak = computeStreak();
+  const pillEl = document.getElementById('heroStreakPill');
+  const valEl  = document.getElementById('heroStreakVal');
+  const navBadge = document.getElementById('navStreakBadge');
+  const navCount = document.getElementById('navStreakCount');
+  if (streak > 0) {
+    if (pillEl)   { pillEl.style.display = 'flex'; if (valEl) valEl.textContent = streak; }
+    if (navBadge) { navBadge.style.display = 'flex'; if (navCount) navCount.textContent = streak; }
+  } else {
+    if (pillEl)   pillEl.style.display = 'none';
+    if (navBadge) navBadge.style.display = 'none';
+  }
+
+  // Update daily challenge solved state
+  updateDailyChallenge();
+}
+
 function buildLandingCards() {
   const wrap = document.getElementById('landingQCards');
 
@@ -3921,6 +4028,8 @@ function updateAuthUI(user) {
   // Show admin nav link only to admins
   var adminLink = document.getElementById('adminNavLink');
   if (adminLink) adminLink.style.display = (loggedIn && userProfile && userProfile.is_admin) ? 'inline-flex' : 'none';
+
+  updateLandingPersonalization();
 }
 
 function getInitials(str) {
@@ -4020,6 +4129,7 @@ async function loadUserProgress(userId) {
     (data || []).forEach(r => { solvedAtMap[r.question_id] = r.solved_at; });
     updateProgress();
     buildPills();
+    updateLandingPersonalization();
   } catch(e) { console.warn('loadUserProgress failed:', e.message); }
 }
 
@@ -4216,6 +4326,8 @@ function _hideAllPages() {
 function showLanding() {
   _hideAllPages();
   document.getElementById('landing-page').classList.add('active');
+  updateDailyChallenge();
+  updateLandingPersonalization();
 }
 
 function showApp(qIdx) {

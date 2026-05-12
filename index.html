@@ -107,11 +107,12 @@
     </div>
     <!-- Logged IN -->
     <div class="nav-user" id="landingNavUser" style="display:none">
+      <div class="nav-streak" id="navStreakBadge" style="display:none">🔥 <span id="navStreakCount">0</span></div>
       <div class="user-avatar-sm" id="landingUserAvatar" onclick="showProfile()" style="cursor:pointer"></div>
       <span class="user-name-sm" id="landingUserName"></span>
       <button class="btn-profile-sm" onclick="showProfile()">My Profile</button>
       <button class="btn-logout-sm" onclick="logoutUser()">Logout</button>
-      <button class="nav-cta" onclick="showApp()">Start Practicing →</button>
+      <button class="nav-cta" onclick="showApp()">Continue Solving →</button>
     </div>
   </nav>
 
@@ -120,39 +121,66 @@
     <div class="hero-bg"></div>
     <div class="hero-grid"></div>
     <div class="hero-content">
-      <div class="hero-badge fade-up fade-up-1">
-        <div class="hero-badge-dot"></div>
-        Begneer friendly. 100% free. Earn certificates.
-      </div>
-      <h1 class="hero-title fade-up fade-up-2">
-        Master SQL<br/>
-        <span class="accent">through practice.</span>
-        <span class="line2">Not memorization.</span>
-      </h1>
-      <p class="hero-sub fade-up fade-up-3">
-        Learn concepts, solve topic-wise questions, and build real SQL problem-solving skill.
-        Every problem is designed to take you one step closer to cracking your dream analyst role.
-      <div class="hero-actions fade-up fade-up-4">
-        <button class="btn-primary" onclick="showApp()">
-          Start Solving
-          <span>→</span>
-        </button>
-        <button class="btn-secondary" onclick="scrollToQuestions()">Browse Problems</button>
-      </div>
-      <div class="hero-stats fade-up fade-up-5">
-        <div>
-          <div class="hero-stat-num" id="heroStatCount">3</div>
-          <div class="hero-stat-label">Problems available</div>
+
+      <!-- ── GUEST state (default) ── -->
+      <div id="heroGuest">
+        <div class="hero-badge fade-up fade-up-1">
+          <div class="hero-badge-dot"></div>
+          Free · 60 Questions · Certificate on completion
         </div>
-        <div>
-          <div class="hero-stat-num">4×</div>
-          <div class="hero-stat-label">Test cases each</div>
+        <h1 class="hero-title fade-up fade-up-2">
+          The SQL platform<br/>
+          <span class="accent">built for analyst</span>
+          <span class="line2">job interviews.</span>
+        </h1>
+        <p class="hero-sub fade-up fade-up-3">
+          Stop watching tutorials. Start writing real queries.<br/>
+          Land your first data job.
+        </p>
+        <div class="hero-actions fade-up fade-up-4">
+          <button class="btn-primary" onclick="openAuthModal('signup')">
+            Start Free — No card needed <span>→</span>
+          </button>
+          <button class="btn-secondary" onclick="scrollToQuestions()">Browse 60 Problems</button>
         </div>
-        <div>
-          <div class="hero-stat-num">0ms</div>
-          <div class="hero-stat-label">Server latency</div>
+        <div class="hero-trust fade-up fade-up-5">
+          <span>★ Trusted by 500+ students</span>
+          <span class="hero-trust-dot">·</span>
+          <span>100% Free, no paywall</span>
+          <span class="hero-trust-dot">·</span>
+          <span>Certificate on completion</span>
         </div>
       </div>
+
+      <!-- ── RETURNING USER state (personalised) ── -->
+      <div id="heroUser" style="display:none">
+        <div class="hero-welcome fade-up fade-up-1">Welcome back, <span id="heroUserName">there</span> 👋</div>
+        <h1 class="hero-title-user fade-up fade-up-2">
+          You've solved <span id="heroSolvedCount" class="accent">0</span><span style="color:var(--muted)">/60</span> questions.
+        </h1>
+        <p class="hero-sub-user fade-up fade-up-3" id="heroProgressMsg">Keep going — you're building something real.</p>
+        <div class="hero-prog-wrap fade-up fade-up-3">
+          <div class="hero-prog-track">
+            <div class="hero-prog-fill" id="heroProgFill" style="width:0%"></div>
+          </div>
+          <span class="hero-prog-pct" id="heroProgPct">0%</span>
+        </div>
+        <div class="hero-actions fade-up fade-up-4" style="margin-top:32px;align-items:center">
+          <button class="btn-primary" onclick="showApp()">Continue Solving →</button>
+          <div id="heroStreakPill" class="hero-streak-pill" style="display:none">
+            🔥 <span id="heroStreakVal">0</span> day streak
+          </div>
+        </div>
+      </div>
+
+      <!-- ── STATS ROW — always visible ── -->
+      <div class="hero-stats fade-up fade-up-5" id="heroStats">
+        <div><div class="hero-stat-num">60</div><div class="hero-stat-label">Questions</div></div>
+        <div><div class="hero-stat-num">16</div><div class="hero-stat-label">Topics</div></div>
+        <div><div class="hero-stat-num">100%</div><div class="hero-stat-label">Free forever</div></div>
+        <div><div class="hero-stat-num">🎓</div><div class="hero-stat-label">Certificate</div></div>
+      </div>
+
     </div>
 
     <!-- HERO VISUAL -->
@@ -185,6 +213,24 @@
           <tr><td>Engineering</td><td class="val-acc">285,000</td><td>3</td></tr>
           <tr><td>Marketing</td><td class="val-acc">214,000</td><td>3</td></tr>
         </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- DAILY CHALLENGE -->
+  <section class="daily-challenge" id="dailyChallengeSection">
+    <div class="dc-inner">
+      <div class="dc-left">
+        <div class="dc-label">⚡ TODAY'S CHALLENGE</div>
+        <div class="dc-title" id="dcTitle">Loading…</div>
+        <div class="dc-meta">
+          <span class="badge" id="dcDiff"></span>
+          <span class="dc-topic" id="dcTopic"></span>
+        </div>
+      </div>
+      <div class="dc-right">
+        <button class="btn-primary" onclick="startDailyChallenge()">Solve It Now →</button>
+        <div class="dc-solved-hint" id="dcSolvedHint"></div>
       </div>
     </div>
   </section>
