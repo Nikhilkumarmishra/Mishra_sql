@@ -858,7 +858,7 @@ footer{padding:40px 80px;border-top:1px solid var(--border);display:flex;align-i
 .left-panel{width:42%;min-width:300px;max-width:560px;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0;}
 .prob-header{padding:24px 24px 0}
 .prob-num{font-family:var(--mono);font-size:11px;color:var(--hint);font-weight:500;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
-.prob-title{font-family:var(--display);font-size:22px;font-weight:700;line-height:1.2;margin-bottom:6px;letter-spacing:-0.5px;}
+.prob-title{font-family:var(--display);font-size:22px;font-weight:700;line-height:1.2;margin-bottom:6px;letter-spacing:-0.5px;color:var(--text);}
 .prob-tags{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
 .prob-tag{padding:3px 10px;background:var(--surface);border:1px solid var(--border2);border-radius:20px;font-size:11px;color:var(--hint);font-family:var(--mono);}
 .prob-body{padding:20px 24px;font-size:13.5px;line-height:1.8;color:var(--muted)}
