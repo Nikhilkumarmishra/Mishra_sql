@@ -1,0 +1,16 @@
+# robots.txt — AnalystWorld (https://analystworld.in)
+
+User-agent: *
+Allow: /
+
+# Block admin panel from indexing
+Disallow: /admin-panel.html
+
+# Block learn/internal pages that add no SEO value
+Disallow: /learn.js
+Disallow: /app.js
+Disallow: /admin.js
+Disallow: /learn-data.js
+
+# Sitemap location
+Sitemap: https://analystworld.in/sitemap.xml
