@@ -3611,11 +3611,27 @@ var Auth = (function () {
     }).catch(function(){ return sess; });
   }
 
-  // Always refresh the token before use so expired JWTs never silently fail
+  // Mutex: prevents concurrent refresh calls from burning the single-use refresh token
+  var _refreshLock = null;
+
   async function getValidToken() {
-    var sess = await refresh(read());
-    if (sess) save(sess);
-    return sess && sess.access_token ? sess.access_token : SUPABASE_ANON;
+    var sess = read();
+    if (!sess || !sess.access_token) return SUPABASE_ANON;
+    // Token still valid — return immediately without a network call
+    if (Date.now()/1000 < (sess.expires_at||0) - 60) return sess.access_token;
+    // Token expired — share a single refresh promise so concurrent callers don't
+    // each try to use the same (single-use) refresh token
+    if (!_refreshLock) {
+      _refreshLock = refresh(sess).then(function(s) {
+        _refreshLock = null;
+        return s;
+      }).catch(function() {
+        _refreshLock = null;
+        return null;
+      });
+    }
+    var refreshed = await _refreshLock;
+    return (refreshed && refreshed.access_token) ? refreshed.access_token : SUPABASE_ANON;
   }
 
   function fromTable(table) {
@@ -3671,12 +3687,27 @@ var Auth = (function () {
       },
       upsert: async function(body) {
         var tok = await getValidToken();
+        // If we only have the anon key, RLS will silently block the write — fail fast
+        if (tok === SUPABASE_ANON) {
+          return {data:null, error:{message:'no_valid_session'}};
+        }
         return fetch(DB+'/'+table, {
           method:'POST',
-          headers: Object.assign(ah(tok), {'Prefer':'resolution=merge-duplicates,return=minimal'}),
+          // return=representation: server echoes back the affected rows.
+          // Empty array = silently blocked by RLS (NOT a network error, so r.ok is true).
+          // This lets us detect the silent failure that return=minimal hides.
+          headers: Object.assign(ah(tok), {'Prefer':'resolution=merge-duplicates,return=representation'}),
           body: JSON.stringify(body)
         }).then(function(r){
-          return r.ok ? {data:body,error:null} : r.json().then(function(e){return {data:null,error:e};});
+          return r.json().then(function(d){
+            if (!r.ok) return {data:null, error:d};
+            if (Array.isArray(d) && d.length === 0) {
+              return {data:null, error:{message:'write_blocked_by_policy'}};
+            }
+            return {data: Array.isArray(d) ? d[0] : d, error:null};
+          }).catch(function() {
+            return r.ok ? {data:body,error:null} : {data:null,error:{message:'parse_error'}};
+          });
         }).catch(function(e){return {data:null,error:{message:e.message}};});
       }
     };
@@ -3841,6 +3872,14 @@ async function init() {
         updateAuthUI(currentUser);
       }
     }).catch(function(e) { console.warn('Auth session check failed:', e.message); });
+
+    // Periodic resync: pull fresh progress from DB every 5 min.
+    // Acts as a safety net — if any save was silently lost, the UI corrects itself.
+    setInterval(async function() {
+      if (currentUser) {
+        await loadUserProgress(currentUser.id);
+      }
+    }, 5 * 60 * 1000);
 
     checkAnnouncement();
 
@@ -4168,17 +4207,26 @@ async function saveUserProgress(questionId) {
   if (!currentUser) return;
   var payload = { user_id: currentUser.id, question_id: questionId, solved_at: new Date().toISOString() };
   var attempts = 0;
-  while (attempts < 2) {
+  while (attempts < 3) {
     attempts++;
     try {
       var result = await Auth.from('user_progress').upsert(payload);
-      if (!result.error) return; // success
-      console.error('Progress save error (attempt ' + attempts + '):', result.error);
+      if (!result.error) {
+        // Confirmed written to DB — nothing more to do
+        return;
+      }
+      if (result.error.message === 'no_valid_session') {
+        // JWT completely gone — session must have been cleared; tell user immediately
+        showToast('⚠ Session expired. Please log out and log back in.', 'error');
+        return;
+      }
+      console.error('saveUserProgress attempt', attempts, result.error);
+      // Brief pause before retry so a transient network blip can recover
+      await new Promise(function(r){ setTimeout(r, 600 * attempts); });
     } catch(e) {
       console.warn('saveUserProgress exception (attempt ' + attempts + '):', e.message);
     }
   }
-  // Both attempts failed — tell the user so they know the solve wasn't persisted
   showToast('⚠ Progress could not be saved. Please refresh and try again.', 'error');
 }
 
