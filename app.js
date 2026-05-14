@@ -932,24 +932,29 @@ INSERT INTO products VALUES
 
   example: {
     cols: ["product_name", "category", "price"],
-    rows: [["Laptop","Electronics",1200],["Sofa","Furniture",700]]
+    rows: [["Laptop","Electronics",1200],["Table","Furniture",500],["Sofa","Furniture",700]]
   },
 
   hint: "Use a <strong>correlated subquery</strong> with AVG(price) filtered by category.",
 
   testCases: [
     {
-      name: "Two products returned",
+      name: "Three products returned",
       seed: null,
-      check: (rows) => rows.length === 2
+      check: (rows) => rows.length === 3
     },
     {
-      name: "Laptop included",
+      name: "Laptop included (above Electronics avg of 1050)",
       seed: null,
       check: (rows) => rows.some(r => r.product_name === "Laptop")
     },
     {
-      name: "Sofa price correct",
+      name: "Table included (above Furniture avg of 466.67)",
+      seed: null,
+      check: (rows) => rows.some(r => r.product_name === "Table")
+    },
+    {
+      name: "Sofa included (above Furniture avg of 466.67)",
       seed: null,
       check: (rows) => {
         const r = rows.find(r => r.product_name === "Sofa");
