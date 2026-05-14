@@ -5066,7 +5066,7 @@ var CertFlow = (function () {
 
     if (_state === 'certified') {
       var _vName = (userProfile && (userProfile.display_name || userProfile.full_name)) || currentUser.email.split('@')[0];
-      _drawCertificate('certCanvasView', _vName);
+      await _drawCertificate('certCanvasView', _vName);
       _show('certScreenView', null);
     } else if (_state === 'in_test') {
       _resumeTest();
@@ -5356,7 +5356,7 @@ var CertFlow = (function () {
 
     // Draw certificate
     var name = (userProfile && (userProfile.display_name || userProfile.full_name)) || currentUser.email.split('@')[0];
-    _certDataUrl = _drawCertificate('certCanvas', name);
+    _certDataUrl = await _drawCertificate('certCanvas', name);
 
     // Send email
     document.getElementById('certSuccessEmail').textContent = email;
@@ -5371,179 +5371,290 @@ var CertFlow = (function () {
   }
 
   // ── certificate canvas ───────────────────────────────────────
-  function _drawCertificate(canvasId, name) {
+  async function _drawCertificate(canvasId, name) {
     var canvas = document.getElementById(canvasId);
     if (!canvas) return null;
 
-    var W = 1000, H = 700;
+    var W = 1122, H = 794; // A4 landscape at 96dpi
     canvas.width  = W;
     canvas.height = H;
     var ctx = canvas.getContext('2d');
-    ctx.textAlign = 'center';
 
-    // ── Deep navy background ────────────────────────────────────
-    var bg = ctx.createLinearGradient(0, 0, W, H);
-    bg.addColorStop(0,   '#08090f');
-    bg.addColorStop(0.5, '#0e0f1a');
-    bg.addColorStop(1,   '#0a0b14');
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, W, H);
+    // ── Load Tangerine font ─────────────────────────────────────
+    try {
+      var ff = new FontFace('Tangerine', 'url(https://fonts.gstatic.com/s/tangerine/v17/IurY6Y5j_oScZZow4VO5srNpjA.woff2)');
+      await ff.load();
+      document.fonts.add(ff);
+    } catch (e) {}
 
-    // ── Radial glow centre ──────────────────────────────────────
-    var glow = ctx.createRadialGradient(W/2, H/2, 80, W/2, H/2, 420);
-    glow.addColorStop(0,   'rgba(139,92,246,0.07)');
-    glow.addColorStop(1,   'rgba(139,92,246,0)');
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, W, H);
-
-    // ── Gold outer border ───────────────────────────────────────
-    var goldGrad = ctx.createLinearGradient(0, 0, W, H);
-    goldGrad.addColorStop(0,    '#c9a84c');
-    goldGrad.addColorStop(0.25, '#f0d060');
-    goldGrad.addColorStop(0.5,  '#c9a84c');
-    goldGrad.addColorStop(0.75, '#f0d060');
-    goldGrad.addColorStop(1,    '#c9a84c');
-    ctx.strokeStyle = goldGrad;
-    ctx.lineWidth   = 3;
-    _roundRect(ctx, 18, 18, W - 36, H - 36, 14, false, true);
-
-    // ── Purple inner border ─────────────────────────────────────
-    ctx.strokeStyle = 'rgba(139,92,246,0.4)';
-    ctx.lineWidth   = 1;
-    _roundRect(ctx, 30, 30, W - 60, H - 60, 10, false, true);
-
-    // ── Corner ornaments ────────────────────────────────────────
-    function _corner(cx, cy) {
-      ctx.strokeStyle = goldGrad;
-      ctx.lineWidth = 1.5;
-      var s = 22;
-      ctx.beginPath(); ctx.moveTo(cx - s, cy); ctx.lineTo(cx, cy); ctx.lineTo(cx, cy + s); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(cx + s, cy); ctx.lineTo(cx, cy); ctx.lineTo(cx, cy - s); ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(cx, cy, 3.5, 0, Math.PI * 2);
-      ctx.fillStyle = '#f0d060'; ctx.fill();
+    // ── Load assets (icon + signature) ─────────────────────────
+    function loadImg(src) {
+      return new Promise(function(res) {
+        var img = new Image();
+        img.onload  = function() { res(img); };
+        img.onerror = function() { res(null); };
+        img.src = src;
+      });
     }
-    _corner(54, 54); _corner(W - 54, 54); _corner(54, H - 54); _corner(W - 54, H - 54);
+    var iconImg = await loadImg('/android-chrome-192x192.png');
+    var sigImg  = await loadImg('/images/signature-nikhil.png');
 
-    // ── Top gold divider line ───────────────────────────────────
-    var divGrad = ctx.createLinearGradient(100, 0, W - 100, 0);
-    divGrad.addColorStop(0,    'transparent');
-    divGrad.addColorStop(0.2,  '#c9a84c');
-    divGrad.addColorStop(0.8,  '#c9a84c');
-    divGrad.addColorStop(1,    'transparent');
-    ctx.strokeStyle = divGrad;
+    // ── Cream background ────────────────────────────────────────
+    ctx.fillStyle = '#f8f5ec';
+    ctx.fillRect(0, 0, W, H);
+
+    // ── Teal left bar ───────────────────────────────────────────
+    ctx.fillStyle = '#00c896';
+    ctx.fillRect(0, 0, 14, H);
+
+    // ── Teal right bar ──────────────────────────────────────────
+    ctx.fillStyle = '#00c896';
+    ctx.fillRect(W - 14, 0, 14, H);
+
+    // ── Navy outer border ───────────────────────────────────────
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth   = 2.5;
+    _roundRect(ctx, 28, 20, W - 56, H - 40, 6, false, true);
+
+    // ── Teal inner accent line ──────────────────────────────────
+    ctx.strokeStyle = '#00c896';
     ctx.lineWidth   = 1;
-    ctx.beginPath(); ctx.moveTo(100, 108); ctx.lineTo(W - 100, 108); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(100, H - 108); ctx.lineTo(W - 100, H - 108); ctx.stroke();
+    _roundRect(ctx, 36, 28, W - 72, H - 56, 4, false, true);
 
-    // ── ANALYST WORLD brand ─────────────────────────────────────
-    ctx.fillStyle = '#f0d060';
-    ctx.font      = 'bold 13px Arial, sans-serif';
-    ctx.fillText('A N A L Y S T   W O R L D', W / 2, 72);
+    // ── AW icon top-centre ──────────────────────────────────────
+    var iconSize = 64;
+    var iconX = W / 2 - iconSize / 2;
+    if (iconImg) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(W / 2, 82, 34, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(iconImg, iconX, 82 - 34, iconSize, iconSize);
+      ctx.restore();
+      // circle ring
+      ctx.strokeStyle = '#00c896';
+      ctx.lineWidth   = 2.5;
+      ctx.beginPath();
+      ctx.arc(W / 2, 82, 35, 0, Math.PI * 2);
+      ctx.stroke();
+    }
 
-    ctx.fillStyle = 'rgba(240,208,96,0.45)';
-    ctx.font      = '11px Arial';
-    ctx.fillText('India\'s Leading Analyst Platform', W / 2, 90);
+    // ── ANALYST WORLD ───────────────────────────────────────────
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#0f172a';
+    ctx.font      = 'bold 20px Arial, sans-serif';
+    ctx.letterSpacing = '4px';
+    ctx.fillText('ANALYST WORLD', W / 2, 138);
+    ctx.letterSpacing = '0px';
+
+    // teal underline
+    ctx.strokeStyle = '#00c896';
+    ctx.lineWidth   = 2;
+    ctx.beginPath(); ctx.moveTo(W/2 - 80, 146); ctx.lineTo(W/2 + 80, 146); ctx.stroke();
 
     // ── CERTIFICATE OF ACHIEVEMENT ──────────────────────────────
-    ctx.fillStyle = 'rgba(196,181,253,0.9)';
-    ctx.font      = '11px Arial, sans-serif';
-    ctx.fillText('C E R T I F I C A T E   O F   A C H I E V E M E N T', W / 2, 138);
-
-    // ── Thin decorative rule under title ────────────────────────
-    ctx.strokeStyle = 'rgba(139,92,246,0.3)';
-    ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(W/2 - 160, 148); ctx.lineTo(W/2 + 160, 148); ctx.stroke();
+    ctx.fillStyle = '#374151';
+    ctx.font      = '12px Arial, sans-serif';
+    ctx.fillText('C E R T I F I C A T E   O F   A C H I E V E M E N T', W / 2, 172);
 
     // ── This certifies that ─────────────────────────────────────
     ctx.fillStyle = '#6b7280';
-    ctx.font      = '15px Georgia, serif';
-    ctx.fillText('This proudly certifies that', W / 2, 188);
+    ctx.font      = 'italic 15px Georgia, serif';
+    ctx.fillText('This proudly certifies that', W / 2, 208);
 
-    // ── Recipient name ──────────────────────────────────────────
+    // ── Recipient name (Tangerine cursive) ──────────────────────
     var displayName = (name && name.trim()) ? name.trim() : 'Analyst';
-    ctx.fillStyle = '#ffffff';
-    ctx.font      = 'bold 52px Georgia, serif';
-    ctx.fillText(displayName, W / 2, 268);
+    ctx.fillStyle = '#0f172a';
+    ctx.font      = '72px Tangerine, Georgia, serif';
+    ctx.fillText(displayName, W / 2, 292);
 
-    // Name gold underline
+    // teal name underline
+    ctx.textAlign = 'center';
+    ctx.font = '72px Tangerine, Georgia, serif';
     var nw = ctx.measureText(displayName).width;
-    var uGrad = ctx.createLinearGradient(W/2 - nw/2, 0, W/2 + nw/2, 0);
-    uGrad.addColorStop(0, 'transparent');
-    uGrad.addColorStop(0.3, '#c9a84c');
-    uGrad.addColorStop(0.7, '#f0d060');
-    uGrad.addColorStop(1, 'transparent');
-    ctx.strokeStyle = uGrad;
-    ctx.lineWidth   = 2;
+    ctx.strokeStyle = '#00c896';
+    ctx.lineWidth   = 1.5;
     ctx.beginPath();
-    ctx.moveTo(W/2 - nw/2 - 20, 282);
-    ctx.lineTo(W/2 + nw/2 + 20, 282);
+    ctx.moveTo(W/2 - nw/2 - 10, 302);
+    ctx.lineTo(W/2 + nw/2 + 10, 302);
     ctx.stroke();
 
     // ── has successfully completed ──────────────────────────────
-    ctx.fillStyle = '#9ca3af';
-    ctx.font      = '16px Georgia, serif';
-    ctx.fillText('has successfully completed the', W / 2, 326);
+    ctx.fillStyle = '#4b5563';
+    ctx.font      = '15px Georgia, serif';
+    ctx.fillText('has successfully completed the', W / 2, 340);
 
     // ── Certification title ─────────────────────────────────────
-    ctx.fillStyle = '#c4b5fd';
-    ctx.font      = 'bold 26px Georgia, serif';
-    ctx.fillText('SQL Analyst Certification', W / 2, 368);
+    ctx.fillStyle = '#0f172a';
+    ctx.font      = 'bold 28px Georgia, serif';
+    ctx.fillText('SQL Analyst Certification', W / 2, 382);
 
     // ── Description ─────────────────────────────────────────────
-    ctx.fillStyle = '#4b5563';
+    ctx.fillStyle = '#6b7280';
     ctx.font      = '13px Arial, sans-serif';
-    ctx.fillText('Demonstrating advanced proficiency in SQL querying, data aggregation,', W / 2, 406);
-    ctx.fillText('JOINs, window functions, CTEs, subqueries, and analytical problem-solving.', W / 2, 424);
+    ctx.fillText('Demonstrating advanced proficiency in SQL querying, data aggregation,', W / 2, 418);
+    ctx.fillText('JOINs, window functions, CTEs, subqueries, and analytical problem-solving.', W / 2, 436);
 
-    // ── Bottom section: date left | seal centre | score right ───
-    var dateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+    // ── Horizontal divider ──────────────────────────────────────
+    ctx.strokeStyle = 'rgba(0,200,150,0.3)';
+    ctx.lineWidth   = 1;
+    ctx.beginPath(); ctx.moveTo(80, 462); ctx.lineTo(W - 80, 462); ctx.stroke();
 
-    // Left — Issue date
+    // ── Issue date ──────────────────────────────────────────────
+    var certDate = (userProfile && userProfile.certificate_sent_at)
+      ? new Date(userProfile.certificate_sent_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+      : new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    // ── Bottom row layout ────────────────────────────────────────
+    // Left 1/3: Signature | Centre 1/3: AW Seal | Right 1/3: India Stamp
+
+    var rowY  = 560;
+    var col1  = W * 0.18;   // centre of left column
+    var col2  = W * 0.50;   // centre column
+    var col3  = W * 0.82;   // centre of right column
+
+    // ── LEFT: Nikhil Mishra signature ───────────────────────────
+    if (sigImg) {
+      var sW = 140, sH = 52;
+      ctx.drawImage(sigImg, col1 - sW/2, rowY - sH - 4, sW, sH);
+    } else {
+      ctx.fillStyle = '#0f172a';
+      ctx.font      = '30px Tangerine, Georgia, serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Nikhil Mishra', col1, rowY - 10);
+    }
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth   = 1;
+    ctx.beginPath(); ctx.moveTo(col1 - 70, rowY + 2); ctx.lineTo(col1 + 70, rowY + 2); ctx.stroke();
+    ctx.fillStyle = '#0f172a';
+    ctx.font      = 'bold 11px Arial, sans-serif';
     ctx.textAlign = 'center';
+    ctx.fillText('Nikhil Mishra', col1, rowY + 18);
     ctx.fillStyle = '#6b7280';
-    ctx.font      = '11px Arial, sans-serif';
-    ctx.fillText('DATE OF ISSUE', 220, 482);
-    ctx.fillStyle = '#e8e6e0';
-    ctx.font      = '13px Georgia, serif';
-    ctx.fillText(dateStr, 220, 500);
-    ctx.strokeStyle = 'rgba(240,208,96,0.3)';
-    ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(140, 510); ctx.lineTo(300, 510); ctx.stroke();
+    ctx.font      = '10px Arial, sans-serif';
+    ctx.fillText('ANALYST WORLD TEAM', col1, rowY + 33);
+    ctx.fillText('Programme Director', col1, rowY + 47);
 
-    // Right — Score
-    ctx.fillStyle = '#6b7280';
-    ctx.font      = '11px Arial, sans-serif';
-    ctx.fillText('APTITUDE SCORE', W - 220, 482);
-    ctx.fillStyle = '#a78bfa';
-    ctx.font      = 'bold 18px Georgia, serif';
-    ctx.fillText(_lastScore + ' / ' + CERT_MCQ.length, W - 220, 502);
-    ctx.strokeStyle = 'rgba(139,92,246,0.3)';
-    ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(W - 300, 510); ctx.lineTo(W - 140, 510); ctx.stroke();
+    // ── CENTRE: AW certified circular seal ──────────────────────
+    var sealR = 50;
+    var sealCY = rowY - 10;
 
-    // Centre seal
+    // outer ring
     ctx.beginPath();
-    ctx.arc(W / 2, 494, 32, 0, Math.PI * 2);
-    var sealGrad = ctx.createRadialGradient(W/2, 494, 4, W/2, 494, 32);
-    sealGrad.addColorStop(0,   '#a78bfa');
-    sealGrad.addColorStop(0.6, '#7c3aed');
-    sealGrad.addColorStop(1,   '#5b21b6');
-    ctx.fillStyle   = sealGrad;
+    ctx.arc(col2, sealCY, sealR, 0, Math.PI * 2);
+    ctx.fillStyle = '#0f172a';
     ctx.fill();
-    ctx.strokeStyle = '#f0d060';
-    ctx.lineWidth   = 2;
+    ctx.strokeStyle = '#00c896';
+    ctx.lineWidth   = 3;
     ctx.stroke();
 
-    // Seal star
-    ctx.fillStyle = '#f0d060';
-    ctx.font      = '22px Arial';
-    ctx.fillText('★', W / 2, 502);
+    // inner ring
+    ctx.beginPath();
+    ctx.arc(col2, sealCY, sealR - 8, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(0,200,150,0.4)';
+    ctx.lineWidth   = 1;
+    ctx.stroke();
 
-    // ── Footer ──────────────────────────────────────────────────
-    ctx.fillStyle = 'rgba(107,114,128,0.6)';
+    // AW icon inside seal
+    if (iconImg) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(col2, sealCY, sealR - 12, 0, Math.PI * 2);
+      ctx.clip();
+      var si = (sealR - 12) * 2;
+      ctx.drawImage(iconImg, col2 - si/2, sealCY - si/2, si, si);
+      ctx.restore();
+    } else {
+      ctx.fillStyle = '#00c896';
+      ctx.font      = 'bold 18px Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('AW', col2, sealCY + 7);
+    }
+
+    // "CERTIFIED" arc text below seal
+    ctx.fillStyle = '#0f172a';
+    ctx.font      = 'bold 10px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('CERTIFIED', col2, sealCY + sealR + 14);
+
+    // ── RIGHT: Round India stamp ─────────────────────────────────
+    var stR   = 48;
+    var stCY  = rowY - 10;
+
+    // outer dashed ring
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(col3, stCY, stR, 0, Math.PI * 2);
+    ctx.strokeStyle = '#00c896';
+    ctx.lineWidth   = 2;
+    ctx.setLineDash([4, 3]);
+    ctx.stroke();
+    ctx.restore();
+
+    // inner solid ring
+    ctx.beginPath();
+    ctx.arc(col3, stCY, stR - 7, 0, Math.PI * 2);
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth   = 1.5;
+    ctx.stroke();
+
+    // curved top text: "INDIA'S LEADING PLATFORM"
+    (function drawArcText(text, cx, cy, r, startAngle, endAngle) {
+      var chars = text.split('');
+      var totalAngle = endAngle - startAngle;
+      var angleStep  = totalAngle / (chars.length - 1);
+      ctx.save();
+      ctx.font      = 'bold 9px Arial, sans-serif';
+      ctx.fillStyle = '#0f172a';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      chars.forEach(function(ch, i) {
+        var angle = startAngle + i * angleStep;
+        ctx.save();
+        ctx.translate(cx + r * Math.cos(angle), cy + r * Math.sin(angle));
+        ctx.rotate(angle + Math.PI / 2);
+        ctx.fillText(ch, 0, 0);
+        ctx.restore();
+      });
+      ctx.restore();
+    })("INDIA'S LEADING PLATFORM", col3, stCY, stR - 12, -Math.PI * 0.82, -Math.PI * 0.18);
+
+    // curved bottom text: "FOR ANALYSTS"
+    (function drawArcText(text, cx, cy, r, startAngle, endAngle) {
+      var chars = text.split('');
+      var totalAngle = endAngle - startAngle;
+      var angleStep  = totalAngle / (chars.length - 1);
+      ctx.save();
+      ctx.font      = 'bold 9px Arial, sans-serif';
+      ctx.fillStyle = '#0f172a';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      chars.forEach(function(ch, i) {
+        var angle = startAngle + i * angleStep;
+        ctx.save();
+        ctx.translate(cx + r * Math.cos(angle), cy + r * Math.sin(angle));
+        ctx.rotate(angle - Math.PI / 2);
+        ctx.fillText(ch, 0, 0);
+        ctx.restore();
+      });
+      ctx.restore();
+    })('FOR ANALYSTS', col3, stCY, stR - 12, Math.PI * 0.22, Math.PI * 0.78);
+
+    // center of stamp: teal dot + "AW"
+    ctx.beginPath();
+    ctx.arc(col3, stCY, 16, 0, Math.PI * 2);
+    ctx.fillStyle = '#00c896';
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font      = 'bold 11px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('AW', col3, stCY + 4);
+
+    // ── Issue date at very bottom ────────────────────────────────
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#9ca3af';
     ctx.font      = '10px Arial, sans-serif';
-    ctx.fillText('analyst.world  ·  India\'s Leading Analyst Platform', W / 2, H - 42);
+    ctx.fillText('Issued on ' + certDate + '   |   analystworld.in', W / 2, H - 28);
 
     var dataUrl = canvas.toDataURL('image/png');
     _certDataUrl = dataUrl;
@@ -5583,11 +5694,11 @@ var CertFlow = (function () {
   }
 
   // ── download ─────────────────────────────────────────────────
-  function downloadCert() {
+  async function downloadCert() {
     var dataUrl = _certDataUrl;
     if (!dataUrl) {
       var name = (userProfile && (userProfile.display_name || userProfile.full_name)) || 'certificate';
-      dataUrl = _drawCertificate(
+      dataUrl = await _drawCertificate(
         document.getElementById('certCanvasView') ? 'certCanvasView' : 'certCanvas',
         name
       );
@@ -5595,7 +5706,7 @@ var CertFlow = (function () {
     if (!dataUrl) return;
     var a       = document.createElement('a');
     a.href      = dataUrl;
-    a.download  = 'MishraSQL-Certificate.png';
+    a.download  = 'AnalystWorld-Certificate.png';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
