@@ -2221,7 +2221,203 @@ VALUES (1);</code></pre>
       <li>Why are constraints important in real systems?</li>
       <li>Can multiple constraints be used together on one table?</li>
     </ol>`,
-  'mod3-t6': `<h1>PRIMARY KEY & FOREIGN KEY</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod3-t6': `<h1>PRIMARY KEY &amp; FOREIGN KEY</h1>
+    <p>Imagine a school with thousands of students. Now suppose two students have the same name, same city, and same class. How will the school uniquely identify each student? Using a roll number, student ID, or admission number.</p>
+    <p>Similarly, in databases we also need a way to uniquely identify records. This is where <strong>PRIMARY KEY</strong> comes in. And when we want to connect multiple tables together, we use <strong>FOREIGN KEY</strong>.</p>
+    <p>These two concepts are among the most important topics in SQL — because real-world databases are built using relationships.</p>
+
+    <h2>Why Keys are Important</h2>
+    <p>Imagine the Swiggy database without proper identifiers. How will the system know which customer placed which order, which payment belongs to which user, or which delivery partner delivered which order? Without keys, data relationships become impossible. Keys help databases remain organized, accurate, connected, and reliable.</p>
+
+    <h2>What is a PRIMARY KEY?</h2>
+    <p>A PRIMARY KEY is a column that uniquely identifies each row in a table.</p>
+    <ul>
+      <li>No two rows can have the same primary key value</li>
+      <li>PRIMARY KEY cannot contain NULL values</li>
+    </ul>
+    <p>Think of Aadhaar number, PAN number, passport number, or employee ID — these uniquely identify people. Similarly, PRIMARY KEY uniquely identifies records in a table.</p>
+
+    <h2>Example Table</h2>
+    <table>
+      <thead><tr><th>student_id</th><th>name</th><th>city</th></tr></thead>
+      <tbody>
+        <tr><td>101</td><td>Rahul</td><td>Delhi</td></tr>
+        <tr><td>102</td><td>Priya</td><td>Mumbai</td></tr>
+        <tr><td>103</td><td>Aman</td><td>Jaipur</td></tr>
+      </tbody>
+    </table>
+    <p>Here <code>student_id</code> can act as PRIMARY KEY — every value is unique and no NULL values exist.</p>
+
+    <h2>Creating PRIMARY KEY</h2>
+    <pre><code>CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    city VARCHAR(50)
+);</code></pre>
+    <p>Now duplicate <code>student_id</code> is not allowed, and NULL <code>student_id</code> is not allowed.</p>
+
+    <h2>PRIMARY KEY Rules</h2>
+    <table>
+      <thead><tr><th>Rule</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>Be Unique</td><td>No duplicates allowed</td></tr>
+        <tr><td>Not Be NULL</td><td>Every row must have a value</td></tr>
+        <tr><td>Identify One Row</td><td>Points to exactly one record</td></tr>
+      </tbody>
+    </table>
+    <p>If <code>student_id = 101</code> already exists and you try to insert another row with <code>student_id = 101</code>, SQL throws an error immediately.</p>
+
+    <h2>Can We Have Multiple PRIMARY KEYS?</h2>
+    <p>No. One table can have only <strong>one PRIMARY KEY</strong>. But that PRIMARY KEY can span multiple columns together — this is called a <strong>Composite Primary Key</strong>.</p>
+
+    <h2>Best Column for PRIMARY KEY</h2>
+    <p>Good PRIMARY KEY columns are unique, stable, small in size, and non-changing. Common examples: <code>customer_id</code>, <code>employee_id</code>, <code>order_id</code>, <code>product_id</code>.</p>
+    <p>Using <code>name</code> as a PRIMARY KEY is a bad idea — multiple people can have the same name. India alone has enough Rahuls to break that system.</p>
+
+    <h2>What is a FOREIGN KEY?</h2>
+    <p>FOREIGN KEY creates a relationship between tables — it connects one table with another. This is how relational databases work.</p>
+
+    <h2>Real-World Example</h2>
+    <p>Two tables:</p>
+    <p><strong>students table</strong></p>
+    <table>
+      <thead><tr><th>student_id</th><th>name</th></tr></thead>
+      <tbody>
+        <tr><td>101</td><td>Rahul</td></tr>
+        <tr><td>102</td><td>Priya</td></tr>
+      </tbody>
+    </table>
+    <p><strong>orders table</strong></p>
+    <table>
+      <thead><tr><th>order_id</th><th>student_id</th><th>course</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>101</td><td>SQL</td></tr>
+        <tr><td>2</td><td>102</td><td>Python</td></tr>
+      </tbody>
+    </table>
+    <p>Here <code>orders.student_id</code> references <code>students.student_id</code> — this creates the relationship.</p>
+
+    <h2>Creating FOREIGN KEY</h2>
+    <pre><code>CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(50)
+);</code></pre>
+    <pre><code>CREATE TABLE enrollments (
+    enrollment_id INT PRIMARY KEY,
+    student_id INT,
+    course_name VARCHAR(50),
+    FOREIGN KEY (student_id)
+        REFERENCES students(student_id)
+);</code></pre>
+    <p>Now the two tables are connected.</p>
+
+    <h2>Understanding the Syntax</h2>
+    <table>
+      <thead><tr><th>Part</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>FOREIGN KEY</td><td>Declares a foreign key</td></tr>
+        <tr><td>student_id</td><td>Column in the current table</td></tr>
+        <tr><td>REFERENCES</td><td>Links to another table</td></tr>
+        <tr><td>students(student_id)</td><td>The referenced column</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Why FOREIGN KEY Matters</h2>
+    <p>FOREIGN KEY maintains relationships, data consistency, and referential integrity. Suppose <code>student_id = 999</code> does not exist in the students table. If someone tries to insert an enrollment with <code>student_id = 999</code>, SQL blocks the insertion. That is the power of FOREIGN KEY.</p>
+
+    <h2>PRIMARY KEY vs FOREIGN KEY</h2>
+    <table>
+      <thead><tr><th>PRIMARY KEY</th><th>FOREIGN KEY</th></tr></thead>
+      <tbody>
+        <tr><td>Uniquely identifies rows</td><td>Connects tables</td></tr>
+        <tr><td>Exists in parent table</td><td>Exists in child table</td></tr>
+        <tr><td>Unique values only</td><td>Can repeat</td></tr>
+        <tr><td>Cannot be NULL</td><td>May contain NULL</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Parent Table and Child Table</h2>
+    <p>The <strong>parent table</strong> (e.g. <code>students</code>) contains the PRIMARY KEY. The <strong>child table</strong> (e.g. <code>enrollments</code>) contains the FOREIGN KEY that references the parent.</p>
+
+    <h2>Real Industry Example</h2>
+    <p>E-commerce websites use relationships everywhere:</p>
+    <table>
+      <thead><tr><th>Table</th><th>Connected To</th></tr></thead>
+      <tbody>
+        <tr><td>customers</td><td>orders</td></tr>
+        <tr><td>orders</td><td>payments</td></tr>
+        <tr><td>products</td><td>categories</td></tr>
+        <tr><td>employees</td><td>departments</td></tr>
+      </tbody>
+    </table>
+    <p>Without FOREIGN KEY relationships, large systems become impossible to manage.</p>
+
+    <h2>What is Referential Integrity?</h2>
+    <p>Big name, simple meaning. Referential integrity ensures relationships between tables remain valid. FOREIGN KEY helps enforce this — you cannot add a child record that references a parent that does not exist.</p>
+
+    <h2>Common Beginner Mistakes</h2>
+    <h3>1. Using Non-Unique Column as PRIMARY KEY</h3>
+    <p>Using <code>city</code> as a PRIMARY KEY is wrong — many people can belong to the same city.</p>
+
+    <h3>2. Forgetting PRIMARY KEY</h3>
+    <p>Without PRIMARY KEY, duplicate rows become possible and relationships become weak.</p>
+
+    <h3>3. Linking Wrong Columns</h3>
+    <p>FOREIGN KEY must reference the correct parent table and correct column. Otherwise relationships break.</p>
+
+    <h3>4. Confusing PRIMARY KEY with UNIQUE</h3>
+    <table>
+      <thead><tr><th>PRIMARY KEY</th><th>UNIQUE</th></tr></thead>
+      <tbody>
+        <tr><td>Only one per table</td><td>Multiple allowed per table</td></tr>
+        <tr><td>Cannot be NULL</td><td>NULL allowed in many DBMS</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Best Practices</h2>
+    <h3>Use Numeric IDs as PRIMARY KEY</h3>
+    <p><code>customer_id</code> is better than using names.</p>
+    <h3>Keep Relationships Logical</h3>
+    <p>Do not connect unrelated tables.</p>
+    <h3>Use Meaningful Column Names</h3>
+    <p>Good: <code>student_id</code>, <code>order_id</code>, <code>employee_id</code>.</p>
+    <h3>Design Before Coding</h3>
+    <p>Good database design saves future headaches. Professional database engineers spend serious time designing relationships properly.</p>
+
+    <h2>Visual Summary</h2>
+    <table>
+      <thead><tr><th>Concept</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>PRIMARY KEY</td><td>Unique identification of rows</td></tr>
+        <tr><td>FOREIGN KEY</td><td>Connects related tables</td></tr>
+        <tr><td>Referential Integrity</td><td>Keeps relationships valid</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Final Thoughts</h2>
+    <p>PRIMARY KEY and FOREIGN KEY are the heart of relational databases. They help databases stay organized, avoid duplication, build relationships, and maintain accuracy. As databases become larger, relationships become even more important — because real-world systems are all about connected data.</p>
+
+    <h2>Quick Revision</h2>
+    <ul>
+      <li>PRIMARY KEY uniquely identifies rows</li>
+      <li>PRIMARY KEY cannot contain duplicates or NULL</li>
+      <li>FOREIGN KEY connects tables together</li>
+      <li>FOREIGN KEY references a PRIMARY KEY in another table</li>
+      <li>Relationships improve database structure</li>
+      <li>Referential integrity keeps data valid</li>
+    </ul>
+
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>What is a PRIMARY KEY?</li>
+      <li>Why must PRIMARY KEY values be unique?</li>
+      <li>What is a FOREIGN KEY?</li>
+      <li>What is the difference between PRIMARY KEY and FOREIGN KEY?</li>
+      <li>What is referential integrity?</li>
+      <li>Can a FOREIGN KEY contain duplicate values?</li>
+      <li>Why should names usually not be used as a PRIMARY KEY?</li>
+      <li>What is the difference between a parent table and a child table?</li>
+    </ol>`,
   'mod3-t7': `<h1>ALTER TABLE</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
   'mod3-t8': `<h1>DROP TABLE & TRUNCATE TABLE</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
 
