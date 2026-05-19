@@ -11,12 +11,4 @@
     <xhtml:link rel="alternate" hreflang="en-in" href="https://analystworld.in/"/>
   </url>
 
-  <!-- Practice Page (SPA route) -->
-  <url>
-    <loc>https://analystworld.in/index.html</loc>
-    <lastmod>2026-05-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-
 </urlset>
