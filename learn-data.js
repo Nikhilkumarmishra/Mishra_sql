@@ -1850,7 +1850,207 @@ student_id INT;</code></pre>
       <li>Why should table names be meaningful?</li>
       <li>What does the <code>DESCRIBE</code> command do?</li>
     </ol>`,
-  'mod3-t4': `<h1>Data Types in SQL</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod3-t4': `<h1>Data Types in SQL</h1>
+    <p>Imagine filling an online form. For name you enter text, for age a number, for date of birth a date, for salary a decimal value. Now imagine if the system allowed "Delhi" as age or "Pizza" as salary. Absolute chaos.</p>
+    <p>This is exactly why SQL uses data types. Data types tell SQL: <em>"What kind of data can be stored inside a column."</em> Without data types, databases would become messy and unreliable.</p>
+
+    <h2>What are Data Types?</h2>
+    <p>Data types define the type of values allowed, storage format, memory allocation, and data validation rules. In simple words: data types help SQL understand the nature of data.</p>
+
+    <h2>Real-Life Analogy</h2>
+    <p>Think of a kitchen. You store rice in containers, water in bottles, ice cream in the freezer, and clothes in the cupboard. Everything has a proper place. Similarly, SQL stores different types of data using different data types.</p>
+
+    <h2>Why Data Types are Important</h2>
+    <table>
+      <thead><tr><th>Benefit</th><th>Why It Matters</th></tr></thead>
+      <tbody>
+        <tr><td>Accuracy</td><td>Prevents wrong data</td></tr>
+        <tr><td>Performance</td><td>Faster queries</td></tr>
+        <tr><td>Storage Optimization</td><td>Uses memory efficiently</td></tr>
+        <tr><td>Validation</td><td>Maintains clean data</td></tr>
+      </tbody>
+    </table>
+    <p>Good database design always uses correct data types.</p>
+
+    <h2>Main Categories of Data Types</h2>
+    <table>
+      <thead><tr><th>Category</th><th>Stores</th></tr></thead>
+      <tbody>
+        <tr><td>Numeric</td><td>Numbers</td></tr>
+        <tr><td>String/Text</td><td>Characters and text</td></tr>
+        <tr><td>Date &amp; Time</td><td>Dates and timestamps</td></tr>
+        <tr><td>Boolean</td><td>True/False values</td></tr>
+      </tbody>
+    </table>
+
+    <h2>1. Numeric Data Types</h2>
+    <p>Numeric data types store numbers — like age, salary, product quantity, or marks.</p>
+
+    <h3>INT</h3>
+    <p><code>INT</code> stores whole numbers.</p>
+    <pre><code>age INT</code></pre>
+    <p>Valid values: 18, 25, 100. Not allowed: 25.5, Rahul.</p>
+    <pre><code>CREATE TABLE students (
+    student_id INT,
+    age INT
+);</code></pre>
+
+    <h3>BIGINT</h3>
+    <p>Used for very large numbers — like Aadhaar-scale systems, banking transactions, or large IDs.</p>
+
+    <h3>FLOAT</h3>
+    <p><code>FLOAT</code> stores decimal values.</p>
+    <pre><code>salary FLOAT</code></pre>
+    <p>Values: 50000.50, 99.99, 7.5</p>
+
+    <h3>DECIMAL</h3>
+    <p><code>DECIMAL</code> is more precise than FLOAT. Mostly used in banking, financial systems, and payment calculations.</p>
+    <pre><code>price DECIMAL(10,2)</code></pre>
+    <p>Meaning: total digits = 10, decimal digits = 2. Example values: 99999.99, 1500.50.</p>
+    <p>Banks love precision. Because nobody wants: <em>"Sir your balance became approximately ₹4999.87352."</em></p>
+
+    <h2>2. String / Text Data Types</h2>
+    <p>These store text — names, cities, email addresses, product names.</p>
+
+    <h3>VARCHAR</h3>
+    <p>Most commonly used text data type.</p>
+    <pre><code>name VARCHAR(50)</code></pre>
+    <p>Meaning: store text up to 50 characters. Examples: Rahul, Priya, Bangalore.</p>
+
+    <h3>CHAR</h3>
+    <p><code>CHAR</code> stores fixed-length text. CHAR always reserves fixed space.</p>
+    <pre><code>gender CHAR(1)</code></pre>
+    <p>Values: M, F.</p>
+
+    <h3>TEXT</h3>
+    <p>Used for large text like comments, reviews, or blog content.</p>
+    <pre><code>review TEXT</code></pre>
+
+    <h3>VARCHAR vs CHAR</h3>
+    <table>
+      <thead><tr><th>VARCHAR</th><th>CHAR</th></tr></thead>
+      <tbody>
+        <tr><td>Variable length</td><td>Fixed length</td></tr>
+        <tr><td>Flexible</td><td>Faster for fixed-size data</td></tr>
+        <tr><td>Commonly used</td><td>Used less frequently</td></tr>
+      </tbody>
+    </table>
+
+    <h2>3. Date and Time Data Types</h2>
+    <p>Used for storing birth dates, order dates, login timestamps, and transaction times.</p>
+
+    <h3>DATE</h3>
+    <p>Stores only the date.</p>
+    <pre><code>date_of_birth DATE</code></pre>
+    <p>Format: <code>YYYY-MM-DD</code> — example: <code>2001-08-15</code></p>
+
+    <h3>TIME</h3>
+    <p>Stores time only.</p>
+    <pre><code>login_time TIME</code></pre>
+
+    <h3>DATETIME</h3>
+    <p>Stores both date and time. Very useful in real applications.</p>
+    <pre><code>created_at DATETIME</code></pre>
+    <p>Example value: <code>2025-05-20 10:30:00</code></p>
+
+    <h3>Real-World Example</h3>
+    <p>Suppose Swiggy stores order details:</p>
+    <pre><code>CREATE TABLE orders (
+    order_id INT,
+    order_date DATE,
+    delivery_time DATETIME
+);</code></pre>
+    <p>Now SQL can properly track order timings.</p>
+
+    <h2>4. Boolean Data Type</h2>
+    <p>Boolean stores TRUE or FALSE.</p>
+    <pre><code>is_active BOOLEAN</code></pre>
+    <p>Useful for user status, login status, and subscription active/inactive flags.</p>
+
+    <h2>Choosing Correct Data Types</h2>
+    <p>This is extremely important. Wrong data type choices create future problems.</p>
+
+    <h3>Example 1: Phone Number</h3>
+    <p>Wrong:</p>
+    <pre><code>phone_number INT</code></pre>
+    <p>Problems: leading zeros may disappear, country codes become tricky, not used for calculations anyway. Better:</p>
+    <pre><code>phone_number VARCHAR(15)</code></pre>
+
+    <h3>Example 2: Salary</h3>
+    <p>Wrong:</p>
+    <pre><code>salary VARCHAR(20)</code></pre>
+    <p>Because salary is numeric data. Correct:</p>
+    <pre><code>salary DECIMAL(10,2)</code></pre>
+
+    <h2>Common Beginner Mistakes</h2>
+    <h3>1. Using VARCHAR Everywhere</h3>
+    <pre><code>age VARCHAR(10)</code></pre>
+    <p>Technically possible. But logically wrong. Numbers should usually use numeric types.</p>
+
+    <h3>2. Using INT for Mobile Numbers</h3>
+    <p>Phone numbers are identifiers, not mathematical values. Use <code>VARCHAR</code>.</p>
+
+    <h3>3. Choosing Very Small VARCHAR Size</h3>
+    <pre><code>name VARCHAR(5)</code></pre>
+    <p>Then someone named Christopher tries to register. SQL: <em>"We only support tiny humans here."</em></p>
+
+    <h3>4. Ignoring Precision for Financial Data</h3>
+    <p>Money-related systems should use <code>DECIMAL</code>. Precision matters.</p>
+
+    <h2>Real Industry Importance</h2>
+    <p>In real companies, choosing correct data types impacts performance, scalability, query speed, storage costs, and data quality. Database engineers spend serious time designing schemas carefully — because fixing bad database design later becomes painful.</p>
+
+    <h2>Visual Summary</h2>
+    <table>
+      <thead><tr><th>Data Type</th><th>Best Used For</th></tr></thead>
+      <tbody>
+        <tr><td>INT</td><td>Whole numbers</td></tr>
+        <tr><td>FLOAT</td><td>Decimal values</td></tr>
+        <tr><td>DECIMAL</td><td>Money values</td></tr>
+        <tr><td>VARCHAR</td><td>Text</td></tr>
+        <tr><td>CHAR</td><td>Fixed text</td></tr>
+        <tr><td>TEXT</td><td>Large content</td></tr>
+        <tr><td>DATE</td><td>Dates</td></tr>
+        <tr><td>DATETIME</td><td>Date + time</td></tr>
+        <tr><td>BOOLEAN</td><td>True/False</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Best Practices</h2>
+    <h3>Use Smallest Suitable Type</h3>
+    <p>Do not waste storage unnecessarily.</p>
+    <h3>Use DECIMAL for Money</h3>
+    <p>Avoid floating-point precision issues.</p>
+    <h3>Use Meaningful Column Names</h3>
+    <p><code>salary DECIMAL(10,2)</code> is better than <code>s DECIMAL(10,2)</code>.</p>
+    <h3>Think Long-Term</h3>
+    <p>Good database design should support future growth.</p>
+
+    <h2>Final Thoughts</h2>
+    <p>Data types may look like a small topic. But they are one of the most important foundations in SQL. Correct data types keep databases clean, improve performance, prevent errors, and make applications reliable.</p>
+
+    <h2>Quick Revision</h2>
+    <ul>
+      <li>Data types define what kind of data can be stored</li>
+      <li><code>INT</code> stores whole numbers</li>
+      <li><code>VARCHAR</code> stores text</li>
+      <li><code>DECIMAL</code> is best for money values</li>
+      <li><code>DATE</code> stores dates</li>
+      <li><code>DATETIME</code> stores both date and time</li>
+      <li>Correct data types improve database quality</li>
+    </ul>
+
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>What are data types in SQL?</li>
+      <li>Why are data types important?</li>
+      <li>What is the difference between <code>INT</code> and <code>FLOAT</code>?</li>
+      <li>Why is <code>DECIMAL</code> preferred for banking systems?</li>
+      <li>What is the difference between <code>VARCHAR</code> and <code>CHAR</code>?</li>
+      <li>Which data type should be used for phone numbers?</li>
+      <li>What does <code>DATETIME</code> store?</li>
+      <li>Why should we avoid using <code>VARCHAR</code> everywhere?</li>
+    </ol>`,
   'mod3-t5': `<h1>Constraints (NOT NULL, UNIQUE, CHECK, DEFAULT)</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
   'mod3-t6': `<h1>PRIMARY KEY & FOREIGN KEY</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
   'mod3-t7': `<h1>ALTER TABLE</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
