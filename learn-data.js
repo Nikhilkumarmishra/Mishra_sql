@@ -2418,7 +2418,140 @@ VALUES (1);</code></pre>
       <li>Why should names usually not be used as a PRIMARY KEY?</li>
       <li>What is the difference between a parent table and a child table?</li>
     </ol>`,
-  'mod3-t7': `<h1>ALTER TABLE</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod3-t7': `<h1>ALTER TABLE</h1>
+    <p>Imagine a school creates a student admission form with name, roll number, and city. Later they realize: <em>"We also need phone number and email."</em> Will they destroy the entire system and rebuild everything? Of course not — they simply modify the structure.</p>
+    <p>Similarly in SQL, after creating a table, we often need to add new columns, remove columns, change data types, or rename columns. For this, SQL provides <code>ALTER TABLE</code> — one of the most commonly used SQL commands in real companies, because databases constantly evolve.</p>
+
+    <h2>Why ALTER TABLE is Important</h2>
+    <p>Real business requirements keep changing. An e-commerce company may initially store just product name and price, but later need discount percentage, product rating, stock availability, and delivery time. Instead of recreating tables, ALTER TABLE helps modify existing structures.</p>
+
+    <h2>Basic Syntax</h2>
+    <pre><code>ALTER TABLE table_name
+modification;</code></pre>
+
+    <h2>Example Table</h2>
+    <p>Suppose we already have:</p>
+    <pre><code>CREATE TABLE students (
+    student_id INT,
+    name VARCHAR(50),
+    city VARCHAR(50)
+);</code></pre>
+    <table>
+      <thead><tr><th>student_id</th><th>name</th><th>city</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Rahul</td><td>Delhi</td></tr>
+        <tr><td>2</td><td>Priya</td><td>Mumbai</td></tr>
+      </tbody>
+    </table>
+
+    <h2>1. ADD COLUMN</h2>
+    <p>Add a new <code>phone_number</code> column:</p>
+    <pre><code>ALTER TABLE students
+ADD phone_number VARCHAR(15);</code></pre>
+    <p>Updated table:</p>
+    <table>
+      <thead><tr><th>student_id</th><th>name</th><th>city</th><th>phone_number</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Rahul</td><td>Delhi</td><td>NULL</td></tr>
+        <tr><td>2</td><td>Priya</td><td>Mumbai</td><td>NULL</td></tr>
+      </tbody>
+    </table>
+    <p>SQL kept old data safe, added the new column, and assigned NULL to existing rows.</p>
+    <p>Real-world example — suppose a company never collected emails, then the marketing team says: <em>"We need email campaigns."</em></p>
+    <pre><code>ALTER TABLE customers
+ADD email VARCHAR(100);</code></pre>
+    <p>Problem solved.</p>
+
+    <h2>2. MODIFY COLUMN</h2>
+    <p>Sometimes we need to change a data type or size. Suppose <code>phone_number VARCHAR(10)</code> was set initially, but the company starts supporting international numbers and needs a bigger size:</p>
+    <pre><code>ALTER TABLE students
+MODIFY phone_number VARCHAR(20);</code></pre>
+    <p>Same situation applies to names. If <code>name VARCHAR(20)</code> was set and then a customer named <em>Siddharthanandeshwar</em> tries to register — database says: <em>"Brother please shorten your identity."</em> Developers increase the column size using ALTER TABLE.</p>
+
+    <h2>3. DROP COLUMN</h2>
+    <p>When a column is no longer needed:</p>
+    <pre><code>ALTER TABLE students
+DROP COLUMN city;</code></pre>
+    <p>The city column disappears — including its structure and all data inside. Permanently. Always double-check before dropping columns.</p>
+    <p>Real-world example: suppose the company no longer uses <code>fax_number</code>. Most people today probably do not even know what fax is. So developers remove unused columns to keep the table clean.</p>
+
+    <h2>4. RENAME COLUMN</h2>
+    <p>When a column name is unclear — like <code>nm</code> — we can rename it:</p>
+    <pre><code>ALTER TABLE students
+RENAME COLUMN nm TO name;</code></pre>
+    <p>Readable databases help developers, analysts, data engineers, and future teams. Poor names like <code>a1</code>, <code>b2</code>, or <code>x_temp_final</code> confuse everyone — including the person who created them, two months later.</p>
+
+    <h2>5. Rename the Table</h2>
+    <p>We can even rename an entire table:</p>
+    <pre><code>ALTER TABLE students
+RENAME TO college_students;</code></pre>
+
+    <h2>Visual Summary</h2>
+    <table>
+      <thead><tr><th>Operation</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>ADD</td><td>Add new column</td></tr>
+        <tr><td>MODIFY</td><td>Change data type or size</td></tr>
+        <tr><td>DROP COLUMN</td><td>Remove a column</td></tr>
+        <tr><td>RENAME COLUMN</td><td>Change column name</td></tr>
+        <tr><td>RENAME TO</td><td>Change table name</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Real Industry Importance</h2>
+    <p>In real companies, ALTER TABLE is used frequently because applications constantly evolve — adding new features, supporting new countries, collecting additional information, improving business logic. Database structures change over time.</p>
+
+    <h2>Real-Life Analogy</h2>
+    <p>Think of ALTER TABLE like a house renovation — adding a new room, removing a wall, expanding the kitchen, or renaming room labels. The structure changes, but the house still exists.</p>
+
+    <h2>Common Beginner Mistakes</h2>
+    <h3>1. Forgetting Existing Data</h3>
+    <p>Before modifying tables, always think: <em>"What happens to old data?"</em> Schema changes can affect millions of rows.</p>
+
+    <h3>2. Using Wrong Data Type During MODIFY</h3>
+    <p>Changing <code>salary DECIMAL</code> to <code>salary VARCHAR</code> may create serious problems. Always think logically about the data type you need.</p>
+
+    <h3>3. Dropping Important Columns Accidentally</h3>
+    <pre><code>DROP COLUMN customer_email;</code></pre>
+    <p>Production team after seeing this: <em>"We need to talk."</em></p>
+
+    <h3>4. Renaming Columns Carelessly</h3>
+    <p>Applications may depend on old column names. Changing names without coordination can break running systems.</p>
+
+    <h2>Best Practices</h2>
+    <h3>Take Backup Before Major Changes</h3>
+    <p>Especially in production databases.</p>
+    <h3>Use Meaningful Names</h3>
+    <p>Readable structures improve maintainability.</p>
+    <h3>Test in Development First</h3>
+    <p>Never experiment directly on production databases.</p>
+    <h3>Think About Future Growth</h3>
+    <p>Design tables flexibly so future changes are less painful.</p>
+
+    <h2>Final Thoughts</h2>
+    <p>ALTER TABLE is one of the most practical SQL commands because databases are never static. As businesses grow, database structures must evolve too. Changing requirements are part of every software system.</p>
+
+    <h2>Quick Revision</h2>
+    <ul>
+      <li><code>ALTER TABLE</code> modifies existing tables</li>
+      <li><code>ADD</code> adds new columns</li>
+      <li><code>MODIFY</code> changes column structure</li>
+      <li><code>DROP COLUMN</code> removes columns permanently</li>
+      <li><code>RENAME</code> changes column or table names</li>
+      <li>ALTER TABLE is heavily used in real projects</li>
+    </ul>
+
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>What is <code>ALTER TABLE</code> used for?</li>
+      <li>Write a query to add an <code>email</code> column to the students table.</li>
+      <li>Which command changes a column's data type?</li>
+      <li>What happens when <code>DROP COLUMN</code> is used?</li>
+      <li>Why is <code>ALTER TABLE</code> important in real companies?</li>
+      <li>How do you rename a column?</li>
+      <li>Why should backups be taken before schema changes?</li>
+      <li>What is the difference between <code>CREATE TABLE</code> and <code>ALTER TABLE</code>?</li>
+    </ol>`,
   'mod3-t8': `<h1>DROP TABLE & TRUNCATE TABLE</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
 
   // ── Module 4 ─────────────────────────────────────────────────
