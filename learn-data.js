@@ -1396,8 +1396,247 @@ WHERE city = 'Delhi';</code></pre>
     </ol>`,
 
   // ── Module 3 ─────────────────────────────────────────────────
-  'mod3-t1': `<h1>CREATE DATABASE</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod3-t2': `<h1>DROP DATABASE</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod3-t1': `<h1>CREATE DATABASE</h1>
+    <p>Before storing any data, we first need a place to store it.</p>
+    <p>Think about real life. Before opening a school, hospital, shop, or warehouse — you first need the building.</p>
+    <p>Similarly, before creating tables and storing data in SQL, we first create a database.</p>
+    <p>A database acts like a digital container. Inside it, we can store tables, data, relationships, and business information. Without a database, there is nowhere to store tables.</p>
+
+    <h2>What is a Database?</h2>
+    <p>A database is an organized collection of data. Simple examples:</p>
+    <table>
+      <thead><tr><th>Real World</th><th>Database Example</th></tr></thead>
+      <tbody>
+        <tr><td>School</td><td>Student database</td></tr>
+        <tr><td>Hospital</td><td>Patient database</td></tr>
+        <tr><td>Swiggy</td><td>Orders database</td></tr>
+        <tr><td>Bank</td><td>Customer accounts database</td></tr>
+      </tbody>
+    </table>
+    <p>Every modern app you use daily depends on databases. Even Instagram needs databases to remember your posts, followers, likes, and messages. Otherwise every time you open the app:</p>
+    <p><em>"New phone, who dis?"</em></p>
+
+    <h2>Why Do We Create Separate Databases?</h2>
+    <p>Imagine mixing hospital records, school data, and banking transactions inside one giant messy system. Absolute chaos.</p>
+    <p>So companies create separate databases for different purposes.</p>
+    <table>
+      <thead><tr><th>Database Name</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>school_db</td><td>Student records</td></tr>
+        <tr><td>ecommerce_db</td><td>Orders and customers</td></tr>
+        <tr><td>banking_db</td><td>Account transactions</td></tr>
+      </tbody>
+    </table>
+    <p>This keeps data organized.</p>
+
+    <h2>SQL Command to Create a Database</h2>
+    <p>The command is:</p>
+    <pre><code>CREATE DATABASE database_name;</code></pre>
+
+    <h2>Example</h2>
+    <pre><code>CREATE DATABASE school;</code></pre>
+    <p>Meaning: <em>"Create a database named school."</em> Once executed, a new database gets created.</p>
+
+    <h2>Understanding the Syntax</h2>
+    <table>
+      <thead><tr><th>Part</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>CREATE</td><td>Create something</td></tr>
+        <tr><td>DATABASE</td><td>Type of object</td></tr>
+        <tr><td>school</td><td>Database name</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Real-World Example</h2>
+    <p>Suppose you are building a food delivery app. You may create:</p>
+    <pre><code>CREATE DATABASE zomato_app;</code></pre>
+    <p>Inside this database, you can later create tables like customers, restaurants, orders, and delivery_partners.</p>
+
+    <h2>Rules for Naming Databases</h2>
+    <p>Good database names should be simple, meaningful, and easy to understand.</p>
+    <p>Good examples:</p>
+    <pre><code>school
+company_db
+hospital_management</code></pre>
+    <p>Bad examples:</p>
+    <pre><code>abcxyz
+newdatabase12345final</code></pre>
+    <p>Even future-you will not remember what that means.</p>
+
+    <h2>What Happens Internally?</h2>
+    <p>When you run:</p>
+    <pre><code>CREATE DATABASE school;</code></pre>
+    <p>MySQL creates a new database container, internal storage structure, and space for tables and data. Basically SQL prepares an empty digital room — now you can start adding furniture (tables and data).</p>
+
+    <h2>Viewing Available Databases</h2>
+    <p>You can see all databases using:</p>
+    <pre><code>SHOW DATABASES;</code></pre>
+    <p>Output may look like:</p>
+    <table>
+      <thead><tr><th>Database</th></tr></thead>
+      <tbody>
+        <tr><td>information_schema</td></tr>
+        <tr><td>mysql</td></tr>
+        <tr><td>school</td></tr>
+        <tr><td>sys</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Understanding Default Databases</h2>
+    <p>When you install MySQL, some databases already exist — like <code>mysql</code>, <code>sys</code>, and <code>performance_schema</code>. These are system databases. Do not randomly delete them. Otherwise MySQL may stop working. And then suddenly your weekend becomes very productive.</p>
+
+    <h2>Selecting a Database</h2>
+    <p>After creating a database, we usually select it using:</p>
+    <pre><code>USE school;</code></pre>
+    <p>Meaning: <em>"Now work inside the school database."</em> Without selecting the database, SQL may not know where to create tables.</p>
+
+    <h2>Common Beginner Mistakes</h2>
+    <h3>1. Forgetting Semicolon</h3>
+    <p>Wrong:</p>
+    <pre><code>CREATE DATABASE school</code></pre>
+    <p>Correct:</p>
+    <pre><code>CREATE DATABASE school;</code></pre>
+
+    <h3>2. Using Spaces in Database Name</h3>
+    <p>Wrong:</p>
+    <pre><code>CREATE DATABASE school management;</code></pre>
+    <p>Better:</p>
+    <pre><code>CREATE DATABASE school_management;</code></pre>
+
+    <h3>3. Creating Duplicate Database</h3>
+    <p>If the database already exists, SQL throws an error. To avoid this, use:</p>
+    <pre><code>CREATE DATABASE IF NOT EXISTS school;</code></pre>
+    <p>Meaning: <em>"Create database only if it does not already exist."</em> Very useful in real projects.</p>
+
+    <h2>Why Database Design Matters</h2>
+    <p>A properly organized database improves performance, makes management easier, reduces confusion, and helps teams collaborate better. Good database design saves massive headaches later.</p>
+
+    <h2>Real Industry Example</h2>
+    <p>Suppose Flipkart stores customers, products, payments, delivery tracking, and reviews. Without proper databases, managing millions of records becomes impossible. That is why database creation is the first step of every system.</p>
+
+    <h2>Final Thoughts</h2>
+    <p><code>CREATE DATABASE</code> may look like a small command. But it is the foundation of everything that comes next. Every application, website, and business system starts by creating databases.</p>
+
+    <h2>Quick Revision</h2>
+    <ul>
+      <li>Database stores organized data</li>
+      <li><code>CREATE DATABASE</code> creates a database</li>
+      <li><code>SHOW DATABASES</code> displays all databases</li>
+      <li><code>USE</code> selects a database</li>
+      <li>Database names should be meaningful</li>
+    </ul>
+
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>What is a database?</li>
+      <li>Why do companies create separate databases?</li>
+      <li>Write a query to create a database called <code>company</code>.</li>
+      <li>Which command displays all databases?</li>
+      <li>What does the <code>USE</code> command do?</li>
+      <li>Why should database names be meaningful?</li>
+      <li>What is the benefit of <code>IF NOT EXISTS</code>?</li>
+    </ol>`,
+
+  'mod3-t2': `<h1>DROP DATABASE</h1>
+    <p>In the previous article, we learned how to create databases. But sometimes, we also need to remove them.</p>
+    <p>Maybe a project ended, a wrong database was created, a testing database is no longer needed, or a duplicate database exists.</p>
+    <p>For this, SQL provides <code>DROP DATABASE</code>. But be careful — this is one of the most dangerous SQL commands. Because once deleted, all tables and data inside the database are removed permanently.</p>
+    <p>SQL does not ask: <em>"Are you emotionally prepared for this decision?"</em> It just deletes everything.</p>
+
+    <h2>What Does DROP DATABASE Do?</h2>
+    <p>It completely removes the database, all its tables, records, relationships, and stored data. Everything disappears.</p>
+
+    <h2>Syntax</h2>
+    <pre><code>DROP DATABASE database_name;</code></pre>
+
+    <h2>Example</h2>
+    <pre><code>DROP DATABASE school;</code></pre>
+    <p>Meaning: <em>"Delete the school database completely."</em> After execution, the database disappears, the tables disappear, and the data disappears. Gone.</p>
+
+    <h2>Real-Life Analogy</h2>
+    <p>Think of <code>CREATE DATABASE</code> as constructing a building. <code>DROP DATABASE</code> means demolishing the entire building — including rooms, furniture, electricity, and everything inside. That is why DROP DATABASE must be used carefully.</p>
+
+    <h2>Checking Databases Before Deleting</h2>
+    <p>Always check available databases first:</p>
+    <pre><code>SHOW DATABASES;</code></pre>
+    <p>This helps avoid deleting the wrong database. Because deleting a production database accidentally is the kind of mistake that creates emergency meetings.</p>
+
+    <h2>Real-World Example</h2>
+    <p>Suppose during practice, you created:</p>
+    <pre><code>CREATE DATABASE test_project;</code></pre>
+    <p>Later you no longer need it. Then:</p>
+    <pre><code>DROP DATABASE test_project;</code></pre>
+    <p>Simple cleanup.</p>
+
+    <h2>What Happens Internally?</h2>
+    <p>When <code>DROP DATABASE</code> runs, MySQL removes database metadata, table structures, stored records, and associated files. It permanently frees storage space.</p>
+
+    <h2>Important Warning</h2>
+    <p><code>DROP DATABASE</code> is irreversible. Once deleted, data cannot be recovered easily — unless a backup exists. That is why companies take regular database backups.</p>
+
+    <h2>Beginner Mistake Example</h2>
+    <p>Imagine writing:</p>
+    <pre><code>DROP DATABASE company;</code></pre>
+    <p>instead of:</p>
+    <pre><code>DROP DATABASE company_test;</code></pre>
+    <p>Congratulations. You just converted a normal day into a career development opportunity.</p>
+
+    <h2>Better Practice: IF EXISTS</h2>
+    <p>Safer approach:</p>
+    <pre><code>DROP DATABASE IF EXISTS school;</code></pre>
+    <p>Meaning: <em>"Delete database only if it exists."</em> This avoids unnecessary errors.</p>
+
+    <h2>Difference Between DROP and DELETE</h2>
+    <p>Many beginners confuse these:</p>
+    <table>
+      <thead><tr><th>Command</th><th>What It Removes</th></tr></thead>
+      <tbody>
+        <tr><td>DELETE</td><td>Removes rows only</td></tr>
+        <tr><td>DROP TABLE</td><td>Removes a table</td></tr>
+        <tr><td>DROP DATABASE</td><td>Removes entire database</td></tr>
+      </tbody>
+    </table>
+    <p><code>DROP DATABASE</code> is the biggest level of deletion.</p>
+
+    <h2>Real Industry Importance</h2>
+    <p>In companies, databases are extremely valuable — banking transactions, customer details, medical records, business reports. Deleting the wrong database can cause financial loss, service outages, customer trust issues, and major business problems. That is why production database access is heavily restricted.</p>
+
+    <h2>Common Beginner Mistakes</h2>
+    <h3>1. Forgetting Which Database is Important</h3>
+    <p>Never randomly delete databases. Always double-check.</p>
+
+    <h3>2. Using DROP Instead of DELETE</h3>
+    <p>If you only wanted to remove one row but ran <code>DROP DATABASE</code> instead — that escalated quickly.</p>
+
+    <h3>3. Not Taking Backup</h3>
+    <p>Before deleting any important database: take a backup, confirm the requirement, and double-check the name. Professionals follow this process carefully.</p>
+
+    <h2>Best Practice in Real Companies</h2>
+    <p>Most companies restrict DROP permissions, require approvals, maintain backups, and use staging or testing environments. Because data is business gold.</p>
+
+    <h2>Final Thoughts</h2>
+    <p><code>DROP DATABASE</code> is powerful. And powerful commands require responsibility.</p>
+    <p>As you continue learning SQL, you will notice: SQL is not just about writing queries — it is about handling data responsibly.</p>
+
+    <h2>Quick Revision</h2>
+    <ul>
+      <li><code>DROP DATABASE</code> removes the entire database</li>
+      <li>All tables and records get deleted permanently</li>
+      <li><code>SHOW DATABASES</code> helps verify databases before deleting</li>
+      <li><code>IF EXISTS</code> avoids unnecessary errors</li>
+      <li><code>DROP DATABASE</code> is irreversible without a backup</li>
+    </ul>
+
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>What does <code>DROP DATABASE</code> do?</li>
+      <li>Why is <code>DROP DATABASE</code> dangerous?</li>
+      <li>Write a query to delete a database called <code>company</code>.</li>
+      <li>What is the purpose of <code>IF EXISTS</code>?</li>
+      <li>What is the difference between <code>DELETE</code> and <code>DROP DATABASE</code>?</li>
+      <li>Why are backups important?</li>
+      <li>Why do companies restrict DROP permissions?</li>
+    </ol>`,
   'mod3-t3': `<h1>CREATE TABLE</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
   'mod3-t4': `<h1>Data Types in SQL</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
   'mod3-t5': `<h1>Constraints (NOT NULL, UNIQUE, CHECK, DEFAULT)</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
