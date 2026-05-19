@@ -1637,7 +1637,219 @@ newdatabase12345final</code></pre>
       <li>Why are backups important?</li>
       <li>Why do companies restrict DROP permissions?</li>
     </ol>`,
-  'mod3-t3': `<h1>CREATE TABLE</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod3-t3': `<h1>CREATE TABLE</h1>
+    <p>In the previous articles, we learned how to create and delete databases. But a database alone is empty — like an empty school building, an empty hospital, or an empty warehouse.</p>
+    <p>To actually store data, we need tables. Tables are where real data lives. Without tables, a database is just an empty container.</p>
+
+    <h2>What is a Table?</h2>
+    <p>A table stores data in rows and columns — just like an Excel sheet.</p>
+    <table>
+      <thead><tr><th>student_id</th><th>name</th><th>city</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Rahul</td><td>Delhi</td></tr>
+        <tr><td>2</td><td>Priya</td><td>Mumbai</td></tr>
+        <tr><td>3</td><td>Aman</td><td>Jaipur</td></tr>
+      </tbody>
+    </table>
+    <table>
+      <thead><tr><th>Part</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>Rows</td><td>Individual records</td></tr>
+        <tr><td>Columns</td><td>Information fields</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Real-World Examples of Tables</h2>
+    <table>
+      <thead><tr><th>Business</th><th>Table Example</th></tr></thead>
+      <tbody>
+        <tr><td>School</td><td>students</td></tr>
+        <tr><td>Swiggy</td><td>orders</td></tr>
+        <tr><td>Bank</td><td>accounts</td></tr>
+        <tr><td>Hospital</td><td>patients</td></tr>
+        <tr><td>E-commerce</td><td>products</td></tr>
+      </tbody>
+    </table>
+    <p>Every app you use daily depends heavily on tables. Even your Instagram followers list is basically stored in tables. Social media apps are just giant table collections with good UI.</p>
+
+    <h2>Why Tables Are Important</h2>
+    <p>Tables help organize data properly. Without tables, all information would become messy. Imagine storing customer names, product prices, payment records, and delivery details inside one giant paragraph. Absolute disaster. Tables bring structure.</p>
+
+    <h2>SQL Command to Create a Table</h2>
+    <pre><code>CREATE TABLE table_name (
+    column_name datatype
+);</code></pre>
+    <p>This tells SQL: <em>"Create a table with specific columns and data types."</em></p>
+
+    <h2>Your First CREATE TABLE Query</h2>
+    <pre><code>CREATE TABLE students (
+    student_id INT,
+    name VARCHAR(50),
+    city VARCHAR(50)
+);</code></pre>
+    <p>Congratulations. You just created your first table.</p>
+
+    <h2>Understanding the Query Step-by-Step</h2>
+    <h3>CREATE TABLE</h3>
+    <p>Means: <em>"Create a new table."</em></p>
+
+    <h3>students</h3>
+    <p>This is the table name.</p>
+
+    <h3>student_id INT</h3>
+    <p>Column name is <code>student_id</code>, data type is <code>INT</code>. INT stores whole numbers.</p>
+
+    <h3>name VARCHAR(50)</h3>
+    <p><code>VARCHAR</code> stores text. <code>50</code> means a maximum of 50 characters.</p>
+
+    <h3>city VARCHAR(50)</h3>
+    <p>Stores city names like Delhi, Mumbai, Pune.</p>
+
+    <h2>What are Data Types?</h2>
+    <p>Data types define: <em>"What kind of data can be stored inside a column."</em></p>
+    <table>
+      <thead><tr><th>Data Type</th><th>Stores</th></tr></thead>
+      <tbody>
+        <tr><td>INT</td><td>Numbers</td></tr>
+        <tr><td>VARCHAR</td><td>Text</td></tr>
+        <tr><td>DATE</td><td>Dates</td></tr>
+        <tr><td>FLOAT</td><td>Decimal values</td></tr>
+      </tbody>
+    </table>
+    <p>Without data types, SQL would not know what type of information you want to store.</p>
+
+    <h2>Real-Life Example</h2>
+    <p>Suppose you are creating a Swiggy orders table:</p>
+    <pre><code>CREATE TABLE orders (
+    order_id INT,
+    customer_name VARCHAR(100),
+    amount FLOAT
+);</code></pre>
+    <p>Now the table can store order IDs, customer names, and order amounts.</p>
+
+    <h2>Visual Understanding</h2>
+    <p>After creating the students table, the structure exists but all rows are empty. Data gets added later.</p>
+    <table>
+      <thead><tr><th>student_id</th><th>name</th><th>city</th></tr></thead>
+      <tbody>
+        <tr><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Rules for Naming Tables</h2>
+    <p>Good table names should be simple, meaningful, and easy to read.</p>
+    <p>Good examples:</p>
+    <pre><code>students
+orders
+employees
+customers</code></pre>
+    <p>Bad examples:</p>
+    <pre><code>abcxyz
+newtablefinal123</code></pre>
+    <p>Even future-you will hate these names.</p>
+
+    <h2>Singular vs Plural Table Names</h2>
+    <p>Some developers use <code>student</code>, others use <code>students</code>. Both work. But consistency matters. In most projects, plural names are commonly used.</p>
+
+    <h2>Common Beginner Mistakes</h2>
+    <h3>1. Forgetting Commas</h3>
+    <p>Wrong:</p>
+    <pre><code>CREATE TABLE students (
+    student_id INT
+    name VARCHAR(50)
+);</code></pre>
+    <p>Correct:</p>
+    <pre><code>CREATE TABLE students (
+    student_id INT,
+    name VARCHAR(50)
+);</code></pre>
+
+    <h3>2. Missing Brackets</h3>
+    <p>Wrong:</p>
+    <pre><code>CREATE TABLE students
+student_id INT;</code></pre>
+    <p>SQL becomes confused without the parentheses.</p>
+
+    <h3>3. Using Wrong Data Type</h3>
+    <p>Example:</p>
+    <pre><code>phone_number INT</code></pre>
+    <p>Problem: phone numbers are not used for calculations, may contain country codes, and leading zeros may disappear. Better:</p>
+    <pre><code>phone_number VARCHAR(15)</code></pre>
+
+    <h3>4. Spelling Mistakes</h3>
+    <pre><code>CREAT TABLE students;</code></pre>
+    <p>SQL: <em>"I appreciate your confidence but that keyword does not exist."</em></p>
+
+    <h2>Viewing Tables</h2>
+    <p>After creating tables, you can view them using:</p>
+    <pre><code>SHOW TABLES;</code></pre>
+    <p>Output:</p>
+    <table>
+      <thead><tr><th>Tables</th></tr></thead>
+      <tbody><tr><td>students</td></tr></tbody>
+    </table>
+
+    <h2>Describing Table Structure</h2>
+    <p>To see column details:</p>
+    <pre><code>DESCRIBE students;</code></pre>
+    <p>Output may show:</p>
+    <table>
+      <thead><tr><th>Field</th><th>Type</th></tr></thead>
+      <tbody>
+        <tr><td>student_id</td><td>int</td></tr>
+        <tr><td>name</td><td>varchar(50)</td></tr>
+        <tr><td>city</td><td>varchar(50)</td></tr>
+      </tbody>
+    </table>
+    <p>Very useful for checking table structure.</p>
+
+    <h2>What Happens Internally?</h2>
+    <p>When <code>CREATE TABLE</code> runs, MySQL creates the table structure, defines columns, assigns data types, and allocates storage space. It prepares the table to store future data.</p>
+
+    <h2>Real Industry Importance</h2>
+    <p>In real companies, proper table design is extremely important. Bad table design can cause slow queries, confusing data, difficult maintenance, and performance problems. Good database engineers spend serious time designing tables correctly.</p>
+
+    <h2>Real-World Analogy</h2>
+    <p>Think of a table like a school admission form. Every student must fill name, roll number, city, and phone number — that structure is predefined. Similarly, SQL tables define what type of information each row should contain.</p>
+
+    <h2>Best Practices</h2>
+    <h3>Use Meaningful Column Names</h3>
+    <p>Good: <code>customer_name</code> — Bad: <code>cn</code></p>
+
+    <h3>Choose Correct Data Types</h3>
+    <p>Store numbers as <code>INT</code>, text as <code>VARCHAR</code>, and dates as <code>DATE</code>.</p>
+
+    <h3>Keep Structure Clean</h3>
+    <p>Well-organized tables make future queries easier.</p>
+
+    <h2>Final Thoughts</h2>
+    <p><code>CREATE TABLE</code> is one of the most important SQL concepts because tables are where all actual business data lives.</p>
+    <p>As you move ahead, you will build more advanced tables with constraints, keys, relationships, and optimized structures. But every database journey starts with:</p>
+    <pre><code>CREATE TABLE table_name (...);</code></pre>
+
+    <h2>Quick Revision</h2>
+    <ul>
+      <li>Tables store data in rows and columns</li>
+      <li><code>CREATE TABLE</code> creates tables</li>
+      <li>Columns define information fields</li>
+      <li>Data types define what data can be stored</li>
+      <li><code>SHOW TABLES</code> displays all tables</li>
+      <li><code>DESCRIBE</code> shows table structure</li>
+    </ul>
+
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>What is a table?</li>
+      <li>What is the difference between rows and columns?</li>
+      <li>Write a query to create a students table with <code>student_id</code>, <code>name</code>, and <code>city</code>.</li>
+      <li>What is <code>VARCHAR</code> used for?</li>
+      <li>Which command displays all tables?</li>
+      <li>Why are data types important?</li>
+      <li>Why should table names be meaningful?</li>
+      <li>What does the <code>DESCRIBE</code> command do?</li>
+    </ol>`,
   'mod3-t4': `<h1>Data Types in SQL</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
   'mod3-t5': `<h1>Constraints (NOT NULL, UNIQUE, CHECK, DEFAULT)</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
   'mod3-t6': `<h1>PRIMARY KEY & FOREIGN KEY</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
