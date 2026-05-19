@@ -2051,7 +2051,176 @@ student_id INT;</code></pre>
       <li>What does <code>DATETIME</code> store?</li>
       <li>Why should we avoid using <code>VARCHAR</code> everywhere?</li>
     </ol>`,
-  'mod3-t5': `<h1>Constraints (NOT NULL, UNIQUE, CHECK, DEFAULT)</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod3-t5': `<h1>Constraints in SQL (NOT NULL, UNIQUE, CHECK, DEFAULT)</h1>
+    <p>Imagine a school admission form. Some fields are compulsory — student name, phone number, date of birth. Some rules also exist: age cannot be negative, roll number must be unique, default city may be set as Delhi.</p>
+    <p>Now imagine if the system allowed empty names, the same roll number for 20 students, or age = -500. Complete chaos.</p>
+    <p>This is exactly why SQL uses constraints. Constraints are rules applied on columns that help maintain data quality, accuracy, consistency, and reliability. In simple words: <em>constraints stop bad data from entering the database.</em></p>
+
+    <h2>Why Constraints Matter</h2>
+    <p>Databases are used in banking, healthcare, e-commerce, education, and government systems. If incorrect data enters these systems, serious problems can happen — same customer ID for two people, negative product price, empty patient name. Constraints protect databases from such issues.</p>
+
+    <h2>Types of Constraints</h2>
+    <table>
+      <thead><tr><th>Constraint</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>NOT NULL</td><td>Prevents empty values</td></tr>
+        <tr><td>UNIQUE</td><td>Prevents duplicate values</td></tr>
+        <tr><td>CHECK</td><td>Applies conditions</td></tr>
+        <tr><td>DEFAULT</td><td>Sets default value</td></tr>
+      </tbody>
+    </table>
+
+    <h2>1. NOT NULL Constraint</h2>
+    <p>NOT NULL ensures a column cannot contain empty values.</p>
+    <pre><code>CREATE TABLE students (
+    student_id INT,
+    name VARCHAR(50) NOT NULL
+);</code></pre>
+    <p>Now SQL will not allow <code>NULL</code> inside the name column.</p>
+
+    <h3>Understanding NULL</h3>
+    <p>NULL means missing or unknown value. It does NOT mean 0, empty string, or false. NULL simply means: <em>"No value exists."</em></p>
+    <p>Wrong insertion that gets rejected:</p>
+    <pre><code>INSERT INTO students (student_id)
+VALUES (1);</code></pre>
+    <p>SQL throws an error because <code>name</code> is mandatory.</p>
+
+    <h3>Where NOT NULL is Commonly Used</h3>
+    <table>
+      <thead><tr><th>Column</th><th>Why NOT NULL?</th></tr></thead>
+      <tbody>
+        <tr><td>Customer Name</td><td>Must exist</td></tr>
+        <tr><td>Email</td><td>Important for contact</td></tr>
+        <tr><td>Product Price</td><td>Cannot be empty</td></tr>
+        <tr><td>Order Date</td><td>Essential information</td></tr>
+      </tbody>
+    </table>
+    <p>Think of NOT NULL like compulsory fields in government forms — you cannot skip name, Aadhaar number, or mobile number. Similarly, SQL forces important columns to always contain values.</p>
+
+    <h2>2. UNIQUE Constraint</h2>
+    <p>UNIQUE ensures duplicate values are not allowed.</p>
+    <pre><code>CREATE TABLE users (
+    user_id INT,
+    email VARCHAR(100) UNIQUE
+);</code></pre>
+    <p>Now two users cannot have the same email.</p>
+
+    <h3>Real-World Usage</h3>
+    <table>
+      <thead><tr><th>Column</th><th>Why UNIQUE?</th></tr></thead>
+      <tbody>
+        <tr><td>Email</td><td>One email per user</td></tr>
+        <tr><td>Username</td><td>Avoid duplicate accounts</td></tr>
+        <tr><td>PAN Number</td><td>Unique identity</td></tr>
+        <tr><td>Aadhaar Number</td><td>Must be unique</td></tr>
+      </tbody>
+    </table>
+    <p>If <code>rahul@gmail.com</code> already exists and you try to insert it again, SQL rejects it immediately.</p>
+    <p>Imagine Instagram allowing duplicate usernames. Suddenly there are: viratkohli, viratkohli, viratkohli123, original_viratkohli_real_final. Internet would collapse.</p>
+
+    <h2>3. CHECK Constraint</h2>
+    <p>CHECK applies conditions on values — data must satisfy a specific rule.</p>
+    <pre><code>CREATE TABLE employees (
+    employee_id INT,
+    age INT CHECK (age >= 18)
+);</code></pre>
+    <p>Now SQL only allows age values of 18 or greater.</p>
+    <p>Without validation, somebody could insert age = -40 or salary = -50000 and the database becomes nonsense. CHECK prevents invalid values.</p>
+
+    <h3>More Examples</h3>
+    <p>Product price must be positive:</p>
+    <pre><code>price DECIMAL(10,2) CHECK (price > 0)</code></pre>
+    <p>Marks should stay within proper range:</p>
+    <pre><code>marks INT CHECK (marks BETWEEN 0 AND 100)</code></pre>
+
+    <h2>4. DEFAULT Constraint</h2>
+    <p>DEFAULT sets a value automatically if no value is provided.</p>
+    <pre><code>CREATE TABLE students (
+    student_id INT,
+    city VARCHAR(50) DEFAULT 'Delhi'
+);</code></pre>
+    <p>If city is not given during insertion, SQL automatically stores Delhi.</p>
+    <pre><code>INSERT INTO students (student_id)
+VALUES (1);</code></pre>
+    <p>Result:</p>
+    <table>
+      <thead><tr><th>student_id</th><th>city</th></tr></thead>
+      <tbody><tr><td>1</td><td>Delhi</td></tr></tbody>
+    </table>
+
+    <h3>Real-World DEFAULT Examples</h3>
+    <table>
+      <thead><tr><th>Column</th><th>Default Value</th></tr></thead>
+      <tbody>
+        <tr><td>Country</td><td>India</td></tr>
+        <tr><td>Account Status</td><td>Active</td></tr>
+        <tr><td>User Role</td><td>Customer</td></tr>
+        <tr><td>Order Status</td><td>Pending</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Combining Multiple Constraints</h2>
+    <p>Constraints can work together on the same table:</p>
+    <pre><code>CREATE TABLE employees (
+    employee_id INT UNIQUE,
+    name VARCHAR(50) NOT NULL,
+    age INT CHECK (age >= 18),
+    city VARCHAR(50) DEFAULT 'Pune'
+);</code></pre>
+    <p>This table now enforces unique employee IDs, mandatory names, valid age condition, and a default city — all at once. Very powerful.</p>
+
+    <h2>Visual Summary</h2>
+    <table>
+      <thead><tr><th>Constraint</th><th>Main Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>NOT NULL</td><td>Prevent empty values</td></tr>
+        <tr><td>UNIQUE</td><td>Prevent duplicates</td></tr>
+        <tr><td>CHECK</td><td>Validate conditions</td></tr>
+        <tr><td>DEFAULT</td><td>Insert automatic values</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Common Beginner Mistakes</h2>
+    <h3>1. Confusing NULL with Empty String</h3>
+    <p><code>NULL</code> is not the same as <code>''</code>. NULL means a missing value — not a blank text.</p>
+
+    <h3>2. Forgetting Business Logic</h3>
+    <p>CHECK constraints should make real-world sense. <code>salary CHECK (salary > 0)</code> is logical. <code>age CHECK (age > 200)</code> is not.</p>
+
+    <h3>3. Using UNIQUE Everywhere</h3>
+    <p>Not every column should be unique. Many people can live in Delhi, many employees can have the same salary. Think carefully before applying UNIQUE.</p>
+
+    <h3>4. Poor DEFAULT Values</h3>
+    <pre><code>status DEFAULT 'abcd'</code></pre>
+    <p>Future developers: <em>"What exactly does abcd mean?"</em> Use meaningful, self-explanatory defaults.</p>
+
+    <h2>Real Industry Importance</h2>
+    <p>Without constraints, duplicate records appear, invalid data enters the system, reporting becomes incorrect, and business logic breaks. Good database systems rely heavily on constraints.</p>
+
+    <h2>Final Thoughts</h2>
+    <p>Constraints are one of the most important concepts in database design. They help databases remain accurate, reliable, clean, and consistent. As databases grow larger, constraints become even more important — because clean data is the foundation of every successful system.</p>
+
+    <h2>Quick Revision</h2>
+    <ul>
+      <li>Constraints apply rules on columns</li>
+      <li><code>NOT NULL</code> prevents empty values</li>
+      <li><code>UNIQUE</code> prevents duplicates</li>
+      <li><code>CHECK</code> validates conditions</li>
+      <li><code>DEFAULT</code> inserts automatic values</li>
+      <li>Constraints improve data quality</li>
+    </ul>
+
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>What are constraints in SQL?</li>
+      <li>What does <code>NOT NULL</code> do?</li>
+      <li>Why is <code>UNIQUE</code> important?</li>
+      <li>Write a <code>CHECK</code> constraint for age &gt;= 18.</li>
+      <li>What is the purpose of <code>DEFAULT</code>?</li>
+      <li>What is the difference between <code>NULL</code> and an empty string?</li>
+      <li>Why are constraints important in real systems?</li>
+      <li>Can multiple constraints be used together on one table?</li>
+    </ol>`,
   'mod3-t6': `<h1>PRIMARY KEY & FOREIGN KEY</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
   'mod3-t7': `<h1>ALTER TABLE</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
   'mod3-t8': `<h1>DROP TABLE & TRUNCATE TABLE</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
