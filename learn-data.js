@@ -2552,7 +2552,151 @@ RENAME TO college_students;</code></pre>
       <li>Why should backups be taken before schema changes?</li>
       <li>What is the difference between <code>CREATE TABLE</code> and <code>ALTER TABLE</code>?</li>
     </ol>`,
-  'mod3-t8': `<h1>DROP TABLE & TRUNCATE TABLE</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod3-t8': `<h1>DROP TABLE &amp; TRUNCATE TABLE</h1>
+    <p>Imagine a classroom. Scenario 1: you remove all students from the classroom, but the classroom itself still exists. Scenario 2: you demolish the entire classroom.</p>
+    <p>Both actions are different. Similarly in SQL, we have two important commands — <code>TRUNCATE TABLE</code> and <code>DROP TABLE</code>. Both remove data, but they work very differently. Accidentally dropping the wrong table is the kind of mistake that creates emergency meetings.</p>
+
+    <h2>What is DROP TABLE?</h2>
+    <p>DROP TABLE completely removes the table structure, all rows, columns, constraints, and the entire table definition. In simple words: <em>DROP TABLE deletes the entire table permanently.</em></p>
+
+    <h2>Syntax</h2>
+    <pre><code>DROP TABLE table_name;</code></pre>
+
+    <h2>Example</h2>
+    <pre><code>DROP TABLE students;</code></pre>
+    <p>After execution the table disappears, data disappears, and structure disappears. Everything is gone. Even running <code>SELECT * FROM students;</code> will throw an error because the table itself no longer exists.</p>
+
+    <h2>Real-Life Analogy</h2>
+    <p>DROP TABLE is like demolishing an entire building — not just removing the furniture. The whole structure disappears.</p>
+
+    <h2>Better Practice: IF EXISTS</h2>
+    <pre><code>DROP TABLE IF EXISTS students;</code></pre>
+    <p>Meaning: <em>"Delete table only if it exists."</em> Avoids unnecessary errors.</p>
+
+    <h2>Real-World Usage of DROP TABLE</h2>
+    <p>Companies may use DROP TABLE when temporary tables are no longer needed, old systems are removed, test environments are cleaned, or duplicate tables exist. But in production systems, DROP operations are carefully controlled — because data is valuable.</p>
+
+    <h2>What is TRUNCATE TABLE?</h2>
+    <p>TRUNCATE TABLE removes all rows but keeps the table structure, columns, data types, and constraints. In simple words: <em>TRUNCATE empties the table but does not delete the table itself.</em></p>
+
+    <h2>Syntax</h2>
+    <pre><code>TRUNCATE TABLE table_name;</code></pre>
+
+    <h2>Example</h2>
+    <p>Before TRUNCATE:</p>
+    <table>
+      <thead><tr><th>student_id</th><th>name</th><th>city</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Rahul</td><td>Delhi</td></tr>
+        <tr><td>2</td><td>Priya</td><td>Mumbai</td></tr>
+      </tbody>
+    </table>
+    <pre><code>TRUNCATE TABLE students;</code></pre>
+    <p>After TRUNCATE — table is empty but structure still exists:</p>
+    <table>
+      <thead><tr><th>student_id</th><th>name</th><th>city</th></tr></thead>
+      <tbody><tr><td colspan="3" style="text-align:center;color:#888;">— no rows —</td></tr></tbody>
+    </table>
+    <p>Because the table still exists, this still works:</p>
+    <pre><code>INSERT INTO students
+VALUES (1, 'Aman', 'Pune');</code></pre>
+
+    <h2>Real-Life Analogy</h2>
+    <p>TRUNCATE is like removing all students from a classroom. The classroom still exists — only the records are removed.</p>
+
+    <h2>DROP TABLE vs TRUNCATE TABLE</h2>
+    <table>
+      <thead><tr><th>Feature</th><th>DROP TABLE</th><th>TRUNCATE TABLE</th></tr></thead>
+      <tbody>
+        <tr><td>Removes Rows</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td>Removes Structure</td><td>Yes</td><td>No</td></tr>
+        <tr><td>Removes Table</td><td>Yes</td><td>No</td></tr>
+        <tr><td>Table Exists After</td><td>No</td><td>Yes</td></tr>
+        <tr><td>Faster for Emptying Data</td><td>No</td><td>Yes</td></tr>
+      </tbody>
+    </table>
+    <p>TRUNCATE removes all rows quickly by resetting the table internally, instead of deleting rows one by one. That is why TRUNCATE is usually faster than DELETE for clearing entire tables.</p>
+
+    <h2>TRUNCATE vs DELETE</h2>
+    <table>
+      <thead><tr><th>Feature</th><th>DELETE</th><th>TRUNCATE</th></tr></thead>
+      <tbody>
+        <tr><td>Removes Specific Rows</td><td>Yes</td><td>No</td></tr>
+        <tr><td>WHERE Clause Allowed</td><td>Yes</td><td>No</td></tr>
+        <tr><td>Removes All Rows</td><td>Optional</td><td>Always</td></tr>
+        <tr><td>Table Structure Remains</td><td>Yes</td><td>Yes</td></tr>
+      </tbody>
+    </table>
+    <pre><code>DELETE FROM students
+WHERE city = 'Delhi';</code></pre>
+    <p>Only Delhi rows get deleted.</p>
+    <pre><code>TRUNCATE TABLE students;</code></pre>
+    <p>All rows removed — no filtering possible.</p>
+
+    <h2>Common Beginner Mistakes</h2>
+    <h3>1. Using DROP Instead of TRUNCATE</h3>
+    <p>You only wanted to empty data but wrote <code>DROP TABLE students;</code> — now the structure also disappears. Suddenly debugging becomes your full-time hobby.</p>
+
+    <h3>2. Expecting WHERE with TRUNCATE</h3>
+    <pre><code>TRUNCATE TABLE students
+WHERE city = 'Delhi';</code></pre>
+    <p>Not allowed. TRUNCATE removes ALL rows only — no filtering.</p>
+
+    <h3>3. Forgetting Backup</h3>
+    <p>Before major deletion operations: take a backup, double-check the table name, and confirm the requirement. Professionals follow this carefully.</p>
+
+    <h3>4. Dropping Production Tables Accidentally</h3>
+    <p>This is why companies restrict permissions heavily. One wrong query can affect millions of users.</p>
+
+    <h2>Real Industry Example</h2>
+    <p>Suppose an analytics team creates temporary reporting tables daily. At the end of the process, old data may be truncated and temporary tables may be dropped. Both commands are useful in real workflows.</p>
+
+    <h2>When to Use Which</h2>
+    <p>Use <strong>TRUNCATE</strong> when you want to remove all rows, keep the table structure, and need fast cleanup. Use <strong>DROP</strong> when the table is no longer needed at all and the entire structure should be removed.</p>
+
+    <h2>Visual Summary</h2>
+    <table>
+      <thead><tr><th>Command</th><th>Main Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>DROP TABLE</td><td>Delete table completely</td></tr>
+        <tr><td>TRUNCATE TABLE</td><td>Remove all rows only</td></tr>
+        <tr><td>DELETE</td><td>Remove selected rows</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Real-World Analogy Summary</h2>
+    <table>
+      <thead><tr><th>SQL Command</th><th>Real-Life Analogy</th></tr></thead>
+      <tbody>
+        <tr><td>DELETE</td><td>Remove some students from class</td></tr>
+        <tr><td>TRUNCATE</td><td>Empty the entire classroom</td></tr>
+        <tr><td>DROP TABLE</td><td>Demolish the classroom completely</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Final Thoughts</h2>
+    <p>DROP TABLE and TRUNCATE TABLE are powerful commands. Understanding their differences is extremely important. As databases grow larger, safe data handling becomes even more critical — because in the real world, data is business gold.</p>
+
+    <h2>Quick Revision</h2>
+    <ul>
+      <li><code>DROP TABLE</code> removes the table completely — structure and data</li>
+      <li><code>TRUNCATE</code> removes all rows but keeps the structure intact</li>
+      <li><code>DELETE</code> can remove selected rows using WHERE</li>
+      <li>TRUNCATE is faster than DELETE for clearing entire tables</li>
+      <li>Always take backups before major deletion operations</li>
+    </ul>
+
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>What does <code>DROP TABLE</code> do?</li>
+      <li>What does <code>TRUNCATE TABLE</code> do?</li>
+      <li>What is the difference between <code>DROP</code> and <code>TRUNCATE</code>?</li>
+      <li>Can <code>TRUNCATE</code> remove selected rows?</li>
+      <li>Which command keeps the table structure intact?</li>
+      <li>Why is <code>DROP TABLE</code> dangerous?</li>
+      <li>What is the difference between <code>DELETE</code> and <code>TRUNCATE</code>?</li>
+      <li>When should <code>TRUNCATE</code> be preferred over <code>DELETE</code>?</li>
+    </ol>`,
 
   // ── Module 4 ─────────────────────────────────────────────────
   'mod4-t1':  `<h1>SELECT Statement</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
