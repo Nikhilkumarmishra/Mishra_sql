@@ -7848,15 +7848,1878 @@ CUBE   = all combinations (full pivot)</code></pre>
   `,
 
   // ── Module 7 ─────────────────────────────────────────────────
-  'mod7-t1': `<h1>What are Joins?</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod7-t2': `<h1>INNER JOIN</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod7-t3': `<h1>LEFT JOIN</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod7-t4': `<h1>RIGHT JOIN</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod7-t5': `<h1>FULL OUTER JOIN</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod7-t6': `<h1>CROSS JOIN</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod7-t7': `<h1>Self Join</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod7-t8': `<h1>Multiple Joins</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod7-t9': `<h1>Join Performance Tips</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod7-t1': `
+    <h1>Joins: How to Combine Data from Two or More Tables</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Priya joined Swiggy's data team two weeks ago. On her third day, her manager Rohit walks over and says, "We need a report showing each customer's name along with the total amount they've spent. Can you pull that?"</p>
+    <p>Priya opens the database and finds two tables. One table called <code>customers</code> has customer names and their cities. The other table called <code>orders</code> has order amounts and customer IDs. Neither table alone gives her what she needs. The customer names are in one place, the spending data is in another.</p>
+    <p>Rohit notices her confusion and says, "You need to join those two tables. That's how we connect related data in SQL."</p>
+    <p>That moment is where most people first understand what a JOIN actually is.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>In any real application, data is stored across multiple tables. At Swiggy, there is a table for customers, a separate table for orders, another for restaurants, and yet another for delivery partners. These tables are connected by shared columns called keys.</p>
+    <p>When you need to answer a business question that spans two or more tables, you cannot just look at one table. You need to bring them together. That is exactly what a JOIN does.</p>
+    <p>The question Priya faced is a perfect example: customer names live in <code>customers</code>, order amounts live in <code>orders</code>. To answer "how much has each customer spent," you have to combine both tables into a single result.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>You might wonder: why not just put everything into one big table? Why have separate tables at all?</p>
+    <p>The answer comes down to a concept called normalization. When you store the same information in multiple places, you create problems. If a customer changes their city, you would have to update every single row in a giant combined table. If you store their name in one place and reference it by ID everywhere else, you only update it once.</p>
+    <p>Separate tables also prevent wasted storage. Imagine a customer who places 50 orders. If you stored their name and city on every single order row, you would have 50 copies of the same data. Instead, you store the customer once and just reference their ID on each order row.</p>
+    <p>Joins were built to give you the best of both worlds: store data cleanly in separate tables, but query it as if it were all in one place.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Picture two registers at a school office. The first register has student names and their roll numbers. The second register has marks and roll numbers. Neither register alone tells you which student scored what. But if you match rows from both registers using the roll number, you instantly get the complete picture: name, roll number, and marks together.</p>
+    <p>SQL JOINs work exactly like that matching process. You tell the database which column to use as the connection point, and it brings the rows together for you.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <p>Here are two tables at Swiggy:</p>
+    <p><strong>customers table</strong></p>
+    <table>
+      <tr><th>customer_id</th><th>name</th><th>city</th></tr>
+      <tr><td>1</td><td>Priya</td><td>Mumbai</td></tr>
+      <tr><td>2</td><td>Arjun</td><td>Delhi</td></tr>
+      <tr><td>3</td><td>Neha</td><td>Bangalore</td></tr>
+    </table>
+    <p><strong>orders table</strong></p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>amount</th></tr>
+      <tr><td>101</td><td>1</td><td>450</td></tr>
+      <tr><td>102</td><td>2</td><td>320</td></tr>
+      <tr><td>103</td><td>1</td><td>200</td></tr>
+    </table>
+    <p>The <code>customer_id</code> column appears in both tables. That shared column is the link. When you JOIN these two tables on <code>customer_id</code>, the database matches row 1 in customers (Priya, Mumbai) with rows 101 and 103 in orders (the two orders where customer_id = 1).</p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>When you write a JOIN, you tell the database three things:</p>
+    <ol>
+      <li>Which two tables to combine</li>
+      <li>Which column to use for matching (the ON clause)</li>
+      <li>What type of JOIN to use (inner, left, right, full, cross, self)</li>
+    </ol>
+    <p>The database then goes through each row in the first table, finds the matching rows in the second table based on your condition, and combines them into a single output row. If there are multiple matches, you get multiple output rows.</p>
+    <p>The ON clause is the heart of any join. It defines what "matching" means. In the school register example, the ON clause would say "match rows where roll numbers are equal." In the Swiggy example, it says "match rows where customer_id is equal."</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>The basic syntax for a JOIN looks like this:</p>
+    <pre><code class="language-sql">SELECT columns
+FROM table1
+JOIN table2 ON table1.matching_column = table2.matching_column;</code></pre>
+    <p>For the Swiggy example, getting customer names with their order amounts:</p>
+    <pre><code class="language-sql">SELECT customers.name, orders.order_id, orders.amount
+FROM customers
+JOIN orders ON customers.customer_id = orders.customer_id;</code></pre>
+    <p>The <code>ON customers.customer_id = orders.customer_id</code> part is the condition that tells the database how to match rows across both tables.</p>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>FROM customers</code></td><td>Sets the first (left) table</td><td>The starting table in the join</td></tr>
+      <tr><td><code>JOIN orders</code></td><td>Brings in the second (right) table</td><td>The table being joined to the first</td></tr>
+      <tr><td><code>ON customers.customer_id = orders.customer_id</code></td><td>Defines how rows are matched</td><td>Rows where customer_id is equal in both tables are combined</td></tr>
+      <tr><td><code>customers.name</code></td><td>References a column from the left table</td><td>Use <code>table.column</code> format to avoid ambiguity</td></tr>
+      <tr><td><code>orders.amount</code></td><td>References a column from the right table</td><td>Clarifies which table the column comes from</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p>Using these two tables:</p>
+    <p><strong>customers</strong></p>
+    <table>
+      <tr><th>customer_id</th><th>name</th><th>city</th></tr>
+      <tr><td>1</td><td>Priya</td><td>Mumbai</td></tr>
+      <tr><td>2</td><td>Arjun</td><td>Delhi</td></tr>
+      <tr><td>3</td><td>Neha</td><td>Bangalore</td></tr>
+      <tr><td>4</td><td>Rahul</td><td>Chennai</td></tr>
+    </table>
+    <p><strong>orders</strong></p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>amount</th></tr>
+      <tr><td>101</td><td>1</td><td>450</td></tr>
+      <tr><td>102</td><td>2</td><td>320</td></tr>
+      <tr><td>103</td><td>1</td><td>200</td></tr>
+      <tr><td>104</td><td>5</td><td>780</td></tr>
+    </table>
+    <h3>Example 1: Basic join to get customer names with orders</h3>
+    <p>Business question: Show each order along with the customer name.</p>
+    <pre><code class="language-sql">SELECT customers.name, orders.order_id, orders.amount
+FROM customers
+JOIN orders ON customers.customer_id = orders.customer_id;</code></pre>
+    <p>Output explanation: Only rows where customer_id exists in both tables appear. Priya appears twice (orders 101 and 103), Arjun appears once (order 102). Neha and Rahul have no orders so they are excluded. Order 104 has customer_id 5 which does not exist in customers, so it is also excluded.</p>
+    <h3>Example 2: Add a WHERE clause after joining</h3>
+    <p>Business question: Show orders above 300 rupees with customer names.</p>
+    <pre><code class="language-sql">SELECT customers.name, orders.order_id, orders.amount
+FROM customers
+JOIN orders ON customers.customer_id = orders.customer_id
+WHERE orders.amount &gt; 300;</code></pre>
+    <p>Output explanation: Same join as above, but now filtered to only rows where amount exceeds 300. Priya's 200-rupee order is removed. You get Priya's 450-rupee order and Arjun's 320-rupee order.</p>
+    <h3>Example 3: Using table aliases to shorten the query</h3>
+    <p>Business question: Same as Example 1, but written more cleanly.</p>
+    <pre><code class="language-sql">SELECT c.name, o.order_id, o.amount
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id;</code></pre>
+    <p>Output explanation: Same result as Example 1. The aliases <code>c</code> and <code>o</code> replace the full table names throughout the query, making it easier to read and write, especially in longer queries.</p>
+    <h3>Example 4: Aggregate after joining</h3>
+    <p>Business question: How much has each customer spent in total?</p>
+    <pre><code class="language-sql">SELECT c.name, SUM(o.amount) AS total_spent
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+GROUP BY c.name;</code></pre>
+    <p>Output explanation: Priya's two orders (450 + 200 = 650) are summed together. Arjun's single order (320) is his total. Neha and Rahul still do not appear because they have no matching orders in the right table.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>The ON clause can reference any columns, not just columns named "id." As long as the values in both columns represent the same thing, the join works. You could join on email addresses, phone numbers, or any other shared value.</p>
+    <p>When two tables have columns with the same name, SQL needs you to specify which table you mean. Writing <code>customers.customer_id</code> instead of just <code>customer_id</code> removes that ambiguity. This is especially important when both tables have a column called <code>name</code> or <code>status</code>.</p>
+    <p>A join does not automatically mean one-to-one matching. If one customer has five orders, the join produces five rows for that customer. The left table row is repeated for each matching right table row.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Writing just <code>customer_id</code> instead of <code>customers.customer_id</code> in the ON clause when both tables have that column causes an error about ambiguous column names. Always specify the table when the column name exists in both tables.</p>
+    <p>Forgetting the ON clause entirely turns a JOIN into a CROSS JOIN, which combines every row from table A with every row from table B. On large tables this produces millions of rows and can bring a database to its knees.</p>
+    <p>Using the wrong column in the ON clause connects tables through unrelated data and produces nonsense results without any error message. Always double-check that the columns you are joining on actually represent the same concept.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Always use table aliases in any query that references more than one table. It makes queries shorter and easier to read.</p>
+    <p>Specify the table name or alias before every column reference in a multi-table query. This makes it immediately clear where each column comes from.</p>
+    <p>Start by looking at the data in both tables separately before writing the join. Understanding what values the join column contains in each table helps you predict what the result will look like.</p>
+    <p>Add a LIMIT clause when testing joins on large tables. Getting the first 10 rows of a join result is enough to verify the logic before running it on millions of rows.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Swiggy, every order report that shows customer names joined with order data uses a JOIN. At Flipkart, the page showing a user's order history combines the orders table with the products table to display product names alongside order IDs. At Paytm, transaction reports join the transactions table with the accounts table to show which account holder made each payment.</p>
+    <p>Any time you see a report that pulls data from different parts of a system into one view, there is a JOIN behind it. JOINs are used in almost every real-world SQL query beyond the most basic lookups.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <p>Here is a visual showing the relationship between the two tables and what a basic JOIN does:</p>
+    <pre><code>customers table          orders table
++-------------+          +----------+
+| customer_id |&lt;---------| customer_id |
+| name        |          | order_id    |
+| city        |          | amount      |
++-------------+          +----------+
+
+JOIN result: only rows where customer_id matches in BOTH tables
+
+customers   orders     Result
+Priya (1) + order 101 = Priya, 101, 450
+Priya (1) + order 103 = Priya, 103, 200
+Arjun (2) + order 102 = Arjun, 102, 320
+Neha  (3) + no match  = excluded
+Rahul (4) + no match  = excluded
+          + order 104 (customer 5) = excluded</code></pre>
+    <p>Different join types change which rows are kept versus excluded. The chapters ahead cover each type in detail.</p>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you understand these points before continuing:</p>
+    <ul>
+      <li>A JOIN connects rows from two tables using a shared column</li>
+      <li>The ON clause defines what "matching" means</li>
+      <li>Rows with no match in the other table are excluded by a basic JOIN (INNER JOIN)</li>
+      <li>You need to specify table names or aliases when column names appear in both tables</li>
+      <li>The same left-table row can appear multiple times if it matches multiple right-table rows</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>You have a <code>products</code> table (product_id, name, price) and a <code>cart_items</code> table (cart_id, product_id, quantity) at Flipkart. Write a query to show each cart item's product name and price.</li>
+    </ol>
+    <ol>
+      <li>Write the same query from Question 1 using table aliases to shorten it.</li>
+    </ol>
+    <ol>
+      <li>Why would you get duplicate rows in a join result? Give an example using the customers and orders tables from this article.</li>
+    </ol>
+    <ol>
+      <li>A <code>students</code> table has (student_id, name) and a <code>grades</code> table has (student_id, subject, score). Write a query to show each student's name, subject, and score.</li>
+    </ol>
+    <ol>
+      <li>What happens if you forget to write the ON clause in a JOIN? What does the result look like?</li>
+    </ol>
+    <ol>
+      <li>At Paytm, you have a <code>users</code> table and a <code>transactions</code> table connected by <code>user_id</code>. Write a query to find the total transaction amount for each user, showing their name alongside the total.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>JOINs are the single most important concept in SQL for anyone working with real databases. Every application splits its data across multiple tables, and every meaningful query eventually needs to bring some of those tables together. Once you understand that a JOIN is just a way of matching rows using a shared value, the rest becomes a matter of choosing which rows to keep and which to leave out. That is what the next eight articles cover.</p>
+  `,
+  'mod7-t2': `
+    <h1>INNER JOIN: Get Only the Rows That Match in Both Tables</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Arjun is on his second week at Flipkart's analytics team. His manager gives him a task before the morning standup: "Pull a list of all customers who have actually placed an order. We need their names, order IDs, and order status for a report going to the business team today."</p>
+    <p>Arjun opens the database and sees two tables. The <code>customers</code> table has names and cities. The <code>orders</code> table has order IDs, amounts, and statuses. He knows from yesterday's training that he needs to join them, but he is not sure which rows should appear in the final result.</p>
+    <p>His manager clarifies: "We only want customers who have orders. Anyone who signed up but never bought anything should not be in this report."</p>
+    <p>That single sentence describes exactly what an INNER JOIN does.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>You will frequently need to pull data that exists across two tables but only want rows where both sides have something to offer. At Flipkart, you might want orders along with customer names, but only for customers who have actually placed an order. At Zomato, you might want restaurant names alongside their reviews, but only for restaurants that have at least one review.</p>
+    <p>In all these cases, you do not want rows from one table that have no corresponding row in the other table. You want the intersection, the rows that exist on both sides.</p>
+    <p>That is the INNER JOIN.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>The INNER JOIN is the most natural kind of join. It answers the question: "Give me rows from table A and table B that belong together." It filters out anything that does not have a partner on the other side.</p>
+    <p>Before JOINs existed in SQL, you would need to write separate queries and combine the results manually in application code. The JOIN syntax was introduced to let the database do this matching work natively, far more efficiently than any code you could write yourself.</p>
+    <p>INNER JOIN is also the default behavior when you just write <code>JOIN</code> without specifying a type. This matters because most SQL you will read in production code says <code>JOIN</code>, not <code>INNER JOIN</code>. They are identical.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine two lists pinned to a notice board at a Flipkart warehouse. One list has all registered seller names. The other list has all active shipments with seller IDs. The warehouse manager wants a combined view showing only sellers who currently have active shipments. She goes through both lists and writes down only the names that appear on both. That is exactly what INNER JOIN does: it keeps only the rows that have a match on both sides.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>customers table           orders table
++----+--------+           +----+----+
+| id | name   |           | oid| cid|
++----+--------+           +----+----+
+|  1 | Priya  |           | 101|  1 |
+|  2 | Arjun  |           | 102|  2 |
+|  3 | Neha   |           | 103|  1 |
+|  4 | Rahul  |           +----+----+
++----+--------+
+
+INNER JOIN result (only rows with matches in both):
+Priya  - order 101
+Priya  - order 103
+Arjun  - order 102
+(Neha and Rahul have no orders, so they are excluded)</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>When you run an INNER JOIN, the database examines each row in the first table and looks for matching rows in the second table based on the ON condition. If it finds a match, it combines those rows into one output row. If it finds multiple matches (a customer with multiple orders), it creates one output row for each match. If it finds no match, the row is silently dropped from the result.</p>
+    <p>This two-sided filtering is what distinguishes INNER JOIN from LEFT JOIN and RIGHT JOIN. Both tables contribute to determining which rows survive in the output.</p>
+    <p>One-to-many relationships are common. One customer can have many orders. The INNER JOIN handles this by repeating the customer's information for each matching order row.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>The standard syntax for an INNER JOIN:</p>
+    <pre><code class="language-sql">SELECT columns
+FROM table1
+INNER JOIN table2 ON table1.column = table2.column;</code></pre>
+    <p>Using just <code>JOIN</code> (which is equivalent):</p>
+    <pre><code class="language-sql">SELECT columns
+FROM table1
+JOIN table2 ON table1.column = table2.column;</code></pre>
+    <p>For Arjun's Flipkart task:</p>
+    <pre><code class="language-sql">SELECT c.name, o.order_id, o.amount, o.status
+FROM customers c
+INNER JOIN orders o ON c.customer_id = o.customer_id;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>FROM customers c</code></td><td>Declares the left table with alias <code>c</code></td><td>All rows in customers are candidates</td></tr>
+      <tr><td><code>INNER JOIN orders o</code></td><td>Declares the right table with alias <code>o</code></td><td>All rows in orders are candidates</td></tr>
+      <tr><td><code>ON c.customer_id = o.customer_id</code></td><td>The matching condition</td><td>Only rows where both customer_ids match survive</td></tr>
+      <tr><td><code>c.name</code></td><td>Column from the left table</td><td>The customer's name</td></tr>
+      <tr><td><code>o.order_id, o.amount, o.status</code></td><td>Columns from the right table</td><td>Order details</td></tr>
+      <tr><td><code>INNER</code> keyword</td><td>Specifies join type</td><td>Can be omitted since it is the default</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>customers table (Flipkart)</strong></p>
+    <table>
+      <tr><th>customer_id</th><th>name</th><th>city</th></tr>
+      <tr><td>1</td><td>Arjun</td><td>Delhi</td></tr>
+      <tr><td>2</td><td>Simran</td><td>Mumbai</td></tr>
+      <tr><td>3</td><td>Vikram</td><td>Pune</td></tr>
+      <tr><td>4</td><td>Ananya</td><td>Hyderabad</td></tr>
+    </table>
+    <p><strong>orders table (Flipkart)</strong></p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>amount</th><th>status</th></tr>
+      <tr><td>101</td><td>1</td><td>1200</td><td>Delivered</td></tr>
+      <tr><td>102</td><td>2</td><td>3400</td><td>Shipped</td></tr>
+      <tr><td>103</td><td>1</td><td>890</td><td>Delivered</td></tr>
+      <tr><td>104</td><td>6</td><td>550</td><td>Delivered</td></tr>
+    </table>
+    <h3>Example 1: Basic INNER JOIN</h3>
+    <p>Business question: Show all orders with the customer name who placed them.</p>
+    <pre><code class="language-sql">SELECT c.name, o.order_id, o.amount, o.status
+FROM customers c
+INNER JOIN orders o ON c.customer_id = o.customer_id;</code></pre>
+    <p>Output explanation: Arjun appears twice (orders 101 and 103) because he has two orders. Simran appears once (order 102). Vikram and Ananya have no orders so they do not appear at all. Order 104 has customer_id 6 which does not exist in the customers table, so it is also excluded. Four candidates from customers, four from orders, but only three rows survive the INNER JOIN.</p>
+    <h3>Example 2: INNER JOIN with a WHERE filter</h3>
+    <p>Business question: Show only delivered orders with the customer name.</p>
+    <pre><code class="language-sql">SELECT c.name, o.order_id, o.amount
+FROM customers c
+INNER JOIN orders o ON c.customer_id = o.customer_id
+WHERE o.status = 'Delivered';</code></pre>
+    <p>Output explanation: After the join, the WHERE clause filters further. Only rows where status is 'Delivered' remain. Arjun's two delivered orders appear. Simran's 'Shipped' order is removed. The result has two rows: Arjun with order 101 and Arjun with order 103.</p>
+    <h3>Example 3: INNER JOIN with GROUP BY and aggregation</h3>
+    <p>Business question: What is the total amount each customer has spent?</p>
+    <pre><code class="language-sql">SELECT c.name, COUNT(o.order_id) AS total_orders, SUM(o.amount) AS total_spent
+FROM customers c
+INNER JOIN orders o ON c.customer_id = o.customer_id
+GROUP BY c.customer_id, c.name;</code></pre>
+    <p>Output explanation: After joining, the GROUP BY collapses all rows for the same customer. Arjun has two orders totalling 2090. Simran has one order totalling 3400. Customers with no orders are not in the join result so they do not appear in the group either.</p>
+    <h3>Example 4: INNER JOIN with ORDER BY</h3>
+    <p>Business question: Show all matched orders sorted by amount from highest to lowest.</p>
+    <pre><code class="language-sql">SELECT c.name, c.city, o.order_id, o.amount
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+ORDER BY o.amount DESC;</code></pre>
+    <p>Output explanation: The same three rows from Example 1 appear, but now sorted so Simran's 3400-rupee order is first, followed by Arjun's 1200-rupee order, then Arjun's 890-rupee order. The <code>JOIN</code> keyword here works identically to <code>INNER JOIN</code>.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>When a customer has three orders, the INNER JOIN produces three rows with that customer's name repeated. This is correct behavior, not a bug. If you want one row per customer, you need to aggregate with GROUP BY.</p>
+    <p>The column used in the ON clause does not have to have the same name in both tables. You might join on <code>customers.customer_id = orders.buyer_id</code> if the second table uses a different column name to store the same information. What matters is that the values in both columns represent the same concept.</p>
+    <p>INNER JOIN and <code>JOIN</code> are identical. There is no performance difference between writing one or the other. Most real-world SQL code uses just <code>JOIN</code> for brevity.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Joining on the wrong column produces a result with no error but incorrect data. For example, if you accidentally join <code>customers.customer_id = orders.order_id</code>, the query runs but the output makes no sense. Always verify that the columns in your ON clause actually represent the same thing in both tables.</p>
+    <p>Selecting a column that appears in both tables without specifying the table causes an ambiguous column error. If both <code>customers</code> and <code>orders</code> have a column called <code>status</code>, writing <code>SELECT status</code> fails. Write <code>SELECT o.status</code> or <code>SELECT c.status</code> to be explicit.</p>
+    <p>Writing a join without an ON clause is valid SQL in some databases but produces a Cartesian product where every row from the first table is combined with every row from the second. With 1000 customers and 10000 orders, you get 10 million rows instantly. Always include the ON clause.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Use table aliases consistently. Once you give a table an alias, use that alias for every column reference in the query. Mixing full table names and aliases in the same query is confusing.</p>
+    <p>Place more selective filters in the WHERE clause to reduce the number of rows early. If you only care about orders from one city, filter on city before or after the join. Smaller intermediate results mean faster queries.</p>
+    <p>Explicitly write <code>INNER JOIN</code> rather than just <code>JOIN</code> when writing queries that will be read by others. The explicit form makes the intent clear to anyone reading the code, even if they do not remember that <code>JOIN</code> defaults to <code>INNER JOIN</code>.</p>
+    <p>Index the columns you join on. A join on <code>customer_id</code> runs much faster when both tables have an index on <code>customer_id</code>. This is covered in detail in the performance tips article later in this module.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Flipkart, the order management dashboard uses INNER JOINs to show a seller's active orders with product names, quantities, and delivery addresses all combined from multiple tables. Only orders that have matching entries in the products and customer tables appear in the dashboard.</p>
+    <p>At BookMyShow, the booking confirmation page uses INNER JOINs to combine the booking record with event details and seat information. If a booking does not have a matching event (which should never happen, but data issues occur), that booking simply does not appear.</p>
+    <p>At Paytm, transaction reports use INNER JOINs to match each transaction with the merchant's name and category. Transactions with unrecognized merchant IDs are naturally excluded, which acts as an implicit data quality filter.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>LEFT TABLE (customers)    RIGHT TABLE (orders)
++---------+               +----------+
+| Arjun   |               | order 101|
+| Simran  |  INNER JOIN   | order 102|
+| Vikram  |  keeps only   | order 103|
+| Ananya  |  the overlap  | order 104|
++---------+               +----------+
+
+   [customers] [OVERLAP] [orders]
+         ^^^
+     Only this zone appears in the result
+
+Excluded:
+- Vikram and Ananya (in customers, no matching order)
+- Order 104 (in orders, no matching customer)</code></pre>
+    <p>The INNER JOIN is the most restrictive join type. It keeps only the rows that are confirmed to exist on both sides.</p>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Confirm you can answer these before moving to the next article:</p>
+    <ul>
+      <li>What rows does an INNER JOIN exclude?</li>
+      <li>Why does one customer appear multiple times in a join result?</li>
+      <li>What is the difference between <code>JOIN</code> and <code>INNER JOIN</code>?</li>
+      <li>What does the ON clause do?</li>
+      <li>What happens if two tables both have a column called <code>name</code> and you write <code>SELECT name</code>?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>You have a <code>products</code> table (product_id, name, category, price) and a <code>order_items</code> table (item_id, order_id, product_id, quantity) at Flipkart. Write an INNER JOIN to show each order item with the product name and price.</li>
+    </ol>
+    <ol>
+      <li>Using the same tables, write a query to count how many times each product has been ordered. Show the product name and order count, sorted by order count from highest to lowest.</li>
+    </ol>
+    <ol>
+      <li>At Myntra, you have a <code>users</code> table (user_id, name, email) and a <code>reviews</code> table (review_id, user_id, product_id, rating). Write an INNER JOIN to find all users who have submitted at least one review, showing their name and average rating.</li>
+    </ol>
+    <ol>
+      <li>Why would you use an INNER JOIN instead of a LEFT JOIN for Arjun's original task (customers who have placed orders)?</li>
+    </ol>
+    <ol>
+      <li>You join <code>orders</code> and <code>customers</code> using INNER JOIN and get back 500 rows, but you know there are 800 orders and 400 customers in the database. What can you infer from this result?</li>
+    </ol>
+    <ol>
+      <li>Write an INNER JOIN query using aliases that shows each Flipkart customer from Delhi along with their orders.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>INNER JOIN is the workhorse of SQL. It is the join you will write most often because most business questions are about things that exist on both sides: customers who have orders, products that have been sold, employees who belong to departments. Once you are comfortable with INNER JOIN, the other join types are just variations on where to draw the boundary between included and excluded rows.</p>
+  `,
+  'mod7-t3': `
+    <h1>LEFT JOIN: Keep All Rows from the Left Table, Match What You Can</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Neha is on the growth team at Swiggy. Her manager calls her in and says, "We ran a big referral campaign last month and acquired 5000 new users. I want to know how many of them have placed at least one order, and more importantly, which ones have not ordered at all. Those are the ones we need to re-engage."</p>
+    <p>Neha opens the database. The <code>customers</code> table has all 5000 new users. The <code>orders</code> table has orders placed by some of them, but not all. If she uses a regular INNER JOIN, customers who never ordered simply disappear from the result. She would have no way to identify them.</p>
+    <p>Her senior, Dev, leans over and says, "You want a LEFT JOIN. It keeps every customer, even the ones with no orders."</p>
+    <p>That is the exact moment where LEFT JOIN becomes necessary.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>The INNER JOIN only returns rows that have a match in both tables. But a huge category of real business questions involves finding things that are missing. You want to know which customers have not ordered, which products have never been sold, which employees have not completed their training. For all of these, an INNER JOIN fails you because the missing rows never appear in the result.</p>
+    <p>LEFT JOIN is built precisely for this situation. It keeps every row from the left table and attaches whatever matching rows it finds from the right table. Where there is no match, it fills the right table's columns with NULL.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>An INNER JOIN assumes both tables have something to say about every row. But in reality, the left table often contains a superset of records compared to the right table. Customers exist before they place orders. Products exist before they are sold. Employees are hired before they complete any training.</p>
+    <p>LEFT JOIN was designed to represent these one-sided relationships without losing the records that have not yet participated in the relationship. It lets you ask "show me everything from table A, and attach table B where it exists" instead of "show me only what exists in both."</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine Swiggy's marketing team has a spreadsheet of all users who downloaded the app this month. Another spreadsheet tracks all orders placed this month. The manager wants a combined sheet showing every user, with their order details filled in if they ordered, and blank cells if they did not.</p>
+    <p>That is a LEFT JOIN. Every row from the left list (all users) appears. The right list (orders) fills in where it can, and leaves NULLs where it cannot.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>customers (left)         orders (right)
++----+--------+          +-----+----+------+
+| id | name   |          | oid | cid| amt  |
++----+--------+          +-----+----+------+
+|  1 | Priya  |          | 101 |  1 | 450  |
+|  2 | Arjun  |          | 102 |  2 | 320  |
+|  3 | Neha   |          | 103 |  1 | 200  |
+|  4 | Rahul  |          +-----+----+------+
++----+--------+
+
+LEFT JOIN result:
+Priya  - order 101 - 450
+Priya  - order 103 - 200
+Arjun  - order 102 - 320
+Neha   - NULL      - NULL   (kept, no matching order)
+Rahul  - NULL      - NULL   (kept, no matching order)</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>In a LEFT JOIN, the database starts with every row in the left table. For each row, it looks for matching rows in the right table using the ON condition. If it finds matches, it combines them and produces output rows just like an INNER JOIN. If it finds no match, it still produces an output row for the left table row, but fills every column from the right table with NULL.</p>
+    <p>The result always contains at least as many rows as the left table. If some left table rows match multiple right table rows, the result contains more rows than the left table. But no left table row is ever silently dropped.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>Basic LEFT JOIN syntax:</p>
+    <pre><code class="language-sql">SELECT columns
+FROM left_table
+LEFT JOIN right_table ON left_table.column = right_table.column;</code></pre>
+    <p><code>LEFT JOIN</code> and <code>LEFT OUTER JOIN</code> are identical. The word <code>OUTER</code> is optional and changes nothing:</p>
+    <pre><code class="language-sql">SELECT columns
+FROM left_table
+LEFT OUTER JOIN right_table ON left_table.column = right_table.column;</code></pre>
+    <p>For Neha's Swiggy task:</p>
+    <pre><code class="language-sql">SELECT c.customer_id, c.name, c.city, o.order_id, o.amount
+FROM customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id;</code></pre>
+    <p>To find customers who have never ordered (the critical business use case):</p>
+    <pre><code class="language-sql">SELECT c.customer_id, c.name, c.city
+FROM customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id
+WHERE o.order_id IS NULL;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>FROM customers c</code></td><td>The left table, all rows are preserved</td><td>Every customer appears in the result</td></tr>
+      <tr><td><code>LEFT JOIN orders o</code></td><td>The right table, matched where possible</td><td>Orders attached where customer_id matches</td></tr>
+      <tr><td><code>ON c.customer_id = o.customer_id</code></td><td>The matching condition</td><td>Rows connected by customer_id</td></tr>
+      <tr><td><code>WHERE o.order_id IS NULL</code></td><td>Filter for unmatched left rows</td><td>Keeps only customers who have no order</td></tr>
+      <tr><td>NULL values in result</td><td>Fill in when no right-side match exists</td><td>Right-side columns show NULL for unmatched customers</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>customers table (Swiggy)</strong></p>
+    <table>
+      <tr><th>customer_id</th><th>name</th><th>city</th></tr>
+      <tr><td>1</td><td>Neha</td><td>Bangalore</td></tr>
+      <tr><td>2</td><td>Priya</td><td>Mumbai</td></tr>
+      <tr><td>3</td><td>Karan</td><td>Delhi</td></tr>
+      <tr><td>4</td><td>Ananya</td><td>Pune</td></tr>
+    </table>
+    <p><strong>orders table (Swiggy)</strong></p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>amount</th></tr>
+      <tr><td>101</td><td>1</td><td>340</td></tr>
+      <tr><td>102</td><td>2</td><td>780</td></tr>
+      <tr><td>103</td><td>1</td><td>120</td></tr>
+      <tr><td>104</td><td>7</td><td>560</td></tr>
+    </table>
+    <h3>Example 1: Full LEFT JOIN showing all customers</h3>
+    <p>Business question: Show every customer and their orders, including customers with no orders.</p>
+    <pre><code class="language-sql">SELECT c.name, c.city, o.order_id, o.amount
+FROM customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id;</code></pre>
+    <p>Output explanation: Neha appears twice because she has two orders. Priya appears once with her order. Karan and Ananya appear once each with NULL for order_id and amount because they have no orders. Order 104 (customer_id 7) does not appear because there is no customer with id 7 in the customers table. The left table drives the result.</p>
+    <h3>Example 2: Find customers who have never placed an order</h3>
+    <p>Business question: Which customers signed up but never ordered? (Re-engagement target list)</p>
+    <pre><code class="language-sql">SELECT c.customer_id, c.name, c.city
+FROM customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id
+WHERE o.order_id IS NULL;</code></pre>
+    <p>Output explanation: After the LEFT JOIN, rows with no match have NULL for all order columns. The WHERE clause then filters to keep only those NULL rows. Result shows Karan (Delhi) and Ananya (Pune). These are the users Neha's team will target for re-engagement.</p>
+    <h3>Example 3: Count orders per customer including zero-order customers</h3>
+    <p>Business question: How many orders has each customer placed? Include customers with zero orders.</p>
+    <pre><code class="language-sql">SELECT c.name, COUNT(o.order_id) AS order_count
+FROM customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id
+GROUP BY c.customer_id, c.name;</code></pre>
+    <p>Output explanation: COUNT(o.order_id) counts non-NULL values, so customers with no orders get a count of 0. Neha gets 2, Priya gets 1, Karan and Ananya each get 0. An INNER JOIN would have shown 0 customers with zero orders because those rows would not have existed in the join result.</p>
+    <h3>Example 4: LEFT JOIN versus INNER JOIN comparison</h3>
+    <p>Business question: Same report as Example 1 but using INNER JOIN to see the difference.</p>
+    <pre><code class="language-sql">-- INNER JOIN (excludes non-ordering customers)
+SELECT c.name, o.order_id, o.amount
+FROM customers c
+INNER JOIN orders o ON c.customer_id = o.customer_id;
+
+-- LEFT JOIN (keeps all customers)
+SELECT c.name, o.order_id, o.amount
+FROM customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id;</code></pre>
+    <p>Output explanation: The INNER JOIN returns 3 rows: Neha twice and Priya once. The LEFT JOIN returns 5 rows: the same 3 plus Karan with NULLs and Ananya with NULLs. The choice between LEFT JOIN and INNER JOIN determines whether you see the full customer picture or only the active customers.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>The most common mistake with LEFT JOIN is placing a filter on the right table column in the WHERE clause instead of the ON clause. When you write <code>WHERE o.amount > 500</code>, you filter out all NULL rows, which turns your LEFT JOIN into an effective INNER JOIN. If you want to filter right-side conditions while still keeping unmatched left rows, put the condition in the ON clause:</p>
+    <pre><code class="language-sql">-- This turns LEFT JOIN into INNER JOIN (wrong if you want unmatched rows)
+SELECT c.name, o.order_id
+FROM customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id
+WHERE o.amount &gt; 500;
+
+-- This keeps unmatched customers (correct)
+SELECT c.name, o.order_id
+FROM customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id AND o.amount &gt; 500;</code></pre>
+    <p>In the second version, customers with no orders still appear (with NULL for order_id), but among customers who do have orders, only orders above 500 are attached.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Using COUNT(<em>) instead of COUNT(right_table.column) in a LEFT JOIN with GROUP BY inflates the count. COUNT(</em>) counts every row including the NULL row. COUNT(o.order_id) correctly counts only non-NULL values, giving you 0 for customers with no orders instead of 1.</p>
+    <p>Assuming the left table is always the table written first in the FROM clause is correct. But when you chain multiple joins, the "left" table for each join is the result of everything joined so far. This takes a bit of practice to visualize.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Always use <code>WHERE right_table.column IS NULL</code> when your goal is to find records in the left table that have no match on the right side. This pattern (sometimes called an anti-join) is one of the most useful things you can do with a LEFT JOIN.</p>
+    <p>When using LEFT JOIN with GROUP BY and COUNT, always count a specific column from the right table (like <code>COUNT(o.order_id)</code>) rather than <code>COUNT(*)</code>. This gives accurate zero counts for unmatched rows.</p>
+    <p>Choose LEFT JOIN over INNER JOIN any time the left table represents a master list (customers, employees, products) and the right table represents associated events (orders, logs, sales). The master list should drive the result, not be filtered by the presence or absence of events.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Swiggy, every weekly retention report uses LEFT JOIN to identify users who have not ordered in the past 7 days. The customers table is joined to last week's orders. Users with NULLs on the orders side are the targets for push notifications.</p>
+    <p>At Byju's, the learning analytics team uses LEFT JOIN to find students who are enrolled in a course but have not started any lessons. Students table joined to lesson progress, filtered by IS NULL.</p>
+    <p>At Amazon India, the seller performance team uses LEFT JOIN to find sellers who are registered but have listed no products. Sellers table joined to the listings table, filtered by IS NULL.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>LEFT JOIN visual:
+
+LEFT TABLE       RIGHT TABLE
+[customers]      [orders]
+
++===========+    +----------+
+| ALL ROWS  |    | matched  |
+| including |    | rows     |
+| unmatched |    | only     |
++===========+    +----------+
+
+Result:
+[  ALL of customers  ] + [orders WHERE match exists]
+                       + NULL columns WHERE no match
+
+Compare with INNER JOIN:
+[ customers ] intersect [ orders ] = matched rows only</code></pre>
+    <p>The left table is always fully represented. The right table contributes what it can.</p>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can confidently answer these:</p>
+    <ul>
+      <li>What does a LEFT JOIN return that an INNER JOIN does not?</li>
+      <li>What value fills the right-side columns when there is no match?</li>
+      <li>How do you find rows in the left table that have no match in the right table?</li>
+      <li>Why does putting a right-side filter in WHERE turn a LEFT JOIN into an INNER JOIN?</li>
+      <li>What is the difference between LEFT JOIN and LEFT OUTER JOIN?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>At Swiggy, you have a <code>restaurants</code> table (restaurant_id, name, city) and a <code>reviews</code> table (review_id, restaurant_id, rating). Write a LEFT JOIN to find all restaurants that have never received a review.</li>
+    </ol>
+    <ol>
+      <li>Using the same tables, count the number of reviews for each restaurant. Make sure restaurants with zero reviews show a count of 0.</li>
+    </ol>
+    <ol>
+      <li>At Byju's, you have a <code>students</code> table (student_id, name) and a <code>submissions</code> table (submission_id, student_id, assignment_id, score). Write a query to find students who have not submitted any assignment.</li>
+    </ol>
+    <ol>
+      <li>Explain in plain words what this query does and what its result looks like:</li>
+    </ol>
+    <pre><code class="language-sql">   SELECT c.name, o.order_id
+   FROM customers c
+   LEFT JOIN orders o ON c.customer_id = o.customer_id
+   WHERE o.order_id IS NULL;</code></pre>
+    <ol>
+      <li>A LEFT JOIN query returns more rows than the left table has. How is this possible? Give an example.</li>
+    </ol>
+    <ol>
+      <li>At IRCTC, you have a <code>passengers</code> table and a <code>bookings</code> table. Write a LEFT JOIN to find passengers who have not made any booking in 2024.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>LEFT JOIN is one of the most practically useful tools in SQL. The ability to keep all rows from a base table and attach matching data from another table, while using IS NULL to find the unmatched ones, covers a huge proportion of real analytical work. Any time your question starts with "which customers have not..." or "which products have never..." you almost certainly need a LEFT JOIN.</p>
+  `,
+  'mod7-t4': `
+    <h1>RIGHT JOIN: Keep All Rows from the Right Table, Match What You Can</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Rahul has been at Zomato's data team for three weeks. His manager hands him a task: "We onboarded a bunch of new restaurants last quarter. I want to see all of them, along with any orders they have received so far. Some of them have zero orders, but I still want them in the report."</p>
+    <p>Rahul writes his query starting with the <code>orders</code> table, then joins the <code>customers</code> table. He types <code>LEFT JOIN</code> and pauses. He realizes his left table is orders, but he wants to keep all restaurants, not all orders. The restaurants live in the right-side table in his current query structure.</p>
+    <p>His teammate Kavya looks over and says, "You could either swap the table order and use LEFT JOIN, or keep your current order and use RIGHT JOIN. Both give the same result. Most teams just swap the tables."</p>
+    <p>That exchange captures everything important about RIGHT JOIN.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>RIGHT JOIN is the mirror image of LEFT JOIN. Instead of keeping all rows from the left table, it keeps all rows from the right table and attaches whatever matching rows it finds from the left table. Left-side columns come back as NULL where there is no match.</p>
+    <p>In practice, you will encounter RIGHT JOIN in legacy SQL code, in queries written by people who prefer to think from the right side, and in interview questions. Understanding it is important. Using it is a personal style choice.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>SQL was designed to be symmetric and intuitive. Once LEFT JOIN existed, it made logical sense to have a RIGHT JOIN that does the same thing from the other direction. Database designers wanted to give query writers flexibility about which table drives the result, regardless of where they place it in the FROM clause.</p>
+    <p>In practice, most SQL developers find it easier to consistently use LEFT JOIN and just arrange their tables so the "primary" or "complete" table is always on the left. But RIGHT JOIN was built for situations where the query structure makes it more natural to put the primary table on the right.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine Zomato's city launch team has a list of all restaurants that were supposed to go live in a new city (the right table). They have a separate list of actual orders received so far (the left table). The team wants to see every restaurant from their launch list, along with orders if any exist. The restaurant list must be complete in the output. This is a RIGHT JOIN: the right table (restaurants) is fully preserved.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>orders (left)            customers (right)
++-----+-----+            +----+--------+
+| oid | cid |            | id | name   |
++-----+-----+            +----+--------+
+| 101 |  1  |            |  1 | Rahul  |
+| 102 |  2  |            |  2 | Priya  |
+| 103 |  1  |            |  3 | Meena  |
++-----+-----+            +----+--------+
+
+RIGHT JOIN result (all right-table rows kept):
+Rahul  - order 101
+Rahul  - order 103
+Priya  - order 102
+Meena  - NULL       (no matching order, but kept because she is in right table)</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>In a RIGHT JOIN, the database ensures every row from the right table appears in the output at least once. For each right table row, it searches the left table for matching rows using the ON condition. When matches are found, they are combined. When no match is found, the right table row still appears with NULLs filling all left-side columns.</p>
+    <p>The result looks exactly like what a LEFT JOIN would produce if you swapped the table positions. The rows are the same; only the column order and which side shows NULLs changes.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>Basic RIGHT JOIN syntax:</p>
+    <pre><code class="language-sql">SELECT columns
+FROM left_table
+RIGHT JOIN right_table ON left_table.column = right_table.column;</code></pre>
+    <p><code>RIGHT JOIN</code> and <code>RIGHT OUTER JOIN</code> are identical:</p>
+    <pre><code class="language-sql">SELECT columns
+FROM left_table
+RIGHT OUTER JOIN right_table ON left_table.column = right_table.column;</code></pre>
+    <p>For Rahul's Zomato task:</p>
+    <pre><code class="language-sql">SELECT o.order_id, o.amount, r.restaurant_name, r.city
+FROM orders o
+RIGHT JOIN restaurants r ON o.restaurant_id = r.restaurant_id;</code></pre>
+    <p>The equivalent using LEFT JOIN (swapping table order):</p>
+    <pre><code class="language-sql">SELECT o.order_id, o.amount, r.restaurant_name, r.city
+FROM restaurants r
+LEFT JOIN orders o ON r.restaurant_id = o.restaurant_id;</code></pre>
+    <p>Both queries produce identical results.</p>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>FROM orders o</code></td><td>The left table</td><td>Orders are candidates for matching</td></tr>
+      <tr><td><code>RIGHT JOIN restaurants r</code></td><td>The right table, fully preserved</td><td>Every restaurant appears in result</td></tr>
+      <tr><td><code>ON o.restaurant_id = r.restaurant_id</code></td><td>The matching condition</td><td>Rows linked by restaurant_id</td></tr>
+      <tr><td>NULL values in left columns</td><td>When no match found on left side</td><td>order_id shows NULL for restaurants with no orders</td></tr>
+      <tr><td><code>RIGHT OUTER JOIN</code></td><td>Same as RIGHT JOIN</td><td>The word OUTER is optional</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>orders table (Zomato)</strong></p>
+    <table>
+      <tr><th>order_id</th><th>restaurant_id</th><th>customer_id</th><th>amount</th></tr>
+      <tr><td>201</td><td>10</td><td>1</td><td>650</td></tr>
+      <tr><td>202</td><td>10</td><td>2</td><td>420</td></tr>
+      <tr><td>203</td><td>12</td><td>3</td><td>880</td></tr>
+      <tr><td>204</td><td>99</td><td>1</td><td>310</td></tr>
+    </table>
+    <p><strong>customers table (Zomato)</strong></p>
+    <table>
+      <tr><th>customer_id</th><th>name</th><th>city</th></tr>
+      <tr><td>1</td><td>Rahul</td><td>Mumbai</td></tr>
+      <tr><td>2</td><td>Simran</td><td>Delhi</td></tr>
+      <tr><td>3</td><td>Karan</td><td>Hyderabad</td></tr>
+      <tr><td>4</td><td>Ananya</td><td>Bengaluru</td></tr>
+    </table>
+    <h3>Example 1: RIGHT JOIN to keep all customers</h3>
+    <p>Business question: Show every customer and their orders, including customers who have not ordered.</p>
+    <pre><code class="language-sql">SELECT o.order_id, o.amount, c.name, c.city
+FROM orders o
+RIGHT JOIN customers c ON o.customer_id = c.customer_id;</code></pre>
+    <p>Output explanation: Rahul appears twice (orders 201 and 204). Simran appears once (order 202). Karan appears once (order 203). Ananya has no orders so she appears with NULL for order_id and amount. Order 204 references restaurant 99 which exists, but the customer join still works. All 4 customers from the right table appear in the result.</p>
+    <h3>Example 2: Find customers with no orders using RIGHT JOIN</h3>
+    <p>Business question: Which customers have never ordered from Zomato?</p>
+    <pre><code class="language-sql">SELECT c.customer_id, c.name, c.city
+FROM orders o
+RIGHT JOIN customers c ON o.customer_id = c.customer_id
+WHERE o.order_id IS NULL;</code></pre>
+    <p>Output explanation: The RIGHT JOIN keeps all customers. Where no order exists, order columns are NULL. The WHERE clause then isolates only those NULL-order rows. Ananya is the only customer with no orders. This is the RIGHT JOIN equivalent of the IS NULL anti-join pattern from the LEFT JOIN article.</p>
+    <h3>Example 3: The equivalent LEFT JOIN rewrite</h3>
+    <p>Business question: Same as Example 1, rewritten as LEFT JOIN.</p>
+    <pre><code class="language-sql">-- RIGHT JOIN version
+SELECT o.order_id, o.amount, c.name, c.city
+FROM orders o
+RIGHT JOIN customers c ON o.customer_id = c.customer_id;
+
+-- Equivalent LEFT JOIN version (tables swapped)
+SELECT o.order_id, o.amount, c.name, c.city
+FROM customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id;</code></pre>
+    <p>Output explanation: Both queries return exactly the same rows. The only difference is the order in which you write the tables. This demonstrates why most teams standardize on LEFT JOIN and just control which table they place first in the FROM clause.</p>
+    <h3>Example 4: RIGHT JOIN with aggregate</h3>
+    <p>Business question: How many orders has each customer placed? Show customers with zero orders too.</p>
+    <pre><code class="language-sql">SELECT c.name, COUNT(o.order_id) AS total_orders
+FROM orders o
+RIGHT JOIN customers c ON o.customer_id = c.customer_id
+GROUP BY c.customer_id, c.name
+ORDER BY total_orders DESC;</code></pre>
+    <p>Output explanation: All four customers appear. Rahul has 2 orders, Simran has 1, Karan has 1, Ananya has 0. COUNT(o.order_id) correctly returns 0 for Ananya because it counts non-NULL values only.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>RIGHT JOIN is confusing to read because most people think left-to-right when reading code. Seeing <code>FROM orders RIGHT JOIN customers</code> means orders is written first but customers is the preserved table. This feels backward to many readers, which is the main reason most teams avoid RIGHT JOIN entirely and use LEFT JOIN with swapped table order instead.</p>
+    <p>The NULL check works the same way as in LEFT JOIN but on the opposite side. In a RIGHT JOIN, if you want to find right-table rows with no match, check <code>WHERE left_table.column IS NULL</code>.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Confusing which table gets preserved is the most common error with RIGHT JOIN. Remind yourself: the word RIGHT refers to the table on the right side of the JOIN keyword. That table is the one that keeps all its rows.</p>
+    <p>Putting a filter on the left table's column in the WHERE clause accidentally converts the RIGHT JOIN into an INNER JOIN, just as it does with LEFT JOIN. If you want to filter left-side data while keeping all right-side rows, put the condition in the ON clause.</p>
+    <pre><code class="language-sql">-- This effectively becomes an INNER JOIN (wrong if you want all customers)
+SELECT o.order_id, c.name
+FROM orders o
+RIGHT JOIN customers c ON o.customer_id = c.customer_id
+WHERE o.amount &gt; 500;
+
+-- This keeps all customers (correct)
+SELECT o.order_id, c.name
+FROM orders o
+RIGHT JOIN customers c ON o.customer_id = c.customer_id AND o.amount &gt; 500;</code></pre>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Most experienced SQL writers standardize on LEFT JOIN and put the primary table first in the FROM clause. This makes queries easier to read because the preserved table is always on the left side, consistent with how we read left-to-right.</p>
+    <p>If you find yourself writing a RIGHT JOIN, ask whether you can achieve the same result by swapping the table order and using LEFT JOIN. In most cases you can, and the resulting query is easier for colleagues to understand.</p>
+    <p>When you encounter RIGHT JOIN in existing code, do not change it without understanding the full query. The person who wrote it may have had a specific reason for the table ordering, or the RIGHT JOIN may be part of a larger query where swapping would require other changes.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Zomato, some legacy reporting queries use RIGHT JOIN when the author started writing from the transactions table and then needed to preserve all restaurant records. Newer code on the same team rewrites these as LEFT JOIN with restaurants first.</p>
+    <p>At IRCTC, train schedule reports sometimes use RIGHT JOIN when the base query starts from seat allocations and needs to join against the complete trains table to show trains with no allocations on certain dates.</p>
+    <p>At Ola, some driver availability reports use RIGHT JOIN when driver data is the primary reference and trip data is joined from the left side. Teams that maintain these queries are often aware that rewriting them as LEFT JOIN would make them more readable.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>RIGHT JOIN visual:
+
+LEFT TABLE (orders)     RIGHT TABLE (customers)
++----------+            +====================+
+| matched  |            | ALL ROWS including |
+| rows     |            | unmatched          |
+| only     |            +====================+
++----------+
+
+Result:
+[orders WHERE match exists] + [ALL of customers]
+[NULL columns] WHERE no     + [ALL of customers]
+match in orders
+
+Compare with LEFT JOIN (tables swapped):
+FROM customers LEFT JOIN orders
+[ALL of customers] + [orders WHERE match exists]
+= same rows, same data, different writing style</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Test yourself on these before continuing:</p>
+    <ul>
+      <li>Which table does RIGHT JOIN preserve completely?</li>
+      <li>How is RIGHT JOIN different from LEFT JOIN in terms of which rows appear?</li>
+      <li>Can every RIGHT JOIN be rewritten as a LEFT JOIN? How?</li>
+      <li>What does the column from the left table show when there is no match?</li>
+      <li>Why do most teams avoid writing RIGHT JOIN in practice?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>At Zomato, you have a <code>delivery_partners</code> table (partner_id, name, city) and a <code>deliveries</code> table (delivery_id, partner_id, order_id, status). Write a RIGHT JOIN to show all delivery partners along with their deliveries, including partners who have not made any deliveries.</li>
+    </ol>
+    <ol>
+      <li>Rewrite the query from Question 1 as a LEFT JOIN that produces the same result.</li>
+    </ol>
+    <ol>
+      <li>Using the same tables, write a query to find delivery partners who have zero completed deliveries (status = 'Completed').</li>
+    </ol>
+    <ol>
+      <li>In your own words, explain why most SQL developers prefer LEFT JOIN over RIGHT JOIN even when the logic calls for a right-side preserve.</li>
+    </ol>
+    <ol>
+      <li>Write a RIGHT JOIN query at Swiggy to find all restaurants that have received no orders, given a <code>restaurants</code> table and an <code>orders</code> table connected by <code>restaurant_id</code>.</li>
+    </ol>
+    <ol>
+      <li>What is the difference between <code>RIGHT JOIN</code> and <code>RIGHT OUTER JOIN</code>?</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>RIGHT JOIN is the less common sibling of LEFT JOIN. Understanding it makes you fluent in all standard join types and prepares you to read and maintain any SQL you encounter in the wild. In your own work, you will likely reach for LEFT JOIN almost always, but knowing why and when RIGHT JOIN exists makes you a more complete SQL writer.</p>
+  `,
+  'mod7-t5': `
+    <h1>FULL OUTER JOIN: Keep Every Row from Both Tables</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Vikram works at a mid-size tech company's finance team. His manager comes to him with an urgent reconciliation task: "We have our internal HR system and a third-party payroll system. Both should have the same employees, but after last month's migration, we are not sure they match up. I need to know which employees are in HR but not in payroll, which are in payroll but not in HR, and which are in both."</p>
+    <p>Vikram immediately thinks of LEFT JOIN and RIGHT JOIN. But then he realizes: he needs to find missing records on both sides at the same time. A LEFT JOIN would catch employees missing from payroll. A RIGHT JOIN would catch employees missing from HR. But he needs both in a single report.</p>
+    <p>His manager nods: "You want a FULL OUTER JOIN. It keeps everything from both sides."</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>LEFT JOIN and RIGHT JOIN each preserve one side completely. But in data reconciliation tasks, you need to see the complete picture from both sides simultaneously. FULL OUTER JOIN is built for exactly this: it returns every row from both tables, matching what it can, and filling NULLs where there is no match on either side.</p>
+    <p>This join type appears less frequently than INNER or LEFT JOIN in day-to-day work, but when you need it, nothing else does the job.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Database systems needed a way to perform a complete comparison between two datasets. Before FULL OUTER JOIN, developers had to run a LEFT JOIN and a RIGHT JOIN separately and combine the results in code. This was error-prone and inefficient.</p>
+    <p>FULL OUTER JOIN was built to express this combined operation in a single query: "Give me every row from both tables. Match what matches. Show NULLs where there is no partner on either side."</p>
+    <p>It is particularly powerful for data quality checks, synchronization audits, and any situation where two systems are supposed to be mirrors of each other but may have diverged.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine two guest lists at a wedding. One was prepared by the bride's family, the other by the groom's family. Some names appear on both lists. Some appear only on one. A FULL OUTER JOIN of these two lists gives you every name from both lists, showing which list each person is on. People on both lists appear once with data from both sides. People only on one list appear with NULLs for the other side.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>employees (HR system)     departments (org system)
++----+----------+         +------+---------------+
+| id | name     |         | dept | dept_name     |
++----+----------+         +------+---------------+
+|  1 | Vikram   |         |  A   | Engineering   |
+|  2 | Priya    |         |  B   | Marketing     |
+|  3 | Karan    |         |  C   | Finance       |
++----+----------+         +------+---------------+
+
+Some employees have no department. Some departments have no employees.
+
+FULL OUTER JOIN result:
+Vikram  - Engineering   (match on both sides)
+Priya   - Marketing     (match on both sides)
+Karan   - NULL          (employee with no department)
+NULL    - Finance        (department with no employee)</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>In a FULL OUTER JOIN, the database effectively performs a LEFT JOIN and a RIGHT JOIN, then combines the results while removing duplicate rows where both sides matched. The implementation details vary by database engine, but the output is always: every row from the left table appears, every row from the right table appears, matched rows are combined, unmatched rows have NULLs for the missing side.</p>
+    <p>An important note: MySQL does not support FULL OUTER JOIN natively. If you are using MySQL (very common in Indian startups), you need to simulate it using a UNION of a LEFT JOIN and a RIGHT JOIN. PostgreSQL, SQL Server, Oracle, and most enterprise databases support FULL OUTER JOIN directly.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>Standard syntax (works in PostgreSQL, SQL Server, Oracle):</p>
+    <pre><code class="language-sql">SELECT columns
+FROM table1
+FULL OUTER JOIN table2 ON table1.column = table2.column;</code></pre>
+    <p>MySQL workaround (UNION of LEFT JOIN and RIGHT JOIN):</p>
+    <pre><code class="language-sql">SELECT columns
+FROM table1
+LEFT JOIN table2 ON table1.column = table2.column
+
+UNION
+
+SELECT columns
+FROM table1
+RIGHT JOIN table2 ON table1.column = table2.column;</code></pre>
+    <p>For Vikram's reconciliation task:</p>
+    <pre><code class="language-sql">SELECT e.employee_id, e.name AS hr_name, p.employee_id AS payroll_id, p.name AS payroll_name
+FROM hr_employees e
+FULL OUTER JOIN payroll_employees p ON e.employee_id = p.employee_id;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>FROM hr_employees e</code></td><td>Left table, all rows preserved</td><td>All HR employees appear</td></tr>
+      <tr><td><code>FULL OUTER JOIN payroll_employees p</code></td><td>Right table, all rows preserved</td><td>All payroll employees appear</td></tr>
+      <tr><td><code>ON e.employee_id = p.employee_id</code></td><td>Matching condition</td><td>Rows where employee_id matches are combined</td></tr>
+      <tr><td>NULL on left side</td><td>Right-only row (exists in payroll, not in HR)</td><td>HR columns show NULL</td></tr>
+      <tr><td>NULL on right side</td><td>Left-only row (exists in HR, not in payroll)</td><td>Payroll columns show NULL</td></tr>
+      <tr><td>UNION (MySQL)</td><td>Simulates FULL OUTER JOIN</td><td>Combines LEFT JOIN and RIGHT JOIN results</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>employees table (HR system)</strong></p>
+    <table>
+      <tr><th>employee_id</th><th>name</th><th>dept_id</th></tr>
+      <tr><td>1</td><td>Vikram</td><td>101</td></tr>
+      <tr><td>2</td><td>Priya</td><td>102</td></tr>
+      <tr><td>3</td><td>Karan</td><td>NULL</td></tr>
+      <tr><td>4</td><td>Ananya</td><td>104</td></tr>
+    </table>
+    <p><strong>departments table</strong></p>
+    <table>
+      <tr><th>dept_id</th><th>dept_name</th></tr>
+      <tr><td>101</td><td>Engineering</td></tr>
+      <tr><td>102</td><td>Marketing</td></tr>
+      <tr><td>103</td><td>Finance</td></tr>
+      <tr><td>105</td><td>Legal</td></tr>
+    </table>
+    <h3>Example 1: Basic FULL OUTER JOIN</h3>
+    <p>Business question: Show all employees and all departments, showing which are connected and which are not.</p>
+    <pre><code class="language-sql">SELECT e.name, e.employee_id, d.dept_id, d.dept_name
+FROM employees e
+FULL OUTER JOIN departments d ON e.dept_id = d.dept_id;</code></pre>
+    <p>Output explanation: Vikram and Engineering match (dept 101). Priya and Marketing match (dept 102). Karan has dept_id NULL so he has no match, appearing with NULL for department columns. Ananya has dept_id 104 which does not exist in departments, so she also appears with NULLs on the right side. Finance (103) and Legal (105) exist in departments but have no employees, so they appear with NULLs on the left side.</p>
+    <h3>Example 2: Find employees with no department</h3>
+    <p>Business question: Which employees are not assigned to any department?</p>
+    <pre><code class="language-sql">SELECT e.employee_id, e.name
+FROM employees e
+FULL OUTER JOIN departments d ON e.dept_id = d.dept_id
+WHERE d.dept_id IS NULL;</code></pre>
+    <p>Output explanation: This keeps rows where the right side (departments) is NULL. Karan has no dept_id match, and Ananya's dept_id 104 does not exist in departments. Both appear in the result.</p>
+    <h3>Example 3: Find departments with no employees</h3>
+    <p>Business question: Which departments are currently empty?</p>
+    <pre><code class="language-sql">SELECT d.dept_id, d.dept_name
+FROM employees e
+FULL OUTER JOIN departments d ON e.dept_id = d.dept_id
+WHERE e.employee_id IS NULL;</code></pre>
+    <p>Output explanation: This keeps rows where the left side (employees) is NULL. Finance (103) and Legal (105) have no employees assigned to them. Both appear in the result.</p>
+    <h3>Example 4: MySQL workaround for FULL OUTER JOIN</h3>
+    <p>Business question: Same as Example 1 but using the MySQL-compatible approach.</p>
+    <pre><code class="language-sql">SELECT e.name, e.employee_id, d.dept_id, d.dept_name
+FROM employees e
+LEFT JOIN departments d ON e.dept_id = d.dept_id
+
+UNION
+
+SELECT e.name, e.employee_id, d.dept_id, d.dept_name
+FROM employees e
+RIGHT JOIN departments d ON e.dept_id = d.dept_id;</code></pre>
+    <p>Output explanation: The LEFT JOIN catches all employees including those without departments. The RIGHT JOIN catches all departments including those without employees. UNION combines both results and removes exact duplicates. The combined result matches what a native FULL OUTER JOIN would return. Note that UNION (not UNION ALL) is important here to avoid duplicate rows for the matched pairs.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>FULL OUTER JOIN can produce a large result set. If each table has 1 million rows and they share only 10% of records, the result could have nearly 2 million rows. Be prepared for large outputs and use WHERE filters when you only need the unmatched portions.</p>
+    <p>The MySQL workaround using UNION works correctly, but the column order in both SELECT statements must match exactly. If the first query selects <code>e.name, e.employee_id</code> and the second selects <code>e.employee_id, e.name</code>, UNION will align the columns incorrectly and produce wrong results.</p>
+    <p>FULL OUTER JOIN does not mean every combination of rows. That would be a CROSS JOIN. FULL OUTER JOIN still only matches rows based on the ON condition. It just keeps unmatched rows from both sides with NULLs.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Forgetting to use UNION (without ALL) in the MySQL workaround causes duplicate rows for matched records. UNION removes duplicates. UNION ALL keeps them. Always use UNION for the MySQL FULL OUTER JOIN workaround.</p>
+    <p>Running a FULL OUTER JOIN on two large tables without any WHERE filter or thinking about the result size first can cause performance problems. Always estimate how many rows will be in the result before running FULL OUTER JOIN on production data.</p>
+    <p>Using FULL OUTER JOIN when you actually need INNER JOIN is a common conceptual mistake. If you want only matched rows, use INNER JOIN. FULL OUTER JOIN is specifically for cases where you need to see unmatched rows from both sides.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Use FULL OUTER JOIN primarily for data reconciliation and auditing tasks, not for regular reporting. Most reporting queries need INNER or LEFT JOIN.</p>
+    <p>When using the MySQL UNION workaround, add a comment in your query explaining that this is a FULL OUTER JOIN simulation. Code without this context can be confusing for future readers.</p>
+    <p>Always identify what the NULL pattern means in your result. A row with NULL on the left side means it came only from the right table. A row with NULL on the right side means it came only from the left table. Document this in your reporting queries.</p>
+    <p>Consider adding a calculated column that labels each row's match status:</p>
+    <pre><code class="language-sql">SELECT
+    e.name AS hr_name,
+    p.name AS payroll_name,
+    CASE
+        WHEN e.employee_id IS NULL THEN 'Payroll only'
+        WHEN p.employee_id IS NULL THEN 'HR only'
+        ELSE 'Both systems'
+    END AS status
+FROM hr_employees e
+FULL OUTER JOIN payroll_employees p ON e.employee_id = p.employee_id;</code></pre>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Flipkart, reconciliation jobs run nightly to compare the orders table in the application database against the orders table in the analytics warehouse. FULL OUTER JOIN identifies any orders that exist in one system but not the other, flagging data pipeline issues.</p>
+    <p>At PhonePe, monthly financial audits use FULL OUTER JOIN to compare transaction records between their internal ledger and the bank's settlement file. Any transaction present in one and not the other requires investigation.</p>
+    <p>At IRCTC, seat availability data is synced between multiple regional systems. FULL OUTER JOIN queries compare the seat inventories across systems to find discrepancies introduced during synchronization.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>FULL OUTER JOIN visual:
+
+LEFT TABLE              RIGHT TABLE
++====================+  +====================+
+| ALL ROWS including |  | ALL ROWS including |
+| unmatched          |  | unmatched          |
++====================+  +====================+
+
+Result:
+
+[Left only] + [Matched rows combined] + [Right only]
+  NULLs on       both sides have          NULLs on
+  right side         values               left side
+
+Compare with:
+INNER JOIN  = only the middle [Matched] section
+LEFT JOIN   = [Left only] + [Matched]
+RIGHT JOIN  = [Matched] + [Right only]
+FULL OUTER  = [Left only] + [Matched] + [Right only]</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Check your understanding before continuing:</p>
+    <ul>
+      <li>What does FULL OUTER JOIN return that LEFT JOIN does not?</li>
+      <li>When does a row in the result have NULLs on the left side vs. the right side?</li>
+      <li>How do you simulate FULL OUTER JOIN in MySQL?</li>
+      <li>Why must you use UNION (not UNION ALL) in the MySQL workaround?</li>
+      <li>Name two real-world scenarios where FULL OUTER JOIN is the right choice.</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>At Flipkart, you have a <code>sellers</code> table (seller_id, name) and a <code>products</code> table (product_id, seller_id, product_name). Write a FULL OUTER JOIN to find sellers with no products and products with no seller.</li>
+    </ol>
+    <ol>
+      <li>Write the MySQL-compatible version of the query from Question 1.</li>
+    </ol>
+    <ol>
+      <li>Using the employees and departments tables from this article, write a query that shows a "status" column with values 'Employee only', 'Department only', or 'Matched' using a CASE expression.</li>
+    </ol>
+    <ol>
+      <li>If the left table has 500 rows and the right table has 600 rows, and 400 rows match on both sides, how many rows will the FULL OUTER JOIN result have?</li>
+    </ol>
+    <ol>
+      <li>At Paytm, two transaction logs from different systems need to be reconciled. Each has (transaction_id, user_id, amount). Write a FULL OUTER JOIN to find transactions that appear in one log but not the other.</li>
+    </ol>
+    <ol>
+      <li>Explain the difference between FULL OUTER JOIN and CROSS JOIN in one sentence each.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>FULL OUTER JOIN is a specialized but powerful tool. You will not write it every day, but when you need to reconcile two datasets or find discrepancies between two systems, it is exactly the right instrument. The MySQL UNION workaround is worth memorizing since MySQL is widely used across the Indian startup ecosystem, and you will encounter this pattern often in real codebases.</p>
+  `,
+  'mod7-t6': `
+    <h1>CROSS JOIN: Every Row Combined with Every Other Row</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Simran joined Swiggy's menu engineering team last month. Her manager gives her an interesting task: "We are expanding to three new cities and we offer five cuisines. I need a list of every possible city-cuisine combination so the business team can decide which combinations to launch first. Every city should be paired with every cuisine."</p>
+    <p>Simran opens her SQL editor and thinks about it. This is not a case where she is trying to match IDs or find related rows. She literally wants every city paired with every cuisine, regardless of any relationship between them. There are 3 cities and 5 cuisines, so she expects 15 rows in the output.</p>
+    <p>Her manager nods: "That is a CROSS JOIN. No ON clause needed."</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Most business questions involve finding related data: customers and their orders, employees and their departments. But sometimes you genuinely need to generate all possible combinations of two sets of values. This comes up when planning a product launch across markets, generating a full test matrix, building a scheduling grid, or creating a pricing configuration for all product variants.</p>
+    <p>For these cases, you do not want to filter or match. You want the Cartesian product: every row from table A combined with every row from table B.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>In mathematics, the Cartesian product of two sets is the set of all ordered pairs from both sets. SQL's CROSS JOIN is the direct implementation of this operation. It was built for situations where the combination itself is the meaningful output, not the match.</p>
+    <p>Before CROSS JOIN syntax existed, the same result was produced by listing two tables in the FROM clause without a JOIN keyword: <code>FROM table1, table2</code>. This old-style syntax is still valid SQL but is discouraged because it looks identical to a query that is missing its WHERE clause.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine a snack company that makes 4 flavors and sells them in 3 sizes. The operations team needs a master list of every product variant: small-spicy, small-tangy, small-salted, small-sweet, medium-spicy, and so on, for all 12 combinations. No matching needed. Just every flavor with every size.</p>
+    <p>That is a CROSS JOIN: take one list, take another list, combine everything.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>cities table (3 rows)      cuisines table (5 rows)
++----+-----------+         +----+----------+
+| id | city_name |         | id | cuisine  |
++----+-----------+         +----+----------+
+|  1 | Mumbai    |         |  1 | Biryani  |
+|  2 | Delhi     |         |  2 | Pizza    |
+|  3 | Bengaluru |         |  3 | Dosa     |
++----+-----------+         +----+----------+
+
+CROSS JOIN result: 3 x 3 = 9 rows (showing subset)
+Mumbai   - Biryani
+Mumbai   - Pizza
+Mumbai   - Dosa
+Delhi    - Biryani
+Delhi    - Pizza
+Delhi    - Dosa
+Bengaluru - Biryani
+Bengaluru - Pizza
+Bengaluru - Dosa</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>A CROSS JOIN does not use an ON clause. It takes every single row from the first table and pairs it with every single row from the second table. If table A has M rows and table B has N rows, the result has M x N rows, always.</p>
+    <p>There is no filtering, no matching condition, no NULLs. Every combination is a valid output row.</p>
+    <p>The database typically implements this by nesting loops: for each row in table A, iterate through all rows in table B and output one combined row. On small tables this is fast. On large tables this produces a massive result very quickly.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>Standard CROSS JOIN syntax:</p>
+    <pre><code class="language-sql">SELECT columns
+FROM table1
+CROSS JOIN table2;</code></pre>
+    <p>Old-style syntax that produces the same result (not recommended):</p>
+    <pre><code class="language-sql">SELECT columns
+FROM table1, table2;</code></pre>
+    <p>For Simran's Swiggy task:</p>
+    <pre><code class="language-sql">SELECT c.city_name, cu.cuisine_name
+FROM cities c
+CROSS JOIN cuisines cu
+ORDER BY c.city_name, cu.cuisine_name;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>FROM cities c</code></td><td>First table, all rows participate</td><td>3 cities</td></tr>
+      <tr><td><code>CROSS JOIN cuisines cu</code></td><td>Second table, all rows participate</td><td>5 cuisines</td></tr>
+      <tr><td>No ON clause</td><td>No matching condition needed</td><td>Every combination is valid</td></tr>
+      <tr><td>M x N result rows</td><td>Total rows in output</td><td>3 cities x 5 cuisines = 15 rows</td></tr>
+      <tr><td><code>ORDER BY</code></td><td>Organizes the combination list</td><td>Groups by city for readability</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>cities table (Swiggy expansion)</strong></p>
+    <table>
+      <tr><th>city_id</th><th>city_name</th></tr>
+      <tr><td>1</td><td>Mumbai</td></tr>
+      <tr><td>2</td><td>Delhi</td></tr>
+      <tr><td>3</td><td>Bengaluru</td></tr>
+    </table>
+    <p><strong>cuisines table (Swiggy)</strong></p>
+    <table>
+      <tr><th>cuisine_id</th><th>cuisine_name</th></tr>
+      <tr><td>1</td><td>Biryani</td></tr>
+      <tr><td>2</td><td>Pizza</td></tr>
+      <tr><td>3</td><td>Dosa</td></tr>
+      <tr><td>4</td><td>Chinese</td></tr>
+    </table>
+    <h3>Example 1: Basic CROSS JOIN for launch planning</h3>
+    <p>Business question: Generate all city-cuisine combinations for the expansion plan.</p>
+    <pre><code class="language-sql">SELECT c.city_name, cu.cuisine_name
+FROM cities c
+CROSS JOIN cuisines cu
+ORDER BY c.city_name, cu.cuisine_name;</code></pre>
+    <p>Output explanation: 3 cities x 4 cuisines = 12 rows. Mumbai appears 4 times (once for each cuisine), Delhi appears 4 times, Bengaluru appears 4 times. Every city is paired with every cuisine. The ORDER BY groups the output by city for readability.</p>
+    <h3>Example 2: CROSS JOIN to build a scheduling grid</h3>
+    <p>Business question: Generate all possible delivery slot and partner combinations for testing.</p>
+    <pre><code class="language-sql">SELECT s.slot_name, p.partner_name
+FROM delivery_slots s
+CROSS JOIN delivery_partners p;</code></pre>
+    <p>Output explanation: If there are 6 delivery slots (morning, afternoon, evening, etc.) and 10 delivery partners, the result has 60 rows. This grid is useful for load testing or scheduling optimization.</p>
+    <h3>Example 3: CROSS JOIN with a filter (controlled combination)</h3>
+    <p>Business question: From all city-cuisine combinations, show only the ones where the city is in the South and the cuisine is a South Indian one.</p>
+    <pre><code class="language-sql">SELECT c.city_name, cu.cuisine_name
+FROM cities c
+CROSS JOIN cuisines cu
+WHERE c.region = 'South' AND cu.type = 'South Indian';</code></pre>
+    <p>Output explanation: The CROSS JOIN first generates all combinations. The WHERE clause then filters to keep only the relevant subset. This is a legitimate use of CROSS JOIN with a filter.</p>
+    <h3>Example 4: CROSS JOIN for product variant generation</h3>
+    <p>Business question: Generate all size-color variants for a new Myntra product launch.</p>
+    <pre><code class="language-sql">SELECT s.size_label, co.color_name
+FROM sizes s
+CROSS JOIN colors co
+ORDER BY s.size_label, co.color_name;</code></pre>
+    <p>Output explanation: If the <code>sizes</code> table has S, M, L, XL (4 rows) and <code>colors</code> has 6 colors, the result has 24 rows. Each row represents one product variant that the inventory team needs to stock. This is a clean, intentional use of CROSS JOIN to generate a configuration matrix.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>The most dangerous aspect of CROSS JOIN is accidental usage. If you forget the ON clause in a regular JOIN, some databases silently perform a CROSS JOIN. A query joining a table with 10,000 rows and a table with 5,000 rows produces 50 million rows instead of the expected handful. This can take minutes to run and consume enormous memory.</p>
+    <pre><code class="language-sql">-- Intended: INNER JOIN with a matching condition
+SELECT c.name, o.order_id
+FROM customers c
+JOIN orders o;  -- Missing ON clause!
+-- This becomes a CROSS JOIN: every customer paired with every order</code></pre>
+    <p>Some databases throw an error for a JOIN without ON. Others silently execute the Cartesian product. Always include the ON clause in regular JOINs.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Using CROSS JOIN when you meant INNER JOIN, or accidentally creating a CROSS JOIN by forgetting the ON clause, is the most costly mistake. On tables with millions of rows, this can lock up a database for minutes or longer. Always review your JOIN clauses before running queries on large tables.</p>
+    <p>Not anticipating the row count is another common issue. Before writing <code>FROM table1 CROSS JOIN table2</code>, ask yourself: how many rows are in each table? Multiply them. Is that a reasonable number of rows to return?</p>
+    <p>Using CROSS JOIN to simulate a relationship that should be expressed with a proper JOIN and ON clause makes queries harder to understand and maintain. CROSS JOIN is for genuine Cartesian product scenarios, not for joining related data.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Always comment your CROSS JOIN to explain that the Cartesian product is intentional:</p>
+    <pre><code class="language-sql">-- CROSS JOIN intentional: generating all city-cuisine combinations for launch planning
+SELECT c.city_name, cu.cuisine_name
+FROM cities c
+CROSS JOIN cuisines cu;</code></pre>
+    <p>Before running any CROSS JOIN, calculate the expected row count. If the result would be more than a few thousand rows, make sure that is what you actually need and that your database can handle it.</p>
+    <p>Use LIMIT when testing CROSS JOIN queries to preview the output before running the full query:</p>
+    <pre><code class="language-sql">SELECT c.city_name, cu.cuisine_name
+FROM cities c
+CROSS JOIN cuisines cu
+LIMIT 20;</code></pre>
+    <p>Prefer the explicit <code>CROSS JOIN</code> syntax over the old <code>FROM table1, table2</code> syntax. The explicit form makes your intent clear to anyone reading the code.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Swiggy, the menu analytics team uses CROSS JOIN to generate a "coverage matrix" showing which cuisine types are available in which cities. Empty cells in the matrix represent expansion opportunities.</p>
+    <p>At Myntra, the catalog team uses CROSS JOIN to generate all size-color-fabric variants for new product lines before populating them with actual inventory. The generated combinations form the product template.</p>
+    <p>At Byju's, the content team uses CROSS JOIN to map all possible subject-grade-language combinations for their content database. This helps identify which combinations are covered and which still need content to be created.</p>
+    <p>At Flipkart, pricing operations use CROSS JOIN to generate all product-region-customer-segment pricing configurations during campaign planning. These generated combinations are then populated with specific prices.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>CROSS JOIN visual:
+
+Table A (3 rows)     Table B (4 rows)
++-----+              +-----+
+|  A1 |              |  B1 |
+|  A2 |              |  B2 |
+|  A3 |              |  B3 |
++-----+              |  B4 |
+                     +-----+
+
+CROSS JOIN result: 3 x 4 = 12 rows
+
+A1-B1  A1-B2  A1-B3  A1-B4
+A2-B1  A2-B2  A2-B3  A2-B4
+A3-B1  A3-B2  A3-B3  A3-B4
+
+No filtering. No matching. Every combination appears exactly once.
+
+Warning zone:
+Table A: 10,000 rows
+Table B: 50,000 rows
+CROSS JOIN result: 500,000,000 rows (500 million)</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these confidently:</p>
+    <ul>
+      <li>What result does a CROSS JOIN produce?</li>
+      <li>How do you calculate the number of rows in a CROSS JOIN result?</li>
+      <li>What syntax mistake accidentally creates a CROSS JOIN?</li>
+      <li>Name two real business scenarios where CROSS JOIN is genuinely the right choice.</li>
+      <li>Why should you always include a comment when writing CROSS JOIN?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>A Swiggy marketing team has a <code>regions</code> table (4 rows) and a <code>promo_types</code> table (6 rows). How many rows will a CROSS JOIN produce? Write the query.</li>
+    </ol>
+    <ol>
+      <li>At Myntra, you have a <code>sizes</code> table (XS, S, M, L, XL, XXL) and a <code>colors</code> table (10 colors). Write a CROSS JOIN to generate all possible product variants.</li>
+    </ol>
+    <ol>
+      <li>The following query is missing its ON clause. What will happen when it runs? Rewrite it correctly as an INNER JOIN.</li>
+    </ol>
+    <pre><code class="language-sql">   SELECT c.name, o.order_id
+   FROM customers c
+   JOIN orders o;</code></pre>
+    <ol>
+      <li>When is CROSS JOIN the right choice instead of INNER JOIN? Give two examples.</li>
+    </ol>
+    <ol>
+      <li>A table has 1000 rows and another has 2000 rows. How many rows does a CROSS JOIN produce? How long might this take to run compared to an INNER JOIN with proper indexes?</li>
+    </ol>
+    <ol>
+      <li>Write a query at Swiggy to generate all combinations of delivery time slots (morning, afternoon, evening, night) and restaurant categories (fast food, casual dining, cloud kitchen, fine dining) for a coverage analysis.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>CROSS JOIN is a simple concept with a very specific use case. When you genuinely need every combination of two lists, it is the right and efficient tool. When you see it in code you did not write, verify that the Cartesian product was intentional and that the result size is manageable. Most of the time in your career, CROSS JOIN will either be something you reach for deliberately for combination generation, or something you watch out for as an accidental mistake in JOIN syntax.</p>
+  `,
+  'mod7-t7': `
+    <h1>Self Join: Joining a Table to Itself</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Karan is a data analyst at Infosys. His manager asks him to pull an org chart report: "I need a list of every employee along with their manager's name. We want to send it to the project leads so they know who reports to whom."</p>
+    <p>Karan opens the database and finds a single <code>employees</code> table. It has an <code>employee_id</code>, a <code>name</code>, a <code>role</code>, and a <code>manager_id</code> column. The <code>manager_id</code> column stores the <code>employee_id</code> of the person's manager.</p>
+    <p>He stares at the table and thinks: the employee names are in this table. The manager names are also in this table. Both pieces of data live in the same table. He needs to connect a row in the table to another row in the same table.</p>
+    <p>His senior walks by and says, "You need a self join. Join the table to itself using two different aliases."</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Some tables store hierarchical or comparative data where rows in the table reference other rows in the same table. The most common example is an employee hierarchy where each employee's manager is also an employee in the same table. Other examples include product categories that have parent categories, geographic regions that have parent regions, and comments that have reply-to relationships pointing to other comments in the same table.</p>
+    <p>A regular join connects two different tables. A self join connects a table to itself. It is the same JOIN operation, but both sides of the join reference the same table. The trick is using two different aliases to tell the database you are treating the same table as two separate instances.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Hierarchical data is extremely common in real databases. Rather than storing manager information in a separate table, most database designs put the reference back into the same table using a foreign key that points to the table's own primary key. This design is clean, efficient, and avoids data duplication.</p>
+    <p>SQL supports self joins because querying this type of data requires reading the same table in two roles simultaneously: once as the "child" row and once as the "parent" row. Aliases make this possible by giving the same table two distinct names within a single query.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine a company phone directory where each page lists an employee's name and their manager's name. But the phone directory only lists names, not the manager's full details. To get the manager's phone number and designation, you need to look up the manager's name in the same directory.</p>
+    <p>That is a self join: you look up information about one person (the employee), then use a reference in their record to look up another person (their manager) in the same directory.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>employees table at Infosys
++----+----------+----------+------------+
+| id | name     | role     | manager_id |
++----+----------+----------+------------+
+|  1 | Ananya   | Director | NULL       |
+|  2 | Karan    | Manager  | 1          |
+|  3 | Priya    | Analyst  | 2          |
+|  4 | Vikram   | Analyst  | 2          |
+|  5 | Rahul    | Manager  | 1          |
++----+----------+----------+------------+
+
+Self join: treat the same table as "employees" and "managers"
+
+e (employee)    m (manager)
+Karan (2)  ---- Ananya (1)   [Karan's manager_id = 1 = Ananya's id]
+Priya (3)  ---- Karan (2)    [Priya's manager_id = 2 = Karan's id]
+Vikram (4) ---- Karan (2)    [Vikram's manager_id = 2 = Karan's id]
+Rahul (5)  ---- Ananya (1)   [Rahul's manager_id = 1 = Ananya's id]</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>In a self join, you write the same table name twice in the FROM clause but give each instance a different alias. One alias represents rows in their "employee" role and the other represents rows in their "manager" role.</p>
+    <p>The ON clause then connects them: <code>ON employee.manager_id = manager.employee_id</code>. This means: find the row in the manager alias whose <code>employee_id</code> equals the <code>manager_id</code> stored in the employee row.</p>
+    <p>The database processes this exactly like a regular two-table join. The alias trick is simply a way to tell the database that the same table is being used in two different roles simultaneously.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>Basic self join syntax:</p>
+    <pre><code class="language-sql">SELECT e.name AS employee_name, m.name AS manager_name
+FROM employees e
+JOIN employees m ON e.manager_id = m.employee_id;</code></pre>
+    <p>Using LEFT JOIN to include employees with no manager (like the CEO or Director):</p>
+    <pre><code class="language-sql">SELECT e.name AS employee_name, m.name AS manager_name
+FROM employees e
+LEFT JOIN employees m ON e.manager_id = m.employee_id;</code></pre>
+    <p>With role information:</p>
+    <pre><code class="language-sql">SELECT e.name AS employee_name, e.role, m.name AS manager_name, m.role AS manager_role
+FROM employees e
+LEFT JOIN employees m ON e.manager_id = m.employee_id
+ORDER BY m.name, e.name;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>FROM employees e</code></td><td>The table in its "employee" role</td><td>Each row represents an employee</td></tr>
+      <tr><td><code>JOIN employees m</code></td><td>The same table in its "manager" role</td><td>Each row represents a manager</td></tr>
+      <tr><td><code>ON e.manager_id = m.employee_id</code></td><td>Connects employee to their manager</td><td>Links the stored reference to the manager's actual row</td></tr>
+      <tr><td><code>e.name AS employee_name</code></td><td>Column from the employee alias</td><td>The subordinate's name</td></tr>
+      <tr><td><code>m.name AS manager_name</code></td><td>Column from the manager alias</td><td>The manager's name from the same table</td></tr>
+      <tr><td><code>LEFT JOIN</code></td><td>Keeps employees with no manager</td><td>The top-level employee (NULL manager_id) still appears</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>employees table (TCS project team)</strong></p>
+    <table>
+      <tr><th>employee_id</th><th>name</th><th>role</th><th>manager_id</th></tr>
+      <tr><td>1</td><td>Ananya</td><td>CTO</td><td>NULL</td></tr>
+      <tr><td>2</td><td>Karan</td><td>VP Eng</td><td>1</td></tr>
+      <tr><td>3</td><td>Priya</td><td>Sr Engineer</td><td>2</td></tr>
+      <tr><td>4</td><td>Vikram</td><td>Engineer</td><td>3</td></tr>
+      <tr><td>5</td><td>Rahul</td><td>VP Product</td><td>1</td></tr>
+      <tr><td>6</td><td>Simran</td><td>PM</td><td>5</td></tr>
+    </table>
+    <h3>Example 1: List every employee with their manager's name</h3>
+    <p>Business question: Show each employee and who they directly report to.</p>
+    <pre><code class="language-sql">SELECT e.name AS employee, e.role, m.name AS manager
+FROM employees e
+LEFT JOIN employees m ON e.manager_id = m.employee_id
+ORDER BY m.name NULLS LAST, e.name;</code></pre>
+    <p>Output explanation: Ananya (CTO) appears with NULL as manager because her manager_id is NULL. Karan and Rahul both show Ananya as their manager. Priya shows Karan as her manager. Vikram shows Priya as his manager. Simran shows Rahul as her manager. LEFT JOIN is used so the top-level employee (Ananya) is not excluded just because she has no manager.</p>
+    <h3>Example 2: Find employees who are also managers (have direct reports)</h3>
+    <p>Business question: Which employees have at least one person reporting to them?</p>
+    <pre><code class="language-sql">SELECT DISTINCT m.name AS manager_name, m.role
+FROM employees e
+JOIN employees m ON e.manager_id = m.employee_id;</code></pre>
+    <p>Output explanation: The INNER JOIN only keeps rows where a match exists (i.e., someone's manager_id points to this person). DISTINCT removes duplicate entries for managers with multiple reports. Ananya, Karan, Priya, and Rahul appear because at least one employee has their ID as a manager_id. Vikram and Simran have no one reporting to them so they do not appear.</p>
+    <h3>Example 3: Find all employees who report directly to Ananya</h3>
+    <p>Business question: Who are Ananya's direct reports?</p>
+    <pre><code class="language-sql">SELECT e.name, e.role
+FROM employees e
+JOIN employees m ON e.manager_id = m.employee_id
+WHERE m.name = 'Ananya';</code></pre>
+    <p>Output explanation: The join pairs each employee with their manager. The WHERE clause filters to only keep pairs where the manager's name is Ananya. Karan (VP Eng) and Rahul (VP Product) are Ananya's direct reports. This returns 2 rows.</p>
+    <h3>Example 4: Show the full chain with three levels</h3>
+    <p>Business question: Show employee, their manager, and their manager's manager (two levels of hierarchy).</p>
+    <pre><code class="language-sql">SELECT
+    e.name AS employee,
+    m.name AS manager,
+    gm.name AS grand_manager
+FROM employees e
+LEFT JOIN employees m ON e.manager_id = m.employee_id
+LEFT JOIN employees gm ON m.manager_id = gm.employee_id;</code></pre>
+    <p>Output explanation: A third alias <code>gm</code> (grand manager) is added for a second level of self join. Vikram shows Priya as manager and Karan as grand manager. Priya shows Karan as manager and Ananya as grand manager. Karan shows Ananya as manager and NULL as grand manager. Ananya shows NULL for both. This shows how self joins can be chained for deeper hierarchies.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>The alias requirement is non-negotiable. If you write <code>FROM employees JOIN employees ON ...</code> without aliases, most databases will throw an error because they cannot distinguish between the two references to the same table. Always use two different aliases.</p>
+    <p>Choosing INNER JOIN vs LEFT JOIN matters here. An INNER JOIN on a self join for hierarchy data excludes the top-level row (the person with NULL in manager_id) because NULL does not match any employee_id. Use LEFT JOIN if you want the top-level person to appear in the result.</p>
+    <p>Reading a self join requires a mental shift. When you see <code>e.name</code> and <code>m.name</code> in the SELECT, both come from the same physical table. The alias determines which "role" that row is playing in the result.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Using the same alias for both sides of the self join causes a syntax error or makes the ON clause impossible to write meaningfully. Always use clearly named aliases that reflect the role of each instance: <code>e</code> for employee and <code>m</code> for manager, or <code>emp</code> and <code>mgr</code> for clarity.</p>
+    <p>Forgetting that a self join on a hierarchy can produce duplicates if the table has data quality issues (like circular references: employee A is manager of B, and B is manager of A). Always validate hierarchy data before running complex multi-level self joins.</p>
+    <p>Not using DISTINCT when looking for managers causes each manager to appear once per direct report. If Karan manages three people, he appears three times without DISTINCT.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Always give your aliases meaningful names that reflect what role each instance of the table is playing. In an employee-manager self join, use <code>e</code> and <code>m</code> or <code>emp</code> and <code>mgr</code>, not just <code>a</code> and <code>b</code>.</p>
+    <p>Add a comment above the self join explaining what the two aliases represent:</p>
+    <pre><code class="language-sql">-- e = employee being listed, m = that employee's manager (same table)
+SELECT e.name AS employee, m.name AS manager
+FROM employees e
+LEFT JOIN employees m ON e.manager_id = m.employee_id;</code></pre>
+    <p>Use LEFT JOIN for hierarchical self joins unless you specifically want to exclude the top-level record. Including the root node (the person with no manager) almost always makes the report more complete.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Infosys and TCS, org chart reports that show team structures are built on self joins. Every time HR needs to export "all employees and their reporting managers," a self join on the employees table produces that report.</p>
+    <p>At Flipkart, the product category hierarchy (Electronics > Mobiles > Smartphones) is stored in a single <code>categories</code> table where each category has a <code>parent_category_id</code>. Self joins traverse this hierarchy for breadcrumb navigation and reporting.</p>
+    <p>At Amazon India, the geographic hierarchy (India > South > Karnataka > Bengaluru > Koramangala) uses a similar self-referencing table structure with self joins for location-based analysis.</p>
+    <p>At BookMyShow, venue sections (stadium > stand > row > seat) are modeled with self-referencing tables traversed by self joins for seat map generation.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Self Join on employees table:
+
+The same table acts in two roles:
+
+employees (as "e")          employees (as "m")
++----+----------+------+    +----+----------+
+| id | name     | mgr  |    | id | name     |
++----+----------+------+    +----+----------+
+|  2 | Karan    |  1   |---&gt;|  1 | Ananya   |
+|  3 | Priya    |  2   |---&gt;|  2 | Karan    |
+|  4 | Vikram   |  3   |---&gt;|  3 | Priya    |
++----+----------+------+    +----+----------+
+          ^
+          Same physical table
+          Two aliases = two logical roles
+
+ON condition: e.manager_id = m.employee_id
+(connects an employee row to the row of their manager)</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Verify you can answer these before moving on:</p>
+    <ul>
+      <li>Why do you need two aliases in a self join?</li>
+      <li>What does the ON clause look like in an employee-manager self join?</li>
+      <li>Why should you use LEFT JOIN instead of INNER JOIN for hierarchy self joins?</li>
+      <li>What other types of data besides employee hierarchies use self joins?</li>
+      <li>How do you find employees who have no direct reports using a self join?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Using the employees table from this article, write a self join to find all employees who have no manager (the top-level people).</li>
+    </ol>
+    <ol>
+      <li>At an organization, a <code>departments</code> table has (dept_id, dept_name, parent_dept_id). Write a self join to show each department along with its parent department name.</li>
+    </ol>
+    <ol>
+      <li>Write a self join to find all employees at TCS who are managed by a VP-level manager (someone whose role contains 'VP').</li>
+    </ol>
+    <ol>
+      <li>At Flipkart, a <code>categories</code> table has (category_id, category_name, parent_category_id). Write a self join to show each category alongside its parent category name.</li>
+    </ol>
+    <ol>
+      <li>What happens if you use INNER JOIN instead of LEFT JOIN in the employee-manager self join from Example 1? Which rows disappear and why?</li>
+    </ol>
+    <ol>
+      <li>Write a query to count how many direct reports each manager has, using the employees table from this article. Show managers with zero direct reports as well.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>Self joins unlock hierarchical data in a way no other join type can. Once you recognize the pattern, where a table's foreign key points back to the same table's primary key, you know a self join is the tool for that data. It takes a bit of practice to get comfortable reading a query where the same table appears twice under different names, but once it clicks, it becomes a natural part of your SQL toolkit.</p>
+  `,
+  'mod7-t8': `
+    <h1>Multiple Joins: Combining Three or More Tables in One Query</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Ananya has been at Swiggy's operations team for a month. Her manager drops a task on her desk: "I need a report showing all orders placed today, with the customer's name, the restaurant's name, and which delivery partner handled the order. Finance needs this for the daily settlement report."</p>
+    <p>Ananya looks at the database schema. The <code>orders</code> table has order IDs and foreign keys pointing to other tables, but not the actual names. Customer names live in <code>customers</code>. Restaurant names live in <code>restaurants</code>. Delivery partner names live in <code>delivery_partners</code>.</p>
+    <p>To produce this report, she needs to connect four tables in a single query. She has done single joins before. Now she needs to chain them together.</p>
+    <p>Her manager says, "Just keep adding JOINs. Each one brings in one more table."</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Real-world reporting queries almost never involve just two tables. A typical order report at any e-commerce or food delivery company pulls from four to eight tables at once: orders, customers, products, sellers, categories, addresses, payment methods, and more. These tables are all connected through the <code>orders</code> table via foreign keys.</p>
+    <p>The technique for handling this is straightforward: chain your JOINs. Add one JOIN clause for each additional table you need. Each JOIN brings one more table into the query.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Database normalization splits data across many tables to avoid redundancy. The trade-off is that answering business questions requires reassembling data from multiple sources. SQL was designed to make this reassembly declarative and readable, letting the database engine handle the physical work of combining data from multiple tables efficiently.</p>
+    <p>Multiple JOINs in a single query are more efficient than running separate queries and combining results in application code, because the database can optimize the execution plan across all tables simultaneously.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine a school's report card printing system. The student's name is in the students register. The subject names are in the subjects register. The scores are in the marks register. The class teacher's name is in the teachers register. To print a complete report card, the school office connects all four registers using the student ID and subject ID. That multi-register connection is exactly what multiple JOINs do in SQL.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>orders (central table)
++----------+-------------+---------------+--------------------+
+| order_id | customer_id | restaurant_id | delivery_partner_id|
++----------+-------------+---------------+--------------------+
+    |             |              |                  |
+    v             v              v                  v
+ orders      customers      restaurants      delivery_partners
+ table        table           table              table</code></pre>
+    <p>The <code>orders</code> table acts as the hub. Each foreign key column points to a different lookup table. Multiple JOINs radiate outward from the central table.</p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>When you chain multiple JOINs, each JOIN builds on the result of the previous one. The database processes them in sequence:</p>
+    <ol>
+      <li>Start with the FROM table.</li>
+      <li>Apply the first JOIN to produce an intermediate result.</li>
+      <li>Apply the second JOIN to the intermediate result.</li>
+      <li>Continue until all JOINs are processed.</li>
+      <li>Apply WHERE, GROUP BY, ORDER BY at the end.</li>
+    </ol>
+    <p>The order of JOINs in the query determines readability but the database optimizer may reorder them internally for performance. What matters to you as the writer is that each ON clause correctly specifies the connection between the newly joined table and a table that already exists in the query.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>Basic syntax for three tables:</p>
+    <pre><code class="language-sql">SELECT columns
+FROM table1
+JOIN table2 ON table1.key = table2.key
+JOIN table3 ON table2.key = table3.key;</code></pre>
+    <p>For Ananya's four-table Swiggy report:</p>
+    <pre><code class="language-sql">SELECT
+    o.order_id,
+    o.order_date,
+    o.amount,
+    c.name AS customer_name,
+    r.restaurant_name,
+    dp.partner_name AS delivery_partner
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+JOIN restaurants r ON o.restaurant_id = r.restaurant_id
+JOIN delivery_partners dp ON o.delivery_partner_id = dp.partner_id
+WHERE DATE(o.order_date) = CURDATE()
+ORDER BY o.order_id;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>FROM orders o</code></td><td>The central hub table</td><td>All orders are the starting point</td></tr>
+      <tr><td><code>JOIN customers c ON o.customer_id = c.customer_id</code></td><td>First join: brings in customer names</td><td>Links order's customer_id to customers table</td></tr>
+      <tr><td><code>JOIN restaurants r ON o.restaurant_id = r.restaurant_id</code></td><td>Second join: brings in restaurant names</td><td>Links order's restaurant_id to restaurants table</td></tr>
+      <tr><td><code>JOIN delivery_partners dp ON o.delivery_partner_id = dp.partner_id</code></td><td>Third join: brings in delivery partner names</td><td>Links order's partner_id to delivery_partners table</td></tr>
+      <tr><td><code>WHERE DATE(o.order_date) = CURDATE()</code></td><td>Filters to today's orders</td><td>Applied after all joins are resolved</td></tr>
+      <tr><td><code>c.name, r.restaurant_name, dp.partner_name</code></td><td>Columns from joined tables</td><td>Each alias prefix shows which table the column comes from</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>orders table</strong></p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>restaurant_id</th><th>delivery_partner_id</th><th>amount</th><th>order_date</th></tr>
+      <tr><td>501</td><td>1</td><td>10</td><td>100</td><td>450</td><td>2024-05-20</td></tr>
+      <tr><td>502</td><td>2</td><td>11</td><td>101</td><td>320</td><td>2024-05-20</td></tr>
+      <tr><td>503</td><td>1</td><td>10</td><td>102</td><td>190</td><td>2024-05-20</td></tr>
+    </table>
+    <p><strong>customers table</strong></p>
+    <table>
+      <tr><th>customer_id</th><th>name</th><th>city</th></tr>
+      <tr><td>1</td><td>Ananya</td><td>Bengaluru</td></tr>
+      <tr><td>2</td><td>Karan</td><td>Mumbai</td></tr>
+    </table>
+    <p><strong>restaurants table</strong></p>
+    <table>
+      <tr><th>restaurant_id</th><th>restaurant_name</th></tr>
+      <tr><td>10</td><td>Meghana Foods</td></tr>
+      <tr><td>11</td><td>Bombay Canteen</td></tr>
+    </table>
+    <p><strong>delivery_partners table</strong></p>
+    <table>
+      <tr><th>partner_id</th><th>partner_name</th></tr>
+      <tr><td>100</td><td>Ravi Kumar</td></tr>
+      <tr><td>101</td><td>Suresh D</td></tr>
+      <tr><td>102</td><td>Amol Patil</td></tr>
+    </table>
+    <h3>Example 1: Basic four-table join</h3>
+    <p>Business question: Show all orders with customer name, restaurant name, and delivery partner.</p>
+    <pre><code class="language-sql">SELECT
+    o.order_id,
+    c.name AS customer,
+    r.restaurant_name,
+    dp.partner_name,
+    o.amount
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+JOIN restaurants r ON o.restaurant_id = r.restaurant_id
+JOIN delivery_partners dp ON o.delivery_partner_id = dp.partner_id;</code></pre>
+    <p>Output explanation: All three orders appear. Order 501 shows Ananya, Meghana Foods, and Ravi Kumar. Order 502 shows Karan, Bombay Canteen, and Suresh D. Order 503 shows Ananya again with Meghana Foods and Amol Patil. All four tables are represented in each row.</p>
+    <h3>Example 2: Multi-join with WHERE and ORDER BY</h3>
+    <p>Business question: Show orders from Bengaluru customers today, sorted by amount.</p>
+    <pre><code class="language-sql">SELECT
+    o.order_id,
+    c.name AS customer,
+    c.city,
+    r.restaurant_name,
+    o.amount
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+JOIN restaurants r ON o.restaurant_id = r.restaurant_id
+JOIN delivery_partners dp ON o.delivery_partner_id = dp.partner_id
+WHERE c.city = 'Bengaluru'
+ORDER BY o.amount DESC;</code></pre>
+    <p>Output explanation: The WHERE clause filters on the <code>customers</code> table, which is already in scope because of the JOIN. Orders 501 and 503 belong to Ananya from Bengaluru. Order 502 belongs to Karan from Mumbai and is excluded. Result shows 2 rows sorted by amount descending.</p>
+    <h3>Example 3: Multi-join with GROUP BY and aggregation</h3>
+    <p>Business question: How much revenue has each restaurant earned today?</p>
+    <pre><code class="language-sql">SELECT
+    r.restaurant_name,
+    COUNT(o.order_id) AS total_orders,
+    SUM(o.amount) AS total_revenue
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+JOIN restaurants r ON o.restaurant_id = r.restaurant_id
+GROUP BY r.restaurant_id, r.restaurant_name
+ORDER BY total_revenue DESC;</code></pre>
+    <p>Output explanation: After all joins, GROUP BY collapses orders by restaurant. Meghana Foods has 2 orders (501 and 503) totalling 640 rupees. Bombay Canteen has 1 order (502) totalling 320 rupees.</p>
+    <h3>Example 4: Mixing JOIN types in a multi-join query</h3>
+    <p>Business question: Show all restaurants along with their orders today, including restaurants that received no orders.</p>
+    <pre><code class="language-sql">SELECT
+    r.restaurant_name,
+    o.order_id,
+    c.name AS customer
+FROM restaurants r
+LEFT JOIN orders o ON r.restaurant_id = o.restaurant_id
+LEFT JOIN customers c ON o.customer_id = c.customer_id;</code></pre>
+    <p>Output explanation: The first LEFT JOIN keeps all restaurants, including those with no orders. The second LEFT JOIN keeps all order rows including the NULL ones. If a restaurant has no orders, order_id and customer name are both NULL. You can mix INNER JOIN and LEFT JOIN in the same query depending on which tables need to preserve all rows.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>Each ON clause in a multi-join query must reference at least one table that is already in the query (from the FROM clause or a previous JOIN). You cannot reference a table in an ON clause before it has been introduced.</p>
+    <p>When multiple tables have columns with the same name, always prefix with the alias. In a four-table join, <code>name</code> could mean customer name, restaurant name, or partner name. Writing <code>c.name</code>, <code>r.restaurant_name</code>, and <code>dp.partner_name</code> removes all ambiguity.</p>
+    <p>Joining on the wrong column in a multi-table query is easy when several tables have similarly named columns. Always double-check your ON clauses. A join on <code>o.customer_id = dp.partner_id</code> would run without error but produce nonsensical results.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Adding a JOIN without verifying that the join column exists in both tables causes a column-not-found error. Always check the schema before writing a multi-join query.</p>
+    <p>Introducing a JOIN that is not actually needed in the query and then filtering on that table's column in WHERE creates an accidental INNER JOIN behavior on a LEFT JOIN chain. Be intentional about which tables you join and why.</p>
+    <p>Using <code>SELECT *</code> in a multi-join query produces duplicate column names (like <code>customer_id</code> appearing four times from four different tables) and creates ambiguous columns. Always list specific columns with aliases.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Start with the most central or smallest table in the FROM clause. In order reports, the <code>orders</code> table is usually the natural starting point because all foreign keys radiate from it.</p>
+    <p>Write one JOIN clause per line with consistent indentation. This makes it easy to see how many tables are involved and verify each ON clause:</p>
+    <pre><code class="language-sql">FROM orders o
+JOIN customers c      ON o.customer_id     = c.customer_id
+JOIN restaurants r    ON o.restaurant_id   = r.restaurant_id
+JOIN delivery_partners dp ON o.delivery_partner_id = dp.partner_id</code></pre>
+    <p>Test the query incrementally. Write it with just the first JOIN and run it. Verify the result looks correct. Then add the second JOIN and run again. This approach isolates which JOIN introduces a problem if rows count unexpectedly high or low.</p>
+    <p>Add column aliases to every column in the SELECT list for multi-join queries. Without aliases, column names in the result can be confusing, especially when two tables have similarly named columns.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Swiggy, the daily settlement report used by the finance team joins orders, customers, restaurants, delivery partners, and payment methods in a single query. This produces the full transaction picture needed for payouts to restaurants and delivery partners.</p>
+    <p>At Flipkart, the seller dashboard shows order items with product names, categories, seller details, and delivery address in one view. This requires joining five to six tables simultaneously.</p>
+    <p>At BookMyShow, the booking confirmation email pulls data from bookings, events, venues, seats, and users in a single multi-join query to generate the complete ticket details.</p>
+    <p>At Myntra, the returns management system joins returns, orders, products, and customers to show the complete return history with all relevant details for customer support agents.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Multi-join query structure:
+
+orders (hub)
+   |
+   +--JOIN customers      (adds customer name, city)
+   |
+   +--JOIN restaurants    (adds restaurant name, type)
+   |
+   +--JOIN delivery_partners (adds partner name, vehicle)
+
+Each JOIN is applied to the growing result set:
+
+After FROM:          orders rows only
+After 1st JOIN:      orders + customer data
+After 2nd JOIN:      orders + customer + restaurant data
+After 3rd JOIN:      orders + customer + restaurant + partner data
+After WHERE/ORDER:   filtered and sorted final result</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these before continuing:</p>
+    <ul>
+      <li>How do you add a third table to an existing two-table JOIN query?</li>
+      <li>Why must you always prefix column names with table aliases in multi-join queries?</li>
+      <li>What is the risk of joining on the wrong column in a multi-table query?</li>
+      <li>How does the order of JOINs affect readability vs. database execution?</li>
+      <li>When would you use LEFT JOIN instead of JOIN in a multi-join chain?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>At Flipkart, you have tables: <code>orders</code> (order_id, customer_id, product_id, seller_id), <code>customers</code> (customer_id, name), <code>products</code> (product_id, product_name, price), <code>sellers</code> (seller_id, seller_name). Write a four-table join to show each order with customer name, product name, price, and seller name.</li>
+    </ol>
+    <ol>
+      <li>Add a WHERE clause to the query from Question 1 to show only orders where the product price is above 2000 rupees.</li>
+    </ol>
+    <ol>
+      <li>At Swiggy, you need to find the top 5 restaurants by revenue for the month of April 2024. The <code>orders</code> table has order amounts and restaurant IDs. The <code>restaurants</code> table has restaurant names. Write the query using a multi-join and GROUP BY.</li>
+    </ol>
+    <ol>
+      <li>Given the four sample tables from this article, write a query that shows the total amount spent by each customer, along with the number of unique restaurants they have ordered from.</li>
+    </ol>
+    <ol>
+      <li>What happens if you include a JOIN to the <code>delivery_partners</code> table but do not use any column from that table in the SELECT list or WHERE clause? Is there any reason to include it?</li>
+    </ol>
+    <ol>
+      <li>At BookMyShow, you have: <code>bookings</code> (booking_id, user_id, event_id, seat_id), <code>users</code> (user_id, name, email), <code>events</code> (event_id, event_name, venue_id), <code>venues</code> (venue_id, venue_name, city). Write a query to show all bookings with user name, event name, and venue city.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>Multiple joins are the natural destination of everything you have learned about joins so far. Single-table queries and two-table joins are how you start. Multi-table joins are how you do real work. Every reporting query in a production system at Swiggy, Flipkart, Zomato, or any company that stores data in normalized tables uses multiple joins. Once you are comfortable chaining three or four joins, you can handle almost any reporting query a business throws at you.</p>
+  `,
+  'mod7-t9': `
+    <h1>Join Performance Tips: Writing Joins That Don't Slow Everything Down</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Rahul joined Flipkart's data engineering team six months ago. He has been writing SQL queries comfortably for a while. One Monday morning, his manager Pooja comes to him with a problem: "The daily sales report that goes to the business team takes 40 minutes to run. It used to take 3 minutes. The report deadline is 8 AM and it is barely making it. Can you fix it?"</p>
+    <p>Rahul opens the query. It is a join across four tables: orders, customers, products, and sellers. The query looks correct. The results are accurate. But it is slow.</p>
+    <p>Pooja says, "Check whether the join columns are indexed. That is almost always the first thing to look at."</p>
+    <p>Rahul checks. The <code>orders</code> table has over 20 million rows. The <code>customer_id</code> column in orders has no index. The query was scanning all 20 million rows for every join operation. He adds an index. The query drops to 2 minutes.</p>
+    <p>That single change, adding an index on the join column, is the most impactful performance improvement you can make on any join query.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Joins are powerful but they are not free. A join between two large tables without proper indexes can scan tens or hundreds of millions of rows. In a production database handling thousands of queries per minute, a slow join query does not just inconvenience the person who ran it. It competes with every other query for CPU, memory, and I/O resources.</p>
+    <p>You will write joins that are fast on a 1000-row development database but crawl on a 50-million-row production table. Understanding why they slow down, and what to do about it, is what separates a junior SQL writer from someone who can work effectively with real production data.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Database engines are sophisticated software built to execute queries as efficiently as possible. But they need information about the data to make smart decisions. Indexes are the primary way you give the database that information: "This column is frequently used for lookups and joins. Build a data structure on it so you can find rows by this value quickly."</p>
+    <p>When you write <code>ON o.customer_id = c.customer_id</code>, the database needs to find rows in <code>customers</code> where <code>customer_id</code> matches each value from <code>orders</code>. Without an index, it reads the entire <code>customers</code> table for each row in <code>orders</code>. With an index, it jumps directly to the matching rows.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine the <code>orders</code> table is a filing cabinet with 10 million folders, and the <code>customers</code> table is a phonebook. Without an index, finding a customer's name for each order means reading the phonebook from page 1 every single time. With an index, it is like having an alphabetical phonebook where you can immediately jump to the right page. The query does 10 million fast lookups instead of 10 million full-book scans.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>Without index on orders.customer_id:
+For each of 20M order rows:
+    Scan all 5M customer rows to find matching customer_id
+    = 20M x 5M = 100 trillion comparisons (very slow)
+
+With index on orders.customer_id:
+For each of 20M order rows:
+    Index lookup: jump directly to matching customer_id
+    = 20M x log(5M) comparisons (fast)</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>There are several key mechanisms that determine join performance. Understanding each helps you diagnose slow queries and apply the right fix.</p>
+    <p><strong>Index on join columns</strong>: The single most impactful optimization. Both columns in the ON clause should have indexes. The primary key column (like <code>customers.customer_id</code>) usually has an automatic index. The foreign key column (like <code>orders.customer_id</code>) often does not have an automatic index and must be created manually.</p>
+    <p><strong>Filter early with WHERE</strong>: Reducing the number of rows before they enter the join significantly reduces work. If you only need orders from one city, filter on that before or in the same query. Fewer rows = fewer join operations.</p>
+    <p><strong>SELECT specific columns</strong>: Fetching 50 columns when you need 5 wastes I/O and memory. This matters more in wide tables with many columns or in databases that store columns separately (columnar storage).</p>
+    <p><strong>Join order</strong>: Some database engines care about which table you put first. Joining a small filtered table to a large table is generally faster than the reverse, because the smaller table gives the engine fewer starting points.</p>
+    <p><strong>EXPLAIN and EXPLAIN ANALYZE</strong>: These commands show you exactly how the database plans to execute your query. They reveal whether indexes are being used, how many rows each step processes, and where the most time is spent.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>Creating an index on a join column:</p>
+    <pre><code class="language-sql">-- Add index on the foreign key column in the orders table
+CREATE INDEX idx_orders_customer_id ON orders(customer_id);
+
+-- Add index on another commonly joined column
+CREATE INDEX idx_orders_restaurant_id ON orders(restaurant_id);</code></pre>
+    <p>Using EXPLAIN to see the execution plan:</p>
+    <pre><code class="language-sql">EXPLAIN
+SELECT c.name, SUM(o.amount)
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+GROUP BY c.customer_id, c.name;</code></pre>
+    <p>Using EXPLAIN ANALYZE (in PostgreSQL) for actual runtime statistics:</p>
+    <pre><code class="language-sql">EXPLAIN ANALYZE
+SELECT c.name, SUM(o.amount)
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+GROUP BY c.customer_id, c.name;</code></pre>
+    <p>Filter before joining using a subquery or CTE when only a subset of rows is needed:</p>
+    <pre><code class="language-sql">-- Less efficient: join everything, then filter
+SELECT c.name, o.order_id
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+WHERE c.city = 'Mumbai' AND o.amount &gt; 500;
+
+-- More efficient on large tables: pre-filter before joining
+WITH mumbai_customers AS (
+    SELECT customer_id, name FROM customers WHERE city = 'Mumbai'
+),
+large_orders AS (
+    SELECT order_id, customer_id, amount FROM orders WHERE amount &gt; 500
+)
+SELECT mc.name, lo.order_id
+FROM mumbai_customers mc
+JOIN large_orders lo ON mc.customer_id = lo.customer_id;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td>Index on join column</td><td>Speeds up row lookup during join</td><td><code>CREATE INDEX idx_orders_cid ON orders(customer_id)</code></td></tr>
+      <tr><td>Filter early with WHERE</td><td>Reduces rows before join executes</td><td><code>WHERE o.status = 'Delivered'</code> before joining</td></tr>
+      <tr><td>SELECT specific columns</td><td>Reduces data transfer and memory use</td><td><code>SELECT c.name, o.amount</code> not <code>SELECT *</code></td></tr>
+      <tr><td>EXPLAIN</td><td>Shows the query execution plan</td><td>Reveals full-table scans vs. index scans</td></tr>
+      <tr><td>EXPLAIN ANALYZE</td><td>Shows actual execution time per step</td><td>Identifies the slowest step in a complex join</td></tr>
+      <tr><td>Avoid functions on join columns</td><td>Prevents index from being used</td><td>Use <code>o.created_date = '2024-01-01'</code> not <code>YEAR(o.created_date) = 2024</code></td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p>These examples show before-and-after patterns for common performance issues. No sample data tables are needed here because the focus is on query structure.</p>
+    <h3>Before/After 1: Slow query without index</h3>
+    <p>The Flipkart daily report running 40 minutes:</p>
+    <pre><code class="language-sql">-- BEFORE (no index on orders.customer_id, 20M row scan)
+SELECT c.name, COUNT(o.order_id), SUM(o.amount)
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+WHERE o.order_date &gt;= '2024-01-01'
+GROUP BY c.customer_id, c.name;
+
+-- Fix: create index
+CREATE INDEX idx_orders_customer_id ON orders(customer_id);
+CREATE INDEX idx_orders_date ON orders(order_date);
+
+-- AFTER: same query now uses index, runs in 2 minutes</code></pre>
+    <h3>Before/After 2: Function on join column kills the index</h3>
+    <p>A common and invisible performance killer:</p>
+    <pre><code class="language-sql">-- BEFORE (function on column prevents index use)
+SELECT c.name, o.order_id
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+WHERE YEAR(o.order_date) = 2024 AND MONTH(o.order_date) = 3;
+
+-- AFTER (range condition allows index scan)
+SELECT c.name, o.order_id
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+WHERE o.order_date &gt;= '2024-03-01' AND o.order_date &lt; '2024-04-01';</code></pre>
+    <p>The second version can use an index on <code>order_date</code>. The first forces a full table scan on every row to compute <code>YEAR()</code> and <code>MONTH()</code>.</p>
+    <h3>Before/After 3: SELECT * in a multi-join query</h3>
+    <pre><code class="language-sql">-- BEFORE (fetches all columns from 4 tables, including large text/blob columns)
+SELECT *
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+JOIN restaurants r ON o.restaurant_id = r.restaurant_id
+JOIN delivery_partners dp ON o.delivery_partner_id = dp.partner_id;
+
+-- AFTER (fetches only the 6 columns actually needed)
+SELECT
+    o.order_id,
+    o.amount,
+    c.name AS customer,
+    r.restaurant_name,
+    dp.partner_name,
+    o.order_date
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+JOIN restaurants r ON o.restaurant_id = r.restaurant_id
+JOIN delivery_partners dp ON o.delivery_partner_id = dp.partner_id;</code></pre>
+    <h3>Before/After 4: FULL OUTER JOIN and CROSS JOIN on large tables</h3>
+    <pre><code class="language-sql">-- DANGEROUS: CROSS JOIN on large tables
+SELECT *
+FROM products p
+CROSS JOIN customers c;
+-- If products = 100,000 and customers = 500,000: 50 BILLION rows
+
+-- SAFER: only use CROSS JOIN on small dimension tables
+SELECT s.size_label, co.color_name
+FROM sizes s         -- 6 rows
+CROSS JOIN colors co -- 10 rows
+;                    -- 60 rows: manageable</code></pre>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>Indexes on the right columns are not enough if the query does not let the database use them. Wrapping a join column in a function, applying arithmetic to it, or using an implicit type conversion can prevent the index from being used. Always write join and filter conditions in their raw column form.</p>
+    <p>Adding more JOINs does not automatically make a query slower, but adding JOINs that produce large intermediate results does. If your first join produces 10 million rows and the second join multiplies them by 5, you have a 50-million-row intermediate table in memory. Pre-filter aggressively before joining.</p>
+    <p>EXPLAIN output can look intimidating at first. Focus on two things: whether it says "Index Scan" or "Seq Scan" (sequential scan = full table scan = potentially slow), and how many rows it estimates processing at each step.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Assuming the query is correct means it is fast. A query can return exactly the right results and still take 10x longer than it should because of missing indexes.</p>
+    <p>Indexing every column is also a mistake. Indexes consume storage and slow down INSERT, UPDATE, and DELETE operations. Index the columns you actually join and filter on, not every column in the table.</p>
+    <p>Not testing on production-sized data is a common trap. A query joining two tables with 1000 rows each runs fine on a development database. The same query on tables with 10 million rows each may time out. Always test performance on data that approximates production size.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p><strong>Index the join columns</strong>. Every column that appears in an ON clause should have an index, with the possible exception of primary keys (which are usually indexed automatically).</p>
+    <p><strong>Filter early</strong>. Apply WHERE conditions before or during the join to reduce the number of rows being processed.</p>
+    <p><strong>Avoid SELECT </strong>*. Fetch only the columns you need. This is especially important in columnar databases and when tables have large binary or text columns.</p>
+    <p><strong>Avoid functions on join and filter columns</strong>. Rewrite function-based conditions as range conditions to allow index usage.</p>
+    <p><strong>Use EXPLAIN before running a heavy join</strong>. Check the execution plan before running a join on large production tables. One minute of review can save 40 minutes of execution.</p>
+    <p><strong>Be careful with FULL OUTER JOIN and CROSS JOIN on large tables</strong>. Both can produce enormous result sets. Pre-filter aggressively and verify expected row counts before running.</p>
+    <p><strong>Join order matters for readability, and sometimes for performance</strong>. Put more selective (smaller, filtered) tables earlier in the join chain. Some databases respect this hint in their execution planning.</p>
+    <p><strong>Use CTEs or subqueries to pre-filter large tables</strong>. If you only need a subset of rows from a large table, filter it before joining rather than joining the full table and filtering afterward.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Flipkart, a database performance team reviews slow queries from the query log every week. The most common fix they apply is adding an index on a foreign key column that is heavily used in JOIN conditions.</p>
+    <p>At Paytm, transaction reports that used to time out were fixed by pre-filtering the date range before joining with customer and merchant tables. The fix reduced intermediate row counts from 50 million to 200,000.</p>
+    <p>At Swiggy, the daily delivery performance report was rewritten to select only 8 specific columns instead of SELECT * across four tables. This alone reduced query runtime by 60% because several of those tables contained large JSON metadata columns.</p>
+    <p>At Zomato, the data team introduced a "performance review" step for any query that joins more than two tables: run EXPLAIN, verify index usage, check estimated row counts. This practice has prevented several production slowdowns from reaching end users.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Join Performance Checklist:
+
+Before writing the JOIN:
+[ ] Do both join columns have indexes?
+[ ] Can I pre-filter either table before joining?
+[ ] Do I really need all join types used, or can I simplify?
+
+In the SELECT clause:
+[ ] Am I selecting only the columns I need?
+[ ] Is SELECT * anywhere in this query? (Replace with specific columns)
+
+In the ON clause:
+[ ] Are join columns in their raw form? (No functions wrapping them)
+[ ] Are the join column types matching? (No implicit type conversions)
+
+In the WHERE clause:
+[ ] Are filters on non-indexed columns unavoidable?
+[ ] Can I rewrite function-based filters as range conditions?
+
+Before running on large tables:
+[ ] Have I run EXPLAIN to check the plan?
+[ ] Does EXPLAIN show Index Scan or Seq Scan?
+[ ] What is the estimated row count at each step?
+[ ] Is there any CROSS JOIN or FULL OUTER JOIN that could explode the result size?</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Check your understanding before finishing this module:</p>
+    <ul>
+      <li>Why does an index on a join column make the query faster?</li>
+      <li>What is the problem with writing <code>WHERE YEAR(o.order_date) = 2024</code> on an indexed column?</li>
+      <li>What does EXPLAIN tell you about a query?</li>
+      <li>Why is SELECT * particularly harmful in multi-join queries?</li>
+      <li>What is one situation where a FULL OUTER JOIN or CROSS JOIN can cause serious performance problems?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>A query at Swiggy joins <code>orders</code> (10 million rows) and <code>customers</code> (2 million rows) on <code>customer_id</code>. There is no index on <code>orders.customer_id</code>. Estimate roughly how many row comparisons the database makes without the index. What happens after the index is added?</li>
+    </ol>
+    <ol>
+      <li>Rewrite the following query to avoid a function on the join/filter column:</li>
+    </ol>
+    <pre><code class="language-sql">   SELECT c.name, o.amount
+   FROM customers c
+   JOIN orders o ON c.customer_id = o.customer_id
+   WHERE MONTH(o.order_date) = 5 AND YEAR(o.order_date) = 2024;</code></pre>
+    <ol>
+      <li>A colleague's query uses <code>SELECT *</code> across a five-table join. The query returns correct data but takes 15 minutes. What is your first suggestion and why?</li>
+    </ol>
+    <ol>
+      <li>Write the CREATE INDEX statement that would help this query run faster:</li>
+    </ol>
+    <pre><code class="language-sql">   SELECT r.restaurant_name, COUNT(o.order_id)
+   FROM orders o
+   JOIN restaurants r ON o.restaurant_id = r.restaurant_id
+   GROUP BY r.restaurant_id;</code></pre>
+    <ol>
+      <li>Use EXPLAIN (write the syntax) on the following query to check its execution plan:</li>
+    </ol>
+    <pre><code class="language-sql">   SELECT c.name, SUM(o.amount)
+   FROM customers c
+   JOIN orders o ON c.customer_id = o.customer_id
+   WHERE o.status = 'Delivered'
+   GROUP BY c.customer_id;</code></pre>
+    <ol>
+      <li>A new analyst writes a CROSS JOIN between the <code>products</code> table (500,000 rows) and the <code>customers</code> table (1,000,000 rows) without realizing it. How many rows will be returned? What should they do instead?</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>Performance is not a separate topic from correctness. A query that gives the right answer but takes 40 minutes is not a working query in a production environment. The habits covered in this article, indexing join columns, filtering early, selecting specific columns, using EXPLAIN, and avoiding functions on indexed columns, are not advanced techniques. They are the foundation of writing SQL that works in real systems at scale. Once these become instincts, you write efficient queries from the start rather than fixing slow ones after the fact.</p>
+  `,
 
   // ── Module 8 ─────────────────────────────────────────────────
   'mod8-t1': `<h1>What is a Subquery?</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
