@@ -5967,15 +5967,1885 @@ ON CONFLICT (event_id) DO NOTHING;</code></pre>
   `,
 
   // ── Module 6 ─────────────────────────────────────────────────
-  'mod6-t1': `<h1>COUNT()</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod6-t2': `<h1>SUM()</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod6-t3': `<h1>AVG()</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod6-t4': `<h1>MIN() and MAX()</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod6-t5': `<h1>GROUP BY</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod6-t6': `<h1>HAVING</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod6-t7': `<h1>Combining Aggregates</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod6-t8': `<h1>NULL Handling in Aggregates</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod6-t9': `<h1>ROLLUP and CUBE</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod6-t1': `
+    <h1>COUNT(): How to Count Rows in Your Query Results</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Priya had just joined Swiggy as a data analyst intern. On her third day, her manager Rohan walked over and said, "We need to know how many orders came in from Bangalore yesterday, and also how many unique customers placed those orders. Can you pull that by end of day?"</p>
+    <p>Priya opened her laptop, stared at the <code>orders</code> table, and realised she had no idea how to count rows in SQL. She knew the data was there. She just did not know how to ask for it. That is exactly where COUNT() comes in.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>You have a table with thousands of rows. Your manager wants a number. Not the rows themselves, just the count. How many orders? How many customers signed up this month? How many transactions were above 500 rupees?</p>
+    <p>You cannot manually scroll through the table. You need SQL to count for you.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Before aggregate functions existed, you had to fetch all the rows and count them in your application code. That meant pulling potentially millions of records across the network just to count them. COUNT() lets the database do the counting itself and return just a single number. It is faster, simpler, and far more practical.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you have a stack of order receipts on your desk. If someone asks "how many receipts do you have?" you count them all, including blank ones. That is COUNT(*). If they ask "how many receipts have a customer name written on them?" you skip the blank ones. That is COUNT(column_name).</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>Table: orders (5 rows)
++----------+-------------+----------+----------+--------+
+| order_id | customer_id | city     | status   | amount |
++----------+-------------+----------+----------+--------+
+| 1        | 101         | Bangalore| Delivered| 320    |
+| 2        | NULL        | Mumbai   | Cancelled| 150    |
+| 3        | 102         | Bangalore| Delivered| 480    |
+| 4        | 103         | Delhi    | Pending  | 200    |
+| 5        | NULL        | Bangalore| Delivered| 560    |
++----------+-------------+----------+----------+--------+
+
+COUNT(*)         = 5   (counts every row)
+COUNT(customer_id) = 3   (skips the 2 NULL rows)
+COUNT(DISTINCT city) = 3 (Bangalore, Mumbai, Delhi)</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>COUNT() is an aggregate function. It scans the rows you give it and returns a single integer. The key rules are:</p>
+    <ul>
+      <li>COUNT(*) counts every row, including rows where some columns are NULL</li>
+      <li>COUNT(column_name) counts only rows where that column is NOT NULL</li>
+      <li>COUNT(DISTINCT column_name) counts unique non-NULL values in that column</li>
+      <li>COUNT always returns a number, never NULL, even on an empty table (it returns 0)</li>
+    </ul>
+    <p>This distinction between COUNT(*) and COUNT(column) trips up a lot of beginners. They look the same but behave very differently when NULLs are present.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <pre><code class="language-sql">-- Count all orders
+SELECT COUNT(*) AS total_orders
+FROM orders;
+
+-- Count orders where customer_id is not NULL
+SELECT COUNT(customer_id) AS orders_with_customer
+FROM orders;
+
+-- Count unique cities
+SELECT COUNT(DISTINCT city) AS unique_cities
+FROM orders;
+
+-- Count orders from Bangalore only
+SELECT COUNT(*) AS bangalore_orders
+FROM orders
+WHERE city = 'Bangalore';</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td>COUNT(*)</td><td>Counts all rows including NULLs</td><td>COUNT(*) returns 5 for a 5-row table</td></tr>
+      <tr><td>COUNT(column)</td><td>Counts rows where that column is not NULL</td><td>COUNT(customer_id) skips NULL customer rows</td></tr>
+      <tr><td>COUNT(DISTINCT column)</td><td>Counts unique non-NULL values</td><td>COUNT(DISTINCT city) returns 3 for Bangalore, Mumbai, Delhi</td></tr>
+      <tr><td>WHERE clause</td><td>Filters rows before counting</td><td>WHERE city = 'Bangalore' counts only Bangalore rows</td></tr>
+      <tr><td>AS alias</td><td>Gives the result column a readable name</td><td>AS total_orders names the output column</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample Table: orders (Swiggy)</strong></p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>city</th><th>status</th><th>amount</th></tr>
+      <tr><td>1</td><td>101</td><td>Bangalore</td><td>Delivered</td><td>320</td></tr>
+      <tr><td>2</td><td>NULL</td><td>Mumbai</td><td>Cancelled</td><td>150</td></tr>
+      <tr><td>3</td><td>102</td><td>Bangalore</td><td>Delivered</td><td>480</td></tr>
+      <tr><td>4</td><td>103</td><td>Delhi</td><td>Pending</td><td>200</td></tr>
+      <tr><td>5</td><td>NULL</td><td>Bangalore</td><td>Delivered</td><td>560</td></tr>
+      <tr><td>6</td><td>104</td><td>Mumbai</td><td>Delivered</td><td>310</td></tr>
+      <tr><td>7</td><td>105</td><td>Delhi</td><td>Delivered</td><td>420</td></tr>
+      <tr><td>8</td><td>101</td><td>Bangalore</td><td>Cancelled</td><td>180</td></tr>
+    </table>
+    <h3>Example 1: How many total orders are there?</h3>
+    <p>Business question: Rohan wants the total order count in the system.</p>
+    <pre><code class="language-sql">SELECT COUNT(*) AS total_orders
+FROM orders;</code></pre>
+    <p>Output: <code>total_orders = 8</code>. Every row is counted including the two rows where customer_id is NULL.</p>
+    <h3>Example 2: How many orders have a known customer?</h3>
+    <p>Business question: How many orders are actually linked to a customer account?</p>
+    <pre><code class="language-sql">SELECT COUNT(customer_id) AS orders_with_customer
+FROM orders;</code></pre>
+    <p>Output: <code>orders_with_customer = 6</code>. The two rows where customer_id is NULL are skipped.</p>
+    <h3>Example 3: How many unique cities do we have orders from?</h3>
+    <p>Business question: In how many cities is Swiggy currently receiving orders?</p>
+    <pre><code class="language-sql">SELECT COUNT(DISTINCT city) AS cities_active
+FROM orders;</code></pre>
+    <p>Output: <code>cities_active = 3</code>. Even though Bangalore appears four times, it is counted once.</p>
+    <h3>Example 4: How many delivered orders came from Bangalore?</h3>
+    <p>Business question: Rohan's original question from the story.</p>
+    <pre><code class="language-sql">SELECT COUNT(*) AS delivered_bangalore
+FROM orders
+WHERE city = 'Bangalore' AND status = 'Delivered';</code></pre>
+    <p>Output: <code>delivered_bangalore = 3</code>. Only rows matching both conditions are counted.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>The biggest confusion is COUNT(<em>) vs COUNT(column). People assume they are the same. They are not. If your column has NULLs, COUNT(column) gives you a smaller number than COUNT(</em>), and both answers are technically correct for different questions.</p>
+    <p>Another issue: people expect COUNT to return NULL on an empty result set. It never does. Even if no rows match your WHERE clause, COUNT returns 0.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <ul>
+      <li>Writing COUNT(order_id, customer_id) thinking it will count combinations. It does not. COUNT takes only one argument or *.</li>
+      <li>Using COUNT on the wrong column when NULL matters. If you want total rows, use COUNT(*). If you want to check completeness of a column, use COUNT(column).</li>
+      <li>Forgetting DISTINCT when your question involves unique values. COUNT(city) and COUNT(DISTINCT city) are very different.</li>
+      <li>Selecting other columns alongside COUNT without GROUP BY. That will either throw an error or give wrong results depending on your database.</li>
+    </ul>
+    <hr>
+    <h2>Best Practices</h2>
+    <ul>
+      <li>Always use COUNT(*) when you want total rows in a table or result set</li>
+      <li>Use COUNT(column) specifically when you want to know how complete a column is</li>
+      <li>Use aliases like AS total_orders so your output column has a meaningful name</li>
+      <li>Combine COUNT with WHERE to focus on a specific subset before counting</li>
+      <li>When in doubt, run COUNT(*) and COUNT(your_column) side by side to spot NULL gaps</li>
+    </ul>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Swiggy, the ops team uses COUNT to track daily order volume per city. At Flipkart, the business team counts how many products are live in each category. At Paytm, the fraud team counts how many transactions came from unverified accounts (where customer_id is NULL). At IRCTC, the platform team counts how many booking attempts were made versus how many were confirmed. These are not fancy queries. They are basic COUNT queries running behind every dashboard you see.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Your Table (many rows)
+        |
+        v
+   COUNT(*)         --&gt; Counts every row
+   COUNT(col)       --&gt; Counts non-NULL values only
+   COUNT(DISTINCT)  --&gt; Counts unique non-NULL values
+        |
+        v
+   Single Number Returned</code></pre>
+    <p>COUNT collapses many rows into one number. That is the core idea of all aggregate functions.</p>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these:</p>
+    <ul>
+      <li>What is the difference between COUNT(*) and COUNT(column)?</li>
+      <li>What does COUNT return if the table is empty?</li>
+      <li>How do you count only unique values?</li>
+      <li>Can COUNT be used without WHERE? What does it return then?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query to count the total number of orders in the <code>orders</code> table at Swiggy.</li>
+    </ol>
+    <ol>
+      <li>Write a query to count how many orders have a non-NULL customer_id.</li>
+    </ol>
+    <ol>
+      <li>How many unique cities appear in the <code>orders</code> table? Write the query.</li>
+    </ol>
+    <ol>
+      <li>Count the number of cancelled orders using a WHERE clause.</li>
+    </ol>
+    <ol>
+      <li>Write a query that shows the count of delivered orders and the count of cancelled orders side by side in the same result row. (Hint: use COUNT with CASE or two subqueries.)</li>
+    </ol>
+    <ol>
+      <li>If a table has 100 rows and the <code>amount</code> column is NULL in 15 of them, what will COUNT(*) return? What will COUNT(amount) return?</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>COUNT() is probably the first aggregate function you will use on the job, and you will use it every single day. The difference between COUNT(*) and COUNT(column) seems small but it reflects a fundamental understanding of how NULLs work in SQL. Get that right early and everything else becomes easier.</p>
+  `,
+  'mod6-t2': `
+    <h1>SUM(): Adding Up Values Across Rows</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Arjun had been working at Flipkart for two months as a junior analyst when his manager Kavitha dropped a message on Slack: "I need this week's total sales revenue from electronics, broken down by city. EOD please."</p>
+    <p>Arjun knew all the individual sale records were sitting in the <code>sales</code> table. But there were over 40,000 rows. Adding them up manually was not an option. He needed SQL to do the addition for him. That is exactly what SUM() is built for.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>You have a table full of individual transaction amounts, salaries, or prices. Someone asks for the total. Not the individual rows, just the grand total or the total per group. You need a way to tell SQL: "add up all the values in this column."</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>In the early days of databases, to get a total you would pull all the rows into your application, loop through them, and add them up yourself. That was slow and error-prone, especially with millions of rows. SUM() moves this addition directly into the database engine, which is optimised for exactly this kind of operation. You get one number back instead of millions of rows.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you are a cashier at a store and you have a stack of bills from the day's sales. SUM() is like feeding all those bills into a counting machine. It does not matter what order they go in. At the end you get one total.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>Table: sales (partial)
++---------+-----------+-------------+----------+--------+
+| sale_id | product   | category    | city     | amount |
++---------+-----------+-------------+----------+--------+
+| 1       | Phone     | Electronics | Mumbai   | 15000  |
+| 2       | Laptop    | Electronics | Delhi    | 45000  |
+| 3       | TV        | Electronics | Mumbai   | 32000  |
+| 4       | Shirt     | Clothing    | Delhi    | 800    |
+| 5       | Headphones| Electronics | Mumbai   | 2500   |
++---------+-----------+-------------+----------+--------+
+
+SUM(amount)                   = 95300  (all rows)
+SUM(amount) WHERE city='Mumbai' = 49500 (Mumbai only)
+SUM grouped by city:
+  Mumbai = 49500
+  Delhi  = 45800</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>SUM() adds up all the values in a specified numeric column. Key rules:</p>
+    <ul>
+      <li>SUM works only on numeric columns. Using it on a text column throws an error.</li>
+      <li>SUM automatically ignores NULL values. If a row has NULL in the amount column, it is skipped silently.</li>
+      <li>If all values are NULL, SUM returns NULL (not zero). This is different from COUNT.</li>
+      <li>SUM combined with GROUP BY gives you per-group totals.</li>
+    </ul>
+    <p>The NULL behaviour is important. It means your totals might not include all rows. If data is missing, your sum will be lower than the true total.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <pre><code class="language-sql">-- Total revenue across all sales
+SELECT SUM(amount) AS total_revenue
+FROM sales;
+
+-- Total revenue for Electronics only
+SELECT SUM(amount) AS electronics_revenue
+FROM sales
+WHERE category = 'Electronics';
+
+-- Total revenue per city
+SELECT city, SUM(amount) AS city_revenue
+FROM sales
+GROUP BY city;
+
+-- Total revenue per category per city, sorted highest first
+SELECT city, category, SUM(amount) AS revenue
+FROM sales
+GROUP BY city, category
+ORDER BY revenue DESC;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td>SUM(column)</td><td>Adds all non-NULL values in the column</td><td>SUM(amount) adds up all sale amounts</td></tr>
+      <tr><td>WHERE clause</td><td>Filters rows before SUM runs</td><td>WHERE category = 'Electronics' limits rows first</td></tr>
+      <tr><td>GROUP BY column</td><td>Splits rows into groups; SUM runs per group</td><td>GROUP BY city gives one total per city</td></tr>
+      <tr><td>ORDER BY</td><td>Sorts the output</td><td>ORDER BY revenue DESC shows highest city first</td></tr>
+      <tr><td>AS alias</td><td>Names the output column</td><td>AS total_revenue makes the result readable</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample Table: sales (Flipkart)</strong></p>
+    <table>
+      <tr><th>sale_id</th><th>product</th><th>category</th><th>city</th><th>amount</th><th>sale_date</th></tr>
+      <tr><td>1</td><td>Phone</td><td>Electronics</td><td>Mumbai</td><td>15000</td><td>2024-01-05</td></tr>
+      <tr><td>2</td><td>Laptop</td><td>Electronics</td><td>Delhi</td><td>45000</td><td>2024-01-06</td></tr>
+      <tr><td>3</td><td>TV</td><td>Electronics</td><td>Mumbai</td><td>32000</td><td>2024-01-06</td></tr>
+      <tr><td>4</td><td>Shirt</td><td>Clothing</td><td>Delhi</td><td>800</td><td>2024-01-07</td></tr>
+      <tr><td>5</td><td>Headphones</td><td>Electronics</td><td>Mumbai</td><td>2500</td><td>2024-01-07</td></tr>
+      <tr><td>6</td><td>Jeans</td><td>Clothing</td><td>Bangalore</td><td>1200</td><td>2024-01-08</td></tr>
+      <tr><td>7</td><td>Tablet</td><td>Electronics</td><td>Delhi</td><td>18000</td><td>2024-01-08</td></tr>
+      <tr><td>8</td><td>Shoes</td><td>Clothing</td><td>Mumbai</td><td>3500</td><td>2024-01-09</td></tr>
+    </table>
+    <h3>Example 1: What is Flipkart's total revenue across all sales?</h3>
+    <p>Business question: Kavitha wants the overall revenue number for the week.</p>
+    <pre><code class="language-sql">SELECT SUM(amount) AS total_revenue
+FROM sales;</code></pre>
+    <p>Output: <code>total_revenue = 118000</code>. Every row's amount is added together.</p>
+    <h3>Example 2: What is the total revenue from Electronics only?</h3>
+    <p>Business question: How much did the Electronics category bring in?</p>
+    <pre><code class="language-sql">SELECT SUM(amount) AS electronics_revenue
+FROM sales
+WHERE category = 'Electronics';</code></pre>
+    <p>Output: <code>electronics_revenue = 112500</code>. The WHERE clause filters out Clothing rows before SUM runs.</p>
+    <h3>Example 3: What is the total revenue per city?</h3>
+    <p>Business question: Which city is generating the most revenue for Flipkart?</p>
+    <pre><code class="language-sql">SELECT city, SUM(amount) AS city_revenue
+FROM sales
+GROUP BY city
+ORDER BY city_revenue DESC;</code></pre>
+    <p>Output:</p>
+    <ul>
+      <li>Mumbai: 53000</li>
+      <li>Delhi: 63800</li>
+      <li>Bangalore: 1200</li>
+    </ul>
+    <h3>Example 4: What is the total revenue per category, per city?</h3>
+    <p>Business question: Give me a breakdown of revenue by both category and city.</p>
+    <pre><code class="language-sql">SELECT city, category, SUM(amount) AS revenue
+FROM sales
+GROUP BY city, category
+ORDER BY city, revenue DESC;</code></pre>
+    <p>Output shows each city-category combination with its total. For example, Mumbai-Electronics: 49500, Mumbai-Clothing: 3500, and so on.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>SUM silently ignores NULLs. This is convenient, but it can mislead you. If 20% of your amount column is NULL because data was not captured properly, your SUM will be lower than actual revenue. You will not get a warning. The number just comes back quietly wrong.</p>
+    <p>Another trap: using SUM on a text column. If your <code>amount</code> column is stored as VARCHAR instead of a number, SUM will either throw an error or return 0 depending on the database. Always verify your column types before aggregating.</p>
+    <p>Also note: if every value in the column is NULL, SUM returns NULL, not 0. This surprises people who expect zero.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <ul>
+      <li>Using SUM on a non-numeric column. Always check the column data type first.</li>
+      <li>Not using GROUP BY when you want per-group sums. Without GROUP BY, SUM collapses everything into one row.</li>
+      <li>Selecting extra columns alongside SUM without including them in GROUP BY. This will throw an error in most databases.</li>
+      <li>Assuming SUM returns 0 when all values are NULL. It returns NULL.</li>
+      <li>Writing SUM(amount, tax) thinking it will add both columns. SUM takes one argument. Use SUM(amount) + SUM(tax) instead.</li>
+    </ul>
+    <hr>
+    <h2>Best Practices</h2>
+    <ul>
+      <li>Always alias your SUM column with a meaningful name using AS</li>
+      <li>Pair SUM with GROUP BY when you need per-group totals rather than one grand total</li>
+      <li>Use COALESCE(column, 0) inside SUM if you want NULLs treated as zero: SUM(COALESCE(amount, 0))</li>
+      <li>Round the result if needed: ROUND(SUM(amount), 2)</li>
+      <li>Verify data types before writing a SUM query on a new table</li>
+    </ul>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Flipkart, the finance team runs SUM queries every night to calculate daily gross merchandise value per category. At Zomato, the restaurant partnerships team sums order revenue per restaurant to calculate payout amounts. At PhonePe, the payments team sums transaction amounts per user to check daily limits. At Ola, the driver ops team sums earnings per driver per week for payout processing. SUM is at the core of almost every financial report in any company running on a relational database.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Table rows:
+  amount: 15000
+  amount: 45000
+  amount: 32000
+  amount: NULL   &lt;-- ignored silently
+  amount: 2500
+         |
+         v
+    SUM(amount)
+         |
+         v
+      94500  (single number returned)
+
+
+With GROUP BY city:
+  Mumbai rows  --&gt; SUM --&gt; Mumbai total
+  Delhi rows   --&gt; SUM --&gt; Delhi total
+  Bangalore rows -&gt; SUM --&gt; Bangalore total</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these:</p>
+    <ul>
+      <li>What happens when SUM encounters a NULL value?</li>
+      <li>What does SUM return if all values in the column are NULL?</li>
+      <li>How do you get totals per group instead of one grand total?</li>
+      <li>What error will you get if you use SUM on a text column?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query to find the total sales amount across the entire <code>sales</code> table.</li>
+    </ol>
+    <ol>
+      <li>Write a query to find the total revenue from the Clothing category only.</li>
+    </ol>
+    <ol>
+      <li>Write a query to get the total revenue per category, sorted from highest to lowest.</li>
+    </ol>
+    <ol>
+      <li>Write a query to get the total revenue per city for the Electronics category only.</li>
+    </ol>
+    <ol>
+      <li>If the <code>amount</code> column has NULL in 3 rows out of 8, what does SUM(amount) return? What does SUM(COALESCE(amount, 0)) return?</li>
+    </ol>
+    <ol>
+      <li>Write a query that shows each city's total revenue alongside the total number of sales in that city (combine SUM and COUNT in one query).</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>SUM() is the workhorse of financial reporting. Every revenue dashboard, every payout report, every sales summary you have ever seen in a product at a company like Flipkart or Paytm is built on top of SUM queries running in the background. Learn it well, and you will be writing those reports yourself.</p>
+  `,
+  'mod6-t3': `
+    <h1>AVG(): Finding the Average Value in a Column</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Neha had been at Zomato for six weeks when her manager Suresh called a quick standup and said, "Our product team wants to know the average delivery time per city, and the average rating per cuisine type. Can you pull that today?"</p>
+    <p>Neha had used SUM and COUNT before, but average was new. She knew the formula: add everything up, divide by the count. But doing that manually for every city would take forever. Then she discovered AVG(), and the query was done in three lines.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>You have a column full of numbers. Customer ratings. Delivery times. Product prices. Someone asks: "What is the average?" You need a single representative number for the whole column or for each group within it.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Averages are one of the most common summaries in business. Instead of requiring you to write SUM(column) / COUNT(column) every single time and handle edge cases manually, AVG() does it in one clean function call. The database handles the division, the NULL skipping, and the grouping, all internally.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine a teacher grading 30 students. She adds all the marks and divides by 30. That is the class average. AVG() is the database doing the same arithmetic across every row in your result set or group.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>Column: delivery_time_mins
+Values: 25, 40, 30, NULL, 35, 20
+
+AVG calculation:
+  Sum of non-NULL values = 25 + 40 + 30 + 35 + 20 = 150
+  Count of non-NULL values = 5  (NULL is skipped)
+  AVG = 150 / 5 = 30
+
+If NULL were treated as 0:
+  Sum = 150, Count = 6, AVG = 25  &lt;-- different and misleading</code></pre>
+    <p>This is the most important thing about AVG: it skips NULLs in both the numerator AND denominator.</p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>AVG(column) adds up all the non-NULL values in the column and divides by the count of non-NULL rows. The key behaviours:</p>
+    <ul>
+      <li>NULL values are ignored completely. They are not counted in the denominator either.</li>
+      <li>This can skew your average if NULLs represent missing data rather than a true absence of value.</li>
+      <li>AVG works only on numeric columns.</li>
+      <li>AVG with GROUP BY gives you per-group averages.</li>
+      <li>ROUND(AVG(column), 2) is a common pattern to limit decimal places.</li>
+    </ul>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <pre><code class="language-sql">-- Average delivery time across all restaurants
+SELECT AVG(delivery_time_mins) AS avg_delivery
+FROM restaurants;
+
+-- Average rounded to 2 decimal places
+SELECT ROUND(AVG(delivery_time_mins), 2) AS avg_delivery
+FROM restaurants;
+
+-- Average delivery time per city
+SELECT city, ROUND(AVG(delivery_time_mins), 2) AS avg_delivery
+FROM restaurants
+GROUP BY city;
+
+-- Average price for two per cuisine type
+SELECT cuisine, ROUND(AVG(price_for_two), 2) AS avg_price
+FROM restaurants
+GROUP BY cuisine
+ORDER BY avg_price DESC;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td>AVG(column)</td><td>Calculates mean of non-NULL values</td><td>AVG(delivery_time_mins) returns average delivery time</td></tr>
+      <tr><td>ROUND(AVG(...), 2)</td><td>Rounds the result to 2 decimal places</td><td>ROUND(AVG(avg_rating), 2) gives 4.23 instead of 4.2333...</td></tr>
+      <tr><td>GROUP BY column</td><td>Calculates AVG separately per group</td><td>GROUP BY city gives average per city</td></tr>
+      <tr><td>ORDER BY</td><td>Sorts results</td><td>ORDER BY avg_price DESC shows highest average first</td></tr>
+      <tr><td>WHERE clause</td><td>Filters rows before AVG runs</td><td>WHERE city = 'Mumbai' averages only Mumbai rows</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample Table: restaurants (Zomato)</strong></p>
+    <table>
+      <tr><th>restaurant_id</th><th>name</th><th>city</th><th>cuisine</th><th>avg_rating</th><th>delivery_time_mins</th><th>price_for_two</th></tr>
+      <tr><td>1</td><td>Spice Garden</td><td>Mumbai</td><td>North Indian</td><td>4.2</td><td>35</td><td>600</td></tr>
+      <tr><td>2</td><td>Pizza Hub</td><td>Delhi</td><td>Italian</td><td>4.5</td><td>25</td><td>800</td></tr>
+      <tr><td>3</td><td>Dosa Corner</td><td>Bangalore</td><td>South Indian</td><td>4.1</td><td>20</td><td>350</td></tr>
+      <tr><td>4</td><td>Burger Barn</td><td>Mumbai</td><td>Fast Food</td><td>3.8</td><td>30</td><td>450</td></tr>
+      <tr><td>5</td><td>Biryani Palace</td><td>Delhi</td><td>North Indian</td><td>4.7</td><td>40</td><td>700</td></tr>
+      <tr><td>6</td><td>Sushi Stop</td><td>Bangalore</td><td>Japanese</td><td>NULL</td><td>45</td><td>1200</td></tr>
+      <tr><td>7</td><td>Noodle House</td><td>Mumbai</td><td>Chinese</td><td>4.0</td><td>35</td><td>550</td></tr>
+      <tr><td>8</td><td>Idli World</td><td>Bangalore</td><td>South Indian</td><td>4.3</td><td>15</td><td>300</td></tr>
+    </table>
+    <h3>Example 1: What is the overall average rating of all restaurants on Zomato?</h3>
+    <p>Business question: Suresh wants a platform-wide average rating.</p>
+    <pre><code class="language-sql">SELECT ROUND(AVG(avg_rating), 2) AS platform_avg_rating
+FROM restaurants;</code></pre>
+    <p>Output: <code>platform_avg_rating = 4.23</code>. Note: Sushi Stop has a NULL rating and is skipped. The average is calculated over 7 restaurants, not 8.</p>
+    <h3>Example 2: What is the average delivery time per city?</h3>
+    <p>Business question: Which city has the fastest average delivery?</p>
+    <pre><code class="language-sql">SELECT city, ROUND(AVG(delivery_time_mins), 2) AS avg_delivery_time
+FROM restaurants
+GROUP BY city
+ORDER BY avg_delivery_time ASC;</code></pre>
+    <p>Output:</p>
+    <ul>
+      <li>Bangalore: 26.67 minutes (average of 20, 45, 15)</li>
+      <li>Mumbai: 33.33 minutes</li>
+      <li>Delhi: 32.50 minutes</li>
+    </ul>
+    <h3>Example 3: What is the average price for two per cuisine type?</h3>
+    <p>Business question: Which cuisines are the most expensive on average?</p>
+    <pre><code class="language-sql">SELECT cuisine, ROUND(AVG(price_for_two), 2) AS avg_price
+FROM restaurants
+GROUP BY cuisine
+ORDER BY avg_price DESC;</code></pre>
+    <p>Output shows Japanese at the top (1200), then North Indian (650), Italian (800), and so on.</p>
+    <h3>Example 4: How does AVG differ from manually doing SUM divided by COUNT?</h3>
+    <p>Business question: Verify the AVG result for Mumbai manually.</p>
+    <pre><code class="language-sql">-- Using AVG
+SELECT ROUND(AVG(delivery_time_mins), 2) AS avg_method
+FROM restaurants
+WHERE city = 'Mumbai';
+
+-- Manual calculation
+SELECT ROUND(SUM(delivery_time_mins) * 1.0 / COUNT(delivery_time_mins), 2) AS manual_method
+FROM restaurants
+WHERE city = 'Mumbai';</code></pre>
+    <p>Both return 33.33. They produce the same result. AVG() is just cleaner syntax for the same operation. The important thing is that both skip NULLs in the same way.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>The NULL behaviour in AVG is genuinely dangerous in real data. Here is a concrete example: suppose 10 restaurants are listed in Bangalore but 3 have no rating yet (NULL). AVG(avg_rating) divides by 7, not 10. Your average looks better than it is because you are effectively ignoring the unrated restaurants. In a real product, those unrated places might have bad service. Your average is misleading.</p>
+    <p>This is why it matters to understand what NULLs represent in your data before averaging.</p>
+    <p>Another trap: comparing AVG values across groups of different sizes. The average delivery time in a city with 2 restaurants is not as reliable as the average in a city with 200.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <ul>
+      <li>Forgetting that AVG skips NULLs, leading to optimistic averages in incomplete data</li>
+      <li>Using AVG on a text column (throws an error)</li>
+      <li>Not using ROUND(), ending up with output like 32.666666666 instead of 32.67</li>
+      <li>Selecting extra columns without GROUP BY when using AVG per group</li>
+      <li>Confusing AVG with the median. AVG is the arithmetic mean. Outliers can pull it far from the typical value.</li>
+    </ul>
+    <hr>
+    <h2>Best Practices</h2>
+    <ul>
+      <li>Always use ROUND(AVG(...), 2) or your preferred decimal places for clean output</li>
+      <li>Check how many NULLs exist in your column before trusting your average</li>
+      <li>Use COUNT(*) alongside AVG to understand how many rows contributed to the average</li>
+      <li>When NULLs represent missing data that should count as zero, use AVG(COALESCE(column, 0))</li>
+      <li>For skewed data with outliers, consider whether median (using window functions) is more appropriate than AVG</li>
+    </ul>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Zomato, product managers track average delivery time per city to monitor service quality. At Byju's, the learning team monitors average time students spend per lesson module. At BookMyShow, the events team tracks average ticket price per event category. At Amazon India, the seller team monitors average seller rating per product category. At Ola, the operations team tracks average trip duration per city to plan driver supply. Every team with numeric data and a performance target is using AVG constantly.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Column: avg_rating
+  4.2, 4.5, 4.1, NULL, 4.7, 4.0, 4.3
+                  |
+          NULL skipped by AVG
+                  |
+  Values used: 4.2 + 4.5 + 4.1 + 4.7 + 4.0 + 4.3 = 25.8
+  Count used: 6 (not 7)
+                  |
+            AVG = 25.8 / 6 = 4.30
+
+
+With GROUP BY city:
+  Mumbai restaurants  --&gt; AVG --&gt; Mumbai avg
+  Delhi restaurants   --&gt; AVG --&gt; Delhi avg
+  Bangalore restaurants --&gt; AVG --&gt; Bangalore avg</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these:</p>
+    <ul>
+      <li>How does AVG handle NULL values?</li>
+      <li>Why can AVG give you a misleading result when your data has lots of NULLs?</li>
+      <li>How do you get a rounded average in SQL?</li>
+      <li>What is the difference between AVG(column) and SUM(column) / COUNT(*)?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query to find the average delivery time for all restaurants in the <code>restaurants</code> table.</li>
+    </ol>
+    <ol>
+      <li>Write a query to find the average price for two, rounded to 2 decimal places, for each cuisine type.</li>
+    </ol>
+    <ol>
+      <li>Write a query to find the average rating per city, only for cities where the average rating is above 4.0. (Hint: use HAVING, which you will learn next.)</li>
+    </ol>
+    <ol>
+      <li>If a column has values 10, 20, NULL, 30, what does AVG return? What does AVG(COALESCE(column, 0)) return?</li>
+    </ol>
+    <ol>
+      <li>Write a query that shows each city's average delivery time alongside the number of restaurants in that city. Which city has the most restaurants? Does it also have the best average delivery time?</li>
+    </ol>
+    <ol>
+      <li>What is the difference between AVG(avg_rating) and SUM(avg_rating) / COUNT(*)? When would they give different results?</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>AVG is simple to write but requires careful thinking about your data. The NULL behaviour alone can silently corrupt your analysis if you are not paying attention. Once you understand that, you will write better queries and catch issues that less careful analysts miss.</p>
+  `,
+  'mod6-t4': `
+    <h1>MIN() and MAX(): Finding the Smallest and Largest Values</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Rahul had been working as a data analyst at Flipkart for three months. One afternoon his manager Deepa sent a message: "Can you find the cheapest and most expensive product in each category? And also tell me which category launched its first product the earliest?"</p>
+    <p>Rahul looked at the <code>products</code> table. The data was there. He just needed SQL to scan the column and pick out the extremes. That is exactly what MIN() and MAX() do.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>You have a column of numbers, dates, or text, and you need to find the extreme values. The lowest price. The highest rating. The earliest order date. The latest joining date. You do not want all the rows. You want just the outliers at each end.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Finding a minimum or maximum manually would mean sorting the entire column and picking the top or bottom row. For large tables, that is expensive without the right index. MIN() and MAX() are built-in functions that the database can often resolve with a single index scan, making them fast even on very large tables.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine a row of price tags in a store. MIN() is the person who scans all of them and tells you the lowest price. MAX() is the same person telling you the highest. They do not care about the middle. They only care about the extremes.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>Table: products (price column)
+  499, 1299, 25000, 799, NULL, 55000, 349
+
+MIN(price) = 349    (lowest non-NULL value)
+MAX(price) = 55000  (highest non-NULL value)
+NULL is ignored in both cases
+
+For text (alphabetical):
+  brands: 'Apple', 'Boat', 'Zebronics', 'Mi'
+  MIN(brand) = 'Apple'    (first alphabetically)
+  MAX(brand) = 'Zebronics' (last alphabetically)
+
+For dates (chronological):
+  dates: 2023-01-15, 2022-06-01, 2024-03-10
+  MIN(launch_date) = 2022-06-01  (earliest)
+  MAX(launch_date) = 2024-03-10  (latest)</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>MIN() returns the smallest value in the specified column. MAX() returns the largest. Key rules:</p>
+    <ul>
+      <li>Both work on numbers, dates, and text columns</li>
+      <li>For text, comparison is alphabetical (based on character encoding)</li>
+      <li>For dates, MIN returns the earliest date, MAX returns the latest</li>
+      <li>Both functions ignore NULL values silently</li>
+      <li>You can use both in the same SELECT statement</li>
+      <li>Combine with GROUP BY to get per-group min and max</li>
+    </ul>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <pre><code class="language-sql">-- Overall cheapest and most expensive product
+SELECT MIN(price) AS cheapest, MAX(price) AS costliest
+FROM products;
+
+-- Earliest and latest product launch
+SELECT MIN(launch_date) AS first_launch, MAX(launch_date) AS latest_launch
+FROM products;
+
+-- Cheapest and costliest product per category
+SELECT category, MIN(price) AS min_price, MAX(price) AS max_price
+FROM products
+GROUP BY category;
+
+-- Category with the widest price range
+SELECT category, MIN(price) AS min_price, MAX(price) AS max_price,
+       (MAX(price) - MIN(price)) AS price_range
+FROM products
+GROUP BY category
+ORDER BY price_range DESC;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td>MIN(column)</td><td>Returns the lowest non-NULL value</td><td>MIN(price) returns 349 from a list of prices</td></tr>
+      <tr><td>MAX(column)</td><td>Returns the highest non-NULL value</td><td>MAX(price) returns 55000 from the same list</td></tr>
+      <tr><td>GROUP BY</td><td>Applies MIN/MAX per group</td><td>GROUP BY category gives min/max per category</td></tr>
+      <tr><td>MAX - MIN</td><td>Calculates the range</td><td>MAX(price) - MIN(price) gives price spread</td></tr>
+      <tr><td>MIN(date)</td><td>Returns the earliest date</td><td>MIN(launch_date) returns the first launch date</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample Table: products (Flipkart)</strong></p>
+    <table>
+      <tr><th>product_id</th><th>name</th><th>category</th><th>price</th><th>stock</th><th>launch_date</th></tr>
+      <tr><td>1</td><td>iPhone 15</td><td>Electronics</td><td>79000</td><td>50</td><td>2023-09-15</td></tr>
+      <tr><td>2</td><td>Budget Phone X1</td><td>Electronics</td><td>8999</td><td>200</td><td>2022-03-10</td></tr>
+      <tr><td>3</td><td>OLED TV 55"</td><td>Electronics</td><td>55000</td><td>30</td><td>2023-01-20</td></tr>
+      <tr><td>4</td><td>Formal Shirt</td><td>Clothing</td><td>799</td><td>500</td><td>2021-06-01</td></tr>
+      <tr><td>5</td><td>Running Shoes</td><td>Footwear</td><td>2499</td><td>150</td><td>2022-11-05</td></tr>
+      <tr><td>6</td><td>Leather Jacket</td><td>Clothing</td><td>4999</td><td>80</td><td>2023-07-15</td></tr>
+      <tr><td>7</td><td>Wireless Earbuds</td><td>Electronics</td><td>1299</td><td>300</td><td>2021-09-01</td></tr>
+      <tr><td>8</td><td>Sports Shoes</td><td>Footwear</td><td>NULL</td><td>100</td><td>2024-01-10</td></tr>
+    </table>
+    <h3>Example 1: What is the cheapest and most expensive product across all categories?</h3>
+    <p>Business question: Deepa wants the overall price extremes on the platform.</p>
+    <pre><code class="language-sql">SELECT MIN(price) AS cheapest_product, MAX(price) AS costliest_product
+FROM products;</code></pre>
+    <p>Output: <code>cheapest_product = 799</code>, <code>costliest_product = 79000</code>. The NULL price in row 8 is skipped by both functions.</p>
+    <h3>Example 2: What is the price range per category?</h3>
+    <p>Business question: Which categories have the widest price spread?</p>
+    <pre><code class="language-sql">SELECT category,
+       MIN(price) AS min_price,
+       MAX(price) AS max_price,
+       (MAX(price) - MIN(price)) AS price_range
+FROM products
+GROUP BY category
+ORDER BY price_range DESC;</code></pre>
+    <p>Output:</p>
+    <ul>
+      <li>Electronics: min 1299, max 79000, range 77701</li>
+      <li>Clothing: min 799, max 4999, range 4200</li>
+      <li>Footwear: min 2499, max NULL (skipped), range NULL</li>
+    </ul>
+    <h3>Example 3: Which category launched its first product earliest?</h3>
+    <p>Business question: When did Flipkart first list a product in each category?</p>
+    <pre><code class="language-sql">SELECT category, MIN(launch_date) AS first_listed
+FROM products
+GROUP BY category
+ORDER BY first_listed ASC;</code></pre>
+    <p>Output:</p>
+    <ul>
+      <li>Clothing: 2021-06-01</li>
+      <li>Electronics: 2021-09-01</li>
+      <li>Footwear: 2022-11-05</li>
+    </ul>
+    <h3>Example 4: Find the min and max stock levels across all products</h3>
+    <p>Business question: Are there any products critically low on stock?</p>
+    <pre><code class="language-sql">SELECT MIN(stock) AS lowest_stock, MAX(stock) AS highest_stock
+FROM products;</code></pre>
+    <p>Output: <code>lowest_stock = 30</code>, <code>highest_stock = 500</code>. The product with 30 units (OLED TV) is worth monitoring.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>MIN and MAX on text columns behave alphabetically, not by string length or any natural sort you might expect. 'Zebronics' would come after 'Apple' because Z comes after A. This is useful when you want alphabetical boundaries but can be confusing if you expected something else.</p>
+    <p>NULL handling: like all aggregate functions, MIN and MAX silently ignore NULLs. In Example 2 above, the Footwear category shows NULL for max_price because one of the two footwear rows has a NULL price. If you want NULL treated as zero or some other value, use COALESCE inside the function: MIN(COALESCE(price, 0)).</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <ul>
+      <li>Using MIN or MAX on a column and being surprised when NULLs distort the result</li>
+      <li>Forgetting that MIN/MAX on text is alphabetical, not length-based</li>
+      <li>Expecting MIN(date) to return the most recent date. MIN on dates returns the earliest (oldest) date.</li>
+      <li>Using MIN and MAX without GROUP BY when you actually want per-category extremes</li>
+      <li>Confusing MIN(price) with the row that has the minimum price. MIN returns just the value, not the entire row. To get the full row for the cheapest product, you need a subquery or window function.</li>
+    </ul>
+    <hr>
+    <h2>Best Practices</h2>
+    <ul>
+      <li>Use both MIN and MAX in the same query when you need the full range</li>
+      <li>Combine with MAX(col) - MIN(col) to calculate the spread or range</li>
+      <li>When working with dates, remember MIN = earliest, MAX = latest</li>
+      <li>Use COALESCE to handle NULLs before applying MIN or MAX if NULLs should not be ignored</li>
+      <li>To find the actual row (not just the value) with the min or max, use ORDER BY with LIMIT 1 or a subquery</li>
+    </ul>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Flipkart, the pricing team uses MIN and MAX to monitor price floors and ceilings per category. At BookMyShow, the events team uses MIN(event_date) to find the next upcoming show and MAX(event_date) for the furthest scheduled event. At IRCTC, the ticketing team uses MIN(available_seats) to flag trains at risk of filling up. At Amazon India, the logistics team uses MIN(delivery_time_days) and MAX(delivery_time_days) to report delivery windows per pin code. At Ola, the pricing team uses MAX(surge_multiplier) to audit peak pricing events.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Column scan for MIN:              Column scan for MAX:
+  79000                             79000  &lt;-- found
+  8999                              8999
+  55000                             55000
+  799  &lt;-- found                    799
+  NULL (skipped)                    NULL (skipped)
+  1299                              1299
+         |                                 |
+    MIN = 799                        MAX = 79000
+
+
+With GROUP BY category:
+  Electronics rows --&gt; MIN --&gt; 1299    MAX --&gt; 79000
+  Clothing rows    --&gt; MIN --&gt; 799     MAX --&gt; 4999
+  Footwear rows    --&gt; MIN --&gt; 2499    MAX --&gt; NULL (one was NULL)</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these:</p>
+    <ul>
+      <li>What does MIN return on a date column?</li>
+      <li>How does MAX handle text columns?</li>
+      <li>What happens when all values in a column are NULL for a group?</li>
+      <li>How is MIN(price) different from finding the row with the lowest price?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query to find the cheapest product price and the most expensive product price in the <code>products</code> table.</li>
+    </ol>
+    <ol>
+      <li>Write a query to find the earliest and latest <code>launch_date</code> per category.</li>
+    </ol>
+    <ol>
+      <li>Write a query to find the category with the highest maximum price. (Show the category name and the max price.)</li>
+    </ol>
+    <ol>
+      <li>Write a query to show per-category: minimum price, maximum price, and the price range (difference between max and min).</li>
+    </ol>
+    <ol>
+      <li>What will MIN(price) return for the Footwear category in our sample table, given that one of the two footwear rows has a NULL price?</li>
+    </ol>
+    <ol>
+      <li>Write a query to find which category has the lowest minimum stock level. This could indicate which category needs restocking first.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>MIN and MAX are among the most straightforward aggregate functions, but their behaviour on dates and text catches people off guard. The rule is simple: MIN always picks the lower end, MAX always picks the upper end, and both ignore NULL. Everything else follows from that.</p>
+  `,
+  'mod6-t5': `
+    <h1>GROUP BY: Summarising Data by Category</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Simran had just started her second month at Swiggy as a business analyst. Her manager Karan asked her to pull a report: "Tell me the total revenue and number of orders for each city this month." Simran knew how to get total revenue for the whole table using SUM. But per city? She wrote her first GROUP BY query that afternoon and suddenly the data started making sense in a completely new way.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>You have a table where the same city, category, or customer appears across hundreds of rows. Your manager does not want to see all 10,000 rows. They want one summary row per city, one row per category, one row per customer. GROUP BY is the clause that collapses those many rows into groups and lets you aggregate each group separately.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Without GROUP BY, aggregate functions like SUM, COUNT, and AVG collapse the entire table into a single row. That is useful sometimes, but rarely what you actually want. GROUP BY was designed to let you say: "Apply this aggregate function not to the whole table, but separately to each distinct value of this column." It turns a raw transaction log into a business summary.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you have a jar full of different coloured marbles. You want to count how many of each colour there are. You sort the marbles by colour first, make separate piles, then count each pile. GROUP BY is the sorting step. It separates your rows into piles based on a column value, and then the aggregate function counts, sums, or averages each pile.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>Table before GROUP BY:
+  Bangalore | 320
+  Mumbai    | 150
+  Bangalore | 480
+  Delhi     | 200
+  Bangalore | 560
+  Mumbai    | 310
+         |
+         | GROUP BY city
+         v
+Group 1: Bangalore | 320, 480, 560  --&gt; SUM = 1360
+Group 2: Mumbai    | 150, 310       --&gt; SUM = 460
+Group 3: Delhi     | 200            --&gt; SUM = 200
+         |
+         v
+Output:
+  Bangalore | 1360
+  Mumbai    | 460
+  Delhi     | 200</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>GROUP BY takes all rows that share the same value in the specified column and collapses them into one row. For each group, aggregate functions are then applied. Rules to remember:</p>
+    <ul>
+      <li>Every column in your SELECT must either appear in GROUP BY, or be inside an aggregate function like SUM, COUNT, AVG, MIN, MAX</li>
+      <li>You can GROUP BY multiple columns to create more granular groups</li>
+      <li>GROUP BY happens after WHERE (which filters rows) and before HAVING (which filters groups)</li>
+      <li>GROUP BY does not guarantee output order. Use ORDER BY to sort results.</li>
+    </ul>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <pre><code class="language-sql">-- Total orders and revenue per city
+SELECT city, COUNT(*) AS total_orders, SUM(amount) AS total_revenue
+FROM orders
+GROUP BY city;
+
+-- Orders per cuisine type
+SELECT cuisine, COUNT(*) AS order_count
+FROM orders
+GROUP BY cuisine
+ORDER BY order_count DESC;
+
+-- Revenue per city per cuisine (multiple column GROUP BY)
+SELECT city, cuisine, SUM(amount) AS revenue
+FROM orders
+GROUP BY city, cuisine
+ORDER BY city, revenue DESC;
+
+-- WHERE filters before grouping; only count orders above 200
+SELECT city, COUNT(*) AS big_orders
+FROM orders
+WHERE amount &gt; 200
+GROUP BY city;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td>GROUP BY column</td><td>Groups rows with the same value together</td><td>GROUP BY city makes one group per city</td></tr>
+      <tr><td>GROUP BY col1, col2</td><td>Groups by combination of both columns</td><td>GROUP BY city, cuisine gives one row per city-cuisine pair</td></tr>
+      <tr><td>SELECT aggregated columns</td><td>One result row per group with calculated values</td><td>SUM(amount) gives total for that group</td></tr>
+      <tr><td>WHERE before GROUP BY</td><td>Filters individual rows before grouping happens</td><td>WHERE amount > 200 removes low-value orders first</td></tr>
+      <tr><td>ORDER BY after GROUP BY</td><td>Sorts the grouped results</td><td>ORDER BY revenue DESC shows highest revenue city first</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample Table: orders (Swiggy)</strong></p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>city</th><th>cuisine</th><th>amount</th><th>order_date</th></tr>
+      <tr><td>1</td><td>101</td><td>Bangalore</td><td>North Indian</td><td>320</td><td>2024-01-05</td></tr>
+      <tr><td>2</td><td>102</td><td>Mumbai</td><td>Chinese</td><td>150</td><td>2024-01-05</td></tr>
+      <tr><td>3</td><td>103</td><td>Bangalore</td><td>South Indian</td><td>480</td><td>2024-01-06</td></tr>
+      <tr><td>4</td><td>104</td><td>Delhi</td><td>North Indian</td><td>200</td><td>2024-01-06</td></tr>
+      <tr><td>5</td><td>101</td><td>Bangalore</td><td>Chinese</td><td>560</td><td>2024-01-07</td></tr>
+      <tr><td>6</td><td>105</td><td>Mumbai</td><td>North Indian</td><td>310</td><td>2024-01-07</td></tr>
+      <tr><td>7</td><td>106</td><td>Delhi</td><td>South Indian</td><td>420</td><td>2024-01-08</td></tr>
+      <tr><td>8</td><td>102</td><td>Mumbai</td><td>Chinese</td><td>280</td><td>2024-01-08</td></tr>
+    </table>
+    <h3>Example 1: How many orders came from each city?</h3>
+    <p>Business question: Karan wants to know which city has the highest order volume.</p>
+    <pre><code class="language-sql">SELECT city, COUNT(*) AS total_orders
+FROM orders
+GROUP BY city
+ORDER BY total_orders DESC;</code></pre>
+    <p>Output:</p>
+    <ul>
+      <li>Bangalore: 3 orders</li>
+      <li>Mumbai: 3 orders</li>
+      <li>Delhi: 2 orders</li>
+    </ul>
+    <h3>Example 2: What is the total revenue per city?</h3>
+    <p>Business question: Which city is generating the most money for Swiggy?</p>
+    <pre><code class="language-sql">SELECT city, SUM(amount) AS total_revenue
+FROM orders
+GROUP BY city
+ORDER BY total_revenue DESC;</code></pre>
+    <p>Output:</p>
+    <ul>
+      <li>Bangalore: 1360</li>
+      <li>Mumbai: 740</li>
+      <li>Delhi: 620</li>
+    </ul>
+    <h3>Example 3: Orders per cuisine type, only orders above 200 rupees</h3>
+    <p>Business question: For higher-value orders, which cuisine is most popular?</p>
+    <pre><code class="language-sql">SELECT cuisine, COUNT(*) AS order_count
+FROM orders
+WHERE amount &gt; 200
+GROUP BY cuisine
+ORDER BY order_count DESC;</code></pre>
+    <p>The WHERE clause runs first and removes the Mumbai-Chinese order for 150. Then GROUP BY groups the remaining rows by cuisine.</p>
+    <h3>Example 4: Revenue per city per cuisine (multi-column GROUP BY)</h3>
+    <p>Business question: Break down revenue by both city and cuisine type.</p>
+    <pre><code class="language-sql">SELECT city, cuisine, COUNT(*) AS orders, SUM(amount) AS revenue
+FROM orders
+GROUP BY city, cuisine
+ORDER BY city, revenue DESC;</code></pre>
+    <p>Output shows separate rows for Bangalore-North Indian, Bangalore-South Indian, Bangalore-Chinese, and so on. Each unique combination becomes its own row.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>The most common error in GROUP BY is selecting a column that is not in the GROUP BY clause and not inside an aggregate. For example:</p>
+    <pre><code class="language-sql">-- This will throw an error in most databases
+SELECT city, cuisine, SUM(amount)
+FROM orders
+GROUP BY city;
+-- ERROR: cuisine is not in GROUP BY and not aggregated</code></pre>
+    <p>You must either add <code>cuisine</code> to GROUP BY or remove it from SELECT.</p>
+    <p>Another confusion: the order of clauses. WHERE always comes before GROUP BY. You cannot use an aggregate in a WHERE clause. If you want to filter based on an aggregate value (e.g., only cities with more than 5 orders), that belongs in a HAVING clause, not a WHERE clause.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <ul>
+      <li>Selecting a column in SELECT that is not in GROUP BY and not aggregated</li>
+      <li>Trying to filter by aggregate in WHERE instead of HAVING</li>
+      <li>Forgetting ORDER BY and being confused by the unsorted output of GROUP BY</li>
+      <li>Using GROUP BY when you did not mean to collapse rows, resulting in fewer rows than expected</li>
+      <li>Grouping by the wrong column and not noticing because the query runs without error</li>
+    </ul>
+    <hr>
+    <h2>Best Practices</h2>
+    <ul>
+      <li>Always include all non-aggregated SELECT columns in GROUP BY</li>
+      <li>Use aliases with AS for aggregate columns to make output readable</li>
+      <li>Add ORDER BY at the end to sort your summary report meaningfully</li>
+      <li>Use WHERE to filter rows before grouping to improve performance</li>
+      <li>Use HAVING (covered next) to filter groups after grouping</li>
+      <li>Test your GROUP BY query with a small sample first before running on full data</li>
+    </ul>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Swiggy, the city ops team groups orders by city and day to track daily GMV. At Reliance Jio, the product team groups user sessions by plan type to compare engagement. At Amazon India, the seller team groups orders by seller_id to calculate per-seller revenue for payouts. At Paytm, the payments team groups transactions by payment method to understand UPI versus card versus wallet splits. Every summary dashboard you have seen in any Indian product company is powered by GROUP BY.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Raw orders table:
+  row 1: Bangalore, 320
+  row 2: Mumbai,    150
+  row 3: Bangalore, 480        WHERE filters rows first
+  row 4: Delhi,     200   --&gt;  (removes rows not matching condition)
+  row 5: Bangalore, 560        then GROUP BY groups remaining rows
+  row 6: Mumbai,    310        then aggregate runs per group
+  row 7: Delhi,     420        then HAVING filters groups
+  row 8: Mumbai,    280        then ORDER BY sorts output
+
+Output after GROUP BY city + SUM(amount):
+  Bangalore | 1360
+  Mumbai    |  740
+  Delhi     |  620</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these:</p>
+    <ul>
+      <li>What happens to rows in a GROUP BY query? Where do they go?</li>
+      <li>Why does SQL throw an error if you select a column that is not in GROUP BY and not aggregated?</li>
+      <li>What is the difference between WHERE and HAVING in the context of GROUP BY?</li>
+      <li>What does GROUP BY on two columns produce?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query to count the number of orders per cuisine type in the <code>orders</code> table.</li>
+    </ol>
+    <ol>
+      <li>Write a query to find the total revenue per city, sorted highest to lowest.</li>
+    </ol>
+    <ol>
+      <li>Write a query to find the average order amount per city. Round to 2 decimal places.</li>
+    </ol>
+    <ol>
+      <li>Write a query that groups by both city and cuisine, showing the count of orders and total revenue for each combination.</li>
+    </ol>
+    <ol>
+      <li>Write a query to find, per city, the total revenue from orders that are strictly greater than 300 rupees. (Use WHERE to filter before grouping.)</li>
+    </ol>
+    <ol>
+      <li>The following query has an error. Identify and fix it:</li>
+    </ol>
+    <pre><code class="language-sql">SELECT city, cuisine, COUNT(*)
+FROM orders
+GROUP BY city;</code></pre>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>GROUP BY is the clause that transforms a raw data table into a business report. Once you understand that every SELECT column must either be in GROUP BY or wrapped in an aggregate, the rest falls into place. Pair it with WHERE for pre-filtering and ORDER BY for sorted output, and you have the foundation of almost every analytical query you will write on the job.</p>
+  `,
+  'mod6-t6': `
+    <h1>HAVING: Filtering Groups After GROUP BY</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Vikram was three weeks into his analyst role at Zomato when his manager Preet gave him a task: "Show me only the cuisines that have more than 50 orders this month. We want to focus our marketing budget on the high-volume ones."</p>
+    <p>Vikram wrote a GROUP BY query to count orders per cuisine. That worked. Then he tried to add <code>WHERE COUNT(*) > 50</code> and the query threw an error. He stared at the screen confused. That is the moment almost every SQL learner discovers HAVING.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>You have written a GROUP BY query. Now you want to filter the results based on the aggregate value, like "only show cities where total orders exceed 100" or "only show restaurants where average rating is above 4.0." WHERE cannot do this because WHERE runs before the groups are formed. HAVING is the clause that filters after groups are created.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>SQL processes clauses in a specific order: FROM, WHERE, GROUP BY, HAVING, SELECT, ORDER BY. By the time GROUP BY runs, WHERE has already done its job. At that point, aggregate values like COUNT(*) and SUM(amount) do not even exist yet as filterable quantities. HAVING was created specifically to filter the groups that GROUP BY produces, using the aggregate values that now exist for each group.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you are sorting people by their department at a company, then counting how many people are in each department. WHERE is a security guard at the entrance who checks each person individually before they enter. HAVING is a manager who reviews the completed headcount per department and says "only show me departments with more than 10 people."</p>
+    <p>Two different stages. Two different filters.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>Stage 1: WHERE filters individual rows
+  (keeps only rows matching the condition)
+
+Stage 2: GROUP BY collapses remaining rows into groups
+
+Stage 3: Aggregates are calculated per group
+  Bangalore: COUNT=12, SUM=5400
+  Mumbai:    COUNT=3,  SUM=1200
+  Delhi:     COUNT=7,  SUM=2800
+
+Stage 4: HAVING filters the groups
+  HAVING COUNT(*) &gt; 5 removes Mumbai (only 3 orders)
+
+Stage 5: ORDER BY sorts the remaining groups</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>HAVING is placed after GROUP BY in your query. It filters groups based on aggregate conditions. Rules:</p>
+    <ul>
+      <li>HAVING almost always requires a GROUP BY (without it, the whole table is one group)</li>
+      <li>HAVING uses aggregate functions: COUNT, SUM, AVG, MIN, MAX</li>
+      <li>You can use WHERE and HAVING in the same query: WHERE filters rows first, HAVING filters groups after</li>
+      <li>HAVING is slower than WHERE because it runs after aggregation, so always push row-level filters into WHERE</li>
+      <li>Column aliases from SELECT are not available in HAVING in most databases (use the full aggregate expression)</li>
+    </ul>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <pre><code class="language-sql">-- Cuisines with more than 2 orders
+SELECT cuisine, COUNT(*) AS order_count
+FROM orders
+GROUP BY cuisine
+HAVING COUNT(*) &gt; 2;
+
+-- Cities where total revenue exceeds 500
+SELECT city, SUM(amount) AS total_revenue
+FROM orders
+GROUP BY city
+HAVING SUM(amount) &gt; 500;
+
+-- Using WHERE and HAVING together
+-- Delivered orders only; cuisines with average above 300
+SELECT cuisine, AVG(amount) AS avg_order
+FROM orders
+WHERE status = 'Delivered'
+GROUP BY cuisine
+HAVING AVG(amount) &gt; 300;
+
+-- Restaurants with average rating above 4.0 and more than 10 orders
+SELECT restaurant_id, COUNT(*) AS orders, AVG(amount) AS avg_order
+FROM orders
+GROUP BY restaurant_id
+HAVING COUNT(*) &gt; 10 AND AVG(amount) &gt; 300;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td>HAVING aggregate_condition</td><td>Filters groups after aggregation</td><td>HAVING COUNT(*) > 5 keeps only groups with more than 5 rows</td></tr>
+      <tr><td>WHERE condition</td><td>Filters individual rows before grouping</td><td>WHERE status = 'Delivered' removes cancelled orders first</td></tr>
+      <tr><td>GROUP BY + HAVING</td><td>Together: group then filter groups</td><td>GROUP BY city HAVING SUM(amount) > 1000</td></tr>
+      <tr><td>HAVING with multiple conditions</td><td>Filter on multiple aggregate values</td><td>HAVING COUNT(*) > 10 AND AVG(amount) > 300</td></tr>
+      <tr><td>AND / OR in HAVING</td><td>Combine conditions</td><td>HAVING AVG(amount) > 200 OR COUNT(*) > 20</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample Table: orders (Zomato)</strong></p>
+    <table>
+      <tr><th>order_id</th><th>restaurant_id</th><th>city</th><th>cuisine</th><th>amount</th><th>order_date</th></tr>
+      <tr><td>1</td><td>R1</td><td>Mumbai</td><td>North Indian</td><td>350</td><td>2024-01-05</td></tr>
+      <tr><td>2</td><td>R2</td><td>Delhi</td><td>Chinese</td><td>180</td><td>2024-01-05</td></tr>
+      <tr><td>3</td><td>R1</td><td>Mumbai</td><td>North Indian</td><td>420</td><td>2024-01-06</td></tr>
+      <tr><td>4</td><td>R3</td><td>Bangalore</td><td>South Indian</td><td>290</td><td>2024-01-06</td></tr>
+      <tr><td>5</td><td>R2</td><td>Delhi</td><td>Chinese</td><td>210</td><td>2024-01-07</td></tr>
+      <tr><td>6</td><td>R1</td><td>Mumbai</td><td>North Indian</td><td>390</td><td>2024-01-07</td></tr>
+      <tr><td>7</td><td>R4</td><td>Bangalore</td><td>Fast Food</td><td>150</td><td>2024-01-08</td></tr>
+      <tr><td>8</td><td>R3</td><td>Bangalore</td><td>South Indian</td><td>330</td><td>2024-01-08</td></tr>
+      <tr><td>9</td><td>R2</td><td>Delhi</td><td>Chinese</td><td>250</td><td>2024-01-09</td></tr>
+      <tr><td>10</td><td>R4</td><td>Bangalore</td><td>Fast Food</td><td>175</td><td>2024-01-09</td></tr>
+    </table>
+    <h3>Example 1: Which cuisines have more than 2 orders?</h3>
+    <p>Business question: Preet wants to focus marketing on high-volume cuisines only.</p>
+    <pre><code class="language-sql">SELECT cuisine, COUNT(*) AS order_count
+FROM orders
+GROUP BY cuisine
+HAVING COUNT(*) &gt; 2;</code></pre>
+    <p>Output:</p>
+    <ul>
+      <li>North Indian: 3 orders (passes)</li>
+      <li>Chinese: 3 orders (passes)</li>
+      <li>South Indian: 2 orders (filtered out, not > 2)</li>
+      <li>Fast Food: 2 orders (filtered out)</li>
+    </ul>
+    <h3>Example 2: Which cities have total revenue above 800?</h3>
+    <p>Business question: Which cities are high-value markets for Zomato?</p>
+    <pre><code class="language-sql">SELECT city, SUM(amount) AS total_revenue
+FROM orders
+GROUP BY city
+HAVING SUM(amount) &gt; 800;</code></pre>
+    <p>Output:</p>
+    <ul>
+      <li>Mumbai: 1160 (passes)</li>
+      <li>Delhi: 640 (filtered out)</li>
+      <li>Bangalore: 945 (passes)</li>
+    </ul>
+    <h3>Example 3: Using WHERE and HAVING together</h3>
+    <p>Business question: Among cuisines, which ones have an average order above 280, considering only orders from 2024-01-06 onwards?</p>
+    <pre><code class="language-sql">SELECT cuisine, COUNT(*) AS orders, ROUND(AVG(amount), 2) AS avg_amount
+FROM orders
+WHERE order_date &gt;= '2024-01-06'
+GROUP BY cuisine
+HAVING AVG(amount) &gt; 280;</code></pre>
+    <p>WHERE removes the two rows from 2024-01-05 first. Then GROUP BY groups the remaining 8 rows. Then HAVING filters groups where the average does not reach 280.</p>
+    <h3>Example 4: Restaurants with at least 2 orders and average order above 300</h3>
+    <p>Business question: Which restaurants are both popular and high-value?</p>
+    <pre><code class="language-sql">SELECT restaurant_id, COUNT(*) AS total_orders, ROUND(AVG(amount), 2) AS avg_amount
+FROM orders
+GROUP BY restaurant_id
+HAVING COUNT(*) &gt;= 2 AND AVG(amount) &gt; 300;</code></pre>
+    <p>Output:</p>
+    <ul>
+      <li>R1: 3 orders, avg 386.67 (passes both conditions)</li>
+      <li>R2: 3 orders, avg 213.33 (fails AVG condition)</li>
+      <li>R3: 2 orders, avg 310.00 (passes both)</li>
+      <li>R4: 2 orders, avg 162.50 (fails AVG condition)</li>
+    </ul>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>The most common mistake is trying to use a WHERE clause with an aggregate:</p>
+    <pre><code class="language-sql">-- This throws an error
+SELECT city, COUNT(*)
+FROM orders
+WHERE COUNT(*) &gt; 5
+GROUP BY city;
+-- ERROR: aggregate functions not allowed in WHERE</code></pre>
+    <p>You cannot use COUNT, SUM, AVG, MIN, or MAX inside a WHERE clause. They do not exist at the WHERE stage of query processing. Move that condition to HAVING.</p>
+    <p>Another confusion: using the alias from SELECT in HAVING. In most databases this does not work:</p>
+    <pre><code class="language-sql">-- Often fails
+SELECT city, COUNT(*) AS order_count
+FROM orders
+GROUP BY city
+HAVING order_count &gt; 5;  -- alias not available here in many databases</code></pre>
+    <p>Write it as <code>HAVING COUNT(*) > 5</code> instead.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <ul>
+      <li>Putting aggregate conditions in WHERE instead of HAVING</li>
+      <li>Using column aliases in HAVING (repeat the full aggregate expression instead)</li>
+      <li>Using HAVING without GROUP BY thinking it will filter rows (it technically treats the whole table as one group)</li>
+      <li>Forgetting that WHERE runs before HAVING, so WHERE is faster for row-level filtering</li>
+      <li>Confusing the order: WHERE then GROUP BY then HAVING, not the other way around</li>
+    </ul>
+    <hr>
+    <h2>Best Practices</h2>
+    <ul>
+      <li>Use WHERE for row-level filters (non-aggregate conditions) to improve performance</li>
+      <li>Use HAVING only for aggregate-level filters</li>
+      <li>If you can write a condition in WHERE, always prefer that over HAVING</li>
+      <li>Write the full aggregate expression in HAVING rather than relying on aliases</li>
+      <li>Combine WHERE and HAVING in the same query when you need both row-level and group-level filtering</li>
+    </ul>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Zomato, the restaurant quality team uses HAVING AVG(rating) < 3.5 to flag underperforming restaurants. At Swiggy, the growth team uses HAVING COUNT(<em>) > 100 to identify power users for loyalty programs. At Amazon India, the seller team uses HAVING SUM(refunds) > SUM(sales) </em> 0.1 to flag sellers with abnormally high refund rates. At Paytm, the fraud team uses HAVING COUNT(DISTINCT device_id) > 3 to flag accounts logging in from too many devices. HAVING is the clause that makes threshold-based business rules expressible in SQL.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Query execution order for a GROUP BY + HAVING query:
+
+1. FROM orders          --&gt; load the table
+2. WHERE status='...'   --&gt; filter individual rows
+3. GROUP BY city        --&gt; collapse rows into groups
+4. SUM/COUNT per group  --&gt; calculate aggregates for each group
+5. HAVING SUM &gt; 500     --&gt; remove groups that don't qualify
+6. SELECT city, SUM     --&gt; pick columns to show
+7. ORDER BY             --&gt; sort the final output
+
+WHERE = bouncer at the door (checks each person)
+HAVING = manager reviewing the final group counts</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these:</p>
+    <ul>
+      <li>Why can you not use aggregate functions in a WHERE clause?</li>
+      <li>What is the difference between WHERE and HAVING?</li>
+      <li>What happens if you write HAVING without GROUP BY?</li>
+      <li>When should you prefer WHERE over HAVING for performance?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query to find cuisines with more than 3 orders total in the <code>orders</code> table.</li>
+    </ol>
+    <ol>
+      <li>Write a query to find cities where the total revenue (SUM of amount) is at least 900.</li>
+    </ol>
+    <ol>
+      <li>Write a query to find restaurant_ids where the average order value is below 250.</li>
+    </ol>
+    <ol>
+      <li>Write a query to find cuisines where the maximum order amount exceeds 400. Use HAVING MAX().</li>
+    </ol>
+    <ol>
+      <li>Write a query combining WHERE and HAVING: count orders per city, but only for orders placed in Bangalore or Mumbai, and only show cities where the count is above 2.</li>
+    </ol>
+    <ol>
+      <li>The following query has an error. Identify and fix it:</li>
+    </ol>
+    <pre><code class="language-sql">SELECT city, COUNT(*) AS orders
+FROM orders
+WHERE COUNT(*) &gt; 3
+GROUP BY city;</code></pre>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>HAVING is not complicated once you understand when in the query lifecycle it runs. WHERE is for rows, HAVING is for groups. That one sentence will save you from most errors. Once you start combining WHERE, GROUP BY, and HAVING together, you can express almost any business filtering rule in a single clean query.</p>
+  `,
+  'mod6-t7': `
+    <h1>Combining Aggregates: Using Multiple Functions in One Query</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Ananya had been an analyst at Swiggy for five months. Every Monday morning, her manager Rohit sent her the same message: "Can you send me the city-wise weekly summary?" For weeks, Ananya had been running four separate queries: one for total orders, one for total revenue, one for average order value, and one for the minimum and maximum order amounts. Then one day she combined all of them into a single query. She sent it to Rohit in two minutes instead of fifteen. That is what combining aggregates can do for you.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Dashboards, reports, and management summaries almost never ask for a single number. They ask for a table: total orders, total revenue, average spend, best order, worst order, all in one view. Running separate queries for each number is slow, error-prone, and hard to maintain. You need to write one query that returns all these values at once.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>SQL allows multiple aggregate functions in a single SELECT statement because the database processes all of them in one pass over the data. There is no performance cost to adding COUNT and AVG alongside your SUM. You are not running the query multiple times. The engine scans the rows once and computes all aggregates simultaneously.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine a factory inspector walking the production line once. She counts the units produced, calculates the average weight, notes the heaviest unit and the lightest unit, all in the same walk. She does not walk the line four separate times. One pass, multiple measurements. That is what your database does when you put multiple aggregate functions in one SELECT.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>One scan of the orders table:
+  Bangalore | 320      COUNT increments
+  Bangalore | 480      SUM adds 320+480+560
+  Bangalore | 560      AVG tracks total/count
+                        MIN compares each value
+                        MAX compares each value
+         |
+         v
+Single result row per group:
+  Bangalore | count=3 | sum=1360 | avg=453.33 | min=320 | max=560</code></pre>
+    <p>All five values computed in one pass. One query. One result set.</p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>You can use as many aggregate functions as you need in a single SELECT. Each one operates independently on the same set of rows (or group of rows if you have GROUP BY). Rules:</p>
+    <ul>
+      <li>Each aggregate function is a separate expression in SELECT</li>
+      <li>Name each with an alias using AS for readable output</li>
+      <li>All non-aggregated columns must appear in GROUP BY</li>
+      <li>ROUND() can wrap any aggregate to control decimal places</li>
+      <li>ORDER BY can sort by any of the aggregated columns</li>
+    </ul>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <pre><code class="language-sql">-- Single summary row for the whole table
+SELECT
+    COUNT(*) AS total_orders,
+    SUM(amount) AS total_revenue,
+    ROUND(AVG(amount), 2) AS avg_order_value,
+    MIN(amount) AS smallest_order,
+    MAX(amount) AS largest_order
+FROM orders;
+
+-- City-wise summary combining all aggregates
+SELECT
+    city,
+    COUNT(*) AS total_orders,
+    SUM(amount) AS total_revenue,
+    ROUND(AVG(amount), 2) AS avg_order_value,
+    MIN(amount) AS min_order,
+    MAX(amount) AS max_order
+FROM orders
+GROUP BY city
+ORDER BY total_revenue DESC;
+
+-- Filter for delivered orders only, then summarise by city
+SELECT
+    city,
+    COUNT(*) AS delivered_orders,
+    SUM(amount) AS delivered_revenue,
+    ROUND(AVG(amount), 2) AS avg_delivered_value
+FROM orders
+WHERE status = 'Delivered'
+GROUP BY city
+ORDER BY delivered_revenue DESC;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td>Multiple aggregates in SELECT</td><td>Each is computed independently in one pass</td><td>COUNT(*), SUM(amount), AVG(amount) all in one query</td></tr>
+      <tr><td>AS alias</td><td>Gives each aggregate column a readable name</td><td>AS total_revenue instead of SUM(amount)</td></tr>
+      <tr><td>ROUND(AVG(...), 2)</td><td>Rounds the average to 2 decimal places</td><td>ROUND(AVG(amount), 2) gives 453.33 not 453.3333...</td></tr>
+      <tr><td>GROUP BY</td><td>Applies all aggregates per group</td><td>GROUP BY city computes each metric per city</td></tr>
+      <tr><td>ORDER BY aggregate alias</td><td>Sorts by any computed column</td><td>ORDER BY total_revenue DESC shows top city first</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample Table: orders (Swiggy)</strong></p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>city</th><th>cuisine</th><th>amount</th><th>order_date</th><th>status</th></tr>
+      <tr><td>1</td><td>101</td><td>Bangalore</td><td>North Indian</td><td>320</td><td>2024-01-05</td><td>Delivered</td></tr>
+      <tr><td>2</td><td>102</td><td>Mumbai</td><td>Chinese</td><td>150</td><td>2024-01-05</td><td>Delivered</td></tr>
+      <tr><td>3</td><td>103</td><td>Bangalore</td><td>South Indian</td><td>480</td><td>2024-01-06</td><td>Delivered</td></tr>
+      <tr><td>4</td><td>104</td><td>Delhi</td><td>North Indian</td><td>200</td><td>2024-01-06</td><td>Cancelled</td></tr>
+      <tr><td>5</td><td>101</td><td>Bangalore</td><td>Chinese</td><td>560</td><td>2024-01-07</td><td>Delivered</td></tr>
+      <tr><td>6</td><td>105</td><td>Mumbai</td><td>North Indian</td><td>310</td><td>2024-01-07</td><td>Delivered</td></tr>
+      <tr><td>7</td><td>106</td><td>Delhi</td><td>South Indian</td><td>420</td><td>2024-01-08</td><td>Delivered</td></tr>
+      <tr><td>8</td><td>102</td><td>Mumbai</td><td>Chinese</td><td>280</td><td>2024-01-08</td><td>Delivered</td></tr>
+    </table>
+    <h3>Example 1: Platform-wide summary in a single row</h3>
+    <p>Business question: Rohit wants one snapshot number for the whole platform this week.</p>
+    <pre><code class="language-sql">SELECT
+    COUNT(*) AS total_orders,
+    SUM(amount) AS total_revenue,
+    ROUND(AVG(amount), 2) AS avg_order_value,
+    MIN(amount) AS smallest_order,
+    MAX(amount) AS largest_order
+FROM orders;</code></pre>
+    <p>Output: One row with total_orders=8, total_revenue=2720, avg_order_value=340.00, smallest_order=150, largest_order=560.</p>
+    <h3>Example 2: City-wise summary report</h3>
+    <p>Business question: The city ops team needs a full summary per city for the weekly review.</p>
+    <pre><code class="language-sql">SELECT
+    city,
+    COUNT(*) AS total_orders,
+    SUM(amount) AS total_revenue,
+    ROUND(AVG(amount), 2) AS avg_order_value,
+    MIN(amount) AS min_order,
+    MAX(amount) AS max_order
+FROM orders
+GROUP BY city
+ORDER BY total_revenue DESC;</code></pre>
+    <p>Output:</p>
+    <table>
+      <tr><th>city</th><th>total_orders</th><th>total_revenue</th><th>avg_order_value</th><th>min_order</th><th>max_order</th></tr>
+      <tr><td>Bangalore</td><td>3</td><td>1360</td><td>453.33</td><td>320</td><td>560</td></tr>
+      <tr><td>Mumbai</td><td>3</td><td>740</td><td>246.67</td><td>150</td><td>310</td></tr>
+      <tr><td>Delhi</td><td>2</td><td>620</td><td>310.00</td><td>200</td><td>420</td></tr>
+    </table>
+    <h3>Example 3: Delivered orders summary per city</h3>
+    <p>Business question: Exclude cancelled orders from the performance summary.</p>
+    <pre><code class="language-sql">SELECT
+    city,
+    COUNT(*) AS delivered_orders,
+    SUM(amount) AS delivered_revenue,
+    ROUND(AVG(amount), 2) AS avg_delivered
+FROM orders
+WHERE status = 'Delivered'
+GROUP BY city
+ORDER BY delivered_revenue DESC;</code></pre>
+    <p>The Delhi cancelled order (200 rupees) is removed by WHERE before grouping, so Delhi shows 1 order instead of 2.</p>
+    <h3>Example 4: Cuisine-wise summary with count and revenue</h3>
+    <p>Business question: Which cuisines are most profitable?</p>
+    <pre><code class="language-sql">SELECT
+    cuisine,
+    COUNT(*) AS orders,
+    SUM(amount) AS revenue,
+    ROUND(AVG(amount), 2) AS avg_per_order,
+    MAX(amount) AS highest_order
+FROM orders
+GROUP BY cuisine
+ORDER BY revenue DESC;</code></pre>
+    <p>Output shows North Indian, Chinese, and South Indian with their full metrics side by side in one result set.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>Aliases work fine in ORDER BY but not in HAVING in most databases. If you write <code>HAVING total_revenue > 500</code> expecting SQL to use the alias you defined in SELECT, it will fail. You must repeat the full expression: <code>HAVING SUM(amount) > 500</code>.</p>
+    <p>Another issue: combining aggregates across different columns and misunderstanding what each applies to. COUNT(*) counts all rows including NULLs. SUM(amount) skips NULLs in amount. AVG(amount) also skips NULLs. If you have NULLs in amount, your COUNT and your AVG denominators will disagree, and the combined report can look inconsistent.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <ul>
+      <li>Not using aliases for aggregate columns, making output hard to read</li>
+      <li>Forgetting ROUND() on AVG, resulting in ugly decimal output in reports</li>
+      <li>Selecting a non-aggregated column without including it in GROUP BY</li>
+      <li>Using aliases in HAVING instead of repeating the full aggregate expression</li>
+      <li>Assuming ORDER BY on a calculated column uses the alias automatically in all databases (MySQL allows it, some others do not)</li>
+    </ul>
+    <hr>
+    <h2>Best Practices</h2>
+    <ul>
+      <li>Always alias every aggregate column in a combined query</li>
+      <li>Use ROUND() consistently for any AVG or division result</li>
+      <li>Put all non-aggregated columns in GROUP BY</li>
+      <li>Use WHERE to filter rows before aggregation when possible</li>
+      <li>Structure your SELECT so related aggregates are next to each other for readability</li>
+      <li>Order your output by the most important metric (usually total_revenue or total_orders)</li>
+    </ul>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Swiggy, this exact pattern is the foundation of the weekly city performance report sent to city general managers. At Flipkart, the category team pulls combined aggregates per category for their monthly business review. At BookMyShow, the events team combines COUNT (bookings), SUM (revenue), and AVG (ticket price) per event for post-show analysis. At Reliance Jio, the data team builds recharge summary dashboards with COUNT, SUM, AVG per plan type per circle. The combined aggregate query is the standard template for any summary report in a data-driven team.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>One query, multiple aggregates, one pass through data:
+
+SELECT
+    city,                          --&gt; grouping key
+    COUNT(*) AS orders,            --&gt; how many rows per group
+    SUM(amount) AS revenue,        --&gt; total value per group
+    ROUND(AVG(amount), 2) AS avg,  --&gt; average value per group
+    MIN(amount) AS lowest,         --&gt; smallest in group
+    MAX(amount) AS highest         --&gt; largest in group
+FROM orders
+GROUP BY city
+ORDER BY revenue DESC;
+
+Database executes:
+  1. Scan all rows once
+  2. Group by city
+  3. For each group, compute all 5 aggregates simultaneously
+  4. Return one row per city with all 5 columns</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these:</p>
+    <ul>
+      <li>Why is combining aggregates in one query better than running separate queries?</li>
+      <li>Why do you need to use ROUND() for AVG output in reports?</li>
+      <li>What happens if you forget to alias an aggregate column?</li>
+      <li>Can you use ORDER BY on a calculated column?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a single query that shows, for the entire <code>orders</code> table: total number of orders, total revenue, average order amount (rounded), and the highest order amount.</li>
+    </ol>
+    <ol>
+      <li>Write a city-wise summary showing total orders, total revenue, and average order value per city, sorted by total revenue descending.</li>
+    </ol>
+    <ol>
+      <li>Write a query that shows per cuisine: order count, total revenue, and the minimum and maximum order amounts.</li>
+    </ol>
+    <ol>
+      <li>Modify the city-wise summary to only include delivered orders (filter with WHERE before grouping).</li>
+    </ol>
+    <ol>
+      <li>Write a combined aggregate query and filter with HAVING to show only cities with more than 2 orders AND average order above 300.</li>
+    </ol>
+    <ol>
+      <li>Write a query that shows, for each city, the number of delivered orders and the number of cancelled orders side by side. (Hint: use COUNT with CASE inside.)</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>Combining aggregates in one query is not a trick or an advanced technique. It is just the natural way to build summary reports in SQL. Once you write your first combined aggregate query and see a clean multi-column summary come back in one result set, running separate queries will feel unnecessary. This is the form most real analyst queries take.</p>
+  `,
+  'mod6-t8': `
+    <h1>How Aggregate Functions Handle NULL Values</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Rahul had been working at Paytm for two months when his manager Sonal flagged a discrepancy: "Your report says the average wallet balance is 842 rupees. But when I look at the raw data, it seems way higher than what most customers actually hold. Can you double-check?"</p>
+    <p>Rahul looked at the data again. The <code>wallet_balance</code> column had 47 NULL values out of 200 rows. AVG was quietly ignoring all of them. The 47 customers with no wallet data were not being counted in the denominator. The average was being calculated over 153 customers, not 200, and it looked artificially inflated. He had no idea this was happening until Sonal caught it.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>In real production databases, columns are rarely fully populated. Customers skip fields. Data pipelines fail for some records. Older rows predate new columns. The result is NULLs scattered through your data. Aggregate functions handle NULLs silently. They do not warn you. They just skip the NULLs and return a result. If you do not know this is happening, your reports will be wrong and you will not know why.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>The SQL standard defines NULL as the absence of a value, not as zero or empty string. Aggregate functions follow this definition: they treat NULL as "not applicable" and exclude it from calculations. This is often the right behaviour. But it requires you to actively think about what NULLs mean in your specific data before you trust your aggregate results.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you are a teacher calculating the class average. Five students took the test. Three handed in their answer sheets. Two were absent and have no score. If you calculate the average of the three scores you have, you are ignoring the two absent students. Is that the right thing to do? It depends on whether "absent" means "zero" or "not applicable." SQL always assumes "not applicable" unless you tell it otherwise.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>Table: customers (10 rows)
+wallet_balance: 500, 1200, NULL, 800, NULL, 300, NULL, 950, 400, NULL
+
+COUNT(*)             = 10  (counts all rows)
+COUNT(wallet_balance)= 6   (skips 4 NULLs)
+SUM(wallet_balance)  = 4150 (adds 500+1200+800+300+950+400, skips NULLs)
+AVG(wallet_balance)  = 4150/6 = 691.67 (denominator is 6, not 10)
+
+If we treat NULL as 0:
+AVG(COALESCE(wallet_balance, 0)) = 4150/10 = 415.00</code></pre>
+    <p>These two averages are very different. Which one is right depends on your business question.</p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>Here is the NULL behaviour for each aggregate function:</p>
+    <ul>
+      <li>COUNT(*): counts every row, including rows where all columns are NULL</li>
+      <li>COUNT(column): skips rows where that specific column is NULL</li>
+      <li>SUM(column): adds only non-NULL values, skips NULLs silently</li>
+      <li>AVG(column): calculates mean over non-NULL values only; denominator is count of non-NULL rows</li>
+      <li>MIN(column): returns the minimum of non-NULL values</li>
+      <li>MAX(column): returns the maximum of non-NULL values</li>
+    </ul>
+    <p>If every value in a column is NULL: SUM, AVG, MIN, MAX all return NULL. COUNT(*) still returns the row count. COUNT(column) returns 0.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <pre><code class="language-sql">-- See the difference between COUNT(*) and COUNT(column)
+SELECT
+    COUNT(*) AS total_rows,
+    COUNT(wallet_balance) AS rows_with_balance,
+    COUNT(*) - COUNT(wallet_balance) AS null_count
+FROM customers;
+
+-- AVG on raw column vs COALESCE to treat NULL as 0
+SELECT
+    ROUND(AVG(wallet_balance), 2) AS avg_ignoring_nulls,
+    ROUND(AVG(COALESCE(wallet_balance, 0)), 2) AS avg_treating_null_as_zero
+FROM customers;
+
+-- COALESCE in SUM to ensure NULLs are treated as 0
+SELECT
+    SUM(COALESCE(last_transaction_amount, 0)) AS total_transactions
+FROM customers;
+
+-- NULLIF to avoid accidental zero division
+-- Use case: score of 0 should not bring down an average
+SELECT
+    ROUND(AVG(NULLIF(wallet_balance, 0)), 2) AS avg_ignoring_zeros
+FROM customers;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td>COUNT(*)</td><td>Counts all rows including NULLs</td><td>Returns 10 for a 10-row table even if all values are NULL</td></tr>
+      <tr><td>COUNT(column)</td><td>Counts only non-NULL rows in that column</td><td>Returns 6 if 4 of 10 values are NULL</td></tr>
+      <tr><td>COALESCE(col, 0)</td><td>Replaces NULL with 0 (or any value) before aggregating</td><td>SUM(COALESCE(balance, 0)) treats NULL as zero</td></tr>
+      <tr><td>NULLIF(col, 0)</td><td>Converts 0 to NULL before aggregating</td><td>AVG(NULLIF(score, 0)) ignores zero scores</td></tr>
+      <tr><td>COUNT(*) - COUNT(col)</td><td>Calculates how many NULLs exist in a column</td><td>A quick NULL audit on any column</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample Table: customers (Paytm)</strong></p>
+    <table>
+      <tr><th>customer_id</th><th>name</th><th>city</th><th>phone</th><th>wallet_balance</th><th>last_transaction_amount</th></tr>
+      <tr><td>1</td><td>Priya</td><td>Mumbai</td><td>9876543210</td><td>500</td><td>150</td></tr>
+      <tr><td>2</td><td>Arjun</td><td>Delhi</td><td>NULL</td><td>1200</td><td>NULL</td></tr>
+      <tr><td>3</td><td>Neha</td><td>Bangalore</td><td>9123456780</td><td>NULL</td><td>300</td></tr>
+      <tr><td>4</td><td>Vikram</td><td>Mumbai</td><td>9988776655</td><td>800</td><td>500</td></tr>
+      <tr><td>5</td><td>Simran</td><td>Delhi</td><td>NULL</td><td>NULL</td><td>NULL</td></tr>
+      <tr><td>6</td><td>Rahul</td><td>Bangalore</td><td>9871234560</td><td>300</td><td>80</td></tr>
+      <tr><td>7</td><td>Ananya</td><td>Mumbai</td><td>9765432109</td><td>NULL</td><td>120</td></tr>
+      <tr><td>8</td><td>Karan</td><td>Delhi</td><td>9654321098</td><td>950</td><td>400</td></tr>
+      <tr><td>9</td><td>Deepa</td><td>Bangalore</td><td>9543210987</td><td>400</td><td>NULL</td></tr>
+      <tr><td>10</td><td>Sonal</td><td>Mumbai</td><td>NULL</td><td>NULL</td><td>250</td></tr>
+    </table>
+    <h3>Example 1: Count all rows vs count of non-NULL wallet balances</h3>
+    <p>Business question: How many customers actually have a wallet balance on record?</p>
+    <pre><code class="language-sql">SELECT
+    COUNT(*) AS total_customers,
+    COUNT(wallet_balance) AS customers_with_balance,
+    COUNT(*) - COUNT(wallet_balance) AS missing_balance_count
+FROM customers;</code></pre>
+    <p>Output: total_customers=10, customers_with_balance=5, missing_balance_count=5. Half the customers have no balance data.</p>
+    <h3>Example 2: Compare AVG with and without COALESCE</h3>
+    <p>Business question: What is the average wallet balance? Should we treat unknown balances as zero?</p>
+    <pre><code class="language-sql">SELECT
+    ROUND(AVG(wallet_balance), 2) AS avg_non_null_only,
+    ROUND(AVG(COALESCE(wallet_balance, 0)), 2) AS avg_with_nulls_as_zero
+FROM customers;</code></pre>
+    <p>Output: avg_non_null_only=690.00 (calculates over 5 customers), avg_with_nulls_as_zero=345.00 (calculates over all 10). The first answer ignores 5 customers entirely. The second treats their missing balance as zero. Both are technically valid but answer different questions.</p>
+    <h3>Example 3: SUM with COALESCE for total transaction volume</h3>
+    <p>Business question: What is the total transaction amount including customers with no recent transaction (treated as 0)?</p>
+    <pre><code class="language-sql">SELECT
+    SUM(last_transaction_amount) AS sum_ignoring_nulls,
+    SUM(COALESCE(last_transaction_amount, 0)) AS sum_with_nulls_as_zero
+FROM customers;</code></pre>
+    <p>Output: sum_ignoring_nulls=1800 (adds 150+300+500+80+120+400+250, skips 3 NULLs), sum_with_nulls_as_zero=1800 (same, because COALESCE adds 0 for NULLs which does not change the sum). In this case the result is the same, but conceptually COALESCE makes your intent explicit.</p>
+    <h3>Example 4: NULLIF to exclude zero values from an average</h3>
+    <p>Business question: Calculate the average wallet balance excluding customers who have exactly zero balance (which might represent inactive accounts).</p>
+    <pre><code class="language-sql">SELECT
+    ROUND(AVG(NULLIF(wallet_balance, 0)), 2) AS avg_active_balances
+FROM customers;</code></pre>
+    <p>NULLIF(wallet_balance, 0) converts any 0 values to NULL, causing AVG to skip them just as it skips existing NULLs.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>The key trap is assuming that because your query runs without errors, the result is complete. AVG silently returns a higher-than-true average when many values are NULL. SUM silently returns a lower-than-true total when NULLs represent amounts that should count as zero. The database never warns you.</p>
+    <p>A practical example with 10 rows and 3 NULLs in amount: AVG(amount) returns the average of the 7 non-NULL values. The denominator is 7, not 10. If those 3 NULL rows represent customers who spent nothing, your average should be calculated over 10. You have to decide and write COALESCE accordingly.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <ul>
+      <li>Trusting AVG results without checking how many NULLs exist in the column</li>
+      <li>Using COUNT(*) when you meant COUNT(column) or vice versa</li>
+      <li>Not auditing NULL counts before writing a summary report on a new table</li>
+      <li>Forgetting that SUM returns NULL (not zero) when all values are NULL</li>
+      <li>Misusing NULLIF: NULLIF(col, 0) makes zeros disappear from aggregates, which may not be what you want</li>
+    </ul>
+    <hr>
+    <h2>Best Practices</h2>
+    <ul>
+      <li>Before aggregating any column in production data, run COUNT(*) vs COUNT(column) to understand how many NULLs exist</li>
+      <li>Decide explicitly whether NULLs should be treated as zero (use COALESCE) or excluded (default behaviour)</li>
+      <li>Document your COALESCE decisions in query comments so future readers understand the assumption</li>
+      <li>Use COALESCE in SUM when NULLs represent missing values that should count as zero (e.g., no transaction means zero, not unknown)</li>
+      <li>Use the default NULL-skipping for AVG when NULLs represent genuinely not-applicable rows</li>
+    </ul>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Paytm, the finance team always checks null rates in transaction columns before running revenue reports. At Swiggy, incomplete delivery partner records with NULL commission values require COALESCE before summing payouts. At IRCTC, passenger records with NULL seat preferences need careful NULL handling in aggregate seat assignment reports. At Byju's, lesson completion rates require COUNT(completed_at) vs COUNT(<em>) because incomplete lessons have NULL timestamps. At PhonePe, UPI transaction amounts can be NULL for failed attempts, so the fraud team uses COUNT(</em>) vs COUNT(amount) to distinguish attempts from completions.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Table: 10 rows
+wallet_balance: 500, 1200, NULL, 800, NULL, 300, NULL, 950, 400, NULL
+
+Default aggregate behaviour (NULL = skip):
+  COUNT(*)              = 10
+  COUNT(wallet_balance) = 6
+  SUM                   = 4150   (6 values summed)
+  AVG                   = 691.67 (4150/6, not 4150/10)
+  MIN                   = 300
+  MAX                   = 1200
+
+With COALESCE(wallet_balance, 0):
+  SUM   = 4150   (same, adding 0s)
+  AVG   = 415.00 (4150/10, NULLs now count as 0 in denominator)
+  COUNT = 10     (no NULLs left after COALESCE)
+
+Choose your approach based on what NULL means in your domain.</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these:</p>
+    <ul>
+      <li>Why does COUNT(*) return a different number than COUNT(column) when NULLs are present?</li>
+      <li>What does AVG return if 5 of 10 rows have NULL in the target column?</li>
+      <li>When should you use COALESCE inside an aggregate?</li>
+      <li>What does NULLIF do and when would you use it?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query to show the total customer count versus the count of customers with a non-NULL wallet_balance in the <code>customers</code> table.</li>
+    </ol>
+    <ol>
+      <li>Write a query to calculate the average wallet_balance two ways: once ignoring NULLs (default) and once treating NULLs as zero. Which is higher?</li>
+    </ol>
+    <ol>
+      <li>Write a query to find how many customers have a NULL phone number.</li>
+    </ol>
+    <ol>
+      <li>Write a query to calculate the total last_transaction_amount, treating NULL as zero using COALESCE.</li>
+    </ol>
+    <ol>
+      <li>Explain in plain English what happens when you run SUM(wallet_balance) on a table where all 10 rows have NULL in wallet_balance.</li>
+    </ol>
+    <ol>
+      <li>Write a query that shows, per city: total customers, customers with a wallet balance, and the average wallet balance (ignoring NULLs). Use COUNT(*), COUNT(col), and AVG(col) together.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>NULL handling is where SQL beginners produce their first incorrect reports without realising it. The fix is not hard: check your NULL counts before trusting any aggregate. Decide whether NULLs mean zero or not-applicable. Write COALESCE explicitly when you want zeros. Leave the default alone when you want to exclude unknowns. That one habit will make your analysis more trustworthy than most.</p>
+  `,
+  'mod6-t9': `
+    <h1>ROLLUP and CUBE: Getting Subtotals and Grand Totals Automatically</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Ananya had been working in data analytics at Flipkart for four months. Every Friday, she had to email the category managers a sales report broken down by region and product category, along with subtotals for each region and a grand total at the bottom. She was doing this by running several GROUP BY queries and manually copying the results into one sheet.</p>
+    <p>Her senior colleague Gaurav watched her do this for two Fridays in a row. On the third Friday he said, "You know there is a single query that does all of that at once, right?" He showed her ROLLUP. The entire three-query workflow collapsed into one.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Business reports almost always need more than just the detailed breakdown. They need subtotals (region-level totals) and a grand total row at the bottom. Getting these from a regular GROUP BY requires either multiple queries unioned together or manual post-processing. ROLLUP and CUBE are SQL extensions designed to generate these summary rows automatically in a single query.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>ROLLUP and CUBE are part of the SQL standard for reporting and OLAP (Online Analytical Processing). They were introduced because reporting systems constantly need aggregated data at multiple levels of hierarchy simultaneously. Instead of forcing you to union five GROUP BY queries, the database can produce all levels of aggregation in one pass using these extensions.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine a company's sales report formatted like an Excel sheet with subtotals:</p>
+    <pre><code>Region: North
+  Mobiles   | 1,20,000
+  Laptops   | 2,50,000
+  Region Total: 3,70,000    &lt;-- subtotal row
+
+Region: South
+  Mobiles   | 90,000
+  Laptops   | 1,80,000
+  Region Total: 2,70,000    &lt;-- subtotal row
+
+Grand Total:  6,40,000      &lt;-- grand total row</code></pre>
+    <p>ROLLUP produces this structure automatically. You do not build it by hand.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>Regular GROUP BY (col1, col2):
+  North | Mobiles  | 120000
+  North | Laptops  | 250000
+  South | Mobiles  |  90000
+  South | Laptops  | 180000
+
+With ROLLUP (col1, col2):
+  North | Mobiles  | 120000
+  North | Laptops  | 250000
+  North | NULL     | 370000   &lt;-- subtotal for North
+  South | Mobiles  |  90000
+  South | Laptops  | 180000
+  South | NULL     | 270000   &lt;-- subtotal for South
+  NULL  | NULL     | 640000   &lt;-- grand total
+
+With CUBE (col1, col2):
+  North | Mobiles  | 120000
+  North | Laptops  | 250000
+  North | NULL     | 370000   &lt;-- North subtotal
+  South | Mobiles  |  90000
+  South | Laptops  | 180000
+  South | NULL     | 270000   &lt;-- South subtotal
+  NULL  | Mobiles  | 210000   &lt;-- Mobiles subtotal (all regions)
+  NULL  | Laptops  | 430000   &lt;-- Laptops subtotal (all regions)
+  NULL  | NULL     | 640000   &lt;-- grand total</code></pre>
+    <p>CUBE adds every possible combination of subtotals. ROLLUP adds only the hierarchical ones.</p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p><strong>ROLLUP</strong> generates subtotals along a hierarchy. For GROUP BY ROLLUP(col1, col2), it produces:</p>
+    <ul>
+      <li>One row per (col1, col2) combination (detailed rows)</li>
+      <li>One subtotal row per col1 (col2 is NULL in these rows)</li>
+      <li>One grand total row (both col1 and col2 are NULL)</li>
+    </ul>
+    <p><strong>CUBE</strong> generates subtotals for every possible combination of the listed columns. For GROUP BY CUBE(col1, col2), it produces:</p>
+    <ul>
+      <li>Detailed rows for each (col1, col2) combination</li>
+      <li>Subtotals for each col1 value (col2 = NULL)</li>
+      <li>Subtotals for each col2 value (col1 = NULL)</li>
+      <li>Grand total row (both NULL)</li>
+    </ul>
+    <p>The NULL values in ROLLUP and CUBE output rows identify the grouping level. A NULL in the category column means "this is a subtotal or total across all categories."</p>
+    <p>The GROUPING() function returns 1 when a column is NULL because of ROLLUP/CUBE (not because the data itself is NULL) and 0 otherwise. Use it with CASE to label those rows as "Total" or "Subtotal."</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <pre><code class="language-sql">-- ROLLUP: subtotals per region + grand total
+SELECT region, category, SUM(amount) AS revenue
+FROM sales
+GROUP BY ROLLUP(region, category);
+
+-- CUBE: all combinations of subtotals
+SELECT region, category, SUM(amount) AS revenue
+FROM sales
+GROUP BY CUBE(region, category);
+
+-- Using GROUPING() to label subtotal/total rows
+SELECT
+    CASE WHEN GROUPING(region) = 1 THEN 'All Regions' ELSE region END AS region,
+    CASE WHEN GROUPING(category) = 1 THEN 'All Categories' ELSE category END AS category,
+    SUM(amount) AS revenue
+FROM sales
+GROUP BY ROLLUP(region, category);
+
+-- ROLLUP with three columns: region &gt; category &gt; product hierarchy
+SELECT region, category, SUM(amount) AS revenue
+FROM sales
+GROUP BY ROLLUP(region, category);</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td>GROUP BY ROLLUP(col1, col2)</td><td>Adds subtotals per col1 and a grand total row</td><td>North subtotal, South subtotal, Grand total</td></tr>
+      <tr><td>GROUP BY CUBE(col1, col2)</td><td>Adds subtotals for every possible column combination</td><td>All combinations including per-category across regions</td></tr>
+      <tr><td>NULL in output</td><td>Identifies a subtotal or total row for that column</td><td>NULL in category means "across all categories"</td></tr>
+      <tr><td>GROUPING(col)</td><td>Returns 1 if NULL is from ROLLUP/CUBE, 0 if from real data</td><td>Used to distinguish ROLLUP NULLs from data NULLs</td></tr>
+      <tr><td>CASE WHEN GROUPING(col)=1</td><td>Labels total rows with a readable name</td><td>Replaces NULL with 'All Regions' in the output</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample Table: sales (Flipkart)</strong></p>
+    <table>
+      <tr><th>sale_id</th><th>region</th><th>category</th><th>amount</th></tr>
+      <tr><td>1</td><td>North</td><td>Electronics</td><td>45000</td></tr>
+      <tr><td>2</td><td>North</td><td>Electronics</td><td>30000</td></tr>
+      <tr><td>3</td><td>North</td><td>Clothing</td><td>8000</td></tr>
+      <tr><td>4</td><td>South</td><td>Electronics</td><td>40000</td></tr>
+      <tr><td>5</td><td>South</td><td>Clothing</td><td>12000</td></tr>
+      <tr><td>6</td><td>South</td><td>Clothing</td><td>9000</td></tr>
+      <tr><td>7</td><td>West</td><td>Electronics</td><td>25000</td></tr>
+      <tr><td>8</td><td>West</td><td>Clothing</td><td>6000</td></tr>
+    </table>
+    <h3>Example 1: Basic ROLLUP with region and category</h3>
+    <p>Business question: Ananya needs detailed sales + region subtotals + grand total in one result.</p>
+    <pre><code class="language-sql">SELECT region, category, SUM(amount) AS revenue
+FROM sales
+GROUP BY ROLLUP(region, category)
+ORDER BY region, category;</code></pre>
+    <p>Output includes:</p>
+    <ul>
+      <li>North | Electronics | 75000</li>
+      <li>North | Clothing | 8000</li>
+      <li>North | NULL | 83000 (North subtotal)</li>
+      <li>South | Clothing | 21000</li>
+      <li>South | Electronics | 40000</li>
+      <li>South | NULL | 61000 (South subtotal)</li>
+      <li>West | Clothing | 6000</li>
+      <li>West | Electronics | 25000</li>
+      <li>West | NULL | 31000 (West subtotal)</li>
+      <li>NULL | NULL | 175000 (grand total)</li>
+    </ul>
+    <h3>Example 2: ROLLUP with labelled total rows using GROUPING()</h3>
+    <p>Business question: Replace NULLs with readable labels in the report.</p>
+    <pre><code class="language-sql">SELECT
+    CASE WHEN GROUPING(region) = 1 THEN 'Grand Total' ELSE region END AS region,
+    CASE WHEN GROUPING(category) = 1 THEN 'All Categories' ELSE category END AS category,
+    SUM(amount) AS revenue
+FROM sales
+GROUP BY ROLLUP(region, category)
+ORDER BY region, category;</code></pre>
+    <p>Now the subtotal row for North shows "North | All Categories | 83000" and the grand total shows "Grand Total | All Categories | 175000" instead of NULL.</p>
+    <h3>Example 3: CUBE for all combinations of subtotals</h3>
+    <p>Business question: The finance team wants subtotals by region AND by category independently, not just hierarchically.</p>
+    <pre><code class="language-sql">SELECT region, category, SUM(amount) AS revenue
+FROM sales
+GROUP BY CUBE(region, category)
+ORDER BY region, category;</code></pre>
+    <p>CUBE adds rows that ROLLUP does not:</p>
+    <ul>
+      <li>NULL | Electronics | 140000 (Electronics across all regions)</li>
+      <li>NULL | Clothing | 35000 (Clothing across all regions)</li>
+    </ul>
+    <p>These cross-column subtotals are what CUBE adds beyond ROLLUP.</p>
+    <h3>Example 4: When to use ROLLUP vs CUBE</h3>
+    <p>Business question: Ananya needs just hierarchical subtotals (region, then grand total). The category manager needs subtotals from every angle.</p>
+    <pre><code class="language-sql">-- Ananya's use case: hierarchy top-down (ROLLUP)
+SELECT region, category, SUM(amount) AS revenue
+FROM sales
+GROUP BY ROLLUP(region, category);
+
+-- Category manager use case: every possible slice (CUBE)
+SELECT region, category, SUM(amount) AS revenue
+FROM sales
+GROUP BY CUBE(region, category);</code></pre>
+    <p>ROLLUP produces fewer rows and is appropriate for hierarchical reports. CUBE produces more rows and is appropriate for pivot-table style analysis.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>The NULL values in ROLLUP/CUBE output look like missing data but they are not. A NULL in the <code>category</code> column on a ROLLUP row means "this row represents the total across all categories for this region." If your actual data also has NULL values in the category column, you cannot tell them apart without using GROUPING().</p>
+    <p>GROUPING() is the solution: GROUPING(category) returns 1 for ROLLUP-generated NULLs and 0 for NULLs that exist in the actual data. Always use GROUPING() in reports where the data itself might contain NULLs in the grouped columns.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <ul>
+      <li>Confusing ROLLUP NULLs with real NULL data in the column</li>
+      <li>Using ROLLUP when CUBE was needed (missing cross-column subtotals)</li>
+      <li>Not using GROUPING() to label subtotal rows, making the report unreadable</li>
+      <li>Not ordering by the GROUP BY columns, making the ROLLUP output hard to follow</li>
+      <li>Using CUBE on many columns (3+ columns produce 2^n combinations and can create very large result sets)</li>
+    </ul>
+    <hr>
+    <h2>Best Practices</h2>
+    <ul>
+      <li>Always use GROUPING() with CASE to replace ROLLUP/CUBE NULLs with readable labels</li>
+      <li>Use ROLLUP for hierarchical reports (region > category > product) where order matters</li>
+      <li>Use CUBE for cross-sectional analysis where you need subtotals from multiple dimensions independently</li>
+      <li>Order your results by the grouping columns to make ROLLUP output readable</li>
+      <li>Avoid CUBE with more than 2-3 columns as the number of subtotal combinations grows exponentially</li>
+    </ul>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Flipkart, finance generates monthly category-region revenue reports using ROLLUP to get automated subtotals. At Amazon India, the seller performance team uses ROLLUP on region and fulfillment type to get seller-level, region-level, and grand totals in one query. At Reliance Jio, the revenue team uses ROLLUP on circle and plan type for quarterly earnings summaries. At Paytm, the finance team uses CUBE on payment method and city to analyze transaction volumes from every angle. ROLLUP and CUBE are the SQL features that power the subtotal rows in spreadsheet-style business reports.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>ROLLUP(region, category) generates:
+  Level 3: (region, category) -- detailed rows
+  Level 2: (region, NULL)     -- subtotals per region
+  Level 1: (NULL, NULL)       -- grand total
+
+CUBE(region, category) generates:
+  (region, category)  -- detailed rows
+  (region, NULL)      -- subtotals per region
+  (NULL, category)    -- subtotals per category  &lt;-- extra vs ROLLUP
+  (NULL, NULL)        -- grand total
+
+ROLLUP = hierarchy (top-down summary)
+CUBE   = all combinations (full pivot)</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these:</p>
+    <ul>
+      <li>What does a NULL in the region column mean in a ROLLUP result?</li>
+      <li>How is CUBE different from ROLLUP?</li>
+      <li>What does GROUPING(column) return and when do you use it?</li>
+      <li>Why would you choose ROLLUP over CUBE?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query using ROLLUP to get total sales by region and category, including region subtotals and a grand total.</li>
+    </ol>
+    <ol>
+      <li>Modify the ROLLUP query to replace NULL values in the output with 'All Regions' and 'All Categories' using GROUPING() and CASE.</li>
+    </ol>
+    <ol>
+      <li>Write a CUBE query on the same <code>sales</code> table. How many additional rows does CUBE produce compared to ROLLUP?</li>
+    </ol>
+    <ol>
+      <li>How would you use ROLLUP with three columns: region, category, and sale_id? What subtotal levels would it produce?</li>
+    </ol>
+    <ol>
+      <li>In a table where the <code>category</code> column itself contains some NULL values (for uncategorised products), how would you distinguish real NULLs from ROLLUP-generated NULLs in the output?</li>
+    </ol>
+    <ol>
+      <li>Write a query to show total revenue by region using ROLLUP, but only for the Electronics category. (Use WHERE to filter before ROLLUP runs.)</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>ROLLUP and CUBE are not beginner features, but they solve a very real problem: generating multi-level summary reports without running multiple queries. Once you understand that NULLs in ROLLUP output mean "total for this group," and that GROUPING() lets you label those rows cleanly, these become genuinely useful tools in your SQL toolkit, especially for the kind of reporting work that data analysts do every week.</p>
+  `,
 
   // ── Module 7 ─────────────────────────────────────────────────
   'mod7-t1': `<h1>What are Joins?</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
