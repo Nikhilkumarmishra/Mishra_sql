@@ -5068,10 +5068,903 @@ RESULT:
   `,
 
   // ── Module 5 ─────────────────────────────────────────────────
-  'mod5-t1': `<h1>INSERT INTO</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod5-t2': `<h1>UPDATE</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod5-t3': `<h1>DELETE</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod5-t4': `<h1>MERGE / UPSERT</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod5-t1': `
+    <h1>INSERT INTO: How You Add New Data to a Table</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Priya just joined Swiggy as a junior data analyst. On her third day, her manager Vikram walks over and says: "We just onboarded 200 new restaurant partners in Bangalore. Their details are sitting in a spreadsheet. Can you get them into the <code>restaurants</code> table in our database by end of day?"</p>
+    <p>Priya opens her laptop, pulls up the database schema, and realizes: she knows how to query data with SELECT, but she has never actually put new data into a table before. This is the moment every new SQL developer faces. You need INSERT INTO.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Most SQL courses start with SELECT. You learn to read data, filter it, join tables, aggregate it. But at some point, someone hands you a requirement: add this record, load this batch, copy this data over. Reading data is only half the job. Writing data is the other half, and INSERT INTO is where that starts.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>A database table is like an empty register when you first create it. The structure (columns, types, constraints) is defined, but there are no rows. INSERT INTO is the command that puts actual rows into that structure. Without it, a table would always remain empty, and a database with no data is just a very complicated filing cabinet with nothing filed.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine a restaurant order slip. The slip has fixed fields: Order ID, Customer Name, Item, Quantity, Price. When a customer places an order, a staff member fills out a new slip and drops it into the stack. INSERT INTO does exactly that for a database table: it creates a new row and fills in the specified fields.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>Table: orders (before)
++----------+----------------+--------+--------+
+| order_id | customer_name  | item   | amount |
++----------+----------------+--------+--------+
+| 1001     | Ankit Sharma   | Biryani| 280    |
+| 1002     | Deepa Nair     | Pizza  | 450    |
++----------+----------------+--------+--------+
+
+You run: INSERT INTO orders (order_id, customer_name, item, amount)
+         VALUES (1003, 'Rahul Verma', 'Burger', 199);
+
+Table: orders (after)
++----------+----------------+--------+--------+
+| order_id | customer_name  | item   | amount |
++----------+----------------+--------+--------+
+| 1001     | Ankit Sharma   | Biryani| 280    |
+| 1002     | Deepa Nair     | Pizza  | 450    |
+| 1003     | Rahul Verma    | Burger | 199    |  &lt;-- new row
++----------+----------------+--------+--------+</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>When you run INSERT INTO, the database engine:</p>
+    <ol>
+      <li>Identifies the target table</li>
+      <li>Matches each value you provide to the corresponding column</li>
+      <li>Validates the data types and constraints (NOT NULL, UNIQUE, PRIMARY KEY, etc.)</li>
+      <li>If everything checks out, writes the new row to the table</li>
+      <li>If anything fails (duplicate primary key, wrong data type, missing required column), it throws an error and rolls back</li>
+    </ol>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p><strong>Basic single-row insert:</strong></p>
+    <pre><code class="language-sql">INSERT INTO orders (order_id, customer_name, item, amount)
+VALUES (1003, 'Rahul Verma', 'Burger', 199);</code></pre>
+    <p><strong>Inserting multiple rows at once:</strong></p>
+    <pre><code class="language-sql">INSERT INTO orders (order_id, customer_name, item, amount)
+VALUES
+  (1004, 'Simran Kaur', 'Dosa', 120),
+  (1005, 'Arjun Mehta', 'Thali', 350),
+  (1006, 'Neha Joshi', 'Sandwich', 180);</code></pre>
+    <p>This is much faster than running three separate INSERT statements. The database processes them as a single operation.</p>
+    <p><strong>INSERT with SELECT (copying data from another table):</strong></p>
+    <pre><code class="language-sql">INSERT INTO orders_archive (order_id, customer_name, item, amount)
+SELECT order_id, customer_name, item, amount
+FROM orders
+WHERE order_date &lt; '2024-01-01';</code></pre>
+    <p>This copies all orders from before 2024 into an archive table. No VALUES clause needed: the SELECT provides the rows.</p>
+    <p><strong>Inserting into all columns (short form):</strong></p>
+    <pre><code class="language-sql">INSERT INTO orders
+VALUES (1007, 'Kiran Rao', 'Idli', 90, '2024-06-15', 'delivered');</code></pre>
+    <p>This works only if you provide a value for every column, in the exact order they were defined in the table. If the table structure ever changes, this statement breaks.</p>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>INSERT INTO</code></td><td>Tells SQL you are adding a new row</td><td><code>INSERT INTO orders</code></td></tr>
+      <tr><td><code>table_name</code></td><td>The table you are inserting into</td><td><code>orders</code></td></tr>
+      <tr><td><code>(col1, col2, ...)</code></td><td>Lists which columns you are filling</td><td><code>(order_id, customer_name, amount)</code></td></tr>
+      <tr><td><code>VALUES</code></td><td>Introduces the actual data</td><td><code>VALUES (1003, 'Rahul', 199)</code></td></tr>
+      <tr><td><code>(val1, val2, ...)</code></td><td>The actual values, matching the column list</td><td><code>(1003, 'Rahul Verma', 199)</code></td></tr>
+      <tr><td><code>SELECT ...</code></td><td>Used instead of VALUES to pull data from another table</td><td><code>SELECT id, name FROM temp_orders</code></td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample table: <code>customers</code> at Flipkart</strong></p>
+    <pre><code>+-------------+------------------+----------+---------------+-----------+
+| customer_id | name             | city     | email         | is_active |
++-------------+------------------+----------+---------------+-----------+
+| 101         | Ravi Kumar       | Delhi    | ravi@mail.com | true      |
+| 102         | Pooja Singh      | Mumbai   | pooja@mail.com| true      |
++-------------+------------------+----------+---------------+-----------+</code></pre>
+    <h3>Example 1: Add a single new customer</h3>
+    <p>Business question: A new customer just signed up. Add them to the table.</p>
+    <pre><code class="language-sql">INSERT INTO customers (customer_id, name, city, email, is_active)
+VALUES (103, 'Arjun Mehta', 'Bengaluru', 'arjun@mail.com', true);</code></pre>
+    <p>Result: A new row for Arjun Mehta appears in the table.</p>
+    <h3>Example 2: Add multiple customers from a city launch</h3>
+    <p>Business question: Flipkart just launched in three new cities. Add all three customers at once.</p>
+    <pre><code class="language-sql">INSERT INTO customers (customer_id, name, city, email, is_active)
+VALUES
+  (104, 'Neha Sharma', 'Pune', 'neha@mail.com', true),
+  (105, 'Vikram Nair', 'Hyderabad', 'vikram@mail.com', true),
+  (106, 'Priya Gupta', 'Chennai', 'priya@mail.com', true);</code></pre>
+    <p>Result: Three new rows are added in one operation.</p>
+    <h3>Example 3: Skip a column and let it default</h3>
+    <p>Business question: A customer record came in without an email. Insert it anyway.</p>
+    <pre><code class="language-sql">INSERT INTO customers (customer_id, name, city, is_active)
+VALUES (107, 'Suresh Babu', 'Kolkata', true);</code></pre>
+    <p>Result: Row is inserted with <code>email</code> set to NULL (or whatever the column default is). If <code>email</code> had a NOT NULL constraint, this would throw an error.</p>
+    <h3>Example 4: Copy customers from a staging table</h3>
+    <p>Business question: A batch of new customers was loaded into <code>customers_staging</code>. Move them into the main table.</p>
+    <pre><code class="language-sql">INSERT INTO customers (customer_id, name, city, email, is_active)
+SELECT customer_id, name, city, email, true
+FROM customers_staging
+WHERE validated = true;</code></pre>
+    <p>Result: All validated customers from the staging table are copied into the main <code>customers</code> table.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p><strong>Column count mismatch:</strong> If you list 4 columns but provide 5 values, SQL throws an error immediately. The number of columns and values must match exactly.</p>
+    <p><strong>Skipping the column list:</strong> Running <code>INSERT INTO orders VALUES (...)</code> requires you to know the exact order of every column. If someone adds a column to the table later, your query breaks silently or errors out.</p>
+    <p><strong>String quoting:</strong> Text values must be in single quotes. <code>'Rahul Verma'</code> is correct. <code>"Rahul Verma"</code> may work in some databases but is not standard SQL.</p>
+    <p><strong>NULL vs empty string:</strong> Skipping a column inserts NULL. Inserting <code>''</code> inserts an empty string. These are different things, and both can cause issues downstream.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p><strong>Mistake 1: Forgetting the WHERE in a later UPDATE after an INSERT.</strong> Not directly related, but a common pattern is to insert a row and then immediately UPDATE it. Always double-check your WHERE clause in that follow-up.</p>
+    <p><strong>Mistake 2: Duplicate primary key.</strong> If <code>customer_id</code> is a primary key and you try to insert 103 again, the database rejects it with a constraint violation error. Either use a unique ID or handle conflicts explicitly.</p>
+    <p><strong>Mistake 3: Data type mismatch.</strong> Inserting a text string into an integer column fails. Always verify your column types before inserting.</p>
+    <p><strong>Mistake 4: Using INSERT INTO table VALUES (...) in production code.</strong> If the table schema changes, this breaks. Always name your columns explicitly.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <ul>
+      <li>Always list column names explicitly in your INSERT statement, never rely on column order.</li>
+      <li>Insert multiple rows in a single statement rather than looping with individual inserts. It is faster and puts less load on the database.</li>
+      <li>When loading data from another source, use a staging table first. Validate the staging data before inserting into the production table.</li>
+      <li>If you are inserting rows that might already exist, look into INSERT ... ON CONFLICT (PostgreSQL) or MERGE (covered in a later article) rather than blindly inserting.</li>
+      <li>Test your INSERT with a SELECT first. Write the SELECT version of your query to confirm you are pulling the right data, then wrap it with INSERT INTO.</li>
+    </ul>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Swiggy, when a delivery partner completes an order, a new row is inserted into the <code>deliveries</code> table with the timestamp, distance, and payout details. At IRCTC, every ticket booking writes a new row to the <code>bookings</code> table. At Paytm, every transaction event inserts a row into the <code>transaction_log</code> table. These are not manual inserts. They are automated inserts triggered by application code. But the SQL underneath is exactly what you just learned.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Data Source
+(Form / App / API / Staging Table)
+           |
+           v
+    INSERT INTO statement
+           |
+     +-----+------+
+     |  Validation |   &lt;-- Are column counts correct?
+     |  Check      |   &lt;-- Are types correct?
+     |             |   &lt;-- Are constraints satisfied?
+     +-----+------+
+           |
+    Pass? Yes / No
+     |           |
+     v           v
+  Row added   Error thrown
+  to table    (nothing changes)</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these without looking:</p>
+    <ul>
+      <li>What happens if you skip a NOT NULL column in your INSERT?</li>
+      <li>Why is listing column names explicitly safer than relying on column order?</li>
+      <li>How do you insert data from one table into another using INSERT with SELECT?</li>
+      <li>What error do you get if you try to insert a duplicate primary key?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write an INSERT statement to add a new restaurant called "Spice Garden" with restaurant_id 501, city "Bengaluru", cuisine "South Indian", and rating 4.2 into a table called <code>restaurants</code>.</li>
+    </ol>
+    <ol>
+      <li>Swiggy is onboarding 3 new delivery partners at once. Write a single INSERT statement to add all three to a <code>delivery_partners</code> table with columns: partner_id, name, city, vehicle_type.</li>
+    </ol>
+    <ol>
+      <li>You have a <code>new_users_staging</code> table with columns user_id, name, phone, city. Write an INSERT INTO SELECT to copy all users from that staging table into the main <code>users</code> table where city = 'Mumbai'.</li>
+    </ol>
+    <ol>
+      <li>What happens when you run this on a table where <code>order_id</code> is the primary key and order_id 1001 already exists?</li>
+    </ol>
+    <pre><code class="language-sql">   INSERT INTO orders (order_id, customer_name) VALUES (1001, 'Test User');</code></pre>
+    <ol>
+      <li>A <code>products</code> table has columns: product_id, name, price, category, created_at. The <code>created_at</code> column has a DEFAULT of the current timestamp. Write an INSERT that adds a new product without specifying the <code>created_at</code> column.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>INSERT INTO is the entry point for all data in a database. Every row you have ever queried was put there by an INSERT at some point. Understanding how it works, what can go wrong, and how to use it safely is fundamental. Once you are comfortable with single-row inserts, multi-row inserts, and INSERT with SELECT, you have the tools to load data at any scale. The next step is knowing how to change data that is already there, which is what UPDATE covers.</p>
+  `,
+  'mod5-t2': `
+    <h1>UPDATE: How You Change Existing Data in a Table</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Arjun works at Flipkart's catalog team in Bengaluru. One Monday morning, his manager sends a message: "The GST rate changed over the weekend. All electronics products need their prices recalculated with 18% tax included. Can you update the database before the site goes live at 9 AM?"</p>
+    <p>Arjun has 45 minutes. There are 4,000 electronics products. He cannot update them one by one. He needs a single SQL statement that finds every electronics product and changes the price column in bulk. This is what UPDATE is for.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Data changes. Prices go up. Addresses change. Order statuses move from "pending" to "delivered". Employee designations get updated after appraisals. A database that cannot be updated would become stale within hours of going live. UPDATE is the command that keeps a database current.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>INSERT adds new rows. But what about rows that already exist and need to change? Deleting and re-inserting a row every time something changes would be messy, slow, and would destroy any history tied to that row's primary key. UPDATE was built to modify specific columns in existing rows, cleanly and efficiently, without touching anything else.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine a whiteboard in an office with employee names and their current projects written on it. When someone switches projects, you do not erase their entire entry and rewrite everything. You just erase the project column next to their name and write the new one. UPDATE does exactly that: it reaches into a specific row and changes specific columns, leaving everything else untouched.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>Table: products (before)
++------------+-------------------+----------+----------+
+| product_id | name              | price    | category |
++------------+-------------------+----------+----------+
+| P001       | Samsung TV 43"    | 32000    | electronics|
+| P002       | OnePlus Nord 5G   | 28000    | electronics|
+| P003       | Kurti Set         | 899      | fashion  |
++------------+-------------------+----------+----------+
+
+You run: UPDATE products SET price = price * 1.18
+         WHERE category = 'electronics';
+
+Table: products (after)
++------------+-------------------+----------+----------+
+| product_id | name              | price    | category |
++------------+-------------------+----------+----------+
+| P001       | Samsung TV 43"    | 37760    | electronics|  &lt;-- updated
+| P002       | OnePlus Nord 5G   | 33040    | electronics|  &lt;-- updated
+| P003       | Kurti Set         | 899      | fashion  |  &lt;-- unchanged
++------------+-------------------+----------+----------+</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>When you run UPDATE, the database engine:</p>
+    <ol>
+      <li>Scans the table to find rows that match the WHERE condition</li>
+      <li>For each matching row, applies the SET changes to the specified columns</li>
+      <li>Validates any constraints (e.g., NOT NULL, data type, CHECK constraints)</li>
+      <li>Writes the modified rows back to storage</li>
+      <li>If no WHERE is specified, every single row in the table gets updated</li>
+    </ol>
+    <p>Step 5 is the one that has caused production incidents at many companies. More on that shortly.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p><strong>Basic update, single column:</strong></p>
+    <pre><code class="language-sql">UPDATE products
+SET price = 35000
+WHERE product_id = 'P001';</code></pre>
+    <p><strong>Updating multiple columns at once:</strong></p>
+    <pre><code class="language-sql">UPDATE products
+SET price = 35000,
+    category = 'premium_electronics'
+WHERE product_id = 'P001';</code></pre>
+    <p><strong>Updating with a calculated value:</strong></p>
+    <pre><code class="language-sql">UPDATE products
+SET price = price * 1.18
+WHERE category = 'electronics';</code></pre>
+    <p>The right side of the SET can reference the current value of the column. This is how you do percentage increases, decrements, or any math-based update.</p>
+    <p><strong>UPDATE with a subquery:</strong></p>
+    <pre><code class="language-sql">UPDATE employees
+SET department = 'Cloud Infrastructure'
+WHERE employee_id IN (
+    SELECT employee_id
+    FROM project_assignments
+    WHERE project_name = 'Jio Cloud 2024'
+);</code></pre>
+    <p>The subquery finds all employee IDs assigned to a specific project, and the UPDATE changes their department accordingly.</p>
+    <p><strong>UPDATE without WHERE (the horror story):</strong></p>
+    <pre><code class="language-sql">-- DO NOT run this unless you actually mean it
+UPDATE products
+SET price = 0;</code></pre>
+    <p>This sets every product's price to zero. All 4,000 rows. Instantly. If you do not have a backup and you have already committed this change, you have a very bad day ahead.</p>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>UPDATE</code></td><td>Tells SQL you want to modify existing rows</td><td><code>UPDATE products</code></td></tr>
+      <tr><td><code>table_name</code></td><td>The table containing the rows to change</td><td><code>products</code></td></tr>
+      <tr><td><code>SET</code></td><td>Introduces the column changes</td><td><code>SET price = 35000</code></td></tr>
+      <tr><td><code>col = value</code></td><td>Specifies which column gets what value</td><td><code>price = price * 1.18</code></td></tr>
+      <tr><td><code>col1 = v1, col2 = v2</code></td><td>Multiple column updates separated by commas</td><td><code>SET price = 35000, category = 'electronics'</code></td></tr>
+      <tr><td><code>WHERE</code></td><td>Filters which rows get updated</td><td><code>WHERE category = 'electronics'</code></td></tr>
+      <tr><td>Subquery in WHERE</td><td>Uses results from another query to filter rows</td><td><code>WHERE id IN (SELECT id FROM ...)</code></td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample table: <code>employees</code> at Reliance Jio</strong></p>
+    <pre><code>+-------------+------------------+------------+-----------+--------+
+| employee_id | name             | department | city      | salary |
++-------------+------------------+------------+-----------+--------+
+| E001        | Simran Kaur      | Sales      | Mumbai    | 55000  |
+| E002        | Rahul Desai      | Engineering| Pune      | 85000  |
+| E003        | Neha Iyer        | Sales      | Chennai   | 52000  |
+| E004        | Karan Malhotra   | HR         | Delhi     | 48000  |
++-------------+------------------+------------+-----------+--------+</code></pre>
+    <h3>Example 1: Update a single employee's salary</h3>
+    <p>Business question: Simran received a promotion. Update her salary to 70,000.</p>
+    <pre><code class="language-sql">UPDATE employees
+SET salary = 70000
+WHERE employee_id = 'E001';</code></pre>
+    <p>Result: Only Simran's row is changed. Everyone else stays the same.</p>
+    <h3>Example 2: Update multiple columns at once</h3>
+    <p>Business question: Rahul transferred to the Bengaluru office and moved to the Cloud team.</p>
+    <pre><code class="language-sql">UPDATE employees
+SET department = 'Cloud',
+    city = 'Bengaluru'
+WHERE employee_id = 'E002';</code></pre>
+    <p>Result: Both <code>department</code> and <code>city</code> are updated for Rahul in a single statement.</p>
+    <h3>Example 3: Calculated update across a department</h3>
+    <p>Business question: All Sales employees get a 10% salary hike after the Q3 appraisal.</p>
+    <pre><code class="language-sql">UPDATE employees
+SET salary = salary * 1.10
+WHERE department = 'Sales';</code></pre>
+    <p>Result: Simran's salary becomes 77,000 (70,000 x 1.10) and Neha's becomes 57,200 (52,000 x 1.10). HR and Engineering are untouched.</p>
+    <h3>Example 4: Update using a subquery</h3>
+    <p>Business question: Promote all employees who are currently assigned to the "5G Rollout" project by increasing their salary by 15,000.</p>
+    <pre><code class="language-sql">UPDATE employees
+SET salary = salary + 15000
+WHERE employee_id IN (
+    SELECT employee_id
+    FROM project_assignments
+    WHERE project_name = '5G Rollout'
+);</code></pre>
+    <p>Result: Only employees linked to the 5G Rollout project in the <code>project_assignments</code> table get the salary bump.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p><strong>Forgetting the WHERE clause:</strong> This is the single most dangerous mistake in SQL. An UPDATE without WHERE touches every row. Always ask yourself: did I write a WHERE clause? Is it correct?</p>
+    <p><strong>Updating the wrong rows:</strong> A WHERE condition that is too broad can update rows you did not intend to change. This is subtler than a missing WHERE and harder to catch.</p>
+    <p><strong>Overwriting with stale data:</strong> If your application fetches a value, modifies it in code, and then writes it back, there is a window where another process may have changed the same row. This is a concurrency problem. In critical systems, row-level locking or optimistic concurrency controls are used to handle this.</p>
+    <p><strong>Calculated updates with NULL:</strong> If a column contains NULL and you do <code>price = price * 1.18</code>, the result is still NULL. Arithmetic on NULL always produces NULL. Filter out NULLs or handle them with COALESCE if needed.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p><strong>Mistake 1: Running UPDATE without testing the WHERE clause first.</strong> Always run a SELECT with the same WHERE clause to see exactly which rows will be affected before you run the UPDATE.</p>
+    <p><strong>Mistake 2: Missing a commit in a transactional context.</strong> In databases that use explicit transactions, your UPDATE is not permanent until you COMMIT. Do not assume the change is saved until you confirm it.</p>
+    <p><strong>Mistake 3: Updating a primary key.</strong> Changing a primary key is almost always a bad idea. It breaks foreign key references in other tables. Only do this if you fully understand the cascading impact.</p>
+    <p><strong>Mistake 4: Using SET col = NULL without intending to.</strong> If you build your UPDATE query dynamically and a variable ends up being NULL, you will accidentally erase data in that column.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p><strong>Test with SELECT first.</strong> Before any UPDATE, run the equivalent SELECT to confirm the rows you are targeting:</p>
+    <pre><code class="language-sql">-- First, check what you are about to change
+SELECT * FROM products WHERE category = 'electronics';
+
+-- Then, run the update
+UPDATE products SET price = price * 1.18 WHERE category = 'electronics';</code></pre>
+    <p><strong>Use a transaction for safety:</strong></p>
+    <pre><code class="language-sql">BEGIN;
+UPDATE employees SET salary = salary * 1.10 WHERE department = 'Sales';
+-- Review the result
+SELECT * FROM employees WHERE department = 'Sales';
+-- If everything looks correct:
+COMMIT;
+-- If something went wrong:
+-- ROLLBACK;</code></pre>
+    <p>This gives you a safety net. If the update looks wrong, ROLLBACK undoes it before it becomes permanent.</p>
+    <p><strong>Be specific with WHERE.</strong> Whenever possible, use a primary key or unique identifier in the WHERE clause. Filtering by a non-unique column like <code>city</code> or <code>department</code> can be unpredictable if data has duplicates or unexpected values.</p>
+    <p><strong>Log what you change.</strong> In production systems, critical updates (salary changes, pricing changes, status changes) are often written to an audit log table with the old value, new value, who made the change, and when.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Zomato, every time a restaurant updates its menu price, an UPDATE runs on the <code>menu_items</code> table. At BookMyShow, when a customer cancels a booking, the <code>bookings</code> table row gets its <code>status</code> column updated from <code>confirmed</code> to <code>cancelled</code>. At Ola, driver ratings are recalculated daily and an UPDATE refreshes the <code>rating</code> column in the <code>drivers</code> table. These are all the same UPDATE command you just learned, running thousands of times a day.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>UPDATE flow:
+                     +------------------+
+   UPDATE statement  |   WHERE clause   |
+   hits the table    |   filter applied |
+         |           +--------+---------+
+         v                    |
+   Scan all rows              v
+         |          Matching rows found?
+         |                    |
+         |           Yes      |     No
+         v                    v     v
+   Apply SET changes    Update them  Do nothing
+   to matching rows          |
+         |                   v
+         v             Validate constraints
+   Write back to             |
+   storage               Pass? Yes / No
+                             |       |
+                             v       v
+                         Committed  Error + Rollback</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these without looking:</p>
+    <ul>
+      <li>What happens when you run UPDATE without a WHERE clause?</li>
+      <li>How do you update multiple columns in a single UPDATE statement?</li>
+      <li>How do you use a subquery inside an UPDATE?</li>
+      <li>What is the safe pattern before running any UPDATE in production?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>In Flipkart's <code>products</code> table, all items in the <code>furniture</code> category need a 5% price increase. Write the UPDATE statement.</li>
+    </ol>
+    <ol>
+      <li>A customer changed their phone number. Write an UPDATE to change the <code>phone</code> column for customer_id = 2048 in a <code>customers</code> table.</li>
+    </ol>
+    <ol>
+      <li>Write an UPDATE that sets the <code>status</code> column to <code>'inactive'</code> for all users in a <code>users</code> table who have not logged in since 2023 (hint: use a <code>last_login</code> column with a date comparison).</li>
+    </ol>
+    <ol>
+      <li>You want to give a 20,000 rupee bonus to all employees in the <code>engineering</code> department who are based in <code>Hyderabad</code>. Write the UPDATE.</li>
+    </ol>
+    <ol>
+      <li>Before running a bulk UPDATE on a <code>pricing</code> table, what SELECT query would you run first to verify you are targeting the right rows? Write both the SELECT and the UPDATE for: increasing all prices in the <code>snacks</code> category by 12%.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>UPDATE is powerful and fast. That combination makes it dangerous if used carelessly. The golden rule every senior analyst will tell you: always SELECT before you UPDATE. Wrap risky updates in a transaction. Keep your WHERE clause tight. One missing WHERE clause on a Friday afternoon has ended more than a few careers. Used carefully, UPDATE is one of the most useful tools in your SQL kit.</p>
+  `,
+  'mod5-t3': `
+    <h1>DELETE: How You Remove Rows from a Table</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Neha works on the trust and safety team at Zomato. Her manager calls her on a Tuesday and says: "We found 47 fake restaurant accounts created by a spam network. Compliance wants them out of the system before the audit tomorrow morning. Can you remove them?"</p>
+    <p>Neha pulls up the list of IDs. She writes a DELETE statement, pastes it into her SQL editor, and hovers over the execute button. Then she pauses. She remembers what her senior told her during onboarding: "Before you run any DELETE, run the SELECT version first. Confirm exactly what you are about to remove." She runs the SELECT. 47 rows, matching perfectly. She runs the DELETE. Done.</p>
+    <p>This is the right way to use DELETE.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Data gets stale, incorrect, or invalid. Test records end up in production. Duplicate entries accumulate. Old logs pile up. At some point, you will need to remove rows from a table. DELETE is the tool for that. But it is the command in SQL where the consequences of a mistake are most immediate and most difficult to undo.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Databases are not meant to hold every row forever. Some data has a natural end: a cancelled order, a deactivated account, a session record that expired. DELETE exists to remove rows that no longer belong in a table, keeping the data clean and the table from growing indefinitely.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Think of a guest list for an event. When someone cancels their registration, you draw a line through their entry and remove them from the list. You do not throw away the entire list (that would be DROP). You do not blank out every entry (that would be DELETE without WHERE). You find their specific entry and remove only that one. DELETE with a proper WHERE clause is that precise removal.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>Table: users (before)
++---------+------------------+-----------+-----------+
+| user_id | name             | city      | is_active |
++---------+------------------+-----------+-----------+
+| U001    | Ravi Shankar     | Delhi     | true      |
+| U002    | FakeUser_bot99   | Unknown   | false     |
+| U003    | Priya Malhotra   | Bengaluru | true      |
+| U004    | SpamAccount_44   | Unknown   | false     |
++---------+------------------+-----------+-----------+
+
+You run: DELETE FROM users WHERE name LIKE 'FakeUser%' OR name LIKE 'SpamAccount%';
+
+Table: users (after)
++---------+------------------+-----------+-----------+
+| user_id | name             | city      | is_active |
++---------+------------------+-----------+-----------+
+| U001    | Ravi Shankar     | Delhi     | true      |
+| U003    | Priya Malhotra   | Bengaluru | true      |
++---------+------------------+-----------+-----------+</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>When you run DELETE, the database engine:</p>
+    <ol>
+      <li>Scans the table for rows matching the WHERE condition</li>
+      <li>Marks those rows for removal</li>
+      <li>Checks for foreign key constraints: if another table references these rows, the database may block the delete or cascade it depending on the constraint definition</li>
+      <li>Removes the rows and records the operation in the transaction log</li>
+      <li>If no WHERE clause is given, marks every row in the table for removal</li>
+    </ol>
+    <p>The operation is logged, which means it can be rolled back within a transaction. This is different from TRUNCATE, which bypasses the row-by-row log in most databases.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p><strong>Basic single-condition delete:</strong></p>
+    <pre><code class="language-sql">DELETE FROM users
+WHERE user_id = 'U002';</code></pre>
+    <p><strong>Delete multiple rows matching a condition:</strong></p>
+    <pre><code class="language-sql">DELETE FROM orders
+WHERE status = 'cancelled'
+AND order_date &lt; '2023-01-01';</code></pre>
+    <p><strong>Delete using a subquery:</strong></p>
+    <pre><code class="language-sql">DELETE FROM reviews
+WHERE restaurant_id IN (
+    SELECT restaurant_id
+    FROM restaurants
+    WHERE is_verified = false
+);</code></pre>
+    <p><strong>The statement you should never run casually:</strong></p>
+    <pre><code class="language-sql">-- This removes ALL rows from the table
+DELETE FROM users;</code></pre>
+    <p>No error. No warning. Every row is gone. The table structure remains, but it is completely empty.</p>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>DELETE FROM</code></td><td>Tells SQL you want to remove rows</td><td><code>DELETE FROM orders</code></td></tr>
+      <tr><td><code>table_name</code></td><td>The table to delete rows from</td><td><code>orders</code></td></tr>
+      <tr><td><code>WHERE</code></td><td>Specifies which rows to remove</td><td><code>WHERE status = 'cancelled'</code></td></tr>
+      <tr><td>Condition</td><td>The filter that identifies target rows</td><td><code>order_date < '2023-01-01'</code></td></tr>
+      <tr><td>Subquery</td><td>Lets you use data from another table to identify rows</td><td><code>WHERE id IN (SELECT id FROM ...)</code></td></tr>
+      <tr><td>No WHERE clause</td><td>Removes every single row in the table</td><td>(avoid this unless fully intentional)</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample table: <code>orders</code> at Swiggy</strong></p>
+    <pre><code>+----------+----------+-----------+--------+------------+
+| order_id | user_id  | status    | amount | order_date |
++----------+----------+-----------+--------+------------+
+| O001     | U101     | delivered | 320    | 2024-01-10 |
+| O002     | U102     | cancelled | 180    | 2024-01-11 |
+| O003     | U103     | delivered | 540    | 2023-06-05 |
+| O004     | U104     | cancelled | 90     | 2022-12-20 |
+| O005     | U105     | delivered | 275    | 2024-02-01 |
++----------+----------+-----------+--------+------------+</code></pre>
+    <h3>Example 1: Delete a specific order</h3>
+    <p>Business question: Order O002 was a test order created by the QA team. Remove it.</p>
+    <pre><code class="language-sql">DELETE FROM orders
+WHERE order_id = 'O002';</code></pre>
+    <p>Result: Only row O002 is removed. All other rows remain untouched.</p>
+    <h3>Example 2: Delete all cancelled orders older than 2023</h3>
+    <p>Business question: Finance wants to clean up cancelled orders from before 2023 to reduce table size.</p>
+    <pre><code class="language-sql">DELETE FROM orders
+WHERE status = 'cancelled'
+AND order_date &lt; '2023-01-01';</code></pre>
+    <p>Result: Row O004 is deleted. Row O002 is not deleted because its date is 2024. Row O003 is not deleted because its status is delivered.</p>
+    <h3>Example 3: Delete using a subquery</h3>
+    <p>Business question: Remove all orders placed by users who have been banned (marked in the <code>banned_users</code> table).</p>
+    <pre><code class="language-sql">DELETE FROM orders
+WHERE user_id IN (
+    SELECT user_id
+    FROM banned_users
+    WHERE ban_reason = 'fraud'
+);</code></pre>
+    <p>Result: Any order rows matching a banned user ID are removed.</p>
+    <h3>Example 4: Safe delete with SELECT first</h3>
+    <p>Business question: Before deleting old delivered orders from 2022, confirm exactly which rows will be affected.</p>
+    <pre><code class="language-sql">-- Step 1: Check first
+SELECT * FROM orders
+WHERE status = 'delivered'
+AND order_date &lt; '2023-01-01';
+
+-- Step 2: If the result looks right, run the delete
+DELETE FROM orders
+WHERE status = 'delivered'
+AND order_date &lt; '2023-01-01';</code></pre>
+    <p>Result: You see the rows before removing them. No surprises.</p>
+    <hr>
+    <h2>DELETE vs TRUNCATE vs DROP</h2>
+    <p>These three operations are often confused by beginners. They are fundamentally different:</p>
+    <table>
+      <tr><th>Operation</th><th>What It Does</th><th>Removes Structure?</th><th>Can Be Rolled Back?</th><th>Speed</th></tr>
+      <tr><td><code>DELETE</code></td><td>Removes specific rows (or all rows if no WHERE)</td><td>No</td><td>Yes (within a transaction)</td><td>Slower (row-by-row)</td></tr>
+      <tr><td><code>TRUNCATE</code></td><td>Removes all rows instantly, resets auto-increment</td><td>No</td><td>Sometimes (depends on database)</td><td>Very fast</td></tr>
+      <tr><td><code>DROP</code></td><td>Removes the entire table including structure</td><td>Yes</td><td>No (in most databases)</td><td>Fast</td></tr>
+    </table>
+    <p>To put it simply:</p>
+    <ul>
+      <li>DELETE removes selected rows, the table stays</li>
+      <li>TRUNCATE empties the whole table, the table stays</li>
+      <li>DROP eliminates the table entirely</li>
+    </ul>
+    <p>If someone tells you "delete that table", clarify whether they mean remove all rows (TRUNCATE) or remove the table structure too (DROP). The difference matters enormously.</p>
+    <hr>
+    <h2>The Soft Delete Pattern</h2>
+    <p>Many production systems at companies like PhonePe and Byju's never actually DELETE rows. Instead, they add an <code>is_deleted</code> column and set it to true. This is called a soft delete.</p>
+    <pre><code class="language-sql">-- Instead of this:
+DELETE FROM users WHERE user_id = 'U099';
+
+-- Do this:
+UPDATE users SET is_deleted = true WHERE user_id = 'U099';</code></pre>
+    <p>Then all your queries filter on <code>WHERE is_deleted = false</code> to exclude soft-deleted records.</p>
+    <p>Why do companies prefer this:</p>
+    <ul>
+      <li>You can restore data if a mistake is made</li>
+      <li>You can audit who deleted what and when (by adding a <code>deleted_at</code> timestamp and <code>deleted_by</code> column)</li>
+      <li>Foreign key references in other tables are not broken</li>
+      <li>Regulatory requirements in industries like finance and healthcare often require keeping data even when "deleted"</li>
+    </ul>
+    <p>The downside is that your table keeps growing. To handle that, companies periodically archive soft-deleted rows to a separate cold-storage table.</p>
+    <hr>
+    <h2>Cascading Deletes with Foreign Keys</h2>
+    <p>If your <code>orders</code> table has a foreign key referencing the <code>users</code> table, and you try to delete a user who has orders, the database will block the delete to prevent orphaned rows.</p>
+    <p>You have two options:</p>
+    <p><strong>Option 1: Delete child rows first:</strong></p>
+    <pre><code class="language-sql">DELETE FROM orders WHERE user_id = 'U101';
+DELETE FROM users WHERE user_id = 'U101';</code></pre>
+    <p><strong>Option 2: Set the foreign key to CASCADE:</strong></p>
+    <p>If the foreign key was defined with <code>ON DELETE CASCADE</code>, deleting the user automatically deletes all their orders. This is powerful but dangerous if not thought through carefully.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p><strong>DELETE without WHERE removes all rows.</strong> The table structure stays. It looks like nothing happened. But when you do <code>SELECT * FROM orders</code>, you get zero rows back. This is one of the most painful moments in a developer's career.</p>
+    <p><strong>Thinking DELETE and DROP are the same.</strong> DELETE removes rows. DROP removes the table. Very different.</p>
+    <p><strong>Forgetting foreign key constraints.</strong> If you try to delete a parent row that has child rows in another table, and there is no CASCADE, the database throws a foreign key violation error.</p>
+    <p><strong>DELETE is not always instant.</strong> On a large table with millions of rows, a bulk DELETE can lock the table and cause performance issues. For large cleanups, consider deleting in batches.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p><strong>Mistake 1: Running DELETE without a WHERE clause in a prod console.</strong> Always double-check that your cursor is on the right statement before executing. Using a transaction with BEGIN/ROLLBACK as a safety net saves lives.</p>
+    <p><strong>Mistake 2: Confusing DELETE FROM table and TRUNCATE TABLE.</strong> They both empty a table but behave differently in transactions and with auto-increment counters.</p>
+    <p><strong>Mistake 3: Deleting a parent record without handling child records.</strong> Always check for foreign key dependencies before deleting rows that other tables reference.</p>
+    <p><strong>Mistake 4: Not checking row count before a bulk delete.</strong> Run a <code>SELECT COUNT(*)</code> with the same WHERE condition. If you expect 47 rows and the count shows 4,700, something is wrong with your filter.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Always run the equivalent SELECT before DELETE:</p>
+    <pre><code class="language-sql">-- First:
+SELECT COUNT(*) FROM orders WHERE status = 'cancelled' AND order_date &lt; '2023-01-01';
+-- Verify the count matches your expectations
+
+-- Then:
+DELETE FROM orders WHERE status = 'cancelled' AND order_date &lt; '2023-01-01';</code></pre>
+    <p>Use transactions for any non-trivial delete:</p>
+    <pre><code class="language-sql">BEGIN;
+DELETE FROM orders WHERE status = 'cancelled' AND order_date &lt; '2023-01-01';
+-- Check row count
+SELECT COUNT(*) FROM orders;
+-- If satisfied:
+COMMIT;
+-- If something is wrong:
+-- ROLLBACK;</code></pre>
+    <p>For large tables, delete in batches to avoid locking issues:</p>
+    <pre><code class="language-sql">-- Delete 1000 rows at a time
+DELETE FROM logs
+WHERE created_at &lt; '2023-01-01'
+LIMIT 1000;
+-- Run this in a loop until COUNT returns 0</code></pre>
+    <p>Consider soft deletes for business-critical data instead of hard deletes.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At IRCTC, when a train is cancelled and all tickets for that train must be voided, a DELETE or status-update runs across the <code>bookings</code> table. At Paytm, expired OTP records are purged from a <code>otp_sessions</code> table every hour using a scheduled DELETE. At Ola, completed ride records older than a certain age are moved to an archive table and then deleted from the primary table to keep queries fast. In all these cases, the logic is: identify the rows, confirm them, delete them.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>DELETE decision tree:
+
+  Want to remove data?
+          |
+          v
+  Remove specific rows        Remove ALL rows         Remove the table
+  (WHERE condition)           (keep structure)         entirely
+          |                         |                       |
+          v                         v                       v
+    DELETE FROM              TRUNCATE TABLE              DROP TABLE
+    table WHERE              table;                      table;
+    condition;
+          |
+          v
+   Check foreign keys?
+   Soft delete instead?
+   Use a transaction?
+          |
+          v
+   Run SELECT first,
+   then DELETE,
+   then COMMIT</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these without looking:</p>
+    <ul>
+      <li>What is the difference between DELETE, TRUNCATE, and DROP?</li>
+      <li>What happens when you run DELETE FROM table without a WHERE clause?</li>
+      <li>Why do many production systems prefer soft deletes over hard deletes?</li>
+      <li>What is a cascading delete and when should you be careful with it?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a DELETE statement to remove all users from a <code>users</code> table at BookMyShow where <code>account_status = 'suspended'</code> and <code>last_login < '2022-01-01'</code>.</li>
+    </ol>
+    <ol>
+      <li>A test order with order_id = 9999 was created during a load test. Write the DELETE to remove it from the <code>orders</code> table. Also write the SELECT you would run before the DELETE.</li>
+    </ol>
+    <ol>
+      <li>Compare DELETE and TRUNCATE: write one scenario where DELETE is the right choice and one where TRUNCATE is the right choice.</li>
+    </ol>
+    <ol>
+      <li>The <code>sessions</code> table at a Paytm-like system accumulates millions of expired rows. They want to delete rows where <code>expires_at < NOW()</code> but the table has 50 million rows. What approach would you recommend and why?</li>
+    </ol>
+    <ol>
+      <li>You want to soft-delete a customer record in the <code>customers</code> table for customer_id = 4421. Write the SQL for a soft delete, assuming the table has <code>is_deleted</code> (boolean) and <code>deleted_at</code> (timestamp) columns.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>DELETE is simple in syntax but serious in consequences. The rule every experienced analyst lives by: SELECT before you DELETE. Use a transaction. Count the rows. When in doubt, soft-delete instead. The cost of a wrong DELETE in production can be hours of recovery work. The cost of running a SELECT check first is three seconds. That trade-off is never worth ignoring.</p>
+  `,
+  'mod5-t4': `
+    <h1>MERGE and UPSERT: Update If It Exists, Insert If It Doesn't</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Simran works on the analytics platform at PhonePe. Every night at midnight, a pipeline runs and pushes daily transaction summaries into a <code>daily_sales</code> table. Each row represents one merchant's total sales for that day.</p>
+    <p>The first time the pipeline runs for a given date, it needs to INSERT new rows. But sometimes the pipeline runs twice: maybe it crashed at 11:58 PM and restarted at 12:02 AM, or a late transaction came in and triggered a recalculation. When that happens, the rows for that date already exist. The pipeline cannot just INSERT again (duplicate key error) and it cannot just UPDATE (what if it is genuinely the first run?).</p>
+    <p>Simran's manager says: "If the row for today's date and merchant already exists, update the sales total. If it does not exist, create it." This is the exact problem MERGE and UPSERT were built to solve.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>There is a recurring situation in data engineering and application development: you receive a batch of records, and you do not know for each one whether it already exists in your table. You cannot blindly INSERT because duplicates will error out. You cannot blindly UPDATE because new records will silently do nothing. Writing separate IF-EXISTS-THEN-UPDATE-ELSE-INSERT logic in application code is verbose, error-prone, and runs two round trips to the database. SQL has a cleaner solution built into the language.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>MERGE was introduced in SQL:2003 as a standard way to synchronize a target table with a source. The core idea: for each incoming row, check whether it already exists in the target. If it does, update it. If it does not, insert it. One statement handles both cases atomically, meaning either the whole operation succeeds or none of it does.</p>
+    <p>Different databases implemented this concept with slightly different syntax, which is why you see MERGE in SQL Server and Oracle, and ON CONFLICT or ON DUPLICATE KEY UPDATE in PostgreSQL and MySQL respectively.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Picture a hotel's daily guest register. At check-in, the receptionist looks up the guest's name. If the guest already has an entry (returning guest from earlier today), they update the room number. If the guest is new, they write a fresh entry. They do not check first in one system and then write in another. It is one operation: look up, then act based on what they find. MERGE works the same way.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>Incoming source data (from pipeline):
++-------------+------------+-------------+
+| merchant_id | sale_date  | total_sales |
++-------------+------------+-------------+
+| M001        | 2024-06-15 | 84000       |
+| M002        | 2024-06-15 | 52000       |   &lt;-- M002 is new
++-------------+------------+-------------+
+
+Existing target table: daily_sales
++-------------+------------+-------------+
+| merchant_id | sale_date  | total_sales |
++-------------+------------+-------------+
+| M001        | 2024-06-15 | 71000       |   &lt;-- already exists, needs update
+| M003        | 2024-06-15 | 39000       |
++-------------+------------+-------------+
+
+After MERGE:
++-------------+------------+-------------+
+| merchant_id | sale_date  | total_sales |
++-------------+------------+-------------+
+| M001        | 2024-06-15 | 84000       |  &lt;-- updated
+| M003        | 2024-06-15 | 39000       |  &lt;-- untouched
+| M002        | 2024-06-15 | 52000       |  &lt;-- inserted
++-------------+------------+-------------+</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>MERGE and UPSERT both follow the same logical flow:</p>
+    <ol>
+      <li>For each row in the source, look for a matching row in the target using a join condition (usually on a primary key or unique key)</li>
+      <li>If a match is found: execute the MATCHED branch (usually UPDATE)</li>
+      <li>If no match is found: execute the NOT MATCHED branch (usually INSERT)</li>
+      <li>The whole operation is atomic: either it all goes through or none of it does</li>
+    </ol>
+    <p>The difference between MERGE and UPSERT is syntax. MERGE is a full statement that explicitly defines source, target, and both branches. UPSERT is a shorthand built into INSERT: try to insert, and if there is a conflict on a unique key, do the update instead.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <h3>MERGE syntax (SQL Server and Oracle)</h3>
+    <pre><code class="language-sql">MERGE INTO daily_sales AS target
+USING incoming_sales AS source
+ON target.merchant_id = source.merchant_id
+   AND target.sale_date = source.sale_date
+WHEN MATCHED THEN
+    UPDATE SET target.total_sales = source.total_sales,
+               target.updated_at = GETDATE()
+WHEN NOT MATCHED THEN
+    INSERT (merchant_id, sale_date, total_sales, updated_at)
+    VALUES (source.merchant_id, source.sale_date, source.total_sales, GETDATE());</code></pre>
+    <p>You can also add a WHEN NOT MATCHED BY SOURCE branch to delete rows from the target that no longer appear in the source, making the target a perfect mirror of the source.</p>
+    <h3>UPSERT with INSERT ON CONFLICT (PostgreSQL)</h3>
+    <pre><code class="language-sql">INSERT INTO daily_sales (merchant_id, sale_date, total_sales, updated_at)
+VALUES ('M001', '2024-06-15', 84000, NOW())
+ON CONFLICT (merchant_id, sale_date)
+DO UPDATE SET
+    total_sales = EXCLUDED.total_sales,
+    updated_at = NOW();</code></pre>
+    <p><code>EXCLUDED</code> is a special keyword in PostgreSQL that refers to the row that was proposed for insertion but was blocked by the conflict. So <code>EXCLUDED.total_sales</code> means the new value you were trying to insert.</p>
+    <p>If you want to handle a conflict by doing nothing (ignore duplicates silently):</p>
+    <pre><code class="language-sql">INSERT INTO daily_sales (merchant_id, sale_date, total_sales)
+VALUES ('M001', '2024-06-15', 84000)
+ON CONFLICT (merchant_id, sale_date) DO NOTHING;</code></pre>
+    <h3>UPSERT with INSERT ON DUPLICATE KEY UPDATE (MySQL)</h3>
+    <pre><code class="language-sql">INSERT INTO daily_sales (merchant_id, sale_date, total_sales, updated_at)
+VALUES ('M001', '2024-06-15', 84000, NOW())
+ON DUPLICATE KEY UPDATE
+    total_sales = VALUES(total_sales),
+    updated_at = NOW();</code></pre>
+    <p><code>VALUES(total_sales)</code> in MySQL refers to the value that was proposed in the INSERT. It is the MySQL equivalent of PostgreSQL's <code>EXCLUDED</code>.</p>
+    <p>For inserting multiple rows in one go with MySQL UPSERT:</p>
+    <pre><code class="language-sql">INSERT INTO daily_sales (merchant_id, sale_date, total_sales)
+VALUES
+  ('M001', '2024-06-15', 84000),
+  ('M002', '2024-06-15', 52000),
+  ('M003', '2024-06-15', 39000)
+ON DUPLICATE KEY UPDATE
+    total_sales = VALUES(total_sales);</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>MERGE INTO target</code></td><td>The table you want to update or insert into</td><td><code>MERGE INTO daily_sales AS target</code></td></tr>
+      <tr><td><code>USING source</code></td><td>The source of incoming data (table, subquery, or VALUES)</td><td><code>USING incoming_sales AS source</code></td></tr>
+      <tr><td><code>ON condition</code></td><td>How to match rows between source and target</td><td><code>ON target.merchant_id = source.merchant_id</code></td></tr>
+      <tr><td><code>WHEN MATCHED THEN UPDATE</code></td><td>What to do when a matching row exists</td><td><code>UPDATE SET total_sales = source.total_sales</code></td></tr>
+      <tr><td><code>WHEN NOT MATCHED THEN INSERT</code></td><td>What to do when no match is found</td><td><code>INSERT (col1, col2) VALUES (...)</code></td></tr>
+      <tr><td><code>ON CONFLICT (col)</code></td><td>PostgreSQL: which unique key conflict to handle</td><td><code>ON CONFLICT (merchant_id, sale_date)</code></td></tr>
+      <tr><td><code>DO UPDATE SET</code></td><td>PostgreSQL: what to do when the conflict fires</td><td><code>DO UPDATE SET total_sales = EXCLUDED.total_sales</code></td></tr>
+      <tr><td><code>EXCLUDED</code></td><td>PostgreSQL: refers to the blocked proposed row</td><td><code>EXCLUDED.total_sales</code></td></tr>
+      <tr><td><code>ON DUPLICATE KEY UPDATE</code></td><td>MySQL: fires when a unique/primary key conflict occurs</td><td><code>ON DUPLICATE KEY UPDATE total_sales = VALUES(total_sales)</code></td></tr>
+      <tr><td><code>VALUES(col)</code></td><td>MySQL: the value that was proposed in the INSERT</td><td><code>VALUES(total_sales)</code></td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample table: <code>inventory</code> at Flipkart warehouse</strong></p>
+    <pre><code>+------------+------------------+----------+------------+
+| product_id | product_name     | quantity | updated_at |
++------------+------------------+----------+------------+
+| P001       | OnePlus Nord 5G  | 150      | 2024-06-10 |
+| P002       | Samsung TV 43"   | 40       | 2024-06-10 |
+| P003       | Noise SmartWatch | 200      | 2024-06-10 |
++------------+------------------+----------+------------+</code></pre>
+    <h3>Example 1: MERGE to sync a new stock delivery (SQL Server)</h3>
+    <p>Business question: A new delivery arrived. P001 has 300 units, P004 is a brand new product with 75 units. Update P001 and insert P004.</p>
+    <pre><code class="language-sql">MERGE INTO inventory AS target
+USING (
+    VALUES ('P001', 'OnePlus Nord 5G', 300),
+           ('P004', 'Boat Rockerz 255', 75)
+) AS source (product_id, product_name, quantity)
+ON target.product_id = source.product_id
+WHEN MATCHED THEN
+    UPDATE SET target.quantity = source.quantity,
+               target.updated_at = GETDATE()
+WHEN NOT MATCHED THEN
+    INSERT (product_id, product_name, quantity, updated_at)
+    VALUES (source.product_id, source.product_name, source.quantity, GETDATE());</code></pre>
+    <p>Result: P001's quantity becomes 300. P004 is inserted as a new row. P002 and P003 are untouched.</p>
+    <h3>Example 2: PostgreSQL ON CONFLICT for a daily sales sync</h3>
+    <p>Business question: The nightly pipeline pushes today's sales. If the row exists, update the total. If not, create it.</p>
+    <pre><code class="language-sql">INSERT INTO daily_sales (merchant_id, sale_date, total_sales, updated_at)
+VALUES
+  ('M001', '2024-06-15', 84000, NOW()),
+  ('M002', '2024-06-15', 52000, NOW()),
+  ('M003', '2024-06-15', 39000, NOW())
+ON CONFLICT (merchant_id, sale_date)
+DO UPDATE SET
+    total_sales = EXCLUDED.total_sales,
+    updated_at = NOW();</code></pre>
+    <p>Result: Existing rows are updated. New rows are inserted. One statement handles both cases for all three merchants.</p>
+    <h3>Example 3: MySQL UPSERT for updating product stock</h3>
+    <p>Business question: A warehouse management system pushes stock counts. Use MySQL UPSERT to keep the inventory current.</p>
+    <pre><code class="language-sql">INSERT INTO inventory (product_id, product_name, quantity)
+VALUES ('P002', 'Samsung TV 43"', 65)
+ON DUPLICATE KEY UPDATE
+    quantity = VALUES(quantity),
+    updated_at = NOW();</code></pre>
+    <p>Result: If P002 exists, quantity is updated to 65. If P002 does not exist, a new row is created.</p>
+    <h3>Example 4: UPSERT with DO NOTHING for deduplication</h3>
+    <p>Business question: Events are streaming in from multiple sources. Some might be duplicates. Insert each event, but if the event_id already exists, ignore it.</p>
+    <pre><code class="language-sql">INSERT INTO events (event_id, merchant_id, event_type, created_at)
+VALUES ('EVT-9981', 'M001', 'payment_received', NOW())
+ON CONFLICT (event_id) DO NOTHING;</code></pre>
+    <p>Result: If EVT-9981 already exists in the table, nothing happens. No error, no duplicate. If it does not exist, it is inserted.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p><strong>Forgetting that ON CONFLICT requires a unique constraint.</strong> In PostgreSQL, the column(s) you specify in ON CONFLICT must have a UNIQUE or PRIMARY KEY constraint on them. If they do not, the database throws an error saying there is no unique constraint for the conflict target.</p>
+    <p><strong>MySQL's VALUES() vs PostgreSQL's EXCLUDED.</strong> These serve the same purpose but use different syntax. Mixing them up across databases is a common mistake when working in a mixed environment.</p>
+    <p><strong>MERGE source ordering.</strong> In SQL Server MERGE, if the source has multiple rows that match the same target row, the behavior is undefined and can cause errors. Always ensure your source has unique rows per match key.</p>
+    <p><strong>Thinking UPSERT is always better than separate INSERT and UPDATE.</strong> For very simple cases, UPSERT is cleaner. But MERGE with its explicit MATCHED and NOT MATCHED branches gives you more control and is easier to read when the logic is complex.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p><strong>Mistake 1: Using MERGE without checking source uniqueness.</strong> If the USING source has duplicate rows for the same match key, SQL Server MERGE raises an error. Deduplicate your source before merging.</p>
+    <p><strong>Mistake 2: Updating all columns when you only need to update a few.</strong> When a conflict fires, you should only update the columns that actually changed. Overwriting unchanged columns with the same values is harmless but wasteful and can cause issues with audit triggers.</p>
+    <p><strong>Mistake 3: Not specifying all columns in the INSERT branch of MERGE.</strong> If the NOT MATCHED branch omits a NOT NULL column with no default, the insert will fail for new rows.</p>
+    <p><strong>Mistake 4: Assuming ON CONFLICT fires for all errors.</strong> ON CONFLICT only handles unique constraint violations. Type mismatches, NULL violations on other columns, and CHECK constraint failures are separate errors that ON CONFLICT does not catch.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Use UPSERT for simple, single-table syncs where the logic is straightforward. Use MERGE when you need full control: update some columns when matched, skip others, delete rows not in the source, or handle complex multi-table logic.</p>
+    <p>Always verify your match key has a proper unique or primary key constraint before relying on ON CONFLICT or ON DUPLICATE KEY.</p>
+    <p>Test your UPSERT logic by inserting a new row (confirm INSERT path) and then inserting the same row again (confirm UPDATE path). Both branches should behave as expected.</p>
+    <p>When using MERGE in production pipelines (like a nightly ETL job at Paytm or PhonePe), wrap it in a transaction and log how many rows were inserted vs updated for monitoring.</p>
+    <p>For PostgreSQL, prefer ON CONFLICT over writing your own IF-EXISTS logic because ON CONFLICT is atomic. Two concurrent sessions cannot both see "no row exists" and both try to INSERT; one will succeed and the other will hit the conflict handler.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At PhonePe, a nightly job uses UPSERT to update merchant transaction summaries. If a merchant already has a row for today, their totals are refreshed. If today is a new merchant's first transaction, a row is created. At Flipkart, inventory sync jobs use MERGE to align warehouse stock counts: products that already exist get quantity updates, new products are inserted. At Byju's, student progress tables are updated using UPSERT: if a student has already started a chapter, their progress percentage is updated; if it is their first time, a new record is created. In all these cases, the business requirement is the same: one operation that handles both cases without the application needing to check first.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>MERGE / UPSERT flow:
+
+   Incoming row from source
+           |
+           v
+   Does a matching row
+   exist in target?
+   (check via ON condition)
+        /       \
+      YES        NO
+       |          |
+       v          v
+  WHEN MATCHED  WHEN NOT MATCHED
+  --&gt; UPDATE    --&gt; INSERT
+  the existing  a new row
+  row           into target
+       |          |
+       v          v
+   Change committed to table
+   (atomic: both branches in same transaction)</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these without looking:</p>
+    <ul>
+      <li>What problem does MERGE or UPSERT solve that a plain INSERT or UPDATE cannot handle alone?</li>
+      <li>What does EXCLUDED refer to in a PostgreSQL ON CONFLICT statement?</li>
+      <li>What is the MySQL equivalent of PostgreSQL's EXCLUDED?</li>
+      <li>Why must the conflict column in ON CONFLICT have a UNIQUE or PRIMARY KEY constraint?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a PostgreSQL UPSERT for a <code>product_prices</code> table with columns product_id, price, updated_at. The unique key is product_id. If the product already exists, update price and updated_at. If not, insert a new row.</li>
+    </ol>
+    <ol>
+      <li>Write a MySQL UPSERT for an <code>employee_login_counts</code> table with columns employee_id, login_count, last_login. Every time an employee logs in, you want to insert their first login or increment their login count if they already have a row.</li>
+    </ol>
+    <ol>
+      <li>Write a SQL Server MERGE that syncs a <code>customers</code> table from a <code>customers_staging</code> table. The match key is customer_id. When matched, update name and phone. When not matched, insert the full row.</li>
+    </ol>
+    <ol>
+      <li>A PostgreSQL table called <code>stock_levels</code> has columns: warehouse_id, product_id, stock_count. The pair (warehouse_id, product_id) is a unique constraint. Write an ON CONFLICT UPSERT that updates stock_count when the pair already exists.</li>
+    </ol>
+    <ol>
+      <li>A data pipeline loads daily revenue per city into a <code>city_revenue</code> table. Sometimes the pipeline runs twice in a day due to retries. Explain why UPSERT is a better solution here than writing application-level check-then-insert logic, and write the PostgreSQL UPSERT for it.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>MERGE and UPSERT are the tools that make data pipelines reliable. Without them, syncing data between systems requires brittle application logic: query first, check result, branch to insert or update, handle race conditions. With MERGE or UPSERT, the database handles all of that in one atomic statement. Once you understand which syntax your database uses (MERGE for SQL Server and Oracle, ON CONFLICT for PostgreSQL, ON DUPLICATE KEY for MySQL) and when to apply it, you will use it constantly in any data-intensive role.</p>
+  `,
 
   // ── Module 6 ─────────────────────────────────────────────────
   'mod6-t1': `<h1>COUNT()</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
