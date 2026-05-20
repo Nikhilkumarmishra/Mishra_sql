@@ -11252,22 +11252,3379 @@ When to use EXISTS:
   `,
 
   // ── Module 9 ─────────────────────────────────────────────────
-  'mod9-t1': `<h1>Common Table Expressions (CTEs)</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod9-t2': `<h1>Recursive CTEs</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod9-t3': `<h1>Multiple CTEs</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod9-t4': `<h1>CTE vs Subquery</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod9-t1': `
+    <h1>CTEs: Writing Cleaner Queries with WITH</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Riya joined Swiggy's data team three months ago. Her manager, Arjun, walks over on a Monday morning and says, "Can you pull a report of total orders per city, but only for our top 5 cities by order volume last month? And then from those cities, I want to see only the orders above 500 rupees."</p>
+    <p>Riya opens her SQL editor and starts writing. She writes a subquery inside another subquery, and then realizes she needs to reference the same intermediate result twice. The query becomes a mess of nested parentheses. She is not sure where one subquery ends and another begins.</p>
+    <p>Arjun leans over and says, "Have you tried using a CTE? Let me show you."</p>
+    <p>That conversation is where this article starts.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>When a query has multiple steps, like first filtering some rows, then aggregating, then filtering again, the natural instinct is to nest subqueries. But deeply nested subqueries are hard to read, hard to debug, and hard to hand off to a teammate.</p>
+    <p>You end up writing something like this:</p>
+    <pre><code class="language-sql">SELECT city, total_orders
+FROM (
+  SELECT city, COUNT(*) AS total_orders
+  FROM orders
+  WHERE order_date &gt;= '2024-01-01'
+  GROUP BY city
+) AS city_summary
+WHERE total_orders &gt; 1000
+ORDER BY total_orders DESC
+LIMIT 5;</code></pre>
+    <p>This works, but the moment you add one more layer, it starts getting unmanageable. CTEs solve exactly this problem.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>SQL was designed to be readable and declarative. But as business queries grew more complex, analysts started nesting subqueries three or four levels deep. Reading such queries was difficult even for the person who wrote them a week earlier.</p>
+    <p>The SQL standard introduced the WITH clause, also called a Common Table Expression, to let you name intermediate results and define them before the main query. The idea was simple: give your steps names, write them in order, and then use those names in the final query.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you are writing a recipe. Instead of saying "take the flour that was sifted after being measured from the bag that came from the store," you write:</p>
+    <p>Step 1: Measure flour. Step 2: Sift the measured flour. Step 3: Use the sifted flour in the batter.</p>
+    <p>A CTE lets you do the same thing in SQL. Each step gets a name. The final query just uses those names.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>WITH clause
+|
+|-- cte_name AS (your intermediate query)
+|
+Main query
+|
+|-- SELECT ... FROM cte_name</code></pre>
+    <p>The CTE lives at the top. The main query runs after it and can use the CTE just like a regular table. The CTE does not get stored anywhere. It exists only for the duration of that single query execution.</p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>When you run a query with a CTE, the database engine processes the WITH block first. It computes the result of the CTE and holds it in memory (or treats it like an inline view, depending on the database). Then the main query runs and references that result by name.</p>
+    <p>The CTE is not a table. It is not saved to disk. It does not persist after the query finishes. If you run the query again, the CTE is recomputed from scratch.</p>
+    <p>One important rule: a CTE can only be referenced within the query it belongs to. You cannot define a CTE in one query and use it in another.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>The basic syntax looks like this:</p>
+    <pre><code class="language-sql">WITH cte_name AS (
+  SELECT ...
+  FROM ...
+  WHERE ...
+)
+SELECT *
+FROM cte_name;</code></pre>
+    <p>You can also give the CTE a column list right after the name, but most people skip that and let the column names come from the inner SELECT.</p>
+    <p>Here is the Swiggy example Riya needed to write:</p>
+    <pre><code class="language-sql">WITH top_cities AS (
+  SELECT city, COUNT(*) AS total_orders
+  FROM orders
+  WHERE order_date &gt;= '2024-01-01'
+  GROUP BY city
+  ORDER BY total_orders DESC
+  LIMIT 5
+)
+SELECT o.order_id, o.customer_id, o.city, o.amount
+FROM orders o
+JOIN top_cities tc ON o.city = tc.city
+WHERE o.amount &gt; 500;</code></pre>
+    <p>First, the CTE finds the top 5 cities. Then the main query pulls all orders from those cities where the amount is above 500.</p>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td>WITH</td><td>Signals the start of a CTE block</td><td>WITH top_cities AS (...)</td></tr>
+      <tr><td>cte_name</td><td>The name you give to the temporary result</td><td>top_cities</td></tr>
+      <tr><td>AS ( )</td><td>Wraps the query that produces the CTE</td><td>AS (SELECT city, COUNT(*) ...)</td></tr>
+      <tr><td>Main SELECT</td><td>Uses the CTE like a regular table</td><td>SELECT ... FROM top_cities</td></tr>
+      <tr><td>JOIN / WHERE on CTE</td><td>Filters or joins using the named result</td><td>JOIN top_cities tc ON o.city = tc.city</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample table: orders (Swiggy)</strong></p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>city</th><th>cuisine</th><th>amount</th><th>order_date</th></tr>
+      <tr><td>1001</td><td>C01</td><td>Mumbai</td><td>North Indian</td><td>620</td><td>2024-01-05</td></tr>
+      <tr><td>1002</td><td>C02</td><td>Delhi</td><td>Chinese</td><td>430</td><td>2024-01-06</td></tr>
+      <tr><td>1003</td><td>C03</td><td>Mumbai</td><td>South Indian</td><td>890</td><td>2024-01-07</td></tr>
+      <tr><td>1004</td><td>C04</td><td>Bangalore</td><td>Biryani</td><td>510</td><td>2024-01-08</td></tr>
+      <tr><td>1005</td><td>C05</td><td>Delhi</td><td>Pizza</td><td>750</td><td>2024-01-09</td></tr>
+      <tr><td>1006</td><td>C06</td><td>Hyderabad</td><td>North Indian</td><td>340</td><td>2024-01-10</td></tr>
+      <tr><td>1007</td><td>C07</td><td>Chennai</td><td>South Indian</td><td>670</td><td>2024-01-11</td></tr>
+      <tr><td>1008</td><td>C08</td><td>Mumbai</td><td>Chinese</td><td>290</td><td>2024-01-12</td></tr>
+    </table>
+    <h3>Example 1: Get total orders per city using a CTE</h3>
+    <p>Business question: How many orders did each city get in January 2024?</p>
+    <pre><code class="language-sql">WITH city_orders AS (
+  SELECT city, COUNT(*) AS total_orders
+  FROM orders
+  WHERE order_date &gt;= '2024-01-01' AND order_date &lt;= '2024-01-31'
+  GROUP BY city
+)
+SELECT city, total_orders
+FROM city_orders
+ORDER BY total_orders DESC;</code></pre>
+    <p>Output explanation: You get one row per city with its total order count. The CTE does the grouping, and the main query just reads and sorts the result.</p>
+    <h3>Example 2: Filter cities with more than 1 order</h3>
+    <p>Business question: Which cities had more than one order in January?</p>
+    <pre><code class="language-sql">WITH city_orders AS (
+  SELECT city, COUNT(*) AS total_orders
+  FROM orders
+  WHERE order_date &gt;= '2024-01-01'
+  GROUP BY city
+)
+SELECT city, total_orders
+FROM city_orders
+WHERE total_orders &gt; 1;</code></pre>
+    <p>Output explanation: Only cities like Mumbai and Delhi, which appear multiple times in the table, will show up. The WHERE filter runs on the CTE result, not the raw table.</p>
+    <h3>Example 3: Find high-value orders from cities with at least 2 orders</h3>
+    <p>Business question: From cities that have more than one order, which individual orders are above 500 rupees?</p>
+    <pre><code class="language-sql">WITH active_cities AS (
+  SELECT city
+  FROM orders
+  GROUP BY city
+  HAVING COUNT(*) &gt; 1
+)
+SELECT o.order_id, o.city, o.cuisine, o.amount
+FROM orders o
+JOIN active_cities ac ON o.city = ac.city
+WHERE o.amount &gt; 500;</code></pre>
+    <p>Output explanation: The CTE identifies Mumbai and Delhi as cities with more than one order. The main query then returns individual orders from those cities where the amount exceeds 500.</p>
+    <h3>Example 4: Calculate average order value per city and flag above-average cities</h3>
+    <p>Business question: Which cities have an average order value above the overall average?</p>
+    <pre><code class="language-sql">WITH city_avg AS (
+  SELECT city, AVG(amount) AS avg_order_value
+  FROM orders
+  GROUP BY city
+),
+overall_avg AS (
+  SELECT AVG(amount) AS total_avg
+  FROM orders
+)
+SELECT ca.city, ca.avg_order_value
+FROM city_avg ca, overall_avg oa
+WHERE ca.avg_order_value &gt; oa.total_avg;</code></pre>
+    <p>Output explanation: Two CTEs are defined. The first computes average value per city. The second computes the overall average. The main query compares each city's average to the total average and shows cities that are above it. (Multiple CTEs are covered in detail in article 3.)</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>A CTE is not a view and not a temp table. If you try to use the CTE name in a different query or a different session, the database will say it does not exist. The CTE name only lives inside the WITH block it was declared in.</p>
+    <p>In some databases, you cannot use ORDER BY inside a CTE unless you also include a LIMIT or TOP clause. If you need to sort, it is usually better to do that in the final SELECT.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Writing WITH inside a subquery instead of at the top level. The WITH clause must come before the very first SELECT of the query. It cannot be nested inside another query.</p>
+    <p>Forgetting that the CTE result is not cached across queries. If you run the same WITH query twice, the database computes the CTE twice. There is no automatic caching.</p>
+    <p>Naming a CTE the same as an actual table. This will confuse you and potentially confuse the database. Always use descriptive names that make it obvious you are working with a derived result, like top_customers or filtered_orders.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Name your CTEs after what they contain, not what they do. Use top_cities, not get_top_cities. The name should read like a noun, not a verb.</p>
+    <p>Keep each CTE focused on one thing. If a CTE is doing three different transformations, break it into separate CTEs.</p>
+    <p>Write comments above each CTE explaining why it exists, especially in long queries that other team members will maintain.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Swiggy, analysts use CTEs to write daily performance dashboards. A typical report might first build a CTE of all orders that were delivered on time, then a CTE of repeat customers, and then join the two to see how many on-time deliveries went to repeat customers.</p>
+    <p>At Zomato, engineers use CTEs inside data pipeline jobs where complex aggregations need to be broken into readable steps before being inserted into a summary table.</p>
+    <p>At IRCTC, reporting queries that calculate ticket booking trends across zones, time periods, and quota types are almost always written using CTEs to keep the logic auditable and maintainable.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Query Execution Flow with a CTE
+---------------------------------
+
+WITH top_cities AS (         &lt;-- Step 1: Database computes this first
+  SELECT city, COUNT(*)         and gives it the name "top_cities"
+  FROM orders
+  GROUP BY city
+  LIMIT 5
+)
+                             &lt;-- Step 2: Main query runs,
+SELECT o.*                       referencing "top_cities" by name
+FROM orders o                    as if it were a real table
+JOIN top_cities tc
+  ON o.city = tc.city
+WHERE o.amount &gt; 500;
+
+Result: Only rows that match both conditions</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these questions without looking at the article:</p>
+    <ul>
+      <li>What does WITH do in SQL?</li>
+      <li>Where does a CTE exist after the query finishes executing?</li>
+      <li>What is the difference between writing logic in a CTE versus writing it as a subquery in the FROM clause?</li>
+      <li>Can you use the same CTE name in two separate queries? Why or why not?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query using a CTE that finds all customers who placed at least 2 orders at Swiggy in the last 30 days. The orders table has order_id, customer_id, city, amount, and order_date.</li>
+    </ol>
+    <ol>
+      <li>Using a CTE, find the top 3 cuisines by total revenue and then list all individual orders belonging to those cuisines.</li>
+    </ol>
+    <ol>
+      <li>Write a CTE that calculates total spending per customer, and then in the main query, return only customers who spent more than 1000 rupees in total.</li>
+    </ol>
+    <ol>
+      <li>Rewrite the following subquery using a CTE:</li>
+    </ol>
+    <pre><code class="language-sql">   SELECT city, COUNT(*) FROM orders
+   WHERE city IN (
+     SELECT city FROM orders GROUP BY city HAVING AVG(amount) &gt; 600
+   )
+   GROUP BY city;</code></pre>
+    <ol>
+      <li>Write a query with a CTE that first finds the most popular cuisine in each city (by order count), and then returns only cities where the top cuisine is "Biryani."</li>
+    </ol>
+    <ol>
+      <li>A manager wants a list of high-value orders (amount > 800) placed in cities where the total number of orders is also above 50. Write this using a CTE.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>CTEs are one of those things that, once you start using them, you will wonder how you ever wrote complex queries without them. They do not add any new logic that subqueries cannot handle. What they add is structure, clarity, and the ability to name your thinking.</p>
+    <p>The next time a query starts getting nested and hard to follow, stop and ask yourself if you can break it into named steps. Usually, you can. And once you do, both you and your teammates will find the query much easier to understand, modify, and debug.</p>
+    <p>The WITH keyword is a small addition to a query, but the difference it makes to readability is significant.</p>
+  `,
+  'mod9-t2': `
+    <h1>Recursive CTEs: Querying Hierarchies and Series in SQL</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Karan works at Infosys as a junior data engineer. His manager calls him over and says, "I need a report that shows every employee and their entire chain of management up to the CEO. And I need it done in SQL, not in Python."</p>
+    <p>Karan's first instinct is to write a series of JOINs. But then he realizes the problem: he does not know how many levels deep the hierarchy goes. Some managers report to managers who report to other managers. If he writes three JOINs, he misses level four. If he writes seven JOINs, he has over-engineered it for a flat team.</p>
+    <p>His colleague Priya walks by and says, "That is a hierarchy problem. You need a recursive CTE." Karan had never heard that phrase before. This article explains exactly what it means and how to use it.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Some data is inherently hierarchical. An org chart. A folder structure. A bill of materials. A comment thread with replies and sub-replies. These structures do not have a fixed depth, and the rows in a SQL table reference each other through a self-referential foreign key.</p>
+    <p>A regular JOIN cannot handle an unknown number of levels. You would need to know in advance how deep to go. A recursive CTE solves this by allowing the query to repeat itself, adding one level per iteration, until there are no more rows to add.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Before recursive CTEs, handling hierarchical data in SQL required either multiple passes, procedural code, or storing additional columns like a path string. None of these were clean solutions.</p>
+    <p>The SQL standard introduced the recursive WITH clause to give SQL a way to handle self-referencing data sets natively. Databases like PostgreSQL, SQL Server, Oracle, and MySQL 8+ support it. The syntax differs slightly across databases but the concept is the same everywhere.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you are climbing a ladder. You start on the ground (the anchor). Then you step up one rung, look down, and check whether there is a rung below you. Then you step up again. You keep doing this until there are no more rungs above you. That is exactly what a recursive CTE does. It starts at a known point, repeats one step at a time, and stops when the condition to keep going is no longer true.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>Recursive CTE Structure
+-------------------------
+
+WITH RECURSIVE cte AS (
+
+  -- Anchor member: starting point, runs once
+  SELECT employee_id, name, manager_id, 0 AS level
+  FROM employees
+  WHERE manager_id IS NULL      &lt;-- The CEO, no manager above them
+
+  UNION ALL
+
+  -- Recursive member: runs repeatedly, references the CTE itself
+  SELECT e.employee_id, e.name, e.manager_id, cte.level + 1
+  FROM employees e
+  JOIN cte ON e.manager_id = cte.employee_id  &lt;-- Each employee joins their manager
+
+)
+SELECT * FROM cte;</code></pre>
+    <p>The anchor runs once and returns the root row. The recursive member runs again and again, each time joining the new rows from the previous iteration against the base table, until no new rows are produced.</p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>The database engine processes a recursive CTE in the following order:</p>
+    <ol>
+      <li>Run the anchor member. This produces the initial set of rows.</li>
+      <li>Run the recursive member using the rows from step 1.</li>
+      <li>If the recursive member returns any rows, add them to the result and run the recursive member again using only the new rows.</li>
+      <li>Repeat until the recursive member returns zero rows.</li>
+      <li>Return all accumulated rows as the final result.</li>
+    </ol>
+    <p>The key requirement for the recursive part to eventually stop is that the WHERE or JOIN condition must become false at some point. If the data has a cycle (employee A reports to B, B reports to A), the query will loop forever unless you add a cycle-detection mechanism.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>In PostgreSQL, you use WITH RECURSIVE:</p>
+    <pre><code class="language-sql">WITH RECURSIVE org_chart AS (
+  SELECT employee_id, name, manager_id, role, 0 AS depth
+  FROM employees
+  WHERE manager_id IS NULL
+
+  UNION ALL
+
+  SELECT e.employee_id, e.name, e.manager_id, e.role, oc.depth + 1
+  FROM employees e
+  JOIN org_chart oc ON e.manager_id = oc.employee_id
+)
+SELECT employee_id, name, role, depth
+FROM org_chart
+ORDER BY depth, name;</code></pre>
+    <p>In SQL Server and older versions, you write WITH without the RECURSIVE keyword. The database knows a CTE is recursive when it references its own name in the query.</p>
+    <p>For generating a number series from 1 to 10:</p>
+    <pre><code class="language-sql">WITH RECURSIVE numbers AS (
+  SELECT 1 AS n
+
+  UNION ALL
+
+  SELECT n + 1
+  FROM numbers
+  WHERE n &lt; 10
+)
+SELECT n FROM numbers;</code></pre>
+    <p>This starts at 1, adds 1 each iteration, and stops when n reaches 10.</p>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td>WITH RECURSIVE</td><td>Declares that this CTE will reference itself</td><td>WITH RECURSIVE org_chart AS (...)</td></tr>
+      <tr><td>Anchor member</td><td>The base case, runs exactly once</td><td>SELECT ... WHERE manager_id IS NULL</td></tr>
+      <tr><td>UNION ALL</td><td>Combines anchor output with each recursive iteration's output</td><td>(required between anchor and recursive part)</td></tr>
+      <tr><td>Recursive member</td><td>References the CTE name to add one more level per iteration</td><td>SELECT ... FROM employees JOIN org_chart ON ...</td></tr>
+      <tr><td>Termination condition</td><td>The WHERE or JOIN condition that becomes false to stop the loop</td><td>WHERE n < 10 or no more JOIN matches</td></tr>
+      <tr><td>depth / level column</td><td>Tracks how deep in the hierarchy each row sits</td><td>0 AS depth in anchor, depth + 1 in recursive part</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample table: employees (Infosys)</strong></p>
+    <table>
+      <tr><th>employee_id</th><th>name</th><th>manager_id</th><th>role</th></tr>
+      <tr><td>1</td><td>Rajesh</td><td>NULL</td><td>CEO</td></tr>
+      <tr><td>2</td><td>Sunita</td><td>1</td><td>VP Engineering</td></tr>
+      <tr><td>3</td><td>Amit</td><td>1</td><td>VP Sales</td></tr>
+      <tr><td>4</td><td>Priya</td><td>2</td><td>Engineering Manager</td></tr>
+      <tr><td>5</td><td>Karan</td><td>2</td><td>Senior Engineer</td></tr>
+      <tr><td>6</td><td>Deepa</td><td>4</td><td>Engineer</td></tr>
+      <tr><td>7</td><td>Rahul</td><td>3</td><td>Sales Lead</td></tr>
+      <tr><td>8</td><td>Ananya</td><td>4</td><td>Engineer</td></tr>
+    </table>
+    <h3>Example 1: Build the full org chart from CEO down</h3>
+    <p>Business question: Show the entire employee hierarchy from top to bottom with depth level.</p>
+    <pre><code class="language-sql">WITH RECURSIVE org_chart AS (
+  SELECT employee_id, name, manager_id, role, 0 AS depth
+  FROM employees
+  WHERE manager_id IS NULL
+
+  UNION ALL
+
+  SELECT e.employee_id, e.name, e.manager_id, e.role, oc.depth + 1
+  FROM employees e
+  JOIN org_chart oc ON e.manager_id = oc.employee_id
+)
+SELECT employee_id, name, role, depth
+FROM org_chart
+ORDER BY depth, name;</code></pre>
+    <p>Output explanation: Rajesh appears at depth 0 (CEO). Sunita and Amit at depth 1. Priya, Karan, and Rahul at depth 2. Deepa and Ananya at depth 3. You get the full hierarchy in one result.</p>
+    <h3>Example 2: Find all employees who report under Sunita (directly or indirectly)</h3>
+    <p>Business question: Who are all the people in Sunita's reporting tree?</p>
+    <pre><code class="language-sql">WITH RECURSIVE sunita_team AS (
+  SELECT employee_id, name, manager_id, role
+  FROM employees
+  WHERE employee_id = 2    -- Sunita's employee_id
+
+  UNION ALL
+
+  SELECT e.employee_id, e.name, e.manager_id, e.role
+  FROM employees e
+  JOIN sunita_team st ON e.manager_id = st.employee_id
+)
+SELECT employee_id, name, role
+FROM sunita_team
+WHERE employee_id != 2;   -- Exclude Sunita herself</code></pre>
+    <p>Output explanation: The result shows Priya, Karan, Deepa, and Ananya. All of them fall under Sunita's chain of command, regardless of how many levels down they sit.</p>
+    <h3>Example 3: Generate a date series for January 2024</h3>
+    <p>Business question: Create a list of all dates in January 2024 to use in a reporting join.</p>
+    <pre><code class="language-sql">WITH RECURSIVE date_series AS (
+  SELECT CAST('2024-01-01' AS DATE) AS report_date
+
+  UNION ALL
+
+  SELECT DATEADD(day, 1, report_date)
+  FROM date_series
+  WHERE report_date &lt; '2024-01-31'
+)
+SELECT report_date FROM date_series;</code></pre>
+    <p>Output explanation: You get 31 rows, one for each day in January. This is commonly used to do a LEFT JOIN against a fact table so that days with zero orders still appear in the report.</p>
+    <h3>Example 4: Find the management chain above a specific employee</h3>
+    <p>Business question: Who does engineer Deepa ultimately report to, all the way up?</p>
+    <pre><code class="language-sql">WITH RECURSIVE management_chain AS (
+  SELECT employee_id, name, manager_id, role
+  FROM employees
+  WHERE employee_id = 6    -- Deepa
+
+  UNION ALL
+
+  SELECT e.employee_id, e.name, e.manager_id, e.role
+  FROM employees e
+  JOIN management_chain mc ON e.employee_id = mc.manager_id
+)
+SELECT employee_id, name, role
+FROM management_chain;</code></pre>
+    <p>Output explanation: The recursion starts at Deepa (employee_id 6), then walks up by joining each row's manager_id to the employees table. The result shows Deepa, then Priya (her manager), then Sunita, then Rajesh (the CEO). The chain stops when manager_id is NULL.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>The most common mistake with recursive CTEs is forgetting the termination condition. If your recursive member does not have a condition that eventually returns zero rows, the query will run forever (or until the database hits a recursion limit and throws an error).</p>
+    <p>Another issue is using UNION instead of UNION ALL. You might think UNION will prevent duplicates and act as a safety net. But UNION is significantly slower because it deduplicates on every iteration. If your data is a clean tree with no cycles, use UNION ALL. If you are dealing with potential cycles, handle them explicitly with a visited-nodes array (in PostgreSQL) or a depth limit.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Writing the recursive reference in the anchor member. The CTE name can only appear in the recursive member, not in the anchor. The anchor must be a standalone query against base tables.</p>
+    <p>Not adding a depth limit as a safety measure. Even if you think there are no cycles, adding a WHERE depth < 20 is a good defensive practice, especially in production.</p>
+    <p>Expecting the order of results to be depth-first or breadth-first without explicitly controlling it. SQL does not guarantee row order unless you use ORDER BY.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Always test your recursive CTE on a small, known dataset first. Count the expected rows before running it on production data.</p>
+    <p>Add a depth or level counter in the anchor member (starting at 0 or 1) and increment it in the recursive member. This makes it easy to filter by level and also serves as a natural loop-depth guard.</p>
+    <p>If using SQL Server, note that the default recursion limit is 100. For deeper hierarchies, you can increase it with OPTION (MAXRECURSION n).</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Infosys, HR reporting queries use recursive CTEs to build org charts dynamically. A single query can tell you how many people are under any given VP, regardless of how the team reorganizes.</p>
+    <p>At Flipkart, category hierarchies (Electronics > Mobiles > Smartphones) are stored in a self-referential table. Recursive CTEs are used to pull all products under a parent category, including subcategories.</p>
+    <p>At Ola, recursive CTEs are used in zone management, where a city is divided into zones, sub-zones, and micro-zones. A query to find all rides in a zone and all its child zones uses this pattern.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>How Recursion Builds Results
+-----------------------------
+
+Iteration 0 (Anchor):
+  [Rajesh]
+
+Iteration 1 (Recursive - joins Rajesh's direct reports):
+  [Sunita, Amit]
+
+Iteration 2 (Recursive - joins Sunita's and Amit's direct reports):
+  [Priya, Karan, Rahul]
+
+Iteration 3 (Recursive - joins Priya's direct reports):
+  [Deepa, Ananya]
+
+Iteration 4 (Recursive - no employees report to Deepa or Ananya):
+  [] -- empty result, recursion stops
+
+Final result: All rows from iterations 0 through 3 combined</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can explain:</p>
+    <ul>
+      <li>What the anchor member does and how many times it runs</li>
+      <li>What the recursive member does and when it stops</li>
+      <li>Why UNION ALL is preferred over UNION in recursive CTEs</li>
+      <li>What happens if you forget the termination condition</li>
+      <li>The difference between walking down a hierarchy and walking up a hierarchy in a recursive CTE</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Using the Infosys employees table, write a recursive CTE that shows only employees at depth level 2 (two levels below the CEO).</li>
+    </ol>
+    <ol>
+      <li>Write a recursive CTE that generates a sequence of numbers from 1 to 100. Then use that series to calculate the sum of all numbers from 1 to 100 in the outer query.</li>
+    </ol>
+    <ol>
+      <li>Modify the org chart example to also show the name of each employee's direct manager alongside the employee's own name.</li>
+    </ol>
+    <ol>
+      <li>Write a recursive CTE that finds all employees who are in Amit's reporting chain (directly or indirectly), and then count how many people Amit manages in total.</li>
+    </ol>
+    <ol>
+      <li>A table called categories has columns category_id, category_name, and parent_id (NULL for top-level categories). Write a recursive CTE to return all categories and their full path, like "Electronics > Mobiles > Smartphones".</li>
+    </ol>
+    <ol>
+      <li>Write a recursive CTE to generate all dates between '2024-03-01' and '2024-03-31'. Then LEFT JOIN this with an orders table to show days where no orders were placed.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>Recursion in SQL feels unusual at first because most SQL you write is non-recursive and flat. But once you recognize a hierarchy or a series as the problem, a recursive CTE is the right tool and often the cleanest one.</p>
+    <p>The pattern is always the same: start somewhere, step forward one level, stop when you run out of steps. Once that mental model is clear, the syntax follows naturally.</p>
+  `,
+  'mod9-t3': `
+    <h1>Multiple CTEs: Chaining Steps in One Clean Query</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Vikram is an analyst at Flipkart. His manager sends him a message on Tuesday afternoon: "I need a report of our top 10 customers by total spend this quarter, but only counting orders that were above 1000 rupees. Also include their most recent order date and the product category they buy most from."</p>
+    <p>Vikram stares at this for a moment. He mentally lists out the steps he needs to take: first filter orders above 1000, then group by customer, then rank them, then figure out each customer's favorite category, then pull their last order date, and finally combine everything.</p>
+    <p>His previous approach would have been to open a spreadsheet, run five separate queries, paste the results, and do a VLOOKUP. His new approach: write it as one SQL query using multiple CTEs, where each CTE handles exactly one step.</p>
+    <p>That is what this article covers.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>As business questions get more specific, the number of steps in a query grows. You might need to:</p>
+    <ul>
+      <li>Filter raw data by some condition</li>
+      <li>Aggregate it</li>
+      <li>Rank the results</li>
+      <li>Join a second aggregation</li>
+      <li>Apply one more filter</li>
+    </ul>
+    <p>Writing all of this in a single deeply nested query is possible, but it becomes very hard to read, test one step at a time, or explain to a colleague. Multiple CTEs let you split this into clearly named stages.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>The WITH clause allows you to define more than one CTE in a single query. Each CTE can reference the ones defined before it, allowing you to build up logic step by step. This is the same idea behind breaking a program into functions: each function does one thing, and you compose them to solve the full problem.</p>
+    <p>Multiple CTEs also make debugging easier. If a result looks wrong, you can run just the first CTE as a standalone SELECT to check its output, then add the second, and so on.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Think of multiple CTEs as a production line in a factory. Each station on the line takes material from the previous station, processes it, and passes the output forward. The final station produces the finished product.</p>
+    <p>In SQL, each CTE is one station on the line. The final SELECT is the finished product at the end of the line.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>WITH clause
+|
+|-- cte1 AS (query against raw tables)
+|
+|-- cte2 AS (query that references cte1)
+|
+|-- cte3 AS (query that references cte1 or cte2)
+|
+Main query: SELECT ... FROM cte3 JOIN cte2 ...</code></pre>
+    <p>Each CTE is defined once. Any CTE defined later in the list can reference CTEs defined before it. The main query can use any or all of the CTEs.</p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>When SQL processes a WITH clause that has multiple CTEs, it evaluates them in the order they appear. The first CTE has access only to the base tables. The second CTE can use the first. The third can use the first and second.</p>
+    <p>This is a single query. All the CTEs and the final SELECT are executed together as one unit. There is no need to create temp tables or run multiple query batches.</p>
+    <p>The database engine decides internally whether to materialize (compute and cache) each CTE or to inline it into the main query. In most modern databases like PostgreSQL 12+ and SQL Server, the optimizer makes this choice automatically.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>The syntax for multiple CTEs separates each CTE definition with a comma. The WITH keyword appears only once, at the very beginning.</p>
+    <pre><code class="language-sql">WITH
+  high_value_orders AS (
+    SELECT order_id, customer_id, product_id, amount, order_date
+    FROM orders
+    WHERE amount &gt; 1000
+  ),
+  customer_totals AS (
+    SELECT customer_id, SUM(amount) AS total_spent, MAX(order_date) AS last_order_date
+    FROM high_value_orders
+    GROUP BY customer_id
+  ),
+  top_customers AS (
+    SELECT customer_id, total_spent, last_order_date
+    FROM customer_totals
+    ORDER BY total_spent DESC
+    LIMIT 10
+  )
+SELECT tc.customer_id, c.name, tc.total_spent, tc.last_order_date
+FROM top_customers tc
+JOIN customers c ON tc.customer_id = c.customer_id;</code></pre>
+    <p>Each CTE has one job. The chain builds up naturally and the final SELECT is straightforward.</p>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td>WITH (appears once)</td><td>Opens the multi-CTE block</td><td>WITH high_value_orders AS (...),</td></tr>
+      <tr><td>Comma between CTEs</td><td>Separates each CTE definition</td><td>...) , customer_totals AS (</td></tr>
+      <tr><td>CTE referencing a prior CTE</td><td>Uses an earlier result as input</td><td>FROM high_value_orders</td></tr>
+      <tr><td>Final SELECT</td><td>Combines results from one or more CTEs</td><td>SELECT ... FROM top_customers JOIN customers</td></tr>
+      <tr><td>No WITH before each CTE</td><td>Only the first WITH keyword is used</td><td>Wrong: WITH cte2 AS (...) WITH cte3 AS (...)</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample tables at Flipkart</strong></p>
+    <p>Table: orders</p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>product_id</th><th>amount</th><th>order_date</th></tr>
+      <tr><td>5001</td><td>C01</td><td>P10</td><td>1500</td><td>2024-01-05</td></tr>
+      <tr><td>5002</td><td>C02</td><td>P20</td><td>800</td><td>2024-01-06</td></tr>
+      <tr><td>5003</td><td>C01</td><td>P30</td><td>2200</td><td>2024-01-07</td></tr>
+      <tr><td>5004</td><td>C03</td><td>P10</td><td>1100</td><td>2024-01-08</td></tr>
+      <tr><td>5005</td><td>C02</td><td>P40</td><td>1800</td><td>2024-01-09</td></tr>
+      <tr><td>5006</td><td>C04</td><td>P20</td><td>600</td><td>2024-01-10</td></tr>
+      <tr><td>5007</td><td>C03</td><td>P30</td><td>950</td><td>2024-01-11</td></tr>
+    </table>
+    <p>Table: customers</p>
+    <table>
+      <tr><th>customer_id</th><th>name</th><th>city</th></tr>
+      <tr><td>C01</td><td>Aakash</td><td>Mumbai</td></tr>
+      <tr><td>C02</td><td>Meera</td><td>Bangalore</td></tr>
+      <tr><td>C03</td><td>Rohit</td><td>Delhi</td></tr>
+      <tr><td>C04</td><td>Shalini</td><td>Chennai</td></tr>
+    </table>
+    <p>Table: products</p>
+    <table>
+      <tr><th>product_id</th><th>product_name</th><th>category</th></tr>
+      <tr><td>P10</td><td>Samsung TV</td><td>Electronics</td></tr>
+      <tr><td>P20</td><td>Nike Shoes</td><td>Footwear</td></tr>
+      <tr><td>P30</td><td>Dining Table</td><td>Furniture</td></tr>
+      <tr><td>P40</td><td>Running Shorts</td><td>Footwear</td></tr>
+    </table>
+    <h3>Example 1: Filter high-value orders and aggregate by customer</h3>
+    <p>Business question: Which customers have spent the most on orders above 1000 rupees?</p>
+    <pre><code class="language-sql">WITH
+  high_value_orders AS (
+    SELECT order_id, customer_id, amount
+    FROM orders
+    WHERE amount &gt; 1000
+  ),
+  customer_totals AS (
+    SELECT customer_id, SUM(amount) AS total_spent, COUNT(*) AS order_count
+    FROM high_value_orders
+    GROUP BY customer_id
+  )
+SELECT ct.customer_id, c.name, ct.total_spent, ct.order_count
+FROM customer_totals ct
+JOIN customers c ON ct.customer_id = c.customer_id
+ORDER BY ct.total_spent DESC;</code></pre>
+    <p>Output explanation: The first CTE filters orders above 1000 rupees. The second CTE aggregates those filtered orders by customer. The final SELECT enriches with customer names. C01 (Aakash) shows the highest spend with two qualifying orders totaling 3700.</p>
+    <h3>Example 2: Chain three CTEs to rank customers</h3>
+    <p>Business question: Who are the top 2 customers by spend and what city are they from?</p>
+    <pre><code class="language-sql">WITH
+  high_value_orders AS (
+    SELECT order_id, customer_id, amount
+    FROM orders
+    WHERE amount &gt; 1000
+  ),
+  customer_totals AS (
+    SELECT customer_id, SUM(amount) AS total_spent
+    FROM high_value_orders
+    GROUP BY customer_id
+  ),
+  ranked_customers AS (
+    SELECT customer_id, total_spent,
+           RANK() OVER (ORDER BY total_spent DESC) AS rank_num
+    FROM customer_totals
+  )
+SELECT rc.customer_id, c.name, c.city, rc.total_spent, rc.rank_num
+FROM ranked_customers rc
+JOIN customers c ON rc.customer_id = c.customer_id
+WHERE rc.rank_num &lt;= 2;</code></pre>
+    <p>Output explanation: Three CTEs in sequence. The third uses a window function to assign ranks. The WHERE clause in the main query filters to only the top 2. Aakash from Mumbai ranks first, Meera from Bangalore ranks second.</p>
+    <h3>Example 3: Use two independent CTEs and join them</h3>
+    <p>Business question: For each customer who spent more than 1000 total, what was their most frequently purchased product category?</p>
+    <pre><code class="language-sql">WITH
+  customer_totals AS (
+    SELECT customer_id, SUM(amount) AS total_spent
+    FROM orders
+    GROUP BY customer_id
+    HAVING SUM(amount) &gt; 1000
+  ),
+  customer_categories AS (
+    SELECT o.customer_id, p.category, COUNT(*) AS category_count
+    FROM orders o
+    JOIN products p ON o.product_id = p.product_id
+    GROUP BY o.customer_id, p.category
+  )
+SELECT ct.customer_id, c.name, cc.category, cc.category_count, ct.total_spent
+FROM customer_totals ct
+JOIN customer_categories cc ON ct.customer_id = cc.customer_id
+JOIN customers c ON ct.customer_id = c.customer_id
+ORDER BY ct.customer_id, cc.category_count DESC;</code></pre>
+    <p>Output explanation: The two CTEs are independent of each other. They both query the base orders table but compute different things. The main query joins them together to combine spend information with category preferences.</p>
+    <h3>Example 4: Full business report in one query</h3>
+    <p>Business question: Build a summary showing each qualifying customer's name, city, total spend, last order date, and top category.</p>
+    <pre><code class="language-sql">WITH
+  high_value_orders AS (
+    SELECT order_id, customer_id, product_id, amount, order_date
+    FROM orders
+    WHERE amount &gt; 1000
+  ),
+  customer_summary AS (
+    SELECT customer_id,
+           SUM(amount) AS total_spent,
+           MAX(order_date) AS last_order_date
+    FROM high_value_orders
+    GROUP BY customer_id
+  ),
+  top_category AS (
+    SELECT o.customer_id, p.category,
+           RANK() OVER (PARTITION BY o.customer_id ORDER BY COUNT(*) DESC) AS cat_rank
+    FROM orders o
+    JOIN products p ON o.product_id = p.product_id
+    GROUP BY o.customer_id, p.category
+  )
+SELECT cs.customer_id, c.name, c.city,
+       cs.total_spent, cs.last_order_date, tc.category AS top_category
+FROM customer_summary cs
+JOIN customers c ON cs.customer_id = c.customer_id
+JOIN top_category tc ON cs.customer_id = tc.customer_id AND tc.cat_rank = 1
+ORDER BY cs.total_spent DESC;</code></pre>
+    <p>Output explanation: Three CTEs build different pieces of the picture. The final SELECT assembles all of them into a complete, readable business report. Each CTE is independently testable and clearly named.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>A later CTE can reference earlier CTEs, but not the other way around. If CTE3 is defined after CTE2, CTE2 cannot reference CTE3. The order in the WITH block is the order of available references.</p>
+    <p>You can reference a CTE more than once in the same query. This is one of the key advantages of CTEs over subqueries. If you need the same intermediate result in two different places, you define it once as a CTE and reference it twice in the main SELECT or in two different CTEs.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Putting a second WITH keyword before the next CTE. The WITH keyword appears only once. Each additional CTE is simply separated by a comma.</p>
+    <p>Defining a CTE that is never used. This is not a syntax error, but it wastes resources. If you define a CTE but do not reference it anywhere, remove it.</p>
+    <p>Referencing a CTE that was defined later in the chain. The references must go forward in order. CTE1 cannot use CTE2 if CTE2 is defined after CTE1.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Name each CTE after what it contains, not after the transformation it performs. high_value_orders tells you what the rows represent. filter_orders_over_1000 tells you the mechanism, which is less useful in a long query.</p>
+    <p>Keep each CTE focused on a single transformation. If a CTE is joining three tables and doing a GROUP BY and a HAVING and a window function, it is doing too much. Split it.</p>
+    <p>Write CTEs in the order a reader would think through the problem. The person reading your query should be able to trace the logic top to bottom without jumping back and forth.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Flipkart, the weekly seller performance dashboard is built using a chain of about six CTEs. Each one isolates one metric: returns, cancellations, delivery failures, revenue, dispute rate, and rating. The final SELECT joins all six together into a single seller scorecard.</p>
+    <p>At Paytm, monthly cashback reports are built using multiple CTEs that first identify eligible transactions, then compute cashback amounts per rule, then aggregate by customer, and finally apply a cap.</p>
+    <p>At Amazon India, supply chain queries use CTEs to separately compute warehouse inventory, pending orders, and in-transit stock, then combine them to show a real-time stock position per product.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Multiple CTE Pipeline
+-----------------------
+
+orders table (raw data)
+       |
+       v
+[CTE 1: high_value_orders]   -- filters amount &gt; 1000
+       |
+       v
+[CTE 2: customer_totals]     -- groups and sums by customer
+       |
+       v
+[CTE 3: ranked_customers]    -- adds RANK() window function
+       |
+       v
+Final SELECT                 -- joins with customers table, filters rank &lt;= 10
+
+Each step feeds the next. Each step can be read independently.</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these:</p>
+    <ul>
+      <li>Where does the WITH keyword appear when you have multiple CTEs?</li>
+      <li>Can CTE3 reference CTE1? Can CTE1 reference CTE3?</li>
+      <li>What is the key difference between defining two CTEs versus nesting two subqueries?</li>
+      <li>Can you use the same CTE twice in the final SELECT?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query at Flipkart with two CTEs: one that finds all orders in the Electronics category, and another that calculates total electronics revenue per customer. The final SELECT should return customers sorted by their electronics spend.</li>
+    </ol>
+    <ol>
+      <li>Write a three-CTE query that first finds orders above 800 rupees, then computes total spend per customer, then ranks them by total spend. Return only the top 5 ranked customers.</li>
+    </ol>
+    <ol>
+      <li>Two CTEs, one independent of the other: CTE1 finds the average order value per city, CTE2 finds the total number of orders per city. The final SELECT joins both CTEs on city and returns cities where both the average order value is above 900 and the order count is above 3.</li>
+    </ol>
+    <ol>
+      <li>Rewrite the following nested subquery using multiple CTEs:</li>
+    </ol>
+    <pre><code class="language-sql">   SELECT customer_id, total_spent
+   FROM (
+     SELECT customer_id, SUM(amount) AS total_spent
+     FROM (SELECT * FROM orders WHERE amount &gt; 500) AS filtered
+     GROUP BY customer_id
+   ) AS aggregated
+   WHERE total_spent &gt; 2000;</code></pre>
+    <ol>
+      <li>Write a query using three CTEs that shows each customer's name, the total amount they spent, the total number of orders they placed, and their average order value. Sort by average order value descending.</li>
+    </ol>
+    <ol>
+      <li>Using CTEs, write a Flipkart report that shows which product category had the highest revenue each month for the first quarter of 2024. Use one CTE per month and union the results in the final SELECT.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>Multiple CTEs are the SQL equivalent of writing clean, well-structured code. Each step has a name. Each name carries meaning. The logic flows from top to bottom in the order a reader would think about the problem.</p>
+    <p>The moment you catch yourself building a third nested subquery, stop and ask whether the whole thing would be clearer as a chain of CTEs. In almost every case, it will be.</p>
+  `,
+  'mod9-t4': `
+    <h1>CTE vs Subquery: When to Use Each One</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Neha has been at Swiggy for six months. She is comfortable with subqueries and uses them confidently in her daily work. One afternoon, a senior analyst named Suresh glances at her screen and says, "That works, but have you thought about rewriting it as a CTE?"</p>
+    <p>Neha is not sure when to use which. She knows both can produce the same result. She has heard people say CTEs are "better," but she wants to know when and why. She asks Suresh directly: "What is actually the rule here? When do I use a subquery and when do I use a CTE?"</p>
+    <p>Suresh pulls up a chair. This article captures that conversation.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Both CTEs and subqueries produce temporary result sets that exist only for the duration of a query. They can often be swapped for each other and return identical output. So the question is not which one is correct, but which one is clearer, more reusable, and more appropriate for the situation at hand.</p>
+    <p>If you always default to subqueries, your queries will become harder to read as the logic grows. If you always default to CTEs, you might be adding unnecessary overhead to simple one-liner lookups. The answer, like most things in SQL, is: it depends. But there are clear guidelines.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Subqueries came first. They are part of the original SQL specification and let you embed one query inside another. As queries grew more complex, the SQL standard added CTEs to give analysts a way to name intermediate results and define them separately from the main query logic.</p>
+    <p>CTEs were not built to replace subqueries. They were built to handle the cases where subqueries become unmanageable: when the logic is multi-step, when the same result is needed more than once, or when the query needs to be recursive.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>A subquery is like a note you write in the margin of a document. It is quick, inline, and works fine for a small comment. A CTE is like a footnote with a label at the top of the page. You define it once, give it a name, and the rest of the document can refer to that label.</p>
+    <p>If you only need that reference once and it is short, the inline note (subquery) is fine. If you need to reference it multiple times, or if the note is longer than the main text, the labeled footnote (CTE) is a better choice.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>Subquery approach (logic is buried inside):
+
+SELECT city, COUNT(*)
+FROM orders
+WHERE customer_id IN (
+  SELECT customer_id
+  FROM orders
+  GROUP BY customer_id
+  HAVING COUNT(*) &gt; 3
+)
+GROUP BY city;
+
+CTE approach (logic is named and upfront):
+
+WITH repeat_customers AS (
+  SELECT customer_id
+  FROM orders
+  GROUP BY customer_id
+  HAVING COUNT(*) &gt; 3
+)
+SELECT city, COUNT(*)
+FROM orders
+WHERE customer_id IN (SELECT customer_id FROM repeat_customers)
+GROUP BY city;</code></pre>
+    <p>Same result. Different readability. In the subquery version, you have to parse the WHERE clause before understanding what the outer query is doing. In the CTE version, you know what repeat_customers means before you even reach the outer query.</p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>A subquery in the FROM clause (also called a derived table or inline view) is essentially an anonymous CTE. The database computes it on the fly and uses its result as if it were a table. It has no name and cannot be referenced more than once in the query.</p>
+    <p>A CTE is a named derived table defined at the top. It can be referenced multiple times by name in the same query. Whether the database materializes the CTE result or inlines it as a view depends on the optimizer. In PostgreSQL 12 and later, CTEs are treated as optimization fences by default only if explicitly marked as MATERIALIZED. In SQL Server and MySQL 8+, the optimizer inlines CTEs unless told otherwise.</p>
+    <p>For performance, in modern databases, CTEs and subqueries typically produce the same execution plan. Choose based on readability and maintenance, not on performance assumptions.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>Here is the same business logic written both ways. The question is: find all orders from cities where the average order amount is above 600 rupees.</p>
+    <p><strong>With a subquery:</strong></p>
+    <pre><code class="language-sql">SELECT order_id, customer_id, city, amount
+FROM orders
+WHERE city IN (
+  SELECT city
+  FROM orders
+  GROUP BY city
+  HAVING AVG(amount) &gt; 600
+);</code></pre>
+    <p><strong>With a CTE:</strong></p>
+    <pre><code class="language-sql">WITH high_avg_cities AS (
+  SELECT city
+  FROM orders
+  GROUP BY city
+  HAVING AVG(amount) &gt; 600
+)
+SELECT o.order_id, o.customer_id, o.city, o.amount
+FROM orders o
+WHERE o.city IN (SELECT city FROM high_avg_cities);</code></pre>
+    <p>When the subquery is this short and clean, either works fine. The subquery version is arguably more compact. The CTE version gives the filter a readable name.</p>
+    <p>Now here is a case where the CTE is clearly better: reuse. Suppose you need the same filtered city list in two different places in the query.</p>
+    <pre><code class="language-sql">WITH high_avg_cities AS (
+  SELECT city
+  FROM orders
+  GROUP BY city
+  HAVING AVG(amount) &gt; 600
+)
+SELECT
+  hac.city,
+  COUNT(o.order_id) AS total_orders,
+  SUM(o.amount) AS total_revenue
+FROM high_avg_cities hac
+JOIN orders o ON o.city = hac.city
+GROUP BY hac.city;</code></pre>
+    <p>With a subquery, you would have to write the same GROUP BY + HAVING logic twice. With the CTE, you define it once and use it throughout.</p>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Dimension</th><th>Subquery</th><th>CTE</th></tr>
+      <tr><td>Where it is defined</td><td>Inline, inside the main query body</td><td>At the top, before the main query</td></tr>
+      <tr><td>Has a name</td><td>No, it is anonymous</td><td>Yes, you assign a name</td></tr>
+      <tr><td>Can be reused in the same query</td><td>No, must be rewritten each time</td><td>Yes, reference the name multiple times</td></tr>
+      <tr><td>Supports recursion</td><td>No</td><td>Yes, with WITH RECURSIVE</td></tr>
+      <tr><td>Readability for complex logic</td><td>Gets hard to read with multiple levels</td><td>Stays readable regardless of complexity</td></tr>
+      <tr><td>Best for</td><td>Simple, one-off filters in WHERE or FROM</td><td>Multi-step logic, reusable results, recursive queries</td></tr>
+      <tr><td>Performance (modern databases)</td><td>Comparable to CTEs</td><td>Comparable to subqueries</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample table: orders (Swiggy)</strong></p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>city</th><th>amount</th><th>order_date</th></tr>
+      <tr><td>1001</td><td>C01</td><td>Mumbai</td><td>620</td><td>2024-01-05</td></tr>
+      <tr><td>1002</td><td>C02</td><td>Delhi</td><td>430</td><td>2024-01-06</td></tr>
+      <tr><td>1003</td><td>C03</td><td>Mumbai</td><td>890</td><td>2024-01-07</td></tr>
+      <tr><td>1004</td><td>C04</td><td>Bangalore</td><td>510</td><td>2024-01-08</td></tr>
+      <tr><td>1005</td><td>C05</td><td>Delhi</td><td>750</td><td>2024-01-09</td></tr>
+      <tr><td>1006</td><td>C06</td><td>Hyderabad</td><td>340</td><td>2024-01-10</td></tr>
+      <tr><td>1007</td><td>C07</td><td>Mumbai</td><td>1100</td><td>2024-01-11</td></tr>
+      <tr><td>1008</td><td>C08</td><td>Bangalore</td><td>980</td><td>2024-01-12</td></tr>
+    </table>
+    <h3>Example 1: Simple filter, subquery is fine</h3>
+    <p>Business question: Find all orders from customers who have ever placed an order above 800 rupees.</p>
+    <p><strong>Subquery version (appropriate here):</strong></p>
+    <pre><code class="language-sql">SELECT order_id, customer_id, city, amount
+FROM orders
+WHERE customer_id IN (
+  SELECT DISTINCT customer_id
+  FROM orders
+  WHERE amount &gt; 800
+);</code></pre>
+    <p>Output explanation: This is a simple, one-off filter. The subquery is short. There is no reuse. The subquery version is compact and perfectly readable. A CTE here would add length without adding clarity.</p>
+    <h3>Example 2: Reuse case, CTE is clearly better</h3>
+    <p>Business question: Show the total orders and total revenue for cities where the average order value exceeds 600 rupees.</p>
+    <p><strong>Subquery version (gets awkward):</strong></p>
+    <pre><code class="language-sql">SELECT city, COUNT(*) AS total_orders, SUM(amount) AS total_revenue
+FROM orders
+WHERE city IN (
+  SELECT city FROM orders GROUP BY city HAVING AVG(amount) &gt; 600
+)
+GROUP BY city;</code></pre>
+    <p><strong>CTE version (cleaner and extendable):</strong></p>
+    <pre><code class="language-sql">WITH qualifying_cities AS (
+  SELECT city
+  FROM orders
+  GROUP BY city
+  HAVING AVG(amount) &gt; 600
+)
+SELECT o.city, COUNT(*) AS total_orders, SUM(o.amount) AS total_revenue
+FROM orders o
+JOIN qualifying_cities qc ON o.city = qc.city
+GROUP BY o.city;</code></pre>
+    <p>Output explanation: Both produce the same result. Mumbai and Bangalore qualify. But the CTE version makes the filter visible by name, and if the same city filter is needed in another part of the query, it is already defined.</p>
+    <h3>Example 3: Multi-step logic, CTE wins clearly</h3>
+    <p>Business question: Find the top 3 customers by total spend, then return all their individual orders.</p>
+    <p><strong>Nested subquery version (hard to follow):</strong></p>
+    <pre><code class="language-sql">SELECT order_id, customer_id, city, amount
+FROM orders
+WHERE customer_id IN (
+  SELECT customer_id
+  FROM (
+    SELECT customer_id, SUM(amount) AS total_spent
+    FROM orders
+    GROUP BY customer_id
+    ORDER BY total_spent DESC
+    LIMIT 3
+  ) AS top3
+);</code></pre>
+    <p><strong>CTE version (logical steps, easy to read):</strong></p>
+    <pre><code class="language-sql">WITH customer_totals AS (
+  SELECT customer_id, SUM(amount) AS total_spent
+  FROM orders
+  GROUP BY customer_id
+),
+top_customers AS (
+  SELECT customer_id
+  FROM customer_totals
+  ORDER BY total_spent DESC
+  LIMIT 3
+)
+SELECT o.order_id, o.customer_id, o.city, o.amount
+FROM orders o
+WHERE o.customer_id IN (SELECT customer_id FROM top_customers);</code></pre>
+    <p>Output explanation: With the subquery version, you have to read inside-out to understand what is happening. With the CTE version, you read top to bottom. Step 1: compute totals. Step 2: pick top 3. Step 3: get their orders. The logic is identical, but the CTE version communicates intent clearly.</p>
+    <h3>Example 4: Recursion, only CTE can do this</h3>
+    <p>Business question: List all employees and their depth in the org chart (this is structurally impossible with subqueries alone).</p>
+    <pre><code class="language-sql">WITH RECURSIVE org_chart AS (
+  SELECT employee_id, name, manager_id, 0 AS depth
+  FROM employees
+  WHERE manager_id IS NULL
+
+  UNION ALL
+
+  SELECT e.employee_id, e.name, e.manager_id, oc.depth + 1
+  FROM employees e
+  JOIN org_chart oc ON e.manager_id = oc.employee_id
+)
+SELECT * FROM org_chart ORDER BY depth;</code></pre>
+    <p>Output explanation: There is no subquery equivalent that can walk an unknown number of levels in a hierarchy. Recursive CTEs are the only native SQL mechanism for this. Subqueries simply cannot do it.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>People sometimes assume CTEs are always faster because they look like precomputed tables. This is not true. In most databases, the optimizer evaluates whether to materialize the CTE result or inline it. You should not rely on a CTE being cached or reused automatically just because you defined it once.</p>
+    <p>People also assume subqueries are always slower because they are "nested." Again, this is not reliable. The query planner in databases like PostgreSQL and SQL Server is sophisticated enough to handle subqueries efficiently. Write for readability first, and measure performance only if there is a real problem.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Using a CTE for a one-line filter in a WHERE clause when a subquery would be more compact and just as readable. Not every query needs a CTE.</p>
+    <p>Using a deeply nested subquery when the same logic, written as two CTEs, would take the same number of lines but be far easier to read and debug.</p>
+    <p>Thinking that defining a CTE means the database will cache and reuse it efficiently. Some databases do, some do not. If performance is critical, measure it with EXPLAIN ANALYZE.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Use a subquery when the logic is simple, short, and only used once. A correlated subquery in a WHERE clause or a short derived table in FROM are good candidates.</p>
+    <p>Use a CTE when the logic is multi-step, when the same result is needed more than once, or when the query needs to be read and understood by someone else. CTEs are also the right choice when you need recursion.</p>
+    <p>When in doubt, prefer CTEs. The extra lines are a small cost compared to the readability benefit.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Swiggy, junior analysts often start with subqueries because that is what they learn first. Senior analysts refactor complex reporting queries into CTEs when they get handed off to other team members or scheduled in automated dashboards.</p>
+    <p>At TCS, large client reporting projects follow a coding standard that requires CTEs for any query longer than 20 lines. This makes peer reviews and audits faster.</p>
+    <p>At PhonePe, fraud detection queries are written using CTEs because each step of the detection logic needs to be auditable. A reviewer can isolate and test each CTE independently to verify the flagging logic is correct.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Decision Guide: CTE or Subquery?
+----------------------------------
+
+Is the logic short and used only once?
+  YES --&gt; Subquery is fine
+  NO  --&gt; Keep going
+
+Is the same intermediate result needed in more than one place?
+  YES --&gt; Use a CTE
+  NO  --&gt; Keep going
+
+Is the logic multi-step (more than one transformation)?
+  YES --&gt; Use CTEs (one per step)
+  NO  --&gt; Keep going
+
+Does the query need to be recursive (hierarchy, series)?
+  YES --&gt; Must use a recursive CTE
+  NO  --&gt; Either works; choose for readability
+
+Default rule: if you are unsure, use a CTE</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can explain:</p>
+    <ul>
+      <li>What the key structural difference between a CTE and a subquery is</li>
+      <li>In which scenario a subquery is the more appropriate choice</li>
+      <li>Why CTEs are better when the same result is needed more than once</li>
+      <li>Why recursion is only possible with CTEs, not with subqueries</li>
+      <li>Whether CTEs are always faster than subqueries (and what the correct answer is)</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>You need to find all customers from Swiggy's orders table who placed at least one order in both January and February 2024. Write this once using a subquery and once using a CTE. Which version is clearer?</li>
+    </ol>
+    <ol>
+      <li>Write a query using a subquery that finds all cities in the orders table where the maximum single order value is above 1000 rupees.</li>
+    </ol>
+    <ol>
+      <li>Rewrite the query from question 2 as a CTE. Then extend it to also show the total number of orders in each qualifying city. Explain why the CTE version is easier to extend.</li>
+    </ol>
+    <ol>
+      <li>A colleague shows you a query with four nested subqueries. Rewrite it using CTEs, giving each level a meaningful name. (Use any realistic Swiggy example you create.)</li>
+    </ol>
+    <ol>
+      <li>In the orders table, write a query that shows, for each city, both the total revenue and the count of customers who placed more than one order. Use a CTE for the multi-order customer list and a subquery for one simpler filter of your choice.</li>
+    </ol>
+    <ol>
+      <li>Explain in plain words: why can a CTE be referenced twice in the same query, but a subquery cannot? What problem does this solve in practice?</li>
+    </ol>
+    <ol>
+      <li>Write a query using a recursive CTE that generates a list of weeks (as start dates) for the first quarter of 2024, starting from January 1. Show why this cannot be done with a regular subquery.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>CTEs and subqueries are two ways to express the same idea: take a query, give it a result, and use that result in a larger query. The difference is in how visible and reusable that intermediate result is.</p>
+    <p>Subqueries are the quick sketch on a napkin. CTEs are the labeled diagram on a whiteboard. Both have their place. The skill is knowing which one the situation calls for.</p>
+    <p>As your queries grow in complexity, you will naturally reach for CTEs more often. That is a sign of growth as a SQL writer, not a preference, but a judgment call made for the right reasons.</p>
+  `,
 
   // ── Module 10 ────────────────────────────────────────────────
-  'mod10-t1':  `<h1>Introduction to Window Functions</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod10-t2':  `<h1>OVER() Clause</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod10-t3':  `<h1>PARTITION BY</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod10-t4':  `<h1>ORDER BY in Window Functions</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod10-t5':  `<h1>ROW_NUMBER()</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod10-t6':  `<h1>RANK() and DENSE_RANK()</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod10-t7':  `<h1>NTILE()</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod10-t8':  `<h1>LAG() and LEAD()</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod10-t9':  `<h1>FIRST_VALUE() and LAST_VALUE()</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod10-t10': `<h1>Frame Specification (ROWS / RANGE)</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod10-t1': `
+    <h1>Window Functions: Running Calculations Across Related Rows Without Collapsing Them</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Priya joined Swiggy's data team three weeks ago. Her manager, Rohit, drops a task in her inbox: "I need the top 3 highest orders per city for this week. And I want every order to show its rank alongside the order details."</p>
+    <p>Priya opens her SQL editor and reaches for the obvious tool: GROUP BY. She groups by city, gets the maximum amounts, and stares at the output. The rows are collapsed. She lost the order IDs. She lost the customer IDs. She can't even tell which specific order was number one in Bengaluru.</p>
+    <p>She tries a subquery. Then a self-join. An hour later, Rohit walks by and says, "Have you tried window functions?" That one question saves her the rest of the afternoon.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>GROUP BY is built for summarization. When you write <code>GROUP BY city</code>, SQL takes every row in a city and collapses them into one output row. You get one number per city, not one number per order.</p>
+    <p>But what if you need both? What if you need to keep every order row intact and also show how that order ranks within its city?</p>
+    <p>That is exactly the problem window functions solve.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Before window functions existed (they were standardized in SQL:2003), analysts had to write correlated subqueries or self-joins to do anything that required comparing a row to other rows in its group. Those queries were slow, hard to read, and easy to get wrong.</p>
+    <p>Window functions were built to handle a specific class of problems: calculations that need context from neighboring rows or from a group of related rows, without losing the individual row identity.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you have a class of 30 students sorted by their marks. You want to write each student's rank next to their name on the same sheet. GROUP BY would hand you a single summary sheet with no names. A window function lets each student keep their own row and adds the rank column right next to their name.</p>
+    <p>The window is the set of rows each student "sees" when computing their own rank. For some functions, every student sees all 30. For others, each student only sees students in their own section.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <p>Think of a sliding panel placed over your result table. The panel covers a specific set of rows for each row being processed. The function runs against whatever rows are inside that panel. Then the panel shifts to the next row. Every row gets its own calculation, and every row stays in the final output.</p>
+    <p>That panel is the window.</p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>A window function sits in the SELECT clause. It looks like a regular function but has an OVER() clause attached to it. That OVER() clause is what defines the window.</p>
+    <p>SQL processes window functions after WHERE, HAVING, and GROUP BY have already run. This means the window function sees a fully filtered, possibly aggregated intermediate result. It runs just before the final ORDER BY at the query level.</p>
+    <p>The three things you can put inside OVER():</p>
+    <ul>
+      <li>PARTITION BY: splits rows into groups (like GROUP BY but without collapsing)</li>
+      <li>ORDER BY: defines the order within each partition for the calculation</li>
+      <li>Frame specification: controls which specific rows within the partition are included</li>
+    </ul>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <pre><code class="language-sql">SELECT
+    order_id,
+    customer_id,
+    city,
+    amount,
+    order_date,
+    SUM(amount) OVER (PARTITION BY city) AS city_total,
+    RANK() OVER (PARTITION BY city ORDER BY amount DESC) AS rank_in_city
+FROM orders;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>SUM(amount)</code></td><td>The function being applied</td><td>Sums the amount column</td></tr>
+      <tr><td><code>OVER (...)</code></td><td>Declares this as a window function</td><td>Without this, SUM would aggregate and collapse rows</td></tr>
+      <tr><td><code>PARTITION BY city</code></td><td>Divides rows into separate windows per city</td><td>Each city gets its own independent calculation</td></tr>
+      <tr><td><code>ORDER BY amount DESC</code></td><td>Orders rows within each partition for the calculation</td><td>Highest amount gets rank 1</td></tr>
+      <tr><td><code>RANK()</code></td><td>Ranking function that handles ties by skipping numbers</td><td>Two rows tied at rank 2 means no rank 3</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample table: <code>orders</code> at Swiggy</strong></p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>city</th><th>amount</th><th>order_date</th></tr>
+      <tr><td>101</td><td>C01</td><td>Mumbai</td><td>450</td><td>2024-01-10</td></tr>
+      <tr><td>102</td><td>C02</td><td>Mumbai</td><td>800</td><td>2024-01-11</td></tr>
+      <tr><td>103</td><td>C03</td><td>Bengaluru</td><td>300</td><td>2024-01-10</td></tr>
+      <tr><td>104</td><td>C04</td><td>Bengaluru</td><td>950</td><td>2024-01-12</td></tr>
+      <tr><td>105</td><td>C05</td><td>Delhi</td><td>600</td><td>2024-01-11</td></tr>
+      <tr><td>106</td><td>C06</td><td>Delhi</td><td>600</td><td>2024-01-13</td></tr>
+    </table>
+    <h3>Example 1: Grand total alongside every row</h3>
+    <p><strong>Business question:</strong> Show each order and the total revenue across all cities.</p>
+    <pre><code class="language-sql">SELECT
+    order_id,
+    city,
+    amount,
+    SUM(amount) OVER () AS grand_total
+FROM orders;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>city</th><th>amount</th><th>grand_total</th></tr>
+      <tr><td>101</td><td>Mumbai</td><td>450</td><td>3710</td></tr>
+      <tr><td>102</td><td>Mumbai</td><td>800</td><td>3710</td></tr>
+      <tr><td>103</td><td>Bengaluru</td><td>300</td><td>3710</td></tr>
+      <tr><td>104</td><td>Bengaluru</td><td>950</td><td>3710</td></tr>
+      <tr><td>105</td><td>Delhi</td><td>600</td><td>3710</td></tr>
+      <tr><td>106</td><td>Delhi</td><td>600</td><td>3710</td></tr>
+    </table>
+    <h3>Example 2: City total alongside every row</h3>
+    <p><strong>Business question:</strong> Show each order and total revenue for that order's city.</p>
+    <pre><code class="language-sql">SELECT
+    order_id,
+    city,
+    amount,
+    SUM(amount) OVER (PARTITION BY city) AS city_total
+FROM orders;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>city</th><th>amount</th><th>city_total</th></tr>
+      <tr><td>101</td><td>Mumbai</td><td>450</td><td>1250</td></tr>
+      <tr><td>102</td><td>Mumbai</td><td>800</td><td>1250</td></tr>
+      <tr><td>103</td><td>Bengaluru</td><td>300</td><td>1250</td></tr>
+      <tr><td>104</td><td>Bengaluru</td><td>950</td><td>1250</td></tr>
+      <tr><td>105</td><td>Delhi</td><td>600</td><td>1200</td></tr>
+      <tr><td>106</td><td>Delhi</td><td>600</td><td>1200</td></tr>
+    </table>
+    <h3>Example 3: Rank orders within each city</h3>
+    <p><strong>Business question:</strong> Rank each order by amount within its city.</p>
+    <pre><code class="language-sql">SELECT
+    order_id,
+    city,
+    amount,
+    RANK() OVER (PARTITION BY city ORDER BY amount DESC) AS rank_in_city
+FROM orders;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>city</th><th>amount</th><th>rank_in_city</th></tr>
+      <tr><td>102</td><td>Mumbai</td><td>800</td><td>1</td></tr>
+      <tr><td>101</td><td>Mumbai</td><td>450</td><td>2</td></tr>
+      <tr><td>104</td><td>Bengaluru</td><td>950</td><td>1</td></tr>
+      <tr><td>103</td><td>Bengaluru</td><td>300</td><td>2</td></tr>
+      <tr><td>105</td><td>Delhi</td><td>600</td><td>1</td></tr>
+      <tr><td>106</td><td>Delhi</td><td>600</td><td>1</td></tr>
+    </table>
+    <h3>Example 4: Running total per city ordered by date</h3>
+    <p><strong>Business question:</strong> Show a running total of revenue per city as orders come in over time.</p>
+    <pre><code class="language-sql">SELECT
+    order_id,
+    city,
+    order_date,
+    amount,
+    SUM(amount) OVER (PARTITION BY city ORDER BY order_date) AS running_total
+FROM orders;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>city</th><th>order_date</th><th>amount</th><th>running_total</th></tr>
+      <tr><td>101</td><td>Mumbai</td><td>2024-01-10</td><td>450</td><td>450</td></tr>
+      <tr><td>102</td><td>Mumbai</td><td>2024-01-11</td><td>800</td><td>1250</td></tr>
+      <tr><td>103</td><td>Bengaluru</td><td>2024-01-10</td><td>300</td><td>300</td></tr>
+      <tr><td>104</td><td>Bengaluru</td><td>2024-01-12</td><td>950</td><td>1250</td></tr>
+      <tr><td>105</td><td>Delhi</td><td>2024-01-11</td><td>600</td><td>600</td></tr>
+      <tr><td>106</td><td>Delhi</td><td>2024-01-13</td><td>600</td><td>1200</td></tr>
+    </table>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>Window functions cannot go inside a WHERE clause. SQL has already decided which rows to keep by the time window functions run. If you need to filter on a window function result, wrap the whole query in a subquery or CTE and filter in the outer query.</p>
+    <p>Two separate OVER() clauses in the same SELECT can define completely different windows. They are independent of each other.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Writing a window function in WHERE: <code>WHERE RANK() OVER (...) = 1</code> throws an error. Use a subquery or CTE and filter on the aliased column there.</p>
+    <p>Confusing PARTITION BY with GROUP BY: GROUP BY produces one output row per group. PARTITION BY keeps all rows and adds a computed column per row.</p>
+    <p>Forgetting OVER(): <code>RANK()</code> without OVER() is not valid SQL. Every window function requires OVER().</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Define windows clearly. When a query has multiple window functions with the same OVER() definition, use a named window with the WINDOW clause (supported in PostgreSQL and BigQuery) to avoid repetition.</p>
+    <p>Keep window functions in SELECT. Never try to use them in WHERE, GROUP BY, or HAVING.</p>
+    <p>Order matters inside OVER(). The ORDER BY inside OVER() affects how cumulative functions behave, not the order of the final output.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Swiggy, analysts use window functions to rank delivery partners by performance within each zone. At Flipkart, window functions power seller leaderboards by category. At Paytm, running totals built with window functions track wallet balance changes over a session. At IRCTC, window functions help identify the busiest booking windows per route without losing individual transaction records.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Table: orders
++----------+------+--------+
+| order_id | city | amount |
++----------+------+--------+
+| 101      | MUM  |   450  |  &lt;-- Window for MUM: rows 101, 102
+| 102      | MUM  |   800  |  &lt;-- Window for MUM: rows 101, 102
+| 103      | BLR  |   300  |  &lt;-- Window for BLR: rows 103, 104
+| 104      | BLR  |   950  |  &lt;-- Window for BLR: rows 103, 104
+| 105      | DEL  |   600  |  &lt;-- Window for DEL: rows 105, 106
+| 106      | DEL  |   600  |  &lt;-- Window for DEL: rows 105, 106
++----------+------+--------+
+
+PARTITION BY city creates three independent windows.
+Each row stays. Each row gets its own computed value.
+No collapsing. No loss of detail.</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these before going further:</p>
+    <ul>
+      <li>What is the difference between GROUP BY and PARTITION BY?</li>
+      <li>Which clause makes a function a window function?</li>
+      <li>At what stage in SQL execution do window functions run?</li>
+      <li>Why can you not filter on a window function result in WHERE?</li>
+      <li>What are the three main categories of window functions?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query on the <code>orders</code> table that shows each order's amount and the average amount across all orders in the same city, without collapsing any rows.</li>
+      <li>Show each order alongside what percentage of its city's total revenue it represents.</li>
+      <li>Write a query that assigns a sequential row number to every order, restarting the count for each city.</li>
+      <li>Show each order, its amount, and the maximum order amount across the entire table, on every single row.</li>
+      <li>Write a query using two different OVER() clauses in the same SELECT: one showing city total and one showing the grand total for each row.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>Window functions are one of those SQL features that feel complicated until you write your first one and it works exactly as expected. Once you understand that OVER() is simply defining the set of rows each calculation looks at, the rest falls into place naturally. Priya figured that out before lunch. You will too.</p>
+  `,
+  'mod10-t2': `
+    <h1>The OVER() Clause: What Turns a Regular Function into a Window Function</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Arjun is a business analyst at Flipkart. His manager asks him to build a sales report that shows each salesperson's individual sale amount and what percentage of the total regional sales that amount represents, all in the same row.</p>
+    <p>Arjun knows how to get the sum per region. He knows how to get individual rows. What he does not know is how to combine both in a single query without losing rows. He writes a GROUP BY query, loses the individual rows. He writes a subquery, and it looks like a mess with three layers of nesting. Then a senior colleague leans over and says, "Just add OVER() to your SUM."</p>
+    <p>That one word changes everything.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Functions like SUM, COUNT, AVG, MIN, MAX are aggregate functions by default. When you use them without any window specification, they collapse rows. You get one row per group, not one row per sale.</p>
+    <p>The challenge is that you often want both: the aggregated value and the original detail row, living side by side in the same output.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>SQL needed a way to tell the engine, "Run this function, but do not collapse the rows." The OVER() clause was introduced for exactly this purpose. It signals to the query planner that the function should be evaluated as a window function, not as a regular aggregate. Every window function ever written uses OVER().</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you are grading a stack of exam papers. With GROUP BY, you hand in just the class average. With OVER(), you hand back every individual paper with the class average printed at the top of each one. The individual answers are still there. The class context is also there. OVER() is what prints that context without removing the individual answers.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <p>Without OVER(): <code>SUM(amount)</code> compresses all rows down to one number.</p>
+    <p>With OVER(): <code>SUM(amount) OVER ()</code> computes the same total but stamps it onto every existing row without removing any of them.</p>
+    <p>The parentheses after OVER can be empty or can contain PARTITION BY, ORDER BY, or a frame clause. What goes inside determines which rows are included in each calculation.</p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>The OVER() clause has three optional components:</p>
+    <p><code>PARTITION BY column</code>: divides the data into groups. The window function resets for each group.</p>
+    <p><code>ORDER BY column</code>: defines the order within each partition. This also activates the default frame, which includes all rows from the start of the partition up to and including the current row.</p>
+    <p><code>Frame specification</code>: defines which exact rows relative to the current row are included. (Covered in detail in the Frame Specification article.)</p>
+    <p>When OVER() is empty, the window is the entire result set. Every row participates in the same calculation.</p>
+    <p>A critical rule: you can use window functions only in SELECT and ORDER BY. Not in WHERE. Not in HAVING. Not in GROUP BY.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <pre><code class="language-sql">SELECT
+    sale_id,
+    salesperson,
+    region,
+    amount,
+    SUM(amount) OVER () AS grand_total,
+    SUM(amount) OVER (PARTITION BY region) AS region_total,
+    SUM(amount) OVER (PARTITION BY region ORDER BY sale_date) AS running_total,
+    SUM(amount) OVER (PARTITION BY region ORDER BY sale_date) /
+        SUM(amount) OVER (PARTITION BY region) * 100 AS pct_of_region
+FROM sales;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>SUM(amount) OVER ()</code></td><td>Applies SUM to the entire result set, stamps total on every row</td><td>grand_total = 15000 on every row</td></tr>
+      <tr><td><code>OVER (PARTITION BY region)</code></td><td>Applies SUM separately for each region, resets per region</td><td>North total on North rows, South total on South rows</td></tr>
+      <tr><td><code>OVER (PARTITION BY region ORDER BY sale_date)</code></td><td>Running cumulative sum within each region, ordered by date</td><td>Grows as dates increase within each region</td></tr>
+      <tr><td><code>OVER (ORDER BY amount DESC)</code></td><td>Cumulative sum ordered by amount descending, across entire table</td><td>No partitioning, just ordered accumulation</td></tr>
+      <tr><td>Multiple OVER() in one SELECT</td><td>Each OVER() defines its own independent window</td><td>Two columns can have completely different window definitions</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample table: <code>sales</code> at Flipkart</strong></p>
+    <table>
+      <tr><th>sale_id</th><th>salesperson</th><th>region</th><th>amount</th><th>sale_date</th></tr>
+      <tr><td>S01</td><td>Amit</td><td>North</td><td>5000</td><td>2024-01-05</td></tr>
+      <tr><td>S02</td><td>Deepa</td><td>North</td><td>3000</td><td>2024-01-08</td></tr>
+      <tr><td>S03</td><td>Rahul</td><td>South</td><td>7000</td><td>2024-01-06</td></tr>
+      <tr><td>S04</td><td>Sneha</td><td>South</td><td>2000</td><td>2024-01-09</td></tr>
+      <tr><td>S05</td><td>Kiran</td><td>East</td><td>4000</td><td>2024-01-07</td></tr>
+    </table>
+    <h3>Example 1: Grand total on every row</h3>
+    <p><strong>Business question:</strong> Show each sale with the total sales across all regions.</p>
+    <pre><code class="language-sql">SELECT
+    sale_id,
+    salesperson,
+    amount,
+    SUM(amount) OVER () AS grand_total
+FROM sales;</code></pre>
+    <table>
+      <tr><th>sale_id</th><th>salesperson</th><th>amount</th><th>grand_total</th></tr>
+      <tr><td>S01</td><td>Amit</td><td>5000</td><td>21000</td></tr>
+      <tr><td>S02</td><td>Deepa</td><td>3000</td><td>21000</td></tr>
+      <tr><td>S03</td><td>Rahul</td><td>7000</td><td>21000</td></tr>
+      <tr><td>S04</td><td>Sneha</td><td>2000</td><td>21000</td></tr>
+      <tr><td>S05</td><td>Kiran</td><td>4000</td><td>21000</td></tr>
+    </table>
+    <h3>Example 2: Region total alongside individual rows</h3>
+    <p><strong>Business question:</strong> Show each sale with the total for its own region.</p>
+    <pre><code class="language-sql">SELECT
+    sale_id,
+    salesperson,
+    region,
+    amount,
+    SUM(amount) OVER (PARTITION BY region) AS region_total
+FROM sales;</code></pre>
+    <table>
+      <tr><th>sale_id</th><th>salesperson</th><th>region</th><th>amount</th><th>region_total</th></tr>
+      <tr><td>S01</td><td>Amit</td><td>North</td><td>5000</td><td>8000</td></tr>
+      <tr><td>S02</td><td>Deepa</td><td>North</td><td>3000</td><td>8000</td></tr>
+      <tr><td>S03</td><td>Rahul</td><td>South</td><td>7000</td><td>9000</td></tr>
+      <tr><td>S04</td><td>Sneha</td><td>South</td><td>2000</td><td>9000</td></tr>
+      <tr><td>S05</td><td>Kiran</td><td>East</td><td>4000</td><td>4000</td></tr>
+    </table>
+    <h3>Example 3: Running cumulative total within each region</h3>
+    <p><strong>Business question:</strong> Show how regional revenue accumulates over time, one sale at a time.</p>
+    <pre><code class="language-sql">SELECT
+    sale_id,
+    salesperson,
+    region,
+    sale_date,
+    amount,
+    SUM(amount) OVER (PARTITION BY region ORDER BY sale_date) AS running_total
+FROM sales;</code></pre>
+    <table>
+      <tr><th>sale_id</th><th>salesperson</th><th>region</th><th>sale_date</th><th>amount</th><th>running_total</th></tr>
+      <tr><td>S01</td><td>Amit</td><td>North</td><td>2024-01-05</td><td>5000</td><td>5000</td></tr>
+      <tr><td>S02</td><td>Deepa</td><td>North</td><td>2024-01-08</td><td>3000</td><td>8000</td></tr>
+      <tr><td>S03</td><td>Rahul</td><td>South</td><td>2024-01-06</td><td>7000</td><td>7000</td></tr>
+      <tr><td>S04</td><td>Sneha</td><td>South</td><td>2024-01-09</td><td>2000</td><td>9000</td></tr>
+      <tr><td>S05</td><td>Kiran</td><td>East</td><td>2024-01-07</td><td>4000</td><td>4000</td></tr>
+    </table>
+    <h3>Example 4: Multiple OVER() clauses in one query</h3>
+    <p><strong>Business question:</strong> Show each sale's amount, its region total, and the grand total, all in one row, then compute what percentage of the region total and grand total each sale represents.</p>
+    <pre><code class="language-sql">SELECT
+    sale_id,
+    salesperson,
+    region,
+    amount,
+    SUM(amount) OVER (PARTITION BY region) AS region_total,
+    SUM(amount) OVER () AS grand_total,
+    ROUND(amount * 100.0 / SUM(amount) OVER (PARTITION BY region), 2) AS pct_of_region,
+    ROUND(amount * 100.0 / SUM(amount) OVER (), 2) AS pct_of_grand
+FROM sales;</code></pre>
+    <table>
+      <tr><th>sale_id</th><th>salesperson</th><th>region</th><th>amount</th><th>region_total</th><th>grand_total</th><th>pct_of_region</th><th>pct_of_grand</th></tr>
+      <tr><td>S01</td><td>Amit</td><td>North</td><td>5000</td><td>8000</td><td>21000</td><td>62.50</td><td>23.81</td></tr>
+      <tr><td>S02</td><td>Deepa</td><td>North</td><td>3000</td><td>8000</td><td>21000</td><td>37.50</td><td>14.29</td></tr>
+      <tr><td>S03</td><td>Rahul</td><td>South</td><td>7000</td><td>9000</td><td>21000</td><td>77.78</td><td>33.33</td></tr>
+      <tr><td>S04</td><td>Sneha</td><td>South</td><td>2000</td><td>9000</td><td>21000</td><td>22.22</td><td>9.52</td></tr>
+      <tr><td>S05</td><td>Kiran</td><td>East</td><td>4000</td><td>4000</td><td>21000</td><td>100.00</td><td>19.05</td></tr>
+    </table>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>Using window functions in WHERE does not work. SQL runs WHERE before evaluating window functions. If you write <code>WHERE SUM(amount) OVER () > 10000</code>, the database will throw an error. Wrap the query in a subquery or CTE and filter in the outer query.</p>
+    <p>OVER() with nothing inside it means all rows. This is useful for comparing each row to a grand total. It does not mean the function has no effect.</p>
+    <p>ORDER BY inside OVER() and ORDER BY at the end of the query are completely independent. You can have both, pointing to different columns, and they do not interfere.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Adding OVER() to a function that is already inside GROUP BY: window functions and GROUP BY can coexist, but the window function only sees the grouped result, not original rows. This is rarely what you want.</p>
+    <p>Assuming OVER() with PARTITION BY is the same as GROUP BY: it is not. GROUP BY eliminates rows. PARTITION BY does not.</p>
+    <p>Using an alias in the same SELECT for a window function result and then referencing that alias in WHERE in the same query: aliases defined in SELECT are not visible in WHERE of the same query.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>When the same OVER() definition appears multiple times in a query, use the WINDOW clause to name it once and reference it by name. This reduces errors from copy-pasting window definitions.</p>
+    <pre><code class="language-sql">SELECT
+    sale_id,
+    amount,
+    SUM(amount) OVER w AS region_total,
+    AVG(amount) OVER w AS region_avg
+FROM sales
+WINDOW w AS (PARTITION BY region);</code></pre>
+    <p>Keep OVER() definitions readable. If the window is complex, break the query into a CTE to separate logic.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Flipkart, analysts use multiple OVER() clauses in the same SELECT to compute category contribution percentages. At Zomato, running totals built with OVER(ORDER BY order_date) track how daily revenue accumulates. At Ola, OVER(PARTITION BY driver_id ORDER BY ride_date) builds lifetime ride counts without losing individual ride records.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>                    OVER ()
+         +---------------------------------+
+         | S01  S02  S03  S04  S05        |  &lt;-- all rows, one window
+         +---------------------------------+
+
+         OVER (PARTITION BY region)
+North:   [S01, S02]   South: [S03, S04]   East: [S05]
+         Each partition is its own independent window
+
+         OVER (PARTITION BY region ORDER BY sale_date)
+North:   S01 sees [S01]
+         S02 sees [S01, S02]     &lt;-- grows row by row
+South:   S03 sees [S03]
+         S04 sees [S03, S04]</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <ul>
+      <li>What is the difference between <code>SUM(amount)</code> and <code>SUM(amount) OVER ()</code>?</li>
+      <li>Why can you not use a window function in a WHERE clause?</li>
+      <li>What does an empty OVER() mean?</li>
+      <li>How do you use the same window definition for multiple columns without repeating it?</li>
+      <li>Can one SELECT have two window functions with different OVER() definitions?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query on the <code>sales</code> table that shows each sale and the average sale amount for the entire table on every row, without collapsing rows.</li>
+      <li>Show each salesperson's sale amount alongside the maximum sale in their region and the maximum sale across the whole table.</li>
+      <li>Write a query that shows each sale's amount and its percentage contribution to the region total.</li>
+      <li>Show each sale with a running count of how many sales have occurred in the same region up to that point, ordered by sale date.</li>
+      <li>Write a query using the WINDOW clause to define one named window and use it for both SUM and COUNT in the same SELECT.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>OVER() is the single most important piece of syntax in all of window functions. Without it, every aggregate function you know collapses rows. With it, those same functions become tools that add context without destroying detail. Arjun's report was done before his next coffee break.</p>
+  `,
+  'mod10-t3': `
+    <h1>PARTITION BY: Running Window Calculations Separately for Each Group</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Neha works on the analytics team at Swiggy. Her manager gives her a task: "For every order in the system, show how much that order contributed to its city's total. I want every order row in the output, not just city-level summaries."</p>
+    <p>Neha immediately thinks GROUP BY. She groups by city and gets city totals. But now she has lost every individual order. She tries joining the city totals back to the orders table using a subquery. It works, but it takes twelve lines of SQL and she has to explain it to two different colleagues before they trust it.</p>
+    <p>Her teammate Vivek looks at the query and replaces the entire subquery with three words: <code>PARTITION BY city</code>. The query drops to four lines.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>You need grouped calculations but you cannot afford to lose individual rows. A GROUP BY gives you one row per group. But your report needs every original row with the group-level calculation sitting next to the row-level detail.</p>
+    <p>That is the core use case for PARTITION BY.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Before PARTITION BY, analysts handled this with correlated subqueries or self-joins. Both approaches were expensive and brittle. PARTITION BY was introduced as part of the window function standard to give SQL a clean way to define independent calculation groups without collapsing the result set.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you have a classroom with students from three different batches. You want to stamp each student's paper with the average score of their batch, while keeping every student's individual paper intact.</p>
+    <p>GROUP BY would hand you three pieces of paper, one per batch, each showing only the average. PARTITION BY keeps all the individual papers and stamps the batch average on each one.</p>
+    <p>The batch is the partition. Each partition is its own independent window.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <p>Without PARTITION BY, the window spans the entire table. Every row participates in one big calculation together.</p>
+    <p>With PARTITION BY, the table is split into separate sub-tables, one per unique value of the partition column. The window function runs independently inside each sub-table. When one partition is done, the engine moves to the next. The rows never disappear.</p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>PARTITION BY sits inside the OVER() clause. You can partition by one column or multiple columns. Each unique combination of partition column values forms its own window.</p>
+    <p>Within each partition, the window function runs from scratch, as if it only sees the rows in that partition. When you PARTITION BY city, the SUM resets at the boundary between cities. When you PARTITION BY city, cuisine, the SUM resets for every unique city-cuisine combination.</p>
+    <p>Without PARTITION BY, the window is the entire result set and no resetting happens.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <pre><code class="language-sql">-- Without PARTITION BY: one big window
+SELECT
+    order_id,
+    city,
+    amount,
+    SUM(amount) OVER () AS total_all
+FROM orders;
+
+-- With PARTITION BY: separate window per city
+SELECT
+    order_id,
+    city,
+    amount,
+    SUM(amount) OVER (PARTITION BY city) AS city_total
+FROM orders;
+
+-- PARTITION BY multiple columns
+SELECT
+    order_id,
+    city,
+    cuisine,
+    amount,
+    SUM(amount) OVER (PARTITION BY city, cuisine) AS city_cuisine_total
+FROM orders;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>PARTITION BY city</code></td><td>Creates one window per unique city value</td><td>Mumbai window, Bengaluru window, Delhi window</td></tr>
+      <tr><td><code>PARTITION BY city, cuisine</code></td><td>Creates one window per unique city-cuisine pair</td><td>Mumbai-Indian, Mumbai-Chinese, Bengaluru-Indian, etc.</td></tr>
+      <tr><td>No PARTITION BY</td><td>Entire result set is one window</td><td>All rows share one calculation</td></tr>
+      <tr><td><code>SUM(amount) OVER (PARTITION BY city)</code></td><td>Sums amount within each city's window independently</td><td>Mumbai sum = 1250, Bengaluru sum = 1250, Delhi sum = 1200</td></tr>
+      <tr><td><code>RANK() OVER (PARTITION BY city ORDER BY amount DESC)</code></td><td>Ranks rows independently within each city</td><td>Rank 1 in Mumbai, Rank 1 in Bengaluru are separate</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample table: <code>orders</code> at Swiggy</strong></p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>city</th><th>cuisine</th><th>amount</th></tr>
+      <tr><td>101</td><td>C01</td><td>Mumbai</td><td>Indian</td><td>450</td></tr>
+      <tr><td>102</td><td>C02</td><td>Mumbai</td><td>Chinese</td><td>800</td></tr>
+      <tr><td>103</td><td>C03</td><td>Bengaluru</td><td>Indian</td><td>300</td></tr>
+      <tr><td>104</td><td>C04</td><td>Bengaluru</td><td>Indian</td><td>950</td></tr>
+      <tr><td>105</td><td>C05</td><td>Delhi</td><td>Chinese</td><td>600</td></tr>
+      <tr><td>106</td><td>C06</td><td>Delhi</td><td>Italian</td><td>600</td></tr>
+      <tr><td>107</td><td>C07</td><td>Mumbai</td><td>Indian</td><td>350</td></tr>
+    </table>
+    <h3>Example 1: City total on every row</h3>
+    <p><strong>Business question:</strong> Show each order with the total order value for its city.</p>
+    <pre><code class="language-sql">SELECT
+    order_id,
+    city,
+    amount,
+    SUM(amount) OVER (PARTITION BY city) AS city_total
+FROM orders;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>city</th><th>amount</th><th>city_total</th></tr>
+      <tr><td>101</td><td>Mumbai</td><td>450</td><td>1600</td></tr>
+      <tr><td>102</td><td>Mumbai</td><td>800</td><td>1600</td></tr>
+      <tr><td>107</td><td>Mumbai</td><td>350</td><td>1600</td></tr>
+      <tr><td>103</td><td>Bengaluru</td><td>300</td><td>1250</td></tr>
+      <tr><td>104</td><td>Bengaluru</td><td>950</td><td>1250</td></tr>
+      <tr><td>105</td><td>Delhi</td><td>600</td><td>1200</td></tr>
+      <tr><td>106</td><td>Delhi</td><td>600</td><td>1200</td></tr>
+    </table>
+    <h3>Example 2: Rank orders within each city</h3>
+    <p><strong>Business question:</strong> Which order is the highest within each city?</p>
+    <pre><code class="language-sql">SELECT
+    order_id,
+    city,
+    amount,
+    RANK() OVER (PARTITION BY city ORDER BY amount DESC) AS rank_in_city
+FROM orders;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>city</th><th>amount</th><th>rank_in_city</th></tr>
+      <tr><td>102</td><td>Mumbai</td><td>800</td><td>1</td></tr>
+      <tr><td>101</td><td>Mumbai</td><td>450</td><td>2</td></tr>
+      <tr><td>107</td><td>Mumbai</td><td>350</td><td>3</td></tr>
+      <tr><td>104</td><td>Bengaluru</td><td>950</td><td>1</td></tr>
+      <tr><td>103</td><td>Bengaluru</td><td>300</td><td>2</td></tr>
+      <tr><td>105</td><td>Delhi</td><td>600</td><td>1</td></tr>
+      <tr><td>106</td><td>Delhi</td><td>600</td><td>1</td></tr>
+    </table>
+    <h3>Example 3: PARTITION BY multiple columns</h3>
+    <p><strong>Business question:</strong> Show each order alongside the total for its specific city and cuisine combination.</p>
+    <pre><code class="language-sql">SELECT
+    order_id,
+    city,
+    cuisine,
+    amount,
+    SUM(amount) OVER (PARTITION BY city, cuisine) AS city_cuisine_total
+FROM orders;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>city</th><th>cuisine</th><th>amount</th><th>city_cuisine_total</th></tr>
+      <tr><td>101</td><td>Mumbai</td><td>Indian</td><td>450</td><td>800</td></tr>
+      <tr><td>107</td><td>Mumbai</td><td>Indian</td><td>350</td><td>800</td></tr>
+      <tr><td>102</td><td>Mumbai</td><td>Chinese</td><td>800</td><td>800</td></tr>
+      <tr><td>103</td><td>Bengaluru</td><td>Indian</td><td>300</td><td>1250</td></tr>
+      <tr><td>104</td><td>Bengaluru</td><td>Indian</td><td>950</td><td>1250</td></tr>
+      <tr><td>105</td><td>Delhi</td><td>Chinese</td><td>600</td><td>600</td></tr>
+      <tr><td>106</td><td>Delhi</td><td>Italian</td><td>600</td><td>600</td></tr>
+    </table>
+    <h3>Example 4: Percentage contribution within each city</h3>
+    <p><strong>Business question:</strong> What share of its city's total does each order represent?</p>
+    <pre><code class="language-sql">SELECT
+    order_id,
+    city,
+    amount,
+    SUM(amount) OVER (PARTITION BY city) AS city_total,
+    ROUND(amount * 100.0 / SUM(amount) OVER (PARTITION BY city), 2) AS pct_of_city
+FROM orders;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>city</th><th>amount</th><th>city_total</th><th>pct_of_city</th></tr>
+      <tr><td>101</td><td>Mumbai</td><td>450</td><td>1600</td><td>28.13</td></tr>
+      <tr><td>102</td><td>Mumbai</td><td>800</td><td>1600</td><td>50.00</td></tr>
+      <tr><td>107</td><td>Mumbai</td><td>350</td><td>1600</td><td>21.88</td></tr>
+      <tr><td>103</td><td>Bengaluru</td><td>300</td><td>1250</td><td>24.00</td></tr>
+      <tr><td>104</td><td>Bengaluru</td><td>950</td><td>1250</td><td>76.00</td></tr>
+      <tr><td>105</td><td>Delhi</td><td>600</td><td>1200</td><td>50.00</td></tr>
+      <tr><td>106</td><td>Delhi</td><td>600</td><td>1200</td><td>50.00</td></tr>
+    </table>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>PARTITION BY and GROUP BY look similar but behave completely differently. GROUP BY collapses. PARTITION BY does not. Running them together in one query is valid, but the window function then operates on the already-grouped result, not on the original rows.</p>
+    <p>PARTITION BY with no ORDER BY inside OVER() means the function sees all rows in the partition at once, in no particular order. The entire partition is the frame. This is appropriate for SUM and AVG but has no effect on ranking functions, which require ORDER BY.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Using PARTITION BY when GROUP BY is what you actually want: if you just need one summary row per group, use GROUP BY. PARTITION BY is for when you need both the detail rows and the group calculation.</p>
+    <p>Partitioning by a high-cardinality column (like user_id) when you actually want a table-wide calculation: if you PARTITION BY order_id where every order_id is unique, you get one row per partition, which defeats the purpose.</p>
+    <p>Expecting rows to be sorted by the partition column in output: PARTITION BY determines which rows are in the same window but does not sort the output. Add ORDER BY at the query level for sorted output.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Use PARTITION BY city when you need a calculation that resets city by city. Use PARTITION BY city, region if your groups are defined by combinations.</p>
+    <p>Keep partition columns meaningful. Partitioning by a column with too many unique values (like a UUID primary key) often means each row is its own window, which is logically the same as no window at all.</p>
+    <p>Pair PARTITION BY with ORDER BY inside OVER() when you need ordered or cumulative calculations within each group.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Swiggy, PARTITION BY restaurant_id lets analysts calculate each restaurant's order share within its cuisine category, across all restaurants. At Myntra, PARTITION BY category gives a running count of returns per product category without losing individual return records. At IRCTC, PARTITION BY route_id shows how each train's seat fill rate compares to the average across that route.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>orders table (all 7 rows):
++----------+--------+---------+
+| order_id | city   | amount  |
++----------+--------+---------+
+| 101      | Mumbai |   450   |
+| 102      | Mumbai |   800   |    PARTITION BY city
+| 107      | Mumbai |   350   |    creates three independent
+| 103      | Bengaluru | 300  |    windows:
+| 104      | Bengaluru | 950  |
+| 105      | Delhi  |   600   |    [Mumbai: 101,102,107]
+| 106      | Delhi  |   600   |    [Bengaluru: 103,104]
++----------+--------+---------+    [Delhi: 105,106]
+
+SUM runs inside each window independently.
+Mumbai: 450+800+350 = 1600
+Bengaluru: 300+950 = 1250
+Delhi: 600+600 = 1200
+
+All 7 rows remain in the result.</code></pre>
+    <hr>
+    <h2>PARTITION BY vs GROUP BY Side-by-Side</h2>
+    <pre><code class="language-sql">-- GROUP BY: collapses to 3 rows
+SELECT city, SUM(amount) AS city_total
+FROM orders
+GROUP BY city;
+
+-- Result: 3 rows only
+-- Mumbai  | 1600
+-- Bengaluru | 1250
+-- Delhi   | 1200
+
+-- PARTITION BY: keeps all 7 rows
+SELECT order_id, city, amount,
+    SUM(amount) OVER (PARTITION BY city) AS city_total
+FROM orders;
+
+-- Result: all 7 rows, each with its city_total stamped on it</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <ul>
+      <li>What happens to the row count when you use PARTITION BY compared to GROUP BY?</li>
+      <li>What does the window look like when there is no PARTITION BY in OVER()?</li>
+      <li>Can you PARTITION BY more than one column?</li>
+      <li>Does PARTITION BY sort the output rows?</li>
+      <li>Why would partitioning by a primary key column be a poor design choice?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query on the <code>orders</code> table that shows each order's amount and the average order amount within its city, without losing any rows.</li>
+      <li>Show each order ranked within its cuisine type across all cities, highest amount first.</li>
+      <li>Write a query that shows each order's amount alongside both the city total and the cuisine total as two separate columns.</li>
+      <li>Find the order with the highest amount in each city using PARTITION BY and ROW_NUMBER in a subquery.</li>
+      <li>Show each order's percentage of its city-cuisine total and its percentage of the overall total as two separate columns in one query.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>PARTITION BY is the tool that makes GROUP BY-style logic possible without giving up your rows. Once you internalize that PARTITION BY divides without collapsing, and GROUP BY divides and collapses, you will know exactly which one to reach for. Neha now writes this pattern instinctively. Her twelve-line subquery lives in the query graveyard where it belongs.</p>
+  `,
+  'mod10-t4': `
+    <h1>ORDER BY Inside OVER(): Controlling the Order of Window Calculations</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Aditya is an analyst at Zomato. His manager asks him to produce a report showing how daily revenue accumulates over a month for each city. Not just the total at the end of the month, but how it grows day by day, like a running scorecard.</p>
+    <p>Aditya knows how to order the final output. He writes <code>ORDER BY order_date</code> at the bottom of his query. The rows sort correctly, but the revenue column just shows each day's amount. It does not accumulate.</p>
+    <p>His senior, Meera, tells him, "You need ORDER BY inside the OVER() clause, not just at the bottom of the query." Aditya adds it. The numbers start accumulating exactly as requested. What he did not realize is that ORDER BY can appear in two completely different places in a window function query, and each one does something entirely different.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>You need a running total: a number that grows with each row as you move through time. With just PARTITION BY and no ORDER BY inside OVER(), the window sees all rows at once and returns the same sum on every row. That is not a running total. That is a partition total.</p>
+    <p>ORDER BY inside OVER() is what converts a static window total into a dynamic, cumulative calculation.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Running totals, cumulative counts, and progressive calculations require knowing which row comes first within a window. Without ORDER BY inside OVER(), the window function has no concept of sequence. It treats all rows as equal participants. ORDER BY inside OVER() gives the window a sense of direction.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you are counting daily visitors to a restaurant. Without ORDER BY inside OVER(), the window adds up all visitors for the month and stamps that total on every day. With ORDER BY inside OVER(), on day one the window only sees day one. On day two it sees day one and day two. On day three it sees all three. The window grows as you move forward.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <p>The default frame when ORDER BY is present inside OVER() is: <code>ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code>. This means the calculation includes all rows from the beginning of the partition up to and including the current row. The window grows as rows are processed in order.</p>
+    <p>When ORDER BY is absent inside OVER(), the frame defaults to the entire partition: <code>ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING</code>. The calculation includes every row in the partition at once, regardless of position.</p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>ORDER BY inside OVER() sets the processing sequence within each partition. It does two things simultaneously:</p>
+    <p>First, it tells the window function which row is "first" and which is "last" within the partition.</p>
+    <p>Second, it activates the default cumulative frame, so functions like SUM and COUNT grow incrementally as rows are processed.</p>
+    <p>The ORDER BY at the end of the query controls the visual sequence of the final output rows. These two ORDER BY clauses are entirely independent. They can reference different columns and point in different directions.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <pre><code class="language-sql">-- Without ORDER BY in OVER(): SUM sees whole partition
+SELECT
+    order_id,
+    city,
+    order_date,
+    amount,
+    SUM(amount) OVER (PARTITION BY city) AS city_total
+FROM orders;
+
+-- With ORDER BY in OVER(): SUM becomes a running total
+SELECT
+    order_id,
+    city,
+    order_date,
+    amount,
+    SUM(amount) OVER (PARTITION BY city ORDER BY order_date) AS running_total
+FROM orders;
+
+-- Both ORDER BY in OVER() and at query level, different columns
+SELECT
+    order_id,
+    city,
+    order_date,
+    amount,
+    SUM(amount) OVER (PARTITION BY city ORDER BY order_date) AS running_total
+FROM orders
+ORDER BY city, running_total;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>ORDER BY order_date</code> inside OVER()</td><td>Sets processing order within each partition window</td><td>Rows are accumulated date by date within each city</td></tr>
+      <tr><td><code>ORDER BY order_date DESC</code> inside OVER()</td><td>Processes rows in reverse date order for accumulation</td><td>Most recent date starts accumulation</td></tr>
+      <tr><td>No ORDER BY in OVER()</td><td>Window sees the entire partition as one batch</td><td>SUM returns the same total on every row in the partition</td></tr>
+      <tr><td>Default frame with ORDER BY</td><td>ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</td><td>Running total that grows row by row</td></tr>
+      <tr><td><code>ORDER BY</code> at query end</td><td>Controls the visual sort order of the final result</td><td>Does not affect how the window calculates</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample table: <code>orders</code> at Zomato</strong></p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>city</th><th>amount</th><th>order_date</th></tr>
+      <tr><td>201</td><td>C01</td><td>Mumbai</td><td>400</td><td>2024-01-01</td></tr>
+      <tr><td>202</td><td>C02</td><td>Mumbai</td><td>600</td><td>2024-01-03</td></tr>
+      <tr><td>203</td><td>C03</td><td>Mumbai</td><td>300</td><td>2024-01-05</td></tr>
+      <tr><td>204</td><td>C04</td><td>Delhi</td><td>500</td><td>2024-01-01</td></tr>
+      <tr><td>205</td><td>C05</td><td>Delhi</td><td>700</td><td>2024-01-04</td></tr>
+      <tr><td>206</td><td>C06</td><td>Delhi</td><td>200</td><td>2024-01-06</td></tr>
+    </table>
+    <h3>Example 1: Partition total without ORDER BY in OVER()</h3>
+    <p><strong>Business question:</strong> Show each order with the total revenue for its city.</p>
+    <pre><code class="language-sql">SELECT
+    order_id,
+    city,
+    order_date,
+    amount,
+    SUM(amount) OVER (PARTITION BY city) AS city_total
+FROM orders
+ORDER BY city, order_date;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>city</th><th>order_date</th><th>amount</th><th>city_total</th></tr>
+      <tr><td>201</td><td>Mumbai</td><td>2024-01-01</td><td>400</td><td>1300</td></tr>
+      <tr><td>202</td><td>Mumbai</td><td>2024-01-03</td><td>600</td><td>1300</td></tr>
+      <tr><td>203</td><td>Mumbai</td><td>2024-01-05</td><td>300</td><td>1300</td></tr>
+      <tr><td>204</td><td>Delhi</td><td>2024-01-01</td><td>500</td><td>1400</td></tr>
+      <tr><td>205</td><td>Delhi</td><td>2024-01-04</td><td>700</td><td>1400</td></tr>
+      <tr><td>206</td><td>Delhi</td><td>2024-01-06</td><td>200</td><td>1400</td></tr>
+    </table>
+    <p>Every row shows the same city total. The window sees all city rows at once.</p>
+    <h3>Example 2: Running total with ORDER BY in OVER()</h3>
+    <p><strong>Business question:</strong> Show cumulative revenue per city as orders come in over time.</p>
+    <pre><code class="language-sql">SELECT
+    order_id,
+    city,
+    order_date,
+    amount,
+    SUM(amount) OVER (PARTITION BY city ORDER BY order_date) AS running_total
+FROM orders
+ORDER BY city, order_date;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>city</th><th>order_date</th><th>amount</th><th>running_total</th></tr>
+      <tr><td>201</td><td>Mumbai</td><td>2024-01-01</td><td>400</td><td>400</td></tr>
+      <tr><td>202</td><td>Mumbai</td><td>2024-01-03</td><td>600</td><td>1000</td></tr>
+      <tr><td>203</td><td>Mumbai</td><td>2024-01-05</td><td>300</td><td>1300</td></tr>
+      <tr><td>204</td><td>Delhi</td><td>2024-01-01</td><td>500</td><td>500</td></tr>
+      <tr><td>205</td><td>Delhi</td><td>2024-01-04</td><td>700</td><td>1200</td></tr>
+      <tr><td>206</td><td>Delhi</td><td>2024-01-06</td><td>200</td><td>1400</td></tr>
+    </table>
+    <p>The total grows with each row. Mumbai restarts from 0 when Delhi begins.</p>
+    <h3>Example 3: Running count of orders per city</h3>
+    <p><strong>Business question:</strong> How many orders have been placed in each city up to each date?</p>
+    <pre><code class="language-sql">SELECT
+    order_id,
+    city,
+    order_date,
+    COUNT(*) OVER (PARTITION BY city ORDER BY order_date) AS running_order_count
+FROM orders
+ORDER BY city, order_date;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>city</th><th>order_date</th><th>running_order_count</th></tr>
+      <tr><td>201</td><td>Mumbai</td><td>2024-01-01</td><td>1</td></tr>
+      <tr><td>202</td><td>Mumbai</td><td>2024-01-03</td><td>2</td></tr>
+      <tr><td>203</td><td>Mumbai</td><td>2024-01-05</td><td>3</td></tr>
+      <tr><td>204</td><td>Delhi</td><td>2024-01-01</td><td>1</td></tr>
+      <tr><td>205</td><td>Delhi</td><td>2024-01-04</td><td>2</td></tr>
+      <tr><td>206</td><td>Delhi</td><td>2024-01-06</td><td>3</td></tr>
+    </table>
+    <h3>Example 4: Final output ordered differently from window order</h3>
+    <p><strong>Business question:</strong> Show the running total per city by date, but display the final output sorted by amount descending.</p>
+    <pre><code class="language-sql">SELECT
+    order_id,
+    city,
+    order_date,
+    amount,
+    SUM(amount) OVER (PARTITION BY city ORDER BY order_date) AS running_total
+FROM orders
+ORDER BY amount DESC;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>city</th><th>order_date</th><th>amount</th><th>running_total</th></tr>
+      <tr><td>205</td><td>Delhi</td><td>2024-01-04</td><td>700</td><td>1200</td></tr>
+      <tr><td>202</td><td>Mumbai</td><td>2024-01-03</td><td>600</td><td>1000</td></tr>
+      <tr><td>204</td><td>Delhi</td><td>2024-01-01</td><td>500</td><td>500</td></tr>
+      <tr><td>201</td><td>Mumbai</td><td>2024-01-01</td><td>400</td><td>400</td></tr>
+      <tr><td>203</td><td>Mumbai</td><td>2024-01-05</td><td>300</td><td>1300</td></tr>
+      <tr><td>206</td><td>Delhi</td><td>2024-01-06</td><td>200</td><td>1400</td></tr>
+    </table>
+    <p>The running_total was computed using ORDER BY order_date inside OVER(). The final rows are sorted by amount DESC. These two orderings are completely independent.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>When two rows share the same value in the ORDER BY column inside OVER(), they are treated as ties. Both are included in the cumulative frame up to that point, so they both show the same running total including all tied rows. This behavior matches the default RANGE frame. Switch to ROWS frame if you want strict row-by-row accumulation regardless of ties.</p>
+    <p>The ORDER BY inside OVER() does not sort your output. It is invisible to the final sort. If you want the output in that order, add ORDER BY at the query level as well.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Confusing ORDER BY at query end with ORDER BY inside OVER(): they serve different purposes. One controls output visual order. One controls how the window accumulates.</p>
+    <p>Expecting the same total on every row when using ORDER BY inside OVER(): once you add ORDER BY inside OVER(), SUM becomes a running sum, not a partition sum. Omit it if you want the static total.</p>
+    <p>Using ORDER BY inside OVER() with a non-date, non-sequential column: the running total will accumulate in whatever order that column implies. Make sure it reflects the logical sequence you need.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Always use ORDER BY inside OVER() when you need cumulative or progressive calculations. Leave it out when you want a static partition-level aggregate on every row.</p>
+    <p>Match your ORDER BY inside OVER() to the business logic. For time-series data, order by date. For sequential events, order by event ID or sequence number.</p>
+    <p>When the final output order should match the window order, use the same column in both ORDER BY inside OVER() and ORDER BY at the query end. SQL allows this and they remain independent.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Zomato, running totals ordered by order_date track daily revenue accumulation per city. At Paytm, ORDER BY transaction_time inside OVER() builds a running wallet balance per user across a session. At Amazon India, cumulative return counts ordered by date per product category help detect spikes in return activity.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>City: Mumbai  (ordered by order_date inside OVER)
+
+order_date   amount   Window seen so far          running_total
+2024-01-01   400      [400]                       400
+2024-01-03   600      [400, 600]                  1000
+2024-01-05   300      [400, 600, 300]             1300
+
+Without ORDER BY in OVER:
+All three rows: [400, 600, 300] seen at once = 1300 on every row
+
+With ORDER BY in OVER:
+Row 1: sees only itself          = 400
+Row 2: sees row1 + itself        = 1000
+Row 3: sees row1 + row2 + itself = 1300</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <ul>
+      <li>What is the default frame when ORDER BY is present inside OVER()?</li>
+      <li>What is the default frame when ORDER BY is absent inside OVER()?</li>
+      <li>Can ORDER BY inside OVER() and ORDER BY at the query end reference different columns?</li>
+      <li>Why does SUM return the same value on every row when ORDER BY is absent in OVER()?</li>
+      <li>How do ties in the ORDER BY column inside OVER() affect a running total?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query on the <code>orders</code> table that shows the running total of revenue per city, ordered by order_date within each city.</li>
+      <li>Show each order alongside how many orders have been placed in the same city on or before that order's date.</li>
+      <li>Write a query that shows the cumulative average order amount per city as orders come in by date.</li>
+      <li>Show the running total ordered by order_date in OVER() but sort the final output by running_total descending.</li>
+      <li>Explain in your own words what would happen if you used ORDER BY amount DESC inside OVER() instead of ORDER BY order_date. Write the query and observe the output.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>ORDER BY inside OVER() is a small addition with an outsized effect. It converts every aggregate function from a static summarizer into a dynamic accumulator. Aditya's running revenue report now updates automatically every time new order data lands, because the logic is clean, correct, and lives in one place.</p>
+  `,
+  'mod10-t5': `
+    <h1>ROW_NUMBER(): Assign a Unique Sequential Number to Every Row</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Kavya is a data analyst at Flipkart. Her manager wants a weekly report: "Give me the top 3 orders per city by amount. Every week. Just those rows, nothing else."</p>
+    <p>Kavya tries a straightforward approach. She writes <code>ORDER BY amount DESC</code> and picks the top few rows. Then she realizes she needs this to be per city, not across the whole table. She tries <code>GROUP BY city</code> and MAX, but that only gives her one row per city. She needs three.</p>
+    <p>She spends an hour trying to make this work with subqueries and HAVING. Eventually, a colleague tells her to use ROW_NUMBER(). She adds it. She filters. Done. The entire solution takes three minutes once she understands the pattern.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>You need the top N rows per group. Not the top N rows in the whole table. Not a group-level summary. The actual detail rows, ranked within their group, filtered to the first N ranks.</p>
+    <p>This is one of the most common window function patterns in professional SQL work. ROW_NUMBER() is the tool built for it.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Numbering rows is a surprisingly common need. Deduplication, top-N per group, pagination, sequential processing, and many other patterns require a unique sequential number assigned to rows in a specific order. ROW_NUMBER() assigns those numbers cleanly and guarantees uniqueness, even when the underlying data has ties.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine a competition where every participant gets a unique starting position number. Even if two participants have identical scores, they still get different numbers. The first one processed gets the lower number. There are no shared positions, no gaps, no duplicates.</p>
+    <p>That is ROW_NUMBER(). Unique, sequential, no ties ever.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <p>ROW_NUMBER() counts from 1 within each partition, according to the ORDER BY inside OVER(). The first row in the partition gets 1. The next gets 2. And so on. If two rows have the same value in the ORDER BY column, the database assigns them different numbers based on internal storage order. The result is always unique.</p>
+    <p>Compare this to RANK() and DENSE_RANK(), which assign the same number to tied rows. ROW_NUMBER() never does that.</p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>ROW_NUMBER() takes no arguments. It is always written as <code>ROW_NUMBER()</code>. It requires an ORDER BY inside OVER() to know what defines "first", "second", and so on. Without ORDER BY in OVER(), the numbers are assigned in an arbitrary order.</p>
+    <p>To use ROW_NUMBER() for filtering, you must wrap the query in a subquery or CTE. Window functions cannot appear in WHERE directly.</p>
+    <pre><code class="language-sql">-- Correct pattern for top N per group
+WITH ranked AS (
+    SELECT
+        order_id,
+        city,
+        amount,
+        ROW_NUMBER() OVER (PARTITION BY city ORDER BY amount DESC) AS rn
+    FROM orders
+)
+SELECT *
+FROM ranked
+WHERE rn &lt;= 3;</code></pre>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <pre><code class="language-sql">-- Basic usage: sequential number per city
+SELECT
+    order_id,
+    city,
+    amount,
+    ROW_NUMBER() OVER (PARTITION BY city ORDER BY amount DESC) AS row_num
+FROM orders;
+
+-- Top 3 orders per city
+WITH ranked AS (
+    SELECT
+        order_id,
+        city,
+        amount,
+        order_date,
+        ROW_NUMBER() OVER (PARTITION BY city ORDER BY amount DESC) AS rn
+    FROM orders
+)
+SELECT order_id, city, amount, order_date
+FROM ranked
+WHERE rn &lt;= 3;
+
+-- Deduplication: keep only the latest row per customer
+WITH ranked AS (
+    SELECT
+        order_id,
+        customer_id,
+        order_date,
+        amount,
+        ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC) AS rn
+    FROM orders
+)
+SELECT order_id, customer_id, order_date, amount
+FROM ranked
+WHERE rn = 1;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>ROW_NUMBER()</code></td><td>Assigns a unique integer starting at 1 for each partition</td><td>Row 1, Row 2, Row 3 within each city</td></tr>
+      <tr><td><code>PARTITION BY city</code></td><td>Restarts numbering from 1 for each city</td><td>Mumbai: 1,2,3 / Delhi: 1,2,3 / Bengaluru: 1,2,3</td></tr>
+      <tr><td><code>ORDER BY amount DESC</code></td><td>The highest amount gets row number 1</td><td>950 = row 1, 800 = row 2, 450 = row 3</td></tr>
+      <tr><td><code>WHERE rn <= 3</code></td><td>Filters to only the top 3 rows per partition</td><td>Only row numbers 1, 2, 3 pass the filter</td></tr>
+      <tr><td><code>ORDER BY order_date DESC</code> in deduplication</td><td>Most recent row per customer gets row number 1</td><td>Latest order is rn = 1, old orders are rn > 1</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample table: <code>orders</code> at Flipkart</strong></p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>city</th><th>amount</th><th>order_date</th></tr>
+      <tr><td>301</td><td>C01</td><td>Mumbai</td><td>950</td><td>2024-01-05</td></tr>
+      <tr><td>302</td><td>C02</td><td>Mumbai</td><td>500</td><td>2024-01-08</td></tr>
+      <tr><td>303</td><td>C03</td><td>Mumbai</td><td>800</td><td>2024-01-10</td></tr>
+      <tr><td>304</td><td>C04</td><td>Mumbai</td><td>300</td><td>2024-01-12</td></tr>
+      <tr><td>305</td><td>C05</td><td>Delhi</td><td>600</td><td>2024-01-06</td></tr>
+      <tr><td>306</td><td>C06</td><td>Delhi</td><td>750</td><td>2024-01-09</td></tr>
+      <tr><td>307</td><td>C07</td><td>Delhi</td><td>400</td><td>2024-01-11</td></tr>
+      <tr><td>308</td><td>C01</td><td>Mumbai</td><td>1100</td><td>2024-01-15</td></tr>
+    </table>
+    <h3>Example 1: Assign row numbers within each city</h3>
+    <p><strong>Business question:</strong> Number every order within its city from highest to lowest amount.</p>
+    <pre><code class="language-sql">SELECT
+    order_id,
+    city,
+    amount,
+    ROW_NUMBER() OVER (PARTITION BY city ORDER BY amount DESC) AS row_num
+FROM orders;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>city</th><th>amount</th><th>row_num</th></tr>
+      <tr><td>308</td><td>Mumbai</td><td>1100</td><td>1</td></tr>
+      <tr><td>301</td><td>Mumbai</td><td>950</td><td>2</td></tr>
+      <tr><td>303</td><td>Mumbai</td><td>800</td><td>3</td></tr>
+      <tr><td>302</td><td>Mumbai</td><td>500</td><td>4</td></tr>
+      <tr><td>304</td><td>Mumbai</td><td>300</td><td>5</td></tr>
+      <tr><td>306</td><td>Delhi</td><td>750</td><td>1</td></tr>
+      <tr><td>305</td><td>Delhi</td><td>600</td><td>2</td></tr>
+      <tr><td>307</td><td>Delhi</td><td>400</td><td>3</td></tr>
+    </table>
+    <h3>Example 2: Top 3 orders per city</h3>
+    <p><strong>Business question:</strong> Which are the three highest orders in each city?</p>
+    <pre><code class="language-sql">WITH ranked AS (
+    SELECT
+        order_id,
+        city,
+        amount,
+        ROW_NUMBER() OVER (PARTITION BY city ORDER BY amount DESC) AS rn
+    FROM orders
+)
+SELECT order_id, city, amount
+FROM ranked
+WHERE rn &lt;= 3;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>city</th><th>amount</th></tr>
+      <tr><td>308</td><td>Mumbai</td><td>1100</td></tr>
+      <tr><td>301</td><td>Mumbai</td><td>950</td></tr>
+      <tr><td>303</td><td>Mumbai</td><td>800</td></tr>
+      <tr><td>306</td><td>Delhi</td><td>750</td></tr>
+      <tr><td>305</td><td>Delhi</td><td>600</td></tr>
+      <tr><td>307</td><td>Delhi</td><td>400</td></tr>
+    </table>
+    <h3>Example 3: Deduplication - keep most recent order per customer</h3>
+    <p><strong>Business question:</strong> Each customer may have placed multiple orders. Show only their most recent one.</p>
+    <pre><code class="language-sql">WITH ranked AS (
+    SELECT
+        order_id,
+        customer_id,
+        city,
+        amount,
+        order_date,
+        ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC) AS rn
+    FROM orders
+)
+SELECT order_id, customer_id, city, amount, order_date
+FROM ranked
+WHERE rn = 1;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>city</th><th>amount</th><th>order_date</th></tr>
+      <tr><td>308</td><td>C01</td><td>Mumbai</td><td>1100</td><td>2024-01-15</td></tr>
+      <tr><td>302</td><td>C02</td><td>Mumbai</td><td>500</td><td>2024-01-08</td></tr>
+      <tr><td>303</td><td>C03</td><td>Mumbai</td><td>800</td><td>2024-01-10</td></tr>
+      <tr><td>304</td><td>C04</td><td>Mumbai</td><td>300</td><td>2024-01-12</td></tr>
+      <tr><td>305</td><td>C05</td><td>Delhi</td><td>600</td><td>2024-01-06</td></tr>
+      <tr><td>306</td><td>C06</td><td>Delhi</td><td>750</td><td>2024-01-09</td></tr>
+      <tr><td>307</td><td>C07</td><td>Delhi</td><td>400</td><td>2024-01-11</td></tr>
+    </table>
+    <h3>Example 4: Number rows across the entire table</h3>
+    <p><strong>Business question:</strong> Assign a global sequential number to all orders sorted by date.</p>
+    <pre><code class="language-sql">SELECT
+    order_id,
+    city,
+    order_date,
+    amount,
+    ROW_NUMBER() OVER (ORDER BY order_date, order_id) AS global_row_num
+FROM orders;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>city</th><th>order_date</th><th>amount</th><th>global_row_num</th></tr>
+      <tr><td>301</td><td>Mumbai</td><td>2024-01-05</td><td>950</td><td>1</td></tr>
+      <tr><td>305</td><td>Delhi</td><td>2024-01-06</td><td>600</td><td>2</td></tr>
+      <tr><td>302</td><td>Mumbai</td><td>2024-01-08</td><td>500</td><td>3</td></tr>
+      <tr><td>306</td><td>Delhi</td><td>2024-01-09</td><td>750</td><td>4</td></tr>
+      <tr><td>303</td><td>Mumbai</td><td>2024-01-10</td><td>800</td><td>5</td></tr>
+      <tr><td>307</td><td>Delhi</td><td>2024-01-11</td><td>400</td><td>6</td></tr>
+      <tr><td>304</td><td>Mumbai</td><td>2024-01-12</td><td>300</td><td>7</td></tr>
+      <tr><td>308</td><td>Mumbai</td><td>2024-01-15</td><td>1100</td><td>8</td></tr>
+    </table>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>ROW_NUMBER() without ORDER BY inside OVER() assigns numbers in an undefined order. The result is non-deterministic. Always include ORDER BY inside OVER() when using ROW_NUMBER().</p>
+    <p>Two rows with identical values in the ORDER BY column will still get different row numbers. Which one gets the lower number is up to the database. If you need stable, predictable tie-breaking, include a unique column (like order_id) as a tiebreaker in the ORDER BY inside OVER().</p>
+    <p>You cannot filter on rn in the same query where you defined it. Always wrap in a subquery or CTE first.</p>
+    <hr>
+    <h2>ROW_NUMBER vs RANK vs DENSE_RANK</h2>
+    <p>Given two rows tied at 800:</p>
+    <table>
+      <tr><th>Function</th><th>Output</th></tr>
+      <tr><td>ROW_NUMBER()</td><td>1, 2 (always unique, arbitrary tiebreak)</td></tr>
+      <tr><td>RANK()</td><td>1, 1, 3 (ties share rank, next rank skips)</td></tr>
+      <tr><td>DENSE_RANK()</td><td>1, 1, 2 (ties share rank, no skip)</td></tr>
+    </table>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Using ROW_NUMBER() and expecting it to handle ties gracefully: it does not. It breaks ties arbitrarily. If you need tied rows to share a rank, use RANK() or DENSE_RANK() instead.</p>
+    <p>Filtering on the window function alias in the same SELECT list: <code>SELECT ..., ROW_NUMBER() OVER (...) AS rn FROM orders WHERE rn = 1</code> will fail. Move the filter to an outer query.</p>
+    <p>Forgetting PARTITION BY when you need per-group numbering: without PARTITION BY, numbering runs across the entire table as one group.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Always add a unique tiebreaker column to ORDER BY inside OVER() when using ROW_NUMBER() for deduplication. This ensures the result is deterministic.</p>
+    <p>Use CTEs over subqueries when working with ROW_NUMBER(). CTEs are easier to read and debug.</p>
+    <p>For top-N per group patterns, ROW_NUMBER() is almost always the right choice. Use RANK() only if you want ties to share the same rank and you are comfortable with gaps.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Flipkart, ROW_NUMBER() filters the top 3 most recent reviews per product for display on product pages. At Myntra, it deduplicates user events where the same event was logged multiple times, keeping only the first occurrence. At IRCTC, it assigns sequence numbers to passengers on a waitlist per train per class. At Amazon India, it identifies each user's first-ever purchase to trigger a welcome campaign.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>orders PARTITION BY city ORDER BY amount DESC:
+
+Mumbai partition:
+  amount: 1100, 950, 800, 500, 300
+  rn:        1,   2,   3,   4,   5
+
+Delhi partition:
+  amount: 750, 600, 400
+  rn:       1,   2,   3
+
+Numbering restarts at 1 for each new city.
+No ties: every row gets a unique number.
+
+Filter WHERE rn &lt;= 3:
+  Mumbai: rows with amount 1100, 950, 800
+  Delhi:  rows with amount 750, 600, 400</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <ul>
+      <li>What guarantees uniqueness in ROW_NUMBER() output?</li>
+      <li>Why can you not filter on a ROW_NUMBER() result in the same query's WHERE clause?</li>
+      <li>What happens when two rows have the same value in the ORDER BY column inside OVER()?</li>
+      <li>How does ROW_NUMBER() differ from RANK() when there are tied values?</li>
+      <li>What is the correct pattern to get the top 3 rows per group using ROW_NUMBER()?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query that assigns a row number to each order within its city, ordered by order_date ascending (oldest first gets row number 1).</li>
+      <li>Use ROW_NUMBER() to find the most expensive order per city and return only those rows.</li>
+      <li>A customer placed multiple orders. Write a query to identify duplicate customers and keep only their oldest order.</li>
+      <li>Write a query that assigns a global row number across all orders sorted by amount descending.</li>
+      <li>Suppose two orders in Mumbai have the exact same amount. Write a query using ROW_NUMBER() that breaks the tie using order_id and explain what the output would look like.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>ROW_NUMBER() is the workhorse of window functions for most analysts. Top-N per group, deduplication, pagination: these three patterns alone make it one of the most useful functions in SQL. Once you learn the CTE-plus-filter pattern, you will reach for ROW_NUMBER() instinctively every time a "give me the best N per group" question lands in your inbox.</p>
+  `,
+  'mod10-t6': `
+    <h1>RANK() and DENSE_RANK(): Ranking Rows and Handling Ties</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Divya is an analyst at Myntra. The business team asks her to publish a monthly sales leaderboard for their fashion category managers. If two managers sold the same amount, they should share a rank. That is a hard requirement: ties must be visible.</p>
+    <p>Divya first tries ROW_NUMBER(). The numbers are unique, but tied managers get different ranks, which the business team considers unfair. They want identical amounts to show identical ranks.</p>
+    <p>She switches to RANK(). Now ties share a rank, but the leaderboard jumps from rank 2 to rank 4 when two people tie for position 2. The business team finds the gap confusing.</p>
+    <p>She tries DENSE_RANK(). Ties share a rank and the next rank is always one higher than the previous, with no gaps. The leaderboard reads naturally. Everyone is happy.</p>
+    <p>The difference between these three functions is subtle but matters enormously in reporting.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Real data has ties. Two sales managers hit the same target. Two products get the same rating. Two customers spend identical amounts. You need to rank them fairly but you also need to decide whether gaps in the sequence are acceptable.</p>
+    <p>RANK() and DENSE_RANK() both handle ties, but they disagree on what comes after a tie.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Sports rankings and competitive leaderboards have always existed. In athletics, if two runners finish at the same time, both are officially second and the next runner is officially fourth. That is RANK(). In some grading systems, if two students tie for second, the next student is still third. That is DENSE_RANK(). SQL provides both because both conventions are used in practice.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine a race with five runners:</p>
+    <ul>
+      <li>RANK(): two runners tie for 2nd place. The next runner is officially 4th because positions 2 and 3 are both occupied by the tied runners.</li>
+      <li>DENSE_RANK(): two runners tie for 2nd place. The next runner is officially 3rd because only one distinct position has been used so far.</li>
+    </ul>
+    <p>Both are legitimate ways to rank. The right choice depends on your reporting requirement.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <p>Given scores: 900, 850, 850, 700</p>
+    <table>
+      <tr><th>Score</th><th>ROW_NUMBER</th><th>RANK</th><th>DENSE_RANK</th></tr>
+      <tr><td>900</td><td>1</td><td>1</td><td>1</td></tr>
+      <tr><td>850</td><td>2</td><td>2</td><td>2</td></tr>
+      <tr><td>850</td><td>3</td><td>2</td><td>2</td></tr>
+      <tr><td>700</td><td>4</td><td>4</td><td>3</td></tr>
+    </table>
+    <p>ROW_NUMBER: always unique, breaks ties arbitrarily. RANK: tied rows share rank, next rank skips to account for all tied positions. DENSE_RANK: tied rows share rank, next rank is always one more than the current shared rank.</p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>Both RANK() and DENSE_RANK() take no arguments. Both require ORDER BY inside OVER(). Both assign the same number to rows that are equal according to the ORDER BY column.</p>
+    <p>The difference is in what happens after a tie:</p>
+    <p>RANK() counts all rows up to and including tied rows before assigning the next rank. If two rows are tied at rank 2, the next rank is 4 (skipping 3).</p>
+    <p>DENSE_RANK() counts only distinct rank values. If two rows are tied at rank 2, the next distinct rank is 3 (no skip).</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <pre><code class="language-sql">SELECT
+    salesperson_id,
+    name,
+    region,
+    monthly_sales,
+    ROW_NUMBER() OVER (PARTITION BY region ORDER BY monthly_sales DESC) AS row_num,
+    RANK() OVER (PARTITION BY region ORDER BY monthly_sales DESC) AS sales_rank,
+    DENSE_RANK() OVER (PARTITION BY region ORDER BY monthly_sales DESC) AS dense_rank
+FROM sales;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>RANK() OVER (ORDER BY monthly_sales DESC)</code></td><td>Assigns rank, skips after ties</td><td>1, 2, 2, 4 for scores 900, 850, 850, 700</td></tr>
+      <tr><td><code>DENSE_RANK() OVER (ORDER BY monthly_sales DESC)</code></td><td>Assigns rank, no skip after ties</td><td>1, 2, 2, 3 for scores 900, 850, 850, 700</td></tr>
+      <tr><td><code>PARTITION BY region</code></td><td>Restarts ranking independently for each region</td><td>Each region has its own rank 1</td></tr>
+      <tr><td>No PARTITION BY</td><td>All rows ranked together as one group</td><td>One global leaderboard</td></tr>
+      <tr><td><code>ORDER BY monthly_sales DESC</code></td><td>Highest sales gets rank 1</td><td>Ascending ORDER BY would give rank 1 to lowest</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample table: <code>sales</code> at Myntra</strong></p>
+    <table>
+      <tr><th>salesperson_id</th><th>name</th><th>region</th><th>monthly_sales</th></tr>
+      <tr><td>SP01</td><td>Anjali</td><td>North</td><td>92000</td></tr>
+      <tr><td>SP02</td><td>Rohan</td><td>North</td><td>85000</td></tr>
+      <tr><td>SP03</td><td>Priya</td><td>North</td><td>85000</td></tr>
+      <tr><td>SP04</td><td>Manoj</td><td>North</td><td>71000</td></tr>
+      <tr><td>SP05</td><td>Sunita</td><td>South</td><td>98000</td></tr>
+      <tr><td>SP06</td><td>Karthik</td><td>South</td><td>88000</td></tr>
+      <tr><td>SP07</td><td>Lavanya</td><td>South</td><td>88000</td></tr>
+      <tr><td>SP08</td><td>Vivek</td><td>South</td><td>74000</td></tr>
+    </table>
+    <h3>Example 1: All three ranking functions side by side</h3>
+    <p><strong>Business question:</strong> Compare how ROW_NUMBER, RANK, and DENSE_RANK handle the tied monthly_sales in the North region.</p>
+    <pre><code class="language-sql">SELECT
+    name,
+    region,
+    monthly_sales,
+    ROW_NUMBER() OVER (PARTITION BY region ORDER BY monthly_sales DESC) AS row_num,
+    RANK() OVER (PARTITION BY region ORDER BY monthly_sales DESC) AS rnk,
+    DENSE_RANK() OVER (PARTITION BY region ORDER BY monthly_sales DESC) AS dense_rnk
+FROM sales
+WHERE region = 'North';</code></pre>
+    <table>
+      <tr><th>name</th><th>region</th><th>monthly_sales</th><th>row_num</th><th>rnk</th><th>dense_rnk</th></tr>
+      <tr><td>Anjali</td><td>North</td><td>92000</td><td>1</td><td>1</td><td>1</td></tr>
+      <tr><td>Rohan</td><td>North</td><td>85000</td><td>2</td><td>2</td><td>2</td></tr>
+      <tr><td>Priya</td><td>North</td><td>85000</td><td>3</td><td>2</td><td>2</td></tr>
+      <tr><td>Manoj</td><td>North</td><td>71000</td><td>4</td><td>4</td><td>3</td></tr>
+    </table>
+    <p>Rohan and Priya both have 85000. RANK gives them both 2 and skips 3. DENSE_RANK gives them both 2 and the next is 3 (not 4).</p>
+    <h3>Example 2: Leaderboard per region using DENSE_RANK</h3>
+    <p><strong>Business question:</strong> Show the rank of each salesperson within their region for the monthly leaderboard.</p>
+    <pre><code class="language-sql">SELECT
+    name,
+    region,
+    monthly_sales,
+    DENSE_RANK() OVER (PARTITION BY region ORDER BY monthly_sales DESC) AS region_rank
+FROM sales
+ORDER BY region, region_rank;</code></pre>
+    <table>
+      <tr><th>name</th><th>region</th><th>monthly_sales</th><th>region_rank</th></tr>
+      <tr><td>Anjali</td><td>North</td><td>92000</td><td>1</td></tr>
+      <tr><td>Rohan</td><td>North</td><td>85000</td><td>2</td></tr>
+      <tr><td>Priya</td><td>North</td><td>85000</td><td>2</td></tr>
+      <tr><td>Manoj</td><td>North</td><td>71000</td><td>3</td></tr>
+      <tr><td>Sunita</td><td>South</td><td>98000</td><td>1</td></tr>
+      <tr><td>Karthik</td><td>South</td><td>88000</td><td>2</td></tr>
+      <tr><td>Lavanya</td><td>South</td><td>88000</td><td>2</td></tr>
+      <tr><td>Vivek</td><td>South</td><td>74000</td><td>3</td></tr>
+    </table>
+    <h3>Example 3: Using RANK to find top performers</h3>
+    <p><strong>Business question:</strong> Find salespersons ranked 1st within their region (handles ties correctly).</p>
+    <pre><code class="language-sql">WITH ranked AS (
+    SELECT
+        name,
+        region,
+        monthly_sales,
+        RANK() OVER (PARTITION BY region ORDER BY monthly_sales DESC) AS rnk
+    FROM sales
+)
+SELECT name, region, monthly_sales
+FROM ranked
+WHERE rnk = 1;</code></pre>
+    <table>
+      <tr><th>name</th><th>region</th><th>monthly_sales</th></tr>
+      <tr><td>Anjali</td><td>North</td><td>92000</td></tr>
+      <tr><td>Sunita</td><td>South</td><td>98000</td></tr>
+    </table>
+    <h3>Example 4: Overall company rank using DENSE_RANK</h3>
+    <p><strong>Business question:</strong> Rank all salespersons across the company, not per region.</p>
+    <pre><code class="language-sql">SELECT
+    name,
+    region,
+    monthly_sales,
+    DENSE_RANK() OVER (ORDER BY monthly_sales DESC) AS company_rank
+FROM sales
+ORDER BY company_rank;</code></pre>
+    <table>
+      <tr><th>name</th><th>region</th><th>monthly_sales</th><th>company_rank</th></tr>
+      <tr><td>Sunita</td><td>South</td><td>98000</td><td>1</td></tr>
+      <tr><td>Anjali</td><td>North</td><td>92000</td><td>2</td></tr>
+      <tr><td>Karthik</td><td>South</td><td>88000</td><td>3</td></tr>
+      <tr><td>Lavanya</td><td>South</td><td>88000</td><td>3</td></tr>
+      <tr><td>Rohan</td><td>North</td><td>85000</td><td>4</td></tr>
+      <tr><td>Priya</td><td>North</td><td>85000</td><td>4</td></tr>
+      <tr><td>Vivek</td><td>South</td><td>74000</td><td>5</td></tr>
+      <tr><td>Manoj</td><td>North</td><td>71000</td><td>6</td></tr>
+    </table>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>Using RANK() and expecting a clean sequence like 1, 2, 3, 4: if there are any ties, RANK() will skip numbers. If the business needs a gapless sequence regardless of ties, use DENSE_RANK().</p>
+    <p>Filtering with <code>WHERE rnk = 2</code> on RANK() results and expecting exactly the salesperson in second place: if two rows tied at rank 1, the second-place row is actually at rank 3 with RANK(). With DENSE_RANK(), it would be at rank 2. Understand the data before filtering.</p>
+    <p>Expecting RANK() or DENSE_RANK() to be deterministic when there are ties: which tied row is processed first is not guaranteed. Both get the same rank number, but if you need a secondary sort for display, add a tiebreaker column to ORDER BY inside OVER().</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Using ROW_NUMBER() when the business requires ties to share a rank: ROW_NUMBER() always gives unique numbers. It will never show two people at the same rank.</p>
+    <p>Using RANK() for a leaderboard where managers dislike gaps: gaps (1, 2, 2, 4) can confuse non-technical stakeholders. Prefer DENSE_RANK() for display purposes.</p>
+    <p>Not partitioning when you should: global rankings and per-region rankings have different business meanings. Make sure PARTITION BY matches the intended grouping.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Use ROW_NUMBER() for deduplication and top-N filtering where uniqueness matters.</p>
+    <p>Use RANK() when your use case explicitly follows athletic convention: tied positions leave a gap in the sequence.</p>
+    <p>Use DENSE_RANK() for leaderboards and reports where the audience should see a clean 1, 2, 3 sequence even when ties exist.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Myntra, DENSE_RANK() powers the category sales leaderboard shared with regional managers. At Byju's, RANK() ranks students within a batch by exam score, making tie-handling explicit in the report. At Ola, DENSE_RANK() ranks drivers by rating within each city, ensuring that multiple top-rated drivers can share rank 1 without confusion. At Amazon India, RANK() on review counts identifies the most-reviewed products, with ties handled transparently.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Data: 92000, 85000, 85000, 71000 (North region, descending)
+
+ROW_NUMBER:   1    2    3    4   (always unique, tie broken arbitrarily)
+RANK:         1    2    2    4   (ties share rank, gap after tie)
+DENSE_RANK:   1    2    2    3   (ties share rank, no gap)
+
+             [92]  [85] [85] [71]
+              |     |    |    |
+RANK:         1     2    2    4   &lt;-- skips 3
+DENSE_RANK:   1     2    2    3   &lt;-- no skip</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <ul>
+      <li>When two rows are tied at rank 2 using RANK(), what rank does the next row get?</li>
+      <li>When two rows are tied at rank 2 using DENSE_RANK(), what rank does the next row get?</li>
+      <li>In what situation would you choose ROW_NUMBER() over RANK()?</li>
+      <li>Why might a business team prefer DENSE_RANK() over RANK() for a report?</li>
+      <li>What happens to RANK() and DENSE_RANK() output when there are no ties in the data?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query that ranks each salesperson within their region by monthly_sales descending using both RANK() and DENSE_RANK() in the same SELECT, and show both columns side by side.</li>
+      <li>Find all salespersons who are in the top 2 ranks within their region using DENSE_RANK(). Include ties.</li>
+      <li>Write a query that shows the gap between RANK() and DENSE_RANK() for each row, to highlight where ties are causing gaps.</li>
+      <li>Rank all salespersons globally by monthly_sales using RANK(). Then filter the result to show only those who are rank 1 globally.</li>
+      <li>A region has four salespersons with monthly sales: 80000, 75000, 75000, 75000, 60000. Write the expected output for RANK() and DENSE_RANK() before running any SQL.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>RANK() and DENSE_RANK() solve the same core problem of handling ties, but they make different promises about what the sequence looks like after a tie. Knowing which promise your business needs is the skill. The SQL is the easy part. Divya's leaderboard now runs every Monday morning and managers trust the numbers because ties are handled consistently.</p>
+  `,
+  'mod10-t7': `
+    <h1>NTILE(): Dividing Rows into Equal Buckets</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Sameer works on the growth team at Paytm. His manager wants to run a targeted marketing campaign but does not want to send the same message to all customers. "Divide our customers into four equal groups based on how much they spend. Top spenders get the premium offer. Bottom spenders get a reactivation message."</p>
+    <p>Sameer knows he needs to segment customers by spend. He thinks about using RANK() or DENSE_RANK(), but those give him a rank per row, not a bucket. The marketing team needs exactly four groups, roughly equal in size, labeled 1 through 4.</p>
+    <p>He finds NTILE(4). Five minutes later, every customer has a bucket number. The marketing team has their four segments.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>You need to divide your dataset into equally sized groups for segmentation, analysis, or reporting. Not one row per rank. Not a summary by category. Actual row-level bucket assignments so you can treat each segment differently.</p>
+    <p>NTILE() does exactly that.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Statistical analysis frequently requires breaking data into quantiles: quartiles (four equal parts), deciles (ten equal parts), or percentile buckets (one hundred equal parts). Doing this manually requires calculating percentages, defining cutoff values, and writing complex CASE expressions. NTILE() handles all of that automatically, given just the number of buckets you want.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you have 100 students sorted by their score. You want to divide them into four equal groups:</p>
+    <ul>
+      <li>Group 1: students ranked 1 to 25</li>
+      <li>Group 2: students ranked 26 to 50</li>
+      <li>Group 3: students ranked 51 to 75</li>
+      <li>Group 4: students ranked 76 to 100</li>
+    </ul>
+    <p>NTILE(4) assigns each student their group number automatically based on their position in the sorted order.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <p>NTILE(n) divides the ordered rows into n buckets as evenly as possible. If the number of rows divides evenly into n, each bucket has exactly the same number of rows. If not, earlier buckets get one extra row each until the remainder is used up.</p>
+    <p>For example, 10 rows divided into 4 buckets gives: buckets 1 and 2 get 3 rows each, buckets 3 and 4 get 2 rows each. The total is still 10.</p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>NTILE(n) takes a single integer argument: the number of buckets you want. It requires ORDER BY inside OVER() to know how to order the rows before dividing them. PARTITION BY is optional and restarts bucket assignment independently for each partition.</p>
+    <p>The formula for bucket size:</p>
+    <ul>
+      <li>Base size = FLOOR(total_rows / n)</li>
+      <li>Remainder = total_rows MOD n</li>
+      <li>First <code>remainder</code> buckets get (base_size + 1) rows</li>
+      <li>Remaining buckets get base_size rows</li>
+    </ul>
+    <p>You cannot specify which rows go into which bucket. NTILE() decides this purely based on sorted order.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <pre><code class="language-sql">-- Divide all customers into 4 quartile buckets by total spend
+SELECT
+    customer_id,
+    name,
+    city,
+    total_spend,
+    NTILE(4) OVER (ORDER BY total_spend DESC) AS spend_quartile
+FROM customers;
+
+-- Divide customers into deciles within each city
+SELECT
+    customer_id,
+    name,
+    city,
+    total_spend,
+    NTILE(10) OVER (PARTITION BY city ORDER BY total_spend DESC) AS spend_decile
+FROM customers;
+
+-- Label the quartiles meaningfully with a CASE
+SELECT
+    customer_id,
+    name,
+    total_spend,
+    NTILE(4) OVER (ORDER BY total_spend DESC) AS quartile_num,
+    CASE NTILE(4) OVER (ORDER BY total_spend DESC)
+        WHEN 1 THEN 'Premium'
+        WHEN 2 THEN 'High Value'
+        WHEN 3 THEN 'Mid Value'
+        WHEN 4 THEN 'Low Value'
+    END AS customer_segment
+FROM customers;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>NTILE(4)</code></td><td>Divides rows into 4 buckets</td><td>Buckets labeled 1, 2, 3, 4</td></tr>
+      <tr><td><code>NTILE(10)</code></td><td>Divides rows into 10 decile buckets</td><td>Bucket 1 is top 10%, bucket 10 is bottom 10%</td></tr>
+      <tr><td><code>ORDER BY total_spend DESC</code></td><td>Highest spend goes into bucket 1</td><td>Premium customers land in bucket 1</td></tr>
+      <tr><td><code>PARTITION BY city</code></td><td>Bucket assignment restarts per city</td><td>Each city gets its own 4-bucket division</td></tr>
+      <tr><td>Uneven rows</td><td>Earlier buckets absorb the remainder</td><td>11 rows, 4 buckets: buckets 1-3 get 3 rows, bucket 4 gets 2</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample table: <code>customers</code> at Paytm</strong></p>
+    <table>
+      <tr><th>customer_id</th><th>name</th><th>city</th><th>total_spend</th></tr>
+      <tr><td>CU01</td><td>Ananya</td><td>Mumbai</td><td>45000</td></tr>
+      <tr><td>CU02</td><td>Rajan</td><td>Delhi</td><td>12000</td></tr>
+      <tr><td>CU03</td><td>Pooja</td><td>Mumbai</td><td>78000</td></tr>
+      <tr><td>CU04</td><td>Suresh</td><td>Bengaluru</td><td>31000</td></tr>
+      <tr><td>CU05</td><td>Meena</td><td>Delhi</td><td>64000</td></tr>
+      <tr><td>CU06</td><td>Arjun</td><td>Bengaluru</td><td>9000</td></tr>
+      <tr><td>CU07</td><td>Divya</td><td>Mumbai</td><td>55000</td></tr>
+      <tr><td>CU08</td><td>Harsh</td><td>Delhi</td><td>22000</td></tr>
+      <tr><td>CU09</td><td>Kavya</td><td>Bengaluru</td><td>88000</td></tr>
+      <tr><td>CU10</td><td>Nitin</td><td>Mumbai</td><td>17000</td></tr>
+    </table>
+    <h3>Example 1: Divide all customers into 4 quartiles by spend</h3>
+    <p><strong>Business question:</strong> Segment all customers into four equal groups by total spend.</p>
+    <pre><code class="language-sql">SELECT
+    customer_id,
+    name,
+    total_spend,
+    NTILE(4) OVER (ORDER BY total_spend DESC) AS spend_quartile
+FROM customers
+ORDER BY spend_quartile, total_spend DESC;</code></pre>
+    <table>
+      <tr><th>customer_id</th><th>name</th><th>total_spend</th><th>spend_quartile</th></tr>
+      <tr><td>CU09</td><td>Kavya</td><td>88000</td><td>1</td></tr>
+      <tr><td>CU03</td><td>Pooja</td><td>78000</td><td>1</td></tr>
+      <tr><td>CU05</td><td>Meena</td><td>64000</td><td>1</td></tr>
+      <tr><td>CU07</td><td>Divya</td><td>55000</td><td>2</td></tr>
+      <tr><td>CU01</td><td>Ananya</td><td>45000</td><td>2</td></tr>
+      <tr><td>CU04</td><td>Suresh</td><td>31000</td><td>2</td></tr>
+      <tr><td>CU08</td><td>Harsh</td><td>22000</td><td>3</td></tr>
+      <tr><td>CU10</td><td>Nitin</td><td>17000</td><td>3</td></tr>
+      <tr><td>CU02</td><td>Rajan</td><td>12000</td><td>4</td></tr>
+      <tr><td>CU06</td><td>Arjun</td><td>9000</td><td>4</td></tr>
+    </table>
+    <p>10 rows into 4 buckets: buckets 1, 2, 3 each get 3, 3, 2 rows and bucket 4 gets 2 rows.</p>
+    <h3>Example 2: Label segments for the marketing team</h3>
+    <p><strong>Business question:</strong> Add a human-readable label to each customer segment.</p>
+    <pre><code class="language-sql">SELECT
+    customer_id,
+    name,
+    total_spend,
+    NTILE(4) OVER (ORDER BY total_spend DESC) AS quartile_num,
+    CASE NTILE(4) OVER (ORDER BY total_spend DESC)
+        WHEN 1 THEN 'Premium'
+        WHEN 2 THEN 'High Value'
+        WHEN 3 THEN 'Mid Value'
+        WHEN 4 THEN 'Low Value'
+    END AS segment_label
+FROM customers
+ORDER BY quartile_num;</code></pre>
+    <table>
+      <tr><th>customer_id</th><th>name</th><th>total_spend</th><th>quartile_num</th><th>segment_label</th></tr>
+      <tr><td>CU09</td><td>Kavya</td><td>88000</td><td>1</td><td>Premium</td></tr>
+      <tr><td>CU03</td><td>Pooja</td><td>78000</td><td>1</td><td>Premium</td></tr>
+      <tr><td>CU05</td><td>Meena</td><td>64000</td><td>1</td><td>Premium</td></tr>
+      <tr><td>CU07</td><td>Divya</td><td>55000</td><td>2</td><td>High Value</td></tr>
+      <tr><td>CU01</td><td>Ananya</td><td>45000</td><td>2</td><td>High Value</td></tr>
+      <tr><td>CU04</td><td>Suresh</td><td>31000</td><td>2</td><td>High Value</td></tr>
+      <tr><td>CU08</td><td>Harsh</td><td>22000</td><td>3</td><td>Mid Value</td></tr>
+      <tr><td>CU10</td><td>Nitin</td><td>17000</td><td>3</td><td>Mid Value</td></tr>
+      <tr><td>CU02</td><td>Rajan</td><td>12000</td><td>4</td><td>Low Value</td></tr>
+      <tr><td>CU06</td><td>Arjun</td><td>9000</td><td>4</td><td>Low Value</td></tr>
+    </table>
+    <h3>Example 3: Divide into deciles across all customers</h3>
+    <p><strong>Business question:</strong> Create 10 equal spending groups (deciles) for detailed campaign targeting.</p>
+    <pre><code class="language-sql">SELECT
+    customer_id,
+    name,
+    total_spend,
+    NTILE(10) OVER (ORDER BY total_spend DESC) AS spend_decile
+FROM customers
+ORDER BY spend_decile;</code></pre>
+    <table>
+      <tr><th>customer_id</th><th>name</th><th>total_spend</th><th>spend_decile</th></tr>
+      <tr><td>CU09</td><td>Kavya</td><td>88000</td><td>1</td></tr>
+      <tr><td>CU03</td><td>Pooja</td><td>78000</td><td>2</td></tr>
+      <tr><td>CU05</td><td>Meena</td><td>64000</td><td>3</td></tr>
+      <tr><td>CU07</td><td>Divya</td><td>55000</td><td>4</td></tr>
+      <tr><td>CU01</td><td>Ananya</td><td>45000</td><td>5</td></tr>
+      <tr><td>CU04</td><td>Suresh</td><td>31000</td><td>6</td></tr>
+      <tr><td>CU08</td><td>Harsh</td><td>22000</td><td>7</td></tr>
+      <tr><td>CU10</td><td>Nitin</td><td>17000</td><td>8</td></tr>
+      <tr><td>CU02</td><td>Rajan</td><td>12000</td><td>9</td></tr>
+      <tr><td>CU06</td><td>Arjun</td><td>9000</td><td>10</td></tr>
+    </table>
+    <p>With 10 rows and 10 buckets, each customer gets their own decile.</p>
+    <h3>Example 4: NTILE per city</h3>
+    <p><strong>Business question:</strong> Divide customers into 2 groups within each city, so you can compare high-spenders vs low-spenders city by city.</p>
+    <pre><code class="language-sql">SELECT
+    customer_id,
+    name,
+    city,
+    total_spend,
+    NTILE(2) OVER (PARTITION BY city ORDER BY total_spend DESC) AS city_half
+FROM customers
+ORDER BY city, city_half, total_spend DESC;</code></pre>
+    <table>
+      <tr><th>customer_id</th><th>name</th><th>city</th><th>total_spend</th><th>city_half</th></tr>
+      <tr><td>CU09</td><td>Kavya</td><td>Bengaluru</td><td>88000</td><td>1</td></tr>
+      <tr><td>CU04</td><td>Suresh</td><td>Bengaluru</td><td>31000</td><td>2</td></tr>
+      <tr><td>CU06</td><td>Arjun</td><td>Bengaluru</td><td>9000</td><td>2</td></tr>
+      <tr><td>CU05</td><td>Meena</td><td>Delhi</td><td>64000</td><td>1</td></tr>
+      <tr><td>CU08</td><td>Harsh</td><td>Delhi</td><td>22000</td><td>1</td></tr>
+      <tr><td>CU02</td><td>Rajan</td><td>Delhi</td><td>12000</td><td>2</td></tr>
+      <tr><td>CU03</td><td>Pooja</td><td>Mumbai</td><td>78000</td><td>1</td></tr>
+      <tr><td>CU07</td><td>Divya</td><td>Mumbai</td><td>55000</td><td>1</td></tr>
+      <tr><td>CU01</td><td>Ananya</td><td>Mumbai</td><td>45000</td><td>2</td></tr>
+      <tr><td>CU10</td><td>Nitin</td><td>Mumbai</td><td>17000</td><td>2</td></tr>
+    </table>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>NTILE() does not guarantee equal-sized buckets when rows do not divide evenly. Earlier buckets always absorb the extra rows. If you have 11 customers and request 4 buckets, you get buckets of sizes 3, 3, 3, 2, not 2, 3, 3, 3. Bucket 1 is always largest or tied for largest.</p>
+    <p>NTILE() does not expose what percentage cutoffs define each bucket. If you need to know the spending range of each quartile, you need to combine NTILE() with MIN() and MAX() in a follow-up query.</p>
+    <p>Using NTILE() with a bucket count larger than the number of rows: if you have 5 rows and request NTILE(10), you get buckets 1 through 5 with one row each. Buckets 6 through 10 will be empty (no rows are assigned to them). The result will not have all 10 bucket numbers in it.</p>
+    <hr>
+    <h2>NTILE vs PERCENT_RANK</h2>
+    <p>NTILE() assigns an integer bucket label (1, 2, 3, ..., n). It tells you which group a row belongs to.</p>
+    <p>PERCENT_RANK() calculates a percentage value between 0 and 1, representing where in the distribution a row falls. It tells you the relative standing as a decimal.</p>
+    <p>NTILE() is better for segmentation and campaign targeting. PERCENT_RANK() is better for statistical analysis and understanding distribution shape.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Expecting NTILE() to define buckets by value ranges: it divides by row count, not by value range. If 90% of your customers spend between 1000 and 5000 and 10% spend over 50000, bucket 1 still has 25% of the rows, not 10% of the rows.</p>
+    <p>Not ordering by the correct column: if you ORDER BY customer_id instead of total_spend, the buckets are assigned by ID order, which is meaningless for spend segmentation.</p>
+    <p>Assuming bucket 1 always means "best": bucket 1 contains the rows that appear first in the ORDER BY. If you ORDER BY total_spend ASC, bucket 1 contains the lowest spenders.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Always pair NTILE() with a CASE statement when the output goes to non-technical stakeholders. Bucket 1 and bucket 4 are not intuitive labels. "Premium" and "Low Value" are.</p>
+    <p>Use NTILE(4) for standard quartile analysis, NTILE(10) for decile analysis, and NTILE(100) for percentile analysis. Match the bucket count to the statistical convention you are following.</p>
+    <p>Combine NTILE() results with aggregate queries to understand the value ranges within each bucket. Join back to the original table grouped by bucket number and use MIN and MAX.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Paytm, NTILE(4) divides users into spend quartiles for targeted cashback campaign design. At PhonePe, NTILE(10) creates decile segments for churn risk modeling. At Amazon India, NTILE(100) assigns every product a sales percentile rank for assortment planning. At Byju's, NTILE(5) groups students into performance quintiles to personalize course recommendations.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>10 customers ordered by total_spend DESC:
+CU09: 88000
+CU03: 78000  &lt;-- NTILE(4) divides these 10 rows
+CU05: 64000     into 4 buckets as evenly as possible:
+CU07: 55000
+CU01: 45000     Bucket 1: rows 1-3  (3 rows)
+CU04: 31000     Bucket 2: rows 4-6  (3 rows)
+CU08: 22000     Bucket 3: rows 7-8  (2 rows)
+CU10: 17000     Bucket 4: rows 9-10 (2 rows)
+CU02: 12000
+CU06:  9000     Earlier buckets absorb the remainder.</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <ul>
+      <li>What does NTILE(4) produce when applied to 10 rows?</li>
+      <li>What happens to earlier buckets when the row count does not divide evenly?</li>
+      <li>How is NTILE() different from RANK() or DENSE_RANK()?</li>
+      <li>What does NTILE() produce when the number of requested buckets is greater than the number of rows?</li>
+      <li>Why must ORDER BY be specified inside OVER() when using NTILE()?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query that divides all customers into 5 equal groups by total_spend descending and labels each group Premium, High, Mid, Low, Inactive.</li>
+      <li>Divide customers within each city into 3 buckets by spend and show the bucket number alongside each customer's details.</li>
+      <li>Write a query that shows, for each NTILE(4) bucket, the minimum and maximum total_spend. (Hint: wrap the NTILE query in a CTE, then GROUP BY quartile_num.)</li>
+      <li>Use NTILE(10) to assign decile ranks to all customers. Then filter to show only customers in deciles 1 and 2 (top 20% spenders).</li>
+      <li>You have 7 rows and request NTILE(3). Write out which rows go into which bucket and explain why.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>NTILE() is the function analysts reach for when the business says "segment our users." It automates the math of equal distribution and handles uneven row counts gracefully. Sameer's marketing segments at Paytm now run as a scheduled query every first of the month, and the campaign team has their four groups ready before 9 AM.</p>
+  `,
+  'mod10-t8': `
+    <h1>LAG() and LEAD(): Looking at the Previous and Next Row</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Tanvi is an analyst at Flipkart. Every Monday, her manager asks the same question: "How did last week's sales compare to the week before?" Tanvi currently does this by running two separate queries, pulling the numbers into a spreadsheet, and doing the subtraction manually. It takes twenty minutes every week.</p>
+    <p>A colleague tells her that LAG() can bring last week's number directly into the current week's row. Tanvi does not believe it at first. She writes the query. Within three minutes, she has a single result set where each week's row shows both its own sales and the previous week's sales, and a difference column computed right there in SQL. Monday morning just got shorter.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Time-series analysis almost always requires comparing a value to a neighboring value: this month vs last month, today vs yesterday, the current order vs the previous order from the same customer. You could do this with self-joins, but self-joins on large tables are expensive and the query becomes difficult to read. LAG() and LEAD() solve this cleanly.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Offset functions were built to access values from neighboring rows without writing a join. The most common analytical patterns, growth rates, period-over-period comparisons, gap analysis, and trend detection, all require seeing what came before or after the current row. LAG() looks backward. LEAD() looks forward.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you are walking through a train of rows in order. LAG() lets you glance back one seat (or more) and read what is written on that passenger's card. LEAD() lets you look forward. You never have to change your seat. You never leave your row. You just borrow the value from a neighbor.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <p>Given a sequence of monthly sales: 100, 120, 110, 135</p>
+    <p>With <code>LAG(total_sales, 1)</code>, each row sees the value from the row before it:</p>
+    <ul>
+      <li>January: NULL (no row before it)</li>
+      <li>February: 100 (January's value)</li>
+      <li>March: 120 (February's value)</li>
+      <li>April: 110 (March's value)</li>
+    </ul>
+    <p>With <code>LEAD(total_sales, 1)</code>, each row sees the value from the row after it:</p>
+    <ul>
+      <li>January: 120 (February's value)</li>
+      <li>February: 110 (March's value)</li>
+      <li>March: 135 (April's value)</li>
+      <li>April: NULL (no row after it)</li>
+    </ul>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>Both LAG() and LEAD() take up to three arguments:</p>
+    <ol>
+      <li>The column to look at (required)</li>
+      <li>The offset: how many rows back or forward to look (optional, defaults to 1)</li>
+      <li>The default value: what to return when there is no row at that offset (optional, defaults to NULL)</li>
+    </ol>
+    <p>Syntax: <code>LAG(column, offset, default) OVER (PARTITION BY ... ORDER BY ...)</code></p>
+    <p>ORDER BY inside OVER() is required. It defines what "previous" and "next" mean. Without it, the concepts of before and after are meaningless.</p>
+    <p>PARTITION BY is optional. When included, LAG() and LEAD() respect partition boundaries. The first row in a partition has no predecessor within that partition, even if rows from another partition came before it in the raw table.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <pre><code class="language-sql">-- Basic LAG: previous month's sales
+SELECT
+    month,
+    region,
+    total_sales,
+    LAG(total_sales, 1) OVER (PARTITION BY region ORDER BY month) AS prev_month_sales,
+    total_sales - LAG(total_sales, 1, 0) OVER (PARTITION BY region ORDER BY month) AS mom_change
+FROM monthly_sales;
+
+-- LEAD: next month's sales
+SELECT
+    month,
+    region,
+    total_sales,
+    LEAD(total_sales, 1) OVER (PARTITION BY region ORDER BY month) AS next_month_sales
+FROM monthly_sales;
+
+-- Days between consecutive orders per customer
+SELECT
+    order_id,
+    customer_id,
+    order_date,
+    LAG(order_date) OVER (PARTITION BY customer_id ORDER BY order_date) AS prev_order_date,
+    DATEDIFF(
+        order_date,
+        LAG(order_date) OVER (PARTITION BY customer_id ORDER BY order_date)
+    ) AS days_since_last_order
+FROM orders;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>LAG(total_sales, 1)</code></td><td>Returns total_sales from 1 row before the current row</td><td>Previous month's sales appear on the current month's row</td></tr>
+      <tr><td><code>LAG(total_sales, 2)</code></td><td>Returns total_sales from 2 rows before the current row</td><td>Sales from 2 months ago appear on the current row</td></tr>
+      <tr><td><code>LAG(total_sales, 1, 0)</code></td><td>Returns 0 when there is no previous row (first row of partition)</td><td>Prevents NULL in the difference calculation</td></tr>
+      <tr><td><code>LEAD(total_sales, 1)</code></td><td>Returns total_sales from 1 row after the current row</td><td>Next month's sales appear on the current row</td></tr>
+      <tr><td><code>PARTITION BY region</code></td><td>Resets the offset lookup at each region boundary</td><td>First row in North has no LAG value, even if South rows exist</td></tr>
+      <tr><td><code>ORDER BY month</code></td><td>Defines what "previous" and "next" mean</td><td>Rows are ordered by month, so LAG looks at the prior month</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample table: <code>monthly_sales</code> at Flipkart</strong></p>
+    <table>
+      <tr><th>month</th><th>region</th><th>total_sales</th></tr>
+      <tr><td>2024-01</td><td>North</td><td>85000</td></tr>
+      <tr><td>2024-02</td><td>North</td><td>91000</td></tr>
+      <tr><td>2024-03</td><td>North</td><td>78000</td></tr>
+      <tr><td>2024-04</td><td>North</td><td>95000</td></tr>
+      <tr><td>2024-01</td><td>South</td><td>72000</td></tr>
+      <tr><td>2024-02</td><td>South</td><td>68000</td></tr>
+      <tr><td>2024-03</td><td>South</td><td>80000</td></tr>
+      <tr><td>2024-04</td><td>South</td><td>88000</td></tr>
+    </table>
+    <h3>Example 1: Previous month's sales alongside current month</h3>
+    <p><strong>Business question:</strong> Show each month's sales alongside last month's sales for the same region.</p>
+    <pre><code class="language-sql">SELECT
+    month,
+    region,
+    total_sales,
+    LAG(total_sales, 1) OVER (PARTITION BY region ORDER BY month) AS prev_month_sales
+FROM monthly_sales
+ORDER BY region, month;</code></pre>
+    <table>
+      <tr><th>month</th><th>region</th><th>total_sales</th><th>prev_month_sales</th></tr>
+      <tr><td>2024-01</td><td>North</td><td>85000</td><td>NULL</td></tr>
+      <tr><td>2024-02</td><td>North</td><td>91000</td><td>85000</td></tr>
+      <tr><td>2024-03</td><td>North</td><td>78000</td><td>91000</td></tr>
+      <tr><td>2024-04</td><td>North</td><td>95000</td><td>78000</td></tr>
+      <tr><td>2024-01</td><td>South</td><td>72000</td><td>NULL</td></tr>
+      <tr><td>2024-02</td><td>South</td><td>68000</td><td>72000</td></tr>
+      <tr><td>2024-03</td><td>South</td><td>80000</td><td>68000</td></tr>
+      <tr><td>2024-04</td><td>South</td><td>88000</td><td>80000</td></tr>
+    </table>
+    <h3>Example 2: Month-over-month change</h3>
+    <p><strong>Business question:</strong> How much did sales grow or decline compared to last month, per region?</p>
+    <pre><code class="language-sql">SELECT
+    month,
+    region,
+    total_sales,
+    LAG(total_sales, 1, 0) OVER (PARTITION BY region ORDER BY month) AS prev_month_sales,
+    total_sales - LAG(total_sales, 1, 0) OVER (PARTITION BY region ORDER BY month) AS mom_change
+FROM monthly_sales
+ORDER BY region, month;</code></pre>
+    <table>
+      <tr><th>month</th><th>region</th><th>total_sales</th><th>prev_month_sales</th><th>mom_change</th></tr>
+      <tr><td>2024-01</td><td>North</td><td>85000</td><td>0</td><td>85000</td></tr>
+      <tr><td>2024-02</td><td>North</td><td>91000</td><td>85000</td><td>6000</td></tr>
+      <tr><td>2024-03</td><td>North</td><td>78000</td><td>91000</td><td>-13000</td></tr>
+      <tr><td>2024-04</td><td>North</td><td>95000</td><td>78000</td><td>17000</td></tr>
+      <tr><td>2024-01</td><td>South</td><td>72000</td><td>0</td><td>72000</td></tr>
+      <tr><td>2024-02</td><td>South</td><td>68000</td><td>72000</td><td>-4000</td></tr>
+      <tr><td>2024-03</td><td>South</td><td>80000</td><td>68000</td><td>12000</td></tr>
+      <tr><td>2024-04</td><td>South</td><td>88000</td><td>80000</td><td>8000</td></tr>
+    </table>
+    <h3>Example 3: Days between consecutive orders per customer</h3>
+    <p><strong>Sample table: <code>orders</code></strong></p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>order_date</th><th>amount</th></tr>
+      <tr><td>401</td><td>C01</td><td>2024-01-05</td><td>500</td></tr>
+      <tr><td>402</td><td>C01</td><td>2024-01-18</td><td>320</td></tr>
+      <tr><td>403</td><td>C01</td><td>2024-02-03</td><td>780</td></tr>
+      <tr><td>404</td><td>C02</td><td>2024-01-10</td><td>450</td></tr>
+      <tr><td>405</td><td>C02</td><td>2024-01-25</td><td>610</td></tr>
+    </table>
+    <p><strong>Business question:</strong> How many days passed between each customer's consecutive orders?</p>
+    <pre><code class="language-sql">SELECT
+    order_id,
+    customer_id,
+    order_date,
+    LAG(order_date) OVER (PARTITION BY customer_id ORDER BY order_date) AS prev_order_date,
+    DATEDIFF(
+        order_date,
+        LAG(order_date) OVER (PARTITION BY customer_id ORDER BY order_date)
+    ) AS days_since_last_order
+FROM orders
+ORDER BY customer_id, order_date;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>order_date</th><th>prev_order_date</th><th>days_since_last_order</th></tr>
+      <tr><td>401</td><td>C01</td><td>2024-01-05</td><td>NULL</td><td>NULL</td></tr>
+      <tr><td>402</td><td>C01</td><td>2024-01-18</td><td>2024-01-05</td><td>13</td></tr>
+      <tr><td>403</td><td>C01</td><td>2024-02-03</td><td>2024-01-18</td><td>16</td></tr>
+      <tr><td>404</td><td>C02</td><td>2024-01-10</td><td>NULL</td><td>NULL</td></tr>
+      <tr><td>405</td><td>C02</td><td>2024-01-25</td><td>2024-01-10</td><td>15</td></tr>
+    </table>
+    <h3>Example 4: Look at the next month using LEAD</h3>
+    <p><strong>Business question:</strong> Show each month alongside what the next month will bring, so the team can project sequentially.</p>
+    <pre><code class="language-sql">SELECT
+    month,
+    region,
+    total_sales,
+    LEAD(total_sales, 1) OVER (PARTITION BY region ORDER BY month) AS next_month_sales
+FROM monthly_sales
+ORDER BY region, month;</code></pre>
+    <table>
+      <tr><th>month</th><th>region</th><th>total_sales</th><th>next_month_sales</th></tr>
+      <tr><td>2024-01</td><td>North</td><td>85000</td><td>91000</td></tr>
+      <tr><td>2024-02</td><td>North</td><td>91000</td><td>78000</td></tr>
+      <tr><td>2024-03</td><td>North</td><td>78000</td><td>95000</td></tr>
+      <tr><td>2024-04</td><td>North</td><td>95000</td><td>NULL</td></tr>
+      <tr><td>2024-01</td><td>South</td><td>72000</td><td>68000</td></tr>
+      <tr><td>2024-02</td><td>South</td><td>68000</td><td>80000</td></tr>
+      <tr><td>2024-03</td><td>South</td><td>80000</td><td>88000</td></tr>
+      <tr><td>2024-04</td><td>South</td><td>88000</td><td>NULL</td></tr>
+    </table>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>The first row in a partition always returns NULL for LAG() because there is no previous row within that partition. If you compute <code>total_sales - LAG(total_sales)</code> and the LAG result is NULL, the difference will also be NULL. Provide a default value as the third argument to LAG() to avoid this: <code>LAG(total_sales, 1, 0)</code>.</p>
+    <p>LAG() and LEAD() respect the PARTITION BY boundary strictly. If you have North and South regions and you PARTITION BY region, the first row of South will not "look back" to the last row of North. Each partition is isolated.</p>
+    <p>Using LAG() without ORDER BY inside OVER() produces undefined results. The database may return any row as the "previous" row because the concept of order is undefined.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Forgetting the third argument when you will subtract or compare: <code>total_sales - LAG(total_sales)</code> where the first row's LAG returns NULL will produce NULL in the result column, not 0 or the original value.</p>
+    <p>Using LEAD() when you mean LAG() and vice versa: LAG looks back to earlier rows, LEAD looks forward to later rows. If your ORDER BY is ascending by date, LAG gives you the past and LEAD gives you the future.</p>
+    <p>Not partitioning when the data spans multiple groups: if you have multiple customers' orders in one table and forget PARTITION BY customer_id, LAG() will look at the previous row from any customer, not the previous order from the same customer.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Always include a default value when the LAG() or LEAD() result will be used in arithmetic. NULL propagation silently ruins calculations.</p>
+    <p>Use PARTITION BY to isolate groups whenever the data represents multiple entities (customers, products, regions) in the same table.</p>
+    <p>For date gap calculations, use DATEDIFF or equivalent date arithmetic functions wrapping the LAG() result.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Flipkart, LAG() on monthly_sales computes month-over-month growth for the weekly business review. At Ola, LEAD() on expected trip end time helps drivers see how their current trip connects to the next scheduled pickup. At PhonePe, LAG() on transaction_date per user identifies customers who have not transacted in over 30 days (days_since_last_transaction > 30) for churn alerts. At Zomato, LAG() on order_date per customer identifies repeat order frequency trends.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>customer C01 orders ordered by date:
+
+Row 1: 2024-01-05  LAG sees: [nothing]  --&gt; NULL
+Row 2: 2024-01-18  LAG sees: [2024-01-05]  --&gt; 13 days gap
+Row 3: 2024-02-03  LAG sees: [2024-01-18]  --&gt; 16 days gap
+
+LEAD works in the opposite direction:
+
+Row 1: 2024-01-05  LEAD sees: [2024-01-18]  --&gt; next order
+Row 2: 2024-01-18  LEAD sees: [2024-02-03]  --&gt; next order
+Row 3: 2024-02-03  LEAD sees: [nothing]     --&gt; NULL</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <ul>
+      <li>What does the third argument in LAG() control?</li>
+      <li>Why must ORDER BY be present inside OVER() when using LAG() or LEAD()?</li>
+      <li>What happens to LAG() at the boundary between partitions?</li>
+      <li>What is the default offset if you only write <code>LAG(column)</code> without a second argument?</li>
+      <li>How would you compute a percentage growth rate using LAG()?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query on the <code>monthly_sales</code> table that shows each month's total_sales and the percentage change compared to the previous month for each region.</li>
+      <li>Using the <code>orders</code> table, find all customers who have gone more than 20 days between two consecutive orders.</li>
+      <li>Write a query using LEAD() that shows each month's sales and the next month's sales side by side, then computes the expected change.</li>
+      <li>Use LAG() with an offset of 2 to compare each month's sales to sales from two months ago.</li>
+      <li>Show each order for each customer with a column that says whether it is an improvement (amount greater than previous order), a decline, or no change. Use LAG() and CASE.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>LAG() and LEAD() turn time-series analysis from a multi-step spreadsheet exercise into a single SQL query. Period-over-period comparison, gap detection, sequential pattern analysis: all of these become straightforward once you know that your previous and next row values are just one function call away. Tanvi's Monday report now runs in thirty seconds, and she has time for coffee before her manager even opens Slack.</p>
+  `,
+  'mod10-t9': `
+    <h1>FIRST_VALUE() and LAST_VALUE(): Getting the First and Last Value in a Window</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Rohit works at Swiggy's analytics team. His manager asks him to build a customer order history report with a specific requirement: "For every order a customer has placed, I want to see their very first order amount and their most recent order amount on the same row. I want to compare how their spending has changed."</p>
+    <p>Rohit tries MIN() and MAX() first. He partitions by customer_id. MIN() gives him the smallest amount, not the first by date. MAX() gives him the largest, not the most recent. Those are different things.</p>
+    <p>He tries LAG() with a large offset to reach back to the first order. That breaks when customers have different numbers of orders. He tries a subquery with ORDER BY and LIMIT 1. It works, but it is a correlated subquery that runs once per row, and the query becomes slow on large data.</p>
+    <p>His senior points him to FIRST_VALUE() and LAST_VALUE(). He writes the query. It runs fast and returns exactly what the report needs. The only catch: LAST_VALUE() has a default frame behavior that trips him up for five minutes. Once he fixes that, everything works.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>You need the first or last value within a group, based on some ordering, but you want it stamped on every row in that group, not returned as a separate summary. MIN() and MAX() by value are not the same as first and last by date. FIRST_VALUE() and LAST_VALUE() solve this by letting you define "first" and "last" through an explicit ORDER BY.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Analysts frequently need to anchor calculations to a reference point: what did this customer spend the very first time, what was the opening price of a stock on a given day, what was the initial order value in a session. FIRST_VALUE() and LAST_VALUE() provide direct access to these anchor values without correlated subqueries or self-joins.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you have a stack of receipts for each customer, sorted by date. FIRST_VALUE() looks at the bottom of the stack and reads the first receipt's amount. LAST_VALUE() looks at the top and reads the most recent receipt's amount. Both values get written on every individual receipt, so every page of the history knows where the customer started and where they are now.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <p>FIRST_VALUE() always returns the value from the first row in the current window frame. Since the default frame (when ORDER BY is present) starts at UNBOUNDED PRECEDING and ends at CURRENT ROW, the first row in the frame is always the beginning of the partition. FIRST_VALUE() is consistent and intuitive.</p>
+    <p>LAST_VALUE() returns the value from the last row in the current window frame. But the default frame ends at CURRENT ROW, not at the end of the partition. This means LAST_VALUE() returns the current row's own value for most rows, which is usually not what you want. To fix this, you must extend the frame to UNBOUNDED FOLLOWING.</p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>Both FIRST_VALUE() and LAST_VALUE() take a single column argument. Both require ORDER BY inside OVER(). Both are affected by the frame specification.</p>
+    <p>FIRST_VALUE():</p>
+    <ul>
+      <li>Default frame: ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</li>
+      <li>The first row of this frame is always the partition start</li>
+      <li>Works correctly without any frame modification</li>
+    </ul>
+    <p>LAST_VALUE():</p>
+    <ul>
+      <li>Default frame: ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</li>
+      <li>The last row of this frame is the CURRENT ROW, not the partition end</li>
+      <li>To get the true last value of the partition, you must write: <code>ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING</code></li>
+    </ul>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <pre><code class="language-sql">-- FIRST_VALUE: first order amount per customer (works with default frame)
+SELECT
+    order_id,
+    customer_id,
+    order_date,
+    amount,
+    FIRST_VALUE(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY order_date
+    ) AS first_order_amount
+FROM orders;
+
+-- LAST_VALUE: most recent order amount per customer (requires frame fix)
+SELECT
+    order_id,
+    customer_id,
+    order_date,
+    amount,
+    LAST_VALUE(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY order_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS last_order_amount
+FROM orders;
+
+-- Both in the same query
+SELECT
+    order_id,
+    customer_id,
+    order_date,
+    amount,
+    FIRST_VALUE(amount) OVER (
+        PARTITION BY customer_id ORDER BY order_date
+    ) AS first_order_amount,
+    LAST_VALUE(amount) OVER (
+        PARTITION BY customer_id ORDER BY order_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS last_order_amount
+FROM orders;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>FIRST_VALUE(amount)</code></td><td>Returns the amount from the first row in the window frame</td><td>First order amount for the customer</td></tr>
+      <tr><td><code>LAST_VALUE(amount)</code></td><td>Returns the amount from the last row in the window frame</td><td>Depends on frame definition</td></tr>
+      <tr><td><code>ORDER BY order_date</code></td><td>Defines which row is "first" and which is "last"</td><td>Earliest date = first row</td></tr>
+      <tr><td>Default frame for LAST_VALUE</td><td>ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</td><td>Returns current row's own value, not partition end</td></tr>
+      <tr><td><code>ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING</code></td><td>Frame spans entire partition</td><td>LAST_VALUE now returns true last row of partition</td></tr>
+      <tr><td><code>PARTITION BY customer_id</code></td><td>Each customer's history is a separate window</td><td>Customer A's first order does not affect Customer B</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample table: <code>orders</code> at Swiggy</strong></p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>city</th><th>amount</th><th>order_date</th></tr>
+      <tr><td>501</td><td>C01</td><td>Mumbai</td><td>400</td><td>2024-01-05</td></tr>
+      <tr><td>502</td><td>C01</td><td>Mumbai</td><td>750</td><td>2024-02-10</td></tr>
+      <tr><td>503</td><td>C01</td><td>Mumbai</td><td>320</td><td>2024-03-15</td></tr>
+      <tr><td>504</td><td>C02</td><td>Delhi</td><td>600</td><td>2024-01-08</td></tr>
+      <tr><td>505</td><td>C02</td><td>Delhi</td><td>950</td><td>2024-02-20</td></tr>
+      <tr><td>506</td><td>C03</td><td>Bengaluru</td><td>280</td><td>2024-01-12</td></tr>
+    </table>
+    <h3>Example 1: First order amount for each customer</h3>
+    <p><strong>Business question:</strong> Show each order alongside what that customer spent on their very first order.</p>
+    <pre><code class="language-sql">SELECT
+    order_id,
+    customer_id,
+    order_date,
+    amount,
+    FIRST_VALUE(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY order_date
+    ) AS first_order_amount
+FROM orders
+ORDER BY customer_id, order_date;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>order_date</th><th>amount</th><th>first_order_amount</th></tr>
+      <tr><td>501</td><td>C01</td><td>2024-01-05</td><td>400</td><td>400</td></tr>
+      <tr><td>502</td><td>C01</td><td>2024-02-10</td><td>750</td><td>400</td></tr>
+      <tr><td>503</td><td>C01</td><td>2024-03-15</td><td>320</td><td>400</td></tr>
+      <tr><td>504</td><td>C02</td><td>2024-01-08</td><td>600</td><td>600</td></tr>
+      <tr><td>505</td><td>C02</td><td>2024-02-20</td><td>950</td><td>600</td></tr>
+      <tr><td>506</td><td>C03</td><td>2024-01-12</td><td>280</td><td>280</td></tr>
+    </table>
+    <p>C01's first order was 400. That value appears on all three of C01's rows.</p>
+    <h3>Example 2: Last order amount without frame fix (wrong result)</h3>
+    <p><strong>Business question:</strong> Show the most recent order amount per customer. (Incorrect frame shown for comparison.)</p>
+    <pre><code class="language-sql">-- This gives WRONG results for LAST_VALUE
+SELECT
+    order_id,
+    customer_id,
+    order_date,
+    amount,
+    LAST_VALUE(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY order_date
+    ) AS last_order_amount_WRONG
+FROM orders
+ORDER BY customer_id, order_date;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>order_date</th><th>amount</th><th>last_order_amount_WRONG</th></tr>
+      <tr><td>501</td><td>C01</td><td>2024-01-05</td><td>400</td><td>400</td></tr>
+      <tr><td>502</td><td>C01</td><td>2024-02-10</td><td>750</td><td>750</td></tr>
+      <tr><td>503</td><td>C01</td><td>2024-03-15</td><td>320</td><td>320</td></tr>
+    </table>
+    <p>Each row returns its own value. The frame ends at CURRENT ROW, so the "last" row is always the current row itself.</p>
+    <h3>Example 3: Last order amount with correct frame</h3>
+    <p><strong>Business question:</strong> Show the most recent order amount for each customer on every row. (Correct version.)</p>
+    <pre><code class="language-sql">SELECT
+    order_id,
+    customer_id,
+    order_date,
+    amount,
+    LAST_VALUE(amount) OVER (
+        PARTITION BY customer_id
+        ORDER BY order_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS last_order_amount
+FROM orders
+ORDER BY customer_id, order_date;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>order_date</th><th>amount</th><th>last_order_amount</th></tr>
+      <tr><td>501</td><td>C01</td><td>2024-01-05</td><td>400</td><td>320</td></tr>
+      <tr><td>502</td><td>C01</td><td>2024-02-10</td><td>750</td><td>320</td></tr>
+      <tr><td>503</td><td>C01</td><td>2024-03-15</td><td>320</td><td>320</td></tr>
+      <tr><td>504</td><td>C02</td><td>2024-01-08</td><td>600</td><td>950</td></tr>
+      <tr><td>505</td><td>C02</td><td>2024-02-20</td><td>950</td><td>950</td></tr>
+      <tr><td>506</td><td>C03</td><td>2024-01-12</td><td>280</td><td>280</td></tr>
+    </table>
+    <p>Now all of C01's rows correctly show 320 (the most recent amount).</p>
+    <h3>Example 4: Both FIRST_VALUE and LAST_VALUE with spend difference</h3>
+    <p><strong>Business question:</strong> Show how much each customer's spending has changed from their first to most recent order.</p>
+    <pre><code class="language-sql">SELECT
+    order_id,
+    customer_id,
+    order_date,
+    amount,
+    FIRST_VALUE(amount) OVER (
+        PARTITION BY customer_id ORDER BY order_date
+    ) AS first_order_amount,
+    LAST_VALUE(amount) OVER (
+        PARTITION BY customer_id ORDER BY order_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS last_order_amount,
+    LAST_VALUE(amount) OVER (
+        PARTITION BY customer_id ORDER BY order_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) - FIRST_VALUE(amount) OVER (
+        PARTITION BY customer_id ORDER BY order_date
+    ) AS spend_change
+FROM orders
+ORDER BY customer_id, order_date;</code></pre>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>order_date</th><th>amount</th><th>first_order_amount</th><th>last_order_amount</th><th>spend_change</th></tr>
+      <tr><td>501</td><td>C01</td><td>2024-01-05</td><td>400</td><td>400</td><td>320</td><td>-80</td></tr>
+      <tr><td>502</td><td>C01</td><td>2024-02-10</td><td>750</td><td>400</td><td>320</td><td>-80</td></tr>
+      <tr><td>503</td><td>C01</td><td>2024-03-15</td><td>320</td><td>400</td><td>320</td><td>-80</td></tr>
+      <tr><td>504</td><td>C02</td><td>2024-01-08</td><td>600</td><td>600</td><td>950</td><td>350</td></tr>
+      <tr><td>505</td><td>C02</td><td>2024-02-20</td><td>950</td><td>600</td><td>950</td><td>350</td></tr>
+      <tr><td>506</td><td>C03</td><td>2024-01-12</td><td>280</td><td>280</td><td>280</td><td>0</td></tr>
+    </table>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>The LAST_VALUE() default frame is the single biggest source of confusion with this function. Every analyst who uses LAST_VALUE() for the first time expects it to return the last value in the partition. It does not, unless you explicitly extend the frame. Always write <code>ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING</code> when using LAST_VALUE() for this use case.</p>
+    <p>FIRST_VALUE() with ORDER BY order_date returns the earliest date's value. If you want the first by a different ordering (like first by amount), change the ORDER BY inside OVER() accordingly.</p>
+    <p>FIRST_VALUE() and LAST_VALUE() are not the same as MIN() and MAX(). MIN() returns the smallest value in the partition. FIRST_VALUE() returns the value from the first row in the ordered window. These can be the same or different depending on the data.</p>
+    <hr>
+    <h2>FIRST_VALUE and LAST_VALUE vs MIN and MAX</h2>
+    <pre><code class="language-sql">-- MIN and MAX: based on value magnitude
+SELECT
+    customer_id,
+    MIN(amount) OVER (PARTITION BY customer_id) AS min_amount,
+    MAX(amount) OVER (PARTITION BY customer_id) AS max_amount
+FROM orders;
+
+-- FIRST_VALUE and LAST_VALUE: based on row order
+SELECT
+    customer_id,
+    FIRST_VALUE(amount) OVER (PARTITION BY customer_id ORDER BY order_date) AS first_amount,
+    LAST_VALUE(amount) OVER (
+        PARTITION BY customer_id ORDER BY order_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS last_amount
+FROM orders;
+-- first_amount is the amount on the earliest date, not necessarily the smallest
+-- last_amount is the amount on the latest date, not necessarily the largest</code></pre>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Using LAST_VALUE() without the frame specification: this returns the current row's own value for most rows, which is almost never the intended behavior. Always add <code>ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING</code> to LAST_VALUE() when you want the true last value of the partition.</p>
+    <p>Confusing FIRST_VALUE with MIN: they return the same value only when the smallest value also happens to be the first in the ORDER BY sequence.</p>
+    <p>Not specifying ORDER BY inside OVER(): without ORDER BY, the concepts of "first" and "last" have no meaning. The result is non-deterministic.</p>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Always write the frame clause explicitly with LAST_VALUE(). Do not rely on the default frame.</p>
+    <p>When you need both the first and last value, define both OVER() clauses clearly in the same query. Use CTEs to keep the query readable.</p>
+    <p>If the goal is simply to find the minimum or maximum value within a group (not specifically the first or last by time), use MIN() or MAX() as window functions instead. They are simpler and do not have the frame gotcha.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Swiggy, FIRST_VALUE(amount) shows each order alongside the customer's introductory order amount to identify how habits have changed. At Amazon India, FIRST_VALUE(order_date) marks each order with the customer's account opening date for tenure calculations. At IRCTC, LAST_VALUE(seat_price) with an extended frame captures the latest ticket price per route for fare comparison analysis. At Byju's, FIRST_VALUE(test_score) shows each subsequent test result alongside the student's baseline score on their first assessment.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Customer C01 orders ordered by date:
+
+order_date    amount    frame window for LAST_VALUE (default)
+2024-01-05    400       [400]             --&gt; LAST_VALUE = 400 (current row)
+2024-02-10    750       [400, 750]        --&gt; LAST_VALUE = 750 (current row)
+2024-03-15    320       [400, 750, 320]   --&gt; LAST_VALUE = 320 (current row)
+
+With ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING:
+2024-01-05    400       [400, 750, 320]   --&gt; LAST_VALUE = 320 (true last)
+2024-02-10    750       [400, 750, 320]   --&gt; LAST_VALUE = 320 (true last)
+2024-03-15    320       [400, 750, 320]   --&gt; LAST_VALUE = 320 (true last)
+
+FIRST_VALUE always sees back to UNBOUNDED PRECEDING, so it always returns 400.</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <ul>
+      <li>What is the default frame when ORDER BY is present in a window function?</li>
+      <li>Why does LAST_VALUE() return the current row's own value with the default frame?</li>
+      <li>What frame specification fixes LAST_VALUE() to return the true last value of the partition?</li>
+      <li>How is FIRST_VALUE() different from MIN() used as a window function?</li>
+      <li>Can you use FIRST_VALUE() without ORDER BY inside OVER()?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query that shows each customer's order history with the amount of their very first order on every row.</li>
+      <li>Show each order alongside the date of the customer's most recent order (not the amount, the date). Use LAST_VALUE() with the correct frame.</li>
+      <li>For each order, compute the ratio of the current amount to the customer's first-ever order amount.</li>
+      <li>Write a query that shows both FIRST_VALUE(amount) and MIN(amount) for each customer side by side. Then identify a customer where the two values differ and explain why.</li>
+      <li>Use FIRST_VALUE() to show each order with the city of the customer's first-ever order, so the team can see if customers have changed delivery cities over time.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>FIRST_VALUE() and LAST_VALUE() are elegant tools for anchoring any calculation to the start or end of a customer's, product's, or period's history. FIRST_VALUE() works intuitively from the start. LAST_VALUE() requires one extra line of frame specification but rewards you with a clean, fast, single-pass query. Rohit's customer history report now loads in under two seconds. His correlated subquery version took forty-five.</p>
+  `,
+  'mod10-t10': `
+    <h1>Frame Specification: Controlling Exactly Which Rows the Window Covers</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Kiran is a data analyst at Zomato. Her manager asks for a 7-day rolling average of daily order revenue per city. Not the cumulative total from day one. Not the single-day amount. A rolling window: each day should show the average of that day and the 6 days before it.</p>
+    <p>Kiran already knows window functions. She writes a SUM with OVER(PARTITION BY city ORDER BY sale_date) and gets a running total. Not what she needs. She tries removing ORDER BY and gets the partition total. Still not it.</p>
+    <p>Her colleague explains: "You need a frame. Without a frame, the window either runs from the beginning to the current row or covers the entire partition. With a frame, you can say: only look at the 6 rows before the current row and the current row itself."</p>
+    <p>Kiran adds <code>ROWS BETWEEN 6 PRECEDING AND CURRENT ROW</code>. She gets the 7-day rolling average. That is the frame specification.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Running totals, moving averages, and fixed-window aggregates all require control over exactly which rows are included in each calculation. The default window behavior does not always match what you need. Frame specification is how you tell SQL precisely which rows to include.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>The default frame is useful for simple running totals, but data analysis requires flexible windows. A 3-month moving average needs a different frame than a year-to-date total. A "look only at the 2 rows before and 2 rows after" calculation needs yet another frame. Frame specification was added to give analysts complete control over the window boundaries.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you are reading a long CSV file row by row. For each row, you place a physical ruler on the screen that covers a certain range of rows above and below. The function calculates only what is under the ruler. You can adjust the ruler to be wider, narrower, anchored at the current row, or spanning the whole page. The frame specification is that ruler.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <p>A frame has two boundaries: where it starts and where it ends, both defined relative to the current row.</p>
+    <ul>
+      <li>UNBOUNDED PRECEDING: from the very first row in the partition</li>
+      <li>n PRECEDING: n rows before the current row</li>
+      <li>CURRENT ROW: the current row itself</li>
+      <li>n FOLLOWING: n rows after the current row</li>
+      <li>UNBOUNDED FOLLOWING: to the very last row in the partition</li>
+    </ul>
+    <p>The frame is written as: <code>ROWS BETWEEN [start] AND [end]</code></p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>Two frame modes exist: ROWS and RANGE.</p>
+    <p>ROWS counts physical row offsets. <code>ROWS BETWEEN 2 PRECEDING AND CURRENT ROW</code> means the 2 rows immediately before the current row plus the current row, regardless of column values. Exactly 3 rows, always.</p>
+    <p>RANGE counts logical value offsets. <code>RANGE BETWEEN 2 PRECEDING AND CURRENT ROW</code> means all rows where the ORDER BY column value is within 2 units of the current row's value. If five rows share the same ORDER BY value, they are all treated as "CURRENT ROW" in RANGE mode.</p>
+    <p><strong>Default frames:</strong></p>
+    <ul>
+      <li>When ORDER BY is present in OVER(): <code>RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code></li>
+      <li>When ORDER BY is absent in OVER(): <code>ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING</code></li>
+    </ul>
+    <p>The RANGE default explains the LAST_VALUE() gotcha from the previous article: the frame ends at CURRENT ROW, so the last value seen is always the current row's own value.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <pre><code class="language-sql">-- Running total (default when ORDER BY present)
+SELECT
+    sale_date,
+    city,
+    total_amount,
+    SUM(total_amount) OVER (
+        PARTITION BY city
+        ORDER BY sale_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS running_total
+FROM daily_sales;
+
+-- 3-row moving average
+SELECT
+    sale_date,
+    city,
+    total_amount,
+    AVG(total_amount) OVER (
+        PARTITION BY city
+        ORDER BY sale_date
+        ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+    ) AS moving_avg_3day
+FROM daily_sales;
+
+-- Whole partition aggregate (same result on every row within partition)
+SELECT
+    sale_date,
+    city,
+    total_amount,
+    SUM(total_amount) OVER (
+        PARTITION BY city
+        ORDER BY sale_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS partition_total
+FROM daily_sales;
+
+-- 7-day rolling average
+SELECT
+    sale_date,
+    city,
+    total_amount,
+    AVG(total_amount) OVER (
+        PARTITION BY city
+        ORDER BY sale_date
+        ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+    ) AS rolling_7day_avg
+FROM daily_sales;</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code></td><td>All rows from partition start to current row</td><td>Running total</td></tr>
+      <tr><td><code>ROWS BETWEEN 2 PRECEDING AND CURRENT ROW</code></td><td>Current row plus 2 rows before it (3 rows total)</td><td>3-row moving average</td></tr>
+      <tr><td><code>ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING</code></td><td>Entire partition included</td><td>Same result on every row of the partition</td></tr>
+      <tr><td><code>ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING</code></td><td>Current row, one before, one after (3 rows)</td><td>Centered 3-row moving average</td></tr>
+      <tr><td><code>RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code></td><td>Default when ORDER BY present; rows with equal ORDER BY values all treated as CURRENT ROW</td><td>Can include more rows than ROWS mode at ties</td></tr>
+      <tr><td><code>ROWS BETWEEN 6 PRECEDING AND CURRENT ROW</code></td><td>Current row plus 6 rows before it (7 rows total)</td><td>7-day rolling average</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample table: <code>daily_sales</code> at Zomato</strong></p>
+    <table>
+      <tr><th>sale_date</th><th>city</th><th>total_amount</th></tr>
+      <tr><td>2024-01-01</td><td>Mumbai</td><td>5000</td></tr>
+      <tr><td>2024-01-02</td><td>Mumbai</td><td>7000</td></tr>
+      <tr><td>2024-01-03</td><td>Mumbai</td><td>4000</td></tr>
+      <tr><td>2024-01-04</td><td>Mumbai</td><td>8000</td></tr>
+      <tr><td>2024-01-05</td><td>Mumbai</td><td>6000</td></tr>
+      <tr><td>2024-01-01</td><td>Delhi</td><td>3000</td></tr>
+      <tr><td>2024-01-02</td><td>Delhi</td><td>4500</td></tr>
+      <tr><td>2024-01-03</td><td>Delhi</td><td>5000</td></tr>
+      <tr><td>2024-01-04</td><td>Delhi</td><td>2000</td></tr>
+      <tr><td>2024-01-05</td><td>Delhi</td><td>6000</td></tr>
+    </table>
+    <h3>Example 1: Running total (UNBOUNDED PRECEDING to CURRENT ROW)</h3>
+    <p><strong>Business question:</strong> Show daily cumulative revenue per city from the start of the month.</p>
+    <pre><code class="language-sql">SELECT
+    sale_date,
+    city,
+    total_amount,
+    SUM(total_amount) OVER (
+        PARTITION BY city
+        ORDER BY sale_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS running_total
+FROM daily_sales
+ORDER BY city, sale_date;</code></pre>
+    <table>
+      <tr><th>sale_date</th><th>city</th><th>total_amount</th><th>running_total</th></tr>
+      <tr><td>2024-01-01</td><td>Delhi</td><td>3000</td><td>3000</td></tr>
+      <tr><td>2024-01-02</td><td>Delhi</td><td>4500</td><td>7500</td></tr>
+      <tr><td>2024-01-03</td><td>Delhi</td><td>5000</td><td>12500</td></tr>
+      <tr><td>2024-01-04</td><td>Delhi</td><td>2000</td><td>14500</td></tr>
+      <tr><td>2024-01-05</td><td>Delhi</td><td>6000</td><td>20500</td></tr>
+      <tr><td>2024-01-01</td><td>Mumbai</td><td>5000</td><td>5000</td></tr>
+      <tr><td>2024-01-02</td><td>Mumbai</td><td>7000</td><td>12000</td></tr>
+      <tr><td>2024-01-03</td><td>Mumbai</td><td>4000</td><td>16000</td></tr>
+      <tr><td>2024-01-04</td><td>Mumbai</td><td>8000</td><td>24000</td></tr>
+      <tr><td>2024-01-05</td><td>Mumbai</td><td>6000</td><td>30000</td></tr>
+    </table>
+    <h3>Example 2: 3-day moving average</h3>
+    <p><strong>Business question:</strong> Smooth out daily fluctuations with a 3-day rolling average.</p>
+    <pre><code class="language-sql">SELECT
+    sale_date,
+    city,
+    total_amount,
+    ROUND(AVG(total_amount) OVER (
+        PARTITION BY city
+        ORDER BY sale_date
+        ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+    ), 2) AS moving_avg_3day
+FROM daily_sales
+ORDER BY city, sale_date;</code></pre>
+    <table>
+      <tr><th>sale_date</th><th>city</th><th>total_amount</th><th>moving_avg_3day</th></tr>
+      <tr><td>2024-01-01</td><td>Delhi</td><td>3000</td><td>3000.00</td></tr>
+      <tr><td>2024-01-02</td><td>Delhi</td><td>4500</td><td>3750.00</td></tr>
+      <tr><td>2024-01-03</td><td>Delhi</td><td>5000</td><td>4166.67</td></tr>
+      <tr><td>2024-01-04</td><td>Delhi</td><td>2000</td><td>3833.33</td></tr>
+      <tr><td>2024-01-05</td><td>Delhi</td><td>6000</td><td>4333.33</td></tr>
+      <tr><td>2024-01-01</td><td>Mumbai</td><td>5000</td><td>5000.00</td></tr>
+      <tr><td>2024-01-02</td><td>Mumbai</td><td>7000</td><td>6000.00</td></tr>
+      <tr><td>2024-01-03</td><td>Mumbai</td><td>4000</td><td>5333.33</td></tr>
+      <tr><td>2024-01-04</td><td>Mumbai</td><td>8000</td><td>6333.33</td></tr>
+      <tr><td>2024-01-05</td><td>Mumbai</td><td>6000</td><td>6000.00</td></tr>
+    </table>
+    <p>Note: for the first two rows in each city, fewer than 3 rows exist, so the average covers only the available rows.</p>
+    <h3>Example 3: Whole partition total on every row</h3>
+    <p><strong>Business question:</strong> Show each day's amount alongside the full 5-day total for that city, on every row.</p>
+    <pre><code class="language-sql">SELECT
+    sale_date,
+    city,
+    total_amount,
+    SUM(total_amount) OVER (
+        PARTITION BY city
+        ORDER BY sale_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+    ) AS full_period_total
+FROM daily_sales
+ORDER BY city, sale_date;</code></pre>
+    <table>
+      <tr><th>sale_date</th><th>city</th><th>total_amount</th><th>full_period_total</th></tr>
+      <tr><td>2024-01-01</td><td>Delhi</td><td>3000</td><td>20500</td></tr>
+      <tr><td>2024-01-02</td><td>Delhi</td><td>4500</td><td>20500</td></tr>
+      <tr><td>2024-01-03</td><td>Delhi</td><td>5000</td><td>20500</td></tr>
+      <tr><td>2024-01-04</td><td>Delhi</td><td>2000</td><td>20500</td></tr>
+      <tr><td>2024-01-05</td><td>Delhi</td><td>6000</td><td>20500</td></tr>
+    </table>
+    <h3>Example 4: Centered 3-row moving average (1 PRECEDING to 1 FOLLOWING)</h3>
+    <p><strong>Business question:</strong> Compute a centered average using the row before, the current row, and the row after.</p>
+    <pre><code class="language-sql">SELECT
+    sale_date,
+    city,
+    total_amount,
+    ROUND(AVG(total_amount) OVER (
+        PARTITION BY city
+        ORDER BY sale_date
+        ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING
+    ), 2) AS centered_avg
+FROM daily_sales
+ORDER BY city, sale_date;</code></pre>
+    <table>
+      <tr><th>sale_date</th><th>city</th><th>total_amount</th><th>centered_avg</th></tr>
+      <tr><td>2024-01-01</td><td>Delhi</td><td>3000</td><td>3750.00</td></tr>
+      <tr><td>2024-01-02</td><td>Delhi</td><td>4500</td><td>4166.67</td></tr>
+      <tr><td>2024-01-03</td><td>Delhi</td><td>5000</td><td>3833.33</td></tr>
+      <tr><td>2024-01-04</td><td>Delhi</td><td>2000</td><td>4333.33</td></tr>
+      <tr><td>2024-01-05</td><td>Delhi</td><td>6000</td><td>4000.00</td></tr>
+    </table>
+    <p>The first and last rows have only 2 rows in their frame (no preceding or following row exists), so averages are over 2 rows.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p>The RANGE vs ROWS difference matters when the ORDER BY column has duplicate values. With RANGE, all rows with the same ORDER BY value are treated as the same position. A frame of <code>RANGE BETWEEN 1 PRECEDING AND CURRENT ROW</code> may include more rows than you expect if many rows share the same date. With ROWS, the count is always exact: n physical rows before, the current row, m physical rows after.</p>
+    <p>When fewer rows exist than the frame requests (first few rows of a partition), the function uses whatever rows are available. For <code>ROWS BETWEEN 6 PRECEDING AND CURRENT ROW</code>, the first row only has 1 row in its frame (itself), the second row has 2, and so on until row 7, which has the full 7.</p>
+    <p>Frame specification is only meaningful when ORDER BY is present in OVER(). Without ORDER BY, the default frame covers the entire partition regardless.</p>
+    <hr>
+    <h2>ROWS vs RANGE</h2>
+    <pre><code>Data: sale_date = 2024-01-03 appears twice (two rows with same date)
+With ROWS BETWEEN 1 PRECEDING AND CURRENT ROW:
+  --&gt; exactly 2 rows: the row immediately before and the current row
+
+With RANGE BETWEEN 1 PRECEDING AND CURRENT ROW:
+  --&gt; all rows where sale_date is within 1 day of 2024-01-03
+  --&gt; both rows with date 2024-01-03 are included as "CURRENT ROW"
+  --&gt; more rows than ROWS mode would include</code></pre>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <p>Writing <code>ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING</code> when you want a forward-looking window: this is valid, but remember that the frame cannot end before it starts. <code>ROWS BETWEEN 3 FOLLOWING AND 1 PRECEDING</code> is invalid.</p>
+    <p>Using RANGE for moving averages when the data has date gaps: if you want exactly 7 days of data in your rolling average, use ROWS BETWEEN 6 PRECEDING AND CURRENT ROW, not RANGE. RANGE with date values works differently from what most people expect unless paired with interval arithmetic.</p>
+    <p>Forgetting that the frame specification is optional: if you only write <code>OVER (PARTITION BY city ORDER BY sale_date)</code>, the default RANGE frame applies. Make it explicit when your logic requires a specific window.</p>
+    <hr>
+    <h2>Default Frame Summary</h2>
+    <table>
+      <tr><th>Scenario</th><th>Default Frame</th><th>Effect</th></tr>
+      <tr><td>No ORDER BY in OVER()</td><td>ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING</td><td>Entire partition, static value on every row</td></tr>
+      <tr><td>ORDER BY present in OVER(), no frame</td><td>RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</td><td>Running total/count, includes all tied ORDER BY values at current row</td></tr>
+      <tr><td>LAST_VALUE() with default frame</td><td>Same as above</td><td>Returns current row's value, not true last</td></tr>
+      <tr><td>LAST_VALUE() with extended frame</td><td>ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING</td><td>Returns true last row in partition</td></tr>
+    </table>
+    <hr>
+    <h2>Best Practices</h2>
+    <p>Always write the frame clause explicitly when your intent depends on it. Implicit defaults work for running totals, but for any other use case, be explicit.</p>
+    <p>Use ROWS instead of RANGE for moving averages and fixed-size windows. ROWS gives deterministic, count-based window sizes.</p>
+    <p>Use RANGE when the business definition involves value-based inclusion: "all rows within 2 days of the current date" is a RANGE concept. "The previous 2 rows and the current row" is a ROWS concept.</p>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Zomato, <code>ROWS BETWEEN 6 PRECEDING AND CURRENT ROW</code> computes the 7-day rolling average of daily city revenue for trend dashboards. At Amazon India, <code>ROWS BETWEEN 29 PRECEDING AND CURRENT ROW</code> computes 30-day rolling return rates per product category. At Paytm, <code>ROWS BETWEEN 2 PRECEDING AND CURRENT ROW</code> smooths daily transaction counts to remove day-of-week spikes. At Ola, <code>ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code> tracks the cumulative total number of rides per driver since onboarding.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Frames visualized for 5 rows in Mumbai partition:
+
+Row:      1/1  1/2  1/3  1/4  1/5
+Amount:  5000 7000 4000 8000 6000
+
+UNBOUNDED PRECEDING to CURRENT ROW (running total):
+Row 1: [5000]
+Row 2: [5000, 7000]
+Row 3: [5000, 7000, 4000]
+Row 4: [5000, 7000, 4000, 8000]
+Row 5: [5000, 7000, 4000, 8000, 6000]
+
+2 PRECEDING to CURRENT ROW (3-row moving avg):
+Row 1: [5000]
+Row 2: [5000, 7000]
+Row 3: [5000, 7000, 4000]   &lt;-- 3 rows once available
+Row 4: [7000, 4000, 8000]   &lt;-- window slides forward
+Row 5: [4000, 8000, 6000]   &lt;-- window slides forward again
+
+UNBOUNDED PRECEDING to UNBOUNDED FOLLOWING (whole partition):
+Every row: [5000, 7000, 4000, 8000, 6000] = 30000 on each row</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <ul>
+      <li>What is the default frame when ORDER BY is present in OVER()?</li>
+      <li>What is the difference between ROWS and RANGE in frame specification?</li>
+      <li>How do you write a frame that includes the previous 6 rows and the current row?</li>
+      <li>Why does LAST_VALUE() require a frame override?</li>
+      <li>What frame would you use to compute a 30-day rolling average?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query on <code>daily_sales</code> that shows a 5-day rolling sum of total_amount per city.</li>
+      <li>Show each day's revenue alongside the average for the current day and the 2 days before and after it (a 5-row centered moving average).</li>
+      <li>Write a query that shows both the running total (UNBOUNDED PRECEDING to CURRENT ROW) and the full partition total (UNBOUNDED PRECEDING to UNBOUNDED FOLLOWING) in the same SELECT.</li>
+      <li>Explain the difference in output between <code>ROWS BETWEEN 2 PRECEDING AND CURRENT ROW</code> and <code>RANGE BETWEEN 2 PRECEDING AND CURRENT ROW</code> when two rows share the same sale_date. Write an example to demonstrate.</li>
+      <li>A business wants a "trailing 3-month revenue" for each month. Write the frame specification and the complete query to compute this.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>Frame specification is the most precise control SQL gives you over window calculations. Once you understand that the frame defines which rows are "visible" to the function on each row, and that the defaults are not always what you want, you gain complete control over running totals, moving averages, and rolling windows of any size. Kiran's 7-day rolling average now runs as an automated daily report, and her manager gets it in their inbox every morning before the city operations review.</p>
+  `,
 
   // ── Module 11 ────────────────────────────────────────────────
   'mod11-t1': `<h1>Common String Functions Overview</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
