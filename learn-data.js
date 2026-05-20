@@ -14627,21 +14627,4011 @@ Every row: [5000, 7000, 4000, 8000, 6000] = 30000 on each row</code></pre>
   `,
 
   // ── Module 11 ────────────────────────────────────────────────
-  'mod11-t1': `<h1>Common String Functions Overview</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod11-t2': `<h1>CONCAT, LENGTH, UPPER, LOWER</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod11-t3': `<h1>SUBSTRING, TRIM, REPLACE</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod11-t4': `<h1>Date Functions Overview</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod11-t5': `<h1>DATE_FORMAT, EXTRACT, DATEDIFF</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod11-t6': `<h1>Working with Timestamps</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod11-t1': `
+    <h1>Common String Functions in SQL — What They Are and Why You Need Them</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Priya works as a data analyst at Flipkart's seller support team in Bengaluru. Every Monday morning, she pulls a report of all seller names, their contact emails, and their product listings from the database. The problem? The data is a mess. Some seller names are in ALL CAPS, some are in lowercase, some have extra spaces at the beginning or end. Email addresses have inconsistent formatting. Product names sometimes have typos or extra characters.</p>
+
+<p>Her manager wants a clean, formatted report by 10 AM. Priya used to spend two hours every Monday cleaning this data manually in Excel. Then she discovered SQL string functions.</p>
+
+<p>Within a few weeks, she had written a single query that cleaned everything automatically — trimmed the spaces, standardized the casing, extracted just the domain from email addresses, and combined first and last names into a full name column. What used to take two hours now took ten seconds. That is what string functions do for you.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>Imagine you have a table called <code>sellers</code> at a company like Meesho or Amazon India. The data was entered by different people at different times, and nobody enforced any formatting rules. You now have:</p>
+
+<ul><li>Names like <code>"  rahul sharma  "</code> (spaces before and after)</li><li>Email addresses like <code>"RAHUL@GMAIL.COM"</code> (all uppercase)</li><li>Phone numbers stored as <code>"9876543210"</code> but you need <code>"+91-9876543210"</code></li><li>Product descriptions that are 500 characters long but you only need the first 100</li></ul>
+
+<p>If you try to search for <code>"Rahul Sharma"</code> in this data, you won't find <code>"  rahul sharma  "</code>. They look different to the database. You need to clean and transform strings before you can do anything useful with them.</p>
+
+<p>This is the core problem string functions solve. They let you manipulate text data directly inside your SQL query without needing to export the data and clean it in Excel or Python first.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>When relational databases were first being built in the 1970s and 1980s, most of the focus was on storing and retrieving numbers — financial data, inventory counts, transaction amounts. Text was secondary. But it quickly became clear that real-world data is messy and text-heavy.</p>
+
+<p>The engineers building SQL realized that analysts would constantly need to clean and reshape text data. Writing separate programs to do this was slow and error-prone. It made more sense to give the database engine itself the ability to manipulate strings, so the work could happen right where the data lives.</p>
+
+<p>Over time, SQL dialects like MySQL, PostgreSQL, and SQL Server each added their own string functions. Some are standard across all databases, some differ slightly in syntax. But the core functions — CONCAT, LENGTH, UPPER, LOWER, SUBSTRING, TRIM, REPLACE — exist in some form in every major SQL database. They have been there for decades because every analyst who works with real data eventually needs them.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think about how you edit text in Microsoft Word. You can find and replace words, change text to uppercase or lowercase, cut out a portion of a sentence, remove extra spaces. You do this manually with your mouse and keyboard.</p>
+
+<p>SQL string functions are doing the exact same thing, but automatically, on thousands or millions of rows at once. Instead of you manually highlighting text and pressing a button, you write a function name in SQL and it applies that operation to every row in your result set.</p>
+
+<p>The difference is scale. Doing it manually in Word works for one document. SQL string functions work for an entire database table with millions of records.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Picture a factory assembly line. Raw material comes in on one end — that's your unformatted text data. Workers at different stations perform specific operations on that material — cutting it, shaping it, labeling it. At the end, a finished product comes out.</p>
+
+<p>SQL string functions are the workers on that assembly line. Each function does one specific job: UPPER converts to uppercase, TRIM removes extra spaces, CONCAT joins two strings together, LENGTH measures how long a string is. You can chain them together, passing the output of one function as the input to another, just like one worker passing a part to the next station.</p>
+
+<p>Your raw data goes in one end, and clean, formatted, ready-to-use text comes out the other.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>When SQL processes a string function, it works row by row. For each row in your result set, it takes the value in the specified column, applies the function to it, and returns the transformed value. The original data in the table is not changed — the function only affects what appears in your query result.</p>
+
+<p>This is an important point. String functions in a SELECT statement are non-destructive. If you write <code>SELECT UPPER(seller<em>name) FROM sellers</code>, the actual data in the <code>seller</em>name</code> column stays exactly as it was. You are just changing how it looks in your output. To permanently change the data, you would need to use UPDATE.</p>
+
+<p>String functions can be nested. This means you can wrap one function inside another. For example, you can TRIM whitespace first and then apply UPPER to the result. SQL evaluates the innermost function first and works outward, just like how mathematical expressions work with parentheses.</p>
+
+<p>Most string functions are deterministic — given the same input, they always produce the same output. This makes them reliable and predictable. If you pass <code>"hello"</code> to UPPER, you will always get <code>"HELLO"</code>. There are no surprises.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<p>Here is the basic pattern for using any string function:</p>
+
+<pre><code class="language-sql">SELECT function_name(column_name) FROM table_name;</code></pre>
+
+<p>You can use string functions in SELECT, WHERE, ORDER BY, and even GROUP BY clauses:</p>
+
+<pre><code class="language-sql">-- In SELECT
+SELECT UPPER(city) FROM customers;
+
+-- In WHERE
+SELECT * FROM customers WHERE LOWER(email) = 'rahul@gmail.com';
+
+-- Nested functions
+SELECT UPPER(TRIM(seller_name)) FROM sellers;
+
+-- With aliases
+SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM employees;
+
+-- Multiple functions in one query
+SELECT
+    UPPER(first_name) AS first_upper,
+    LENGTH(phone_number) AS phone_length,
+    TRIM(address) AS clean_address
+FROM customers;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Component</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td><code>function_name</code></td><td>The name of the string function you want to apply (e.g., UPPER, TRIM)</td></tr>
+<tr><td><code>column_name</code></td><td>The column whose values you want to transform</td></tr>
+<tr><td><code>AS alias</code></td><td>Optional — gives the result column a readable name</td></tr>
+<tr><td>Nested calls</td><td>Wrapping one function inside another to apply multiple operations</td></tr>
+<tr><td>String literal</td><td>You can pass a fixed string value like <code>'hello'</code> instead of a column name</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p>Here is a sample table we will use for examples:</p>
+
+<table>
+<thead><tr><th>seller_id</th><th>seller_name</th><th>city</th><th>email</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><code>  rahul sharma  </code></td><td>mumbai</td><td>RAHUL@GMAIL.COM</td></tr>
+<tr><td>2</td><td>PRIYA PATEL</td><td>Bengaluru</td><td>priya@yahoo.com</td></tr>
+<tr><td>3</td><td>arjun mehta</td><td><code>  delhi  </code></td><td>ARJUN@HOTMAIL.COM</td></tr>
+<tr><td>4</td><td>Neha Singh</td><td>Chennai</td><td>neha@gmail.com</td></tr>
+</tbody></table>
+
+<h3>Example 1: Standardize seller names to title-friendly format</h3>
+
+<pre><code class="language-sql">SELECT seller_id, UPPER(TRIM(seller_name)) AS clean_name FROM sellers;</code></pre>
+
+<p>This trims extra spaces from each name first, then converts the result to uppercase. Rahul's name loses its leading and trailing spaces. All names end up in consistent uppercase.</p>
+
+<h3>Example 2: Find sellers with Gmail accounts regardless of case</h3>
+
+<pre><code class="language-sql">SELECT seller_name FROM sellers WHERE LOWER(email) LIKE '%gmail.com';</code></pre>
+
+<p>By applying LOWER to the email column before comparing, we catch both <code>RAHUL@GMAIL.COM</code> and <code>neha@gmail.com</code>. Without LOWER, the LIKE pattern would miss the uppercase email.</p>
+
+<h3>Example 3: Count characters in seller names</h3>
+
+<pre><code class="language-sql">SELECT seller_name, LENGTH(TRIM(seller_name)) AS name_length FROM sellers;</code></pre>
+
+<p>TRIM removes the extra spaces first so we are measuring the actual name length, not the padded version.</p>
+
+<h3>Example 4: Combine city and country</h3>
+
+<pre><code class="language-sql">SELECT CONCAT(city, ', India') AS full_location FROM sellers;</code></pre>
+
+<p>This adds <code>, India</code> to every city value, creating a <code>full_location</code> like <code>mumbai, India</code> or <code>Bengaluru, India</code>.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Why does my WHERE clause not find the record even though the value is clearly there?</strong></p>
+<p>Almost always a case or whitespace issue. The database is doing an exact comparison. <code>"Rahul"</code> and <code>"rahul"</code> are different strings. <code>"Rahul"</code> and <code>"Rahul "</code> (with a trailing space) are also different. Use LOWER or UPPER and TRIM in your WHERE clause to handle this.</p>
+
+<p><strong>Do string functions change my actual data?</strong></p>
+<p>No. Using string functions in a SELECT query only changes what appears in your results. The underlying table data is untouched. If you want to permanently update the data, you need an UPDATE statement with the function.</p>
+
+<p><strong>Can I use string functions in a WHERE clause?</strong></p>
+<p>Yes, absolutely. You can apply LOWER, UPPER, TRIM, or any other string function in a WHERE clause to normalize values before comparing them. This is very common in real queries.</p>
+
+<p><strong>Are string functions slow on large tables?</strong></p>
+<p>They can be, especially in WHERE clauses. If you apply a function to a column in a WHERE condition, the database usually cannot use an index on that column, so it has to scan every row. For large tables, this matters. Consider storing pre-cleaned data or using generated columns with indexes.</p>
+
+<p><strong>What happens if a column value is NULL?</strong></p>
+<p>Most string functions return NULL if the input is NULL. <code>UPPER(NULL)</code> returns NULL. <code>CONCAT('hello', NULL)</code> returns NULL in MySQL (though PostgreSQL handles this differently). Always consider using COALESCE or IFNULL to handle NULLs before applying string functions if NULL values are possible.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Forgetting to handle NULLs</strong> — If any value in the column is NULL, most string functions will return NULL for that row, which can silently break your results.</li><li><strong>Applying functions in WHERE on indexed columns</strong> — This kills performance because the index cannot be used. Store cleaned data separately if you need fast lookups.</li><li><strong>Not trimming before comparing</strong> — Comparing <code>"Rahul"</code> to <code>"Rahul "</code> will fail. Always TRIM when comparing text from user input or older tables.</li><li><strong>Confusing LENGTH with CHAR<em>LENGTH</strong> — In MySQL, LENGTH returns byte count (important for multi-byte characters like Hindi text), while CHAR</em>LENGTH returns actual character count.</li><li><strong>Assuming all databases use the same syntax</strong> — CONCAT works in MySQL and PostgreSQL, but SQL Server uses <code>+</code> for string concatenation. Always check your database's documentation.</li><li><strong>Over-nesting functions</strong> — Wrapping five functions inside each other makes queries hard to read and debug. Break complex transformations into CTEs or subqueries when they get complicated.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Always TRIM user-entered data before comparing or storing it.</li><li>Use LOWER or UPPER consistently when doing case-insensitive comparisons — pick one and stick with it.</li><li>Add an alias with AS whenever you use a string function in SELECT, so the output column has a meaningful name.</li><li>Test your string functions on a small sample first before running on a full table.</li><li>Use COALESCE to provide a default value before passing potentially NULL columns to string functions.</li><li>Document in comments what your string transformations are doing, especially when you nest multiple functions.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Swiggy uses string functions extensively in their restaurant data pipeline. Restaurant names come from multiple sources — owner-entered, scraped from Google Maps, imported from third-party aggregators. Before any of this data appears in the app, backend queries clean it using TRIM, UPPER/LOWER normalization, and REPLACE to remove special characters. A query running every hour normalizes incoming restaurant data so searches work correctly.</p>
+
+<p>Paytm's KYC team uses string functions to validate and clean data submitted by users. Phone numbers sometimes come in with spaces or dashes — <code>98765 43210</code> or <code>98765-43210</code>. SQL REPLACE functions strip out the non-numeric characters before validation runs. Email addresses get LOWER applied before being stored and compared, so duplicate account detection works regardless of how the user typed their email.</p>
+
+<p>IRCTC's passenger data team uses LENGTH checks on PAN card and Aadhaar fields to catch data entry errors. A PAN card should always be 10 characters. A quick <code>WHERE LENGTH(pan_number) != 10</code> query surfaces all records with bad data that needs manual review.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>Your Raw Data Column (messy, inconsistent)
+            |
+            v
+    +------------------+
+    |  String Function  |
+    |  (UPPER / TRIM /  |
+    |  CONCAT / LENGTH) |
+    +------------------+
+            |
+            v
+    Clean, Transformed Output
+    (only in query result — original data unchanged)
+
+Chaining Example:
+    raw_value
+        --&gt; TRIM(raw_value)           removes spaces
+        --&gt; UPPER(TRIM(raw_value))    converts to uppercase
+        --&gt; result: "RAHUL SHARMA"</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>String functions transform text data inside your SQL query without changing the original table.</li><li>They work row by row — the function is applied to each row's value independently.</li><li>They can be used in SELECT, WHERE, ORDER BY, and GROUP BY.</li><li>Functions can be nested — inner functions run first.</li><li>NULL inputs usually produce NULL outputs — always account for NULLs.</li><li>Performance matters: avoid applying functions to indexed columns in WHERE clauses on large tables.</li><li>The most common functions are CONCAT, LENGTH, UPPER, LOWER, SUBSTRING, TRIM, and REPLACE.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<p>Use this table called <code>students</code>:</p>
+
+<table>
+<thead><tr><th>student_id</th><th>name</th><th>email</th><th>city</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><code>  Arjun Sharma  </code></td><td>ARJUN@GMAIL.COM</td><td>mumbai</td></tr>
+<tr><td>2</td><td>NEHA PATEL</td><td>neha@yahoo.com</td><td><code>  Delhi  </code></td></tr>
+<tr><td>3</td><td>simran kaur</td><td>SIMRAN@HOTMAIL.COM</td><td>bengaluru</td></tr>
+<tr><td>4</td><td>Aman Verma</td><td>aman@gmail.com</td><td>Chennai</td></tr>
+<tr><td>5</td><td><code>  RIYA SINGH  </code></td><td>riya@gmail.com</td><td>hyderabad</td></tr>
+</tbody></table>
+
+<ol><li>Write a query to display all student names in uppercase, with leading and trailing spaces removed.</li><li>Find all students whose email (after converting to lowercase) ends with <code>@gmail.com</code>.</li><li>Display each student's name and the length of their name (after trimming spaces).</li><li>Create a new column called <code>contact_info</code> that combines the student name and city as: <code>"Name — City"</code>.</li><li>Find all students whose cleaned (trimmed) name is longer than 10 characters.</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Priya's Monday morning problem did not go away by itself. The data was always going to be messy. What changed was her ability to deal with it directly in SQL, right where the data lived, without exporting it and spending hours in Excel.</p>
+
+<p>String functions are not exotic or advanced. They are basic tools that you will use in almost every real project that involves text data. And real projects almost always involve text data. Names, emails, addresses, product descriptions, user-generated content — all of it needs cleaning and formatting at some point.</p>
+
+<p>The six core functions — CONCAT, LENGTH, UPPER, LOWER, SUBSTRING, TRIM, and REPLACE — cover about 90% of what you will ever need to do with text in SQL. Learn these well, understand when to use each one, and you will be able to handle the kind of data quality problems that come up every day in any company working with real data.</p>
+
+<p>Start with one function at a time. Try it on a table you already have. See what it returns. Break it on purpose by passing NULL. Then try nesting two functions together. That hands-on practice is how this becomes second nature.</p>
+
+  `,
+  'mod11-t2': `
+    <h1>CONCAT, LENGTH, UPPER, LOWER — The Four String Functions You'll Use Every Day</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Aman works on the data team at Zomato's Hyderabad office. His job involves generating customer communication reports — emails, SMS previews, delivery notifications. Every day, his team pulls customer data from the database and formats it into messages like "Hi Rahul, your order from Paradise Biryani is on the way!"</p>
+
+<p>The problem is that the database stores first name and last name in separate columns. City names come in inconsistent casing — sometimes "hyderabad", sometimes "HYDERABAD", sometimes "Hyderabad". Email addresses from old imports are all uppercase. And every few weeks someone asks him, "How many characters does the average product description have?" — which means he needs to count string lengths.</p>
+
+<p>Aman solves all of these problems with four functions: CONCAT, LENGTH, UPPER, and LOWER. He uses them in almost every query he writes. Once he learned these four, he stopped thinking of database text as a problem and started thinking of it as something he could shape however he needed.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>Say you are working at PhonePe and you need to send personalized SMS notifications to customers. Your <code>customers</code> table has <code>first<em>name</code> and <code>last</em>name</code> as separate columns, but your SMS system expects a single <code>full_name</code> field. You also need the city name in a consistent format because the notification template reads "Your transaction in [City] was successful."</p>
+
+<p>Your data looks like this: first names are mixed case, last names are mixed case, cities are all over the place. Some records have <code>"delhi"</code>, some have <code>"DELHI"</code>, some have <code>"Delhi"</code>. If your template uses the raw database value, your customer gets a message saying "Your transaction in dELHI was successful." That looks broken.</p>
+
+<p>You need CONCAT to combine names, and UPPER or LOWER to standardize casing. These are not theoretical problems — this kind of data inconsistency is in every production database that has been around for more than a year.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>CONCAT was added to SQL because storing data in normalized form (splitting full names into first and last, for example) is good for storage and querying, but terrible for display purposes. Databases needed a way to reassemble split data for output without changing how it is stored. CONCAT was the solution.</p>
+
+<p>UPPER and LOWER came from a fundamental problem in text searching. Computers are case-sensitive by default. <code>"Rahul"</code> and <code>"rahul"</code> are completely different byte sequences. When users search a website or an analyst writes a WHERE clause, they should not have to know or care what case the data was entered in. UPPER and LOWER let you normalize both the stored value and the search term to the same case before comparing them, making searches reliable.</p>
+
+<p>LENGTH was added because text validation is a real need. Phone numbers should be exactly 10 digits. PIN codes should be 6 characters. PAN cards should be 10 alphanumeric characters. Without LENGTH, you would have to export data to check this. With LENGTH, a single WHERE clause finds all records that do not meet the expected character count.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think about how a post office handles addresses. When you write a letter, you might write the city as "new delhi" or "New Delhi" or "NEW DELHI." The post office standardizes this internally — they pick one format and use it everywhere. That is what UPPER and LOWER do for your database.</p>
+
+<p>CONCAT is like the post office assembling the full address from pieces. They have the door number, street name, city, and PIN code in separate fields. When they print the label, they combine all of them into one line. That combining is CONCAT.</p>
+
+<p>LENGTH is like the post office checking that a PIN code has exactly 6 digits before accepting a package. It is a simple rule — count the characters — but it catches a huge number of data entry errors.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Picture a name badge at a conference. The badge printing system gets data from a registration form. Someone registered as <code>"NIKHIL"</code> (all caps), someone else as <code>"nikhil"</code> (all lowercase), and a third person as <code>"Nikhil"</code>. They all want badges that look the same.</p>
+
+<p>The system applies LOWER to everything first, getting <code>"nikhil"</code> for all three. Then it applies its own formatting to capitalize the first letter. The starting mess does not matter because the function normalizes everything.</p>
+
+<p>Now the system also needs to print <code>"Nikhil Kumar"</code> as one string on the badge, even though the database has two columns. CONCAT joins them with a space. LENGTH tells the badge printer whether the name is too long and needs a smaller font — anything over 20 characters gets a warning flag.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p><strong>CONCAT</strong> takes two or more string values and joins them end to end. If you CONCAT <code>"Rahul"</code> and <code>"Sharma"</code>, you get <code>"RahulSharma"</code>. If you want a space, you pass a space as a third argument: CONCAT(<code>"Rahul"</code>, <code>" "</code>, <code>"Sharma"</code>) gives you <code>"Rahul Sharma"</code>. In MySQL, if any argument is NULL, the whole result is NULL. PostgreSQL is more forgiving with its <code>||</code> operator.</p>
+
+<p><strong>LENGTH</strong> counts the number of characters (or bytes, depending on the function variant) in a string. <code>LENGTH("Rahul")</code> returns 5. <code>LENGTH("  Rahul  ")</code> returns 9, because it counts the spaces too. This is why TRIM and LENGTH are often used together — you TRIM first to remove padding, then LENGTH to get the real count.</p>
+
+<p><strong>UPPER</strong> and <strong>LOWER</strong> work by converting every letter in the string to its uppercase or lowercase version. They only affect alphabetic characters — numbers, spaces, and punctuation are left unchanged. <code>UPPER("rahul123!")</code> returns <code>"RAHUL123!"</code>. The numbers and the <code>!</code> do not change.</p>
+
+<p>These functions do not permanently change data. They only affect the output of the SELECT query. The table data stays exactly as it was entered. If you want to permanently normalize data in a column, you use UPDATE — for example, <code>UPDATE customers SET city = LOWER(city)</code>.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<pre><code class="language-sql">-- CONCAT: combine first and last name
+SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM customers;
+
+-- LENGTH: find how long a product description is
+SELECT product_name, LENGTH(description) AS desc_length FROM products;
+
+-- UPPER: standardize city names for display
+SELECT UPPER(city) AS city_upper FROM customers;
+
+-- LOWER: normalize emails before comparison
+SELECT * FROM customers WHERE LOWER(email) = 'rahul@gmail.com';
+
+-- Combining all four in one query
+SELECT
+    CONCAT(UPPER(first_name), ' ', UPPER(last_name)) AS formatted_name,
+    LOWER(email) AS clean_email,
+    LENGTH(TRIM(phone)) AS phone_length
+FROM customers;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Function</th><th>Syntax</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td><code>CONCAT</code></td><td><code>CONCAT(str1, str2, ...)</code></td><td>Joins two or more strings into one</td></tr>
+<tr><td><code>LENGTH</code></td><td><code>LENGTH(str)</code></td><td>Returns the number of characters (or bytes) in the string</td></tr>
+<tr><td><code>UPPER</code></td><td><code>UPPER(str)</code></td><td>Converts all letters to uppercase</td></tr>
+<tr><td><code>LOWER</code></td><td><code>LOWER(str)</code></td><td>Converts all letters to lowercase</td></tr>
+<tr><td>Space literal</td><td><code>' '</code></td><td>Pass a space string to CONCAT to add a space between values</td></tr>
+<tr><td><code>AS</code></td><td><code>AS alias_name</code></td><td>Renames the output column to something readable</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p>Here is our sample table, <code>customers</code>:</p>
+
+<table>
+<thead><tr><th>customer_id</th><th>first_name</th><th>last_name</th><th>email</th><th>city</th><th>phone</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>rahul</td><td>sharma</td><td>RAHUL@GMAIL.COM</td><td>mumbai</td><td>9876543210</td></tr>
+<tr><td>2</td><td>PRIYA</td><td>PATEL</td><td>priya@yahoo.com</td><td>BENGALURU</td><td>98765</td></tr>
+<tr><td>3</td><td>Arjun</td><td>mehta</td><td>ARJUN@HOTMAIL.COM</td><td>Delhi</td><td>8765432109</td></tr>
+<tr><td>4</td><td>neha</td><td>SINGH</td><td>neha@gmail.com</td><td>chennai</td><td>7654321098</td></tr>
+</tbody></table>
+
+<h3>Example 1: Build a full name column</h3>
+
+<pre><code class="language-sql">SELECT
+    customer_id,
+    CONCAT(first_name, ' ', last_name) AS full_name
+FROM customers;</code></pre>
+
+<p>Result: <code>"rahul sharma"</code>, <code>"PRIYA PATEL"</code>, <code>"Arjun mehta"</code>, <code>"neha SINGH"</code>. The names are joined but still inconsistently cased. We fix that in the next example.</p>
+
+<h3>Example 2: Full name in proper uppercase</h3>
+
+<pre><code class="language-sql">SELECT
+    customer_id,
+    CONCAT(UPPER(first_name), ' ', UPPER(last_name)) AS full_name_upper
+FROM customers;</code></pre>
+
+<p>Now every name is uppercase: <code>"RAHUL SHARMA"</code>, <code>"PRIYA PATEL"</code>, <code>"ARJUN MEHTA"</code>, <code>"NEHA SINGH"</code>. Consistent regardless of how the data was entered.</p>
+
+<h3>Example 3: Find all Gmail users regardless of email casing</h3>
+
+<pre><code class="language-sql">SELECT first_name, email
+FROM customers
+WHERE LOWER(email) LIKE '%@gmail.com';</code></pre>
+
+<p>This finds Rahul (<code>RAHUL@GMAIL.COM</code>) and Neha (<code>neha@gmail.com</code>) — both Gmail users, even though one is uppercase and one is lowercase.</p>
+
+<h3>Example 4: Flag customers with invalid phone numbers</h3>
+
+<pre><code class="language-sql">SELECT customer_id, first_name, phone
+FROM customers
+WHERE LENGTH(phone) != 10;</code></pre>
+
+<p>This returns Priya's row because her phone <code>"98765"</code> has only 5 characters, not 10. This is how you do basic data validation.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Why does CONCAT return NULL for some rows?</strong></p>
+<p>In MySQL, if any argument passed to CONCAT is NULL, the entire result is NULL. If <code>last<em>name</code> is NULL for a row, <code>CONCAT(first</em>name, ' ', last<em>name)</code> returns NULL for that row. Use <code>CONCAT</em>WS</code> (CONCAT With Separator) or wrap NULLs with <code>COALESCE(last_name, '')</code> to handle this.</p>
+
+<p><strong>Does LENGTH count bytes or characters?</strong></p>
+<p>In MySQL, <code>LENGTH</code> counts bytes. For ASCII characters (standard English letters), this is the same as characters. But for multi-byte characters like Devanagari (Hindi, Marathi) or emoji, one character may take 2-4 bytes. Use <code>CHAR_LENGTH</code> in MySQL if you want actual character count. In PostgreSQL, <code>LENGTH</code> counts characters.</p>
+
+<p><strong>UPPER and LOWER do not work on numbers — is that right?</strong></p>
+<p>Yes, that is correct behavior. <code>UPPER('abc123')</code> returns <code>'ABC123'</code>. The digits stay as they are. This is not a bug.</p>
+
+<p><strong>Can I use LENGTH in a WHERE clause?</strong></p>
+<p>Yes. <code>WHERE LENGTH(column) > 100</code> is completely valid. Just be aware that on large tables, this prevents index use on that column and causes a full table scan.</p>
+
+<p><strong>What is the difference between LOWER in WHERE vs. storing data in lowercase?</strong></p>
+<p>Using <code>LOWER</code> in a WHERE clause is flexible but can be slow on large tables. Storing data in a consistent case (always lowercase, always uppercase) and then just comparing directly is faster because the database can use indexes. At Flipkart-scale data volumes, this performance difference matters a lot.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Not adding a separator in CONCAT</strong> — <code>CONCAT(first<em>name, last</em>name)</code> gives you <code>"RahulSharma"</code> without a space. Always include <code>', '</code> or <code>' '</code> as a separator argument.</li><li><strong>Using LENGTH to check for empty strings</strong> — <code>LENGTH('')</code> returns 0, but <code>LENGTH(' ')</code> returns 1. An all-space string is not empty. Use TRIM first: <code>LENGTH(TRIM(column)) = 0</code>.</li><li><strong>Assuming UPPER/LOWER works on all languages</strong> — Case conversion behavior depends on the database collation settings. For non-ASCII languages, results can be unexpected. Test with your actual data.</li><li><strong>Forgetting that LENGTH includes spaces</strong> — <code>LENGTH('  Rahul  ')</code> is 9, not 5. TRIM before LENGTH if you care about the actual content length.</li><li><strong>Using CONCAT in WHERE instead of = or LIKE</strong> — Sometimes people write <code>WHERE CONCAT(first<em>name, ' ', last</em>name) = 'Rahul Sharma'</code> when they could just use <code>WHERE first<em>name = 'Rahul' AND last</em>name = 'Sharma'</code>. The second form is faster.</li><li><strong>Case sensitivity in column names vs. values</strong> — Column names are not case-sensitive in SQL (<code>first<em>name</code> and <code>FIRST</em>NAME</code> refer to the same column). String <em>values</em> inside the column are case-sensitive. Do not confuse the two.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Use <code>CONCAT_WS</code> (CONCAT With Separator) when joining multiple fields — it handles NULLs gracefully by skipping them.</li><li>Always apply LOWER to both sides of a string comparison for case-insensitive matching: <code>LOWER(email) = LOWER('Input@GMAIL.com')</code>.</li><li>Use CHAR_LENGTH instead of LENGTH in MySQL when dealing with non-ASCII data (Hindi names, regional languages).</li><li>Store normalized data (e.g., emails always in lowercase) if you query it frequently — do not rely on LOWER in every WHERE clause.</li><li>Alias all function outputs: <code>CONCAT(...) AS full_name</code> makes result columns readable.</li><li>Combine TRIM with LENGTH for meaningful length checks — raw LENGTH on padded data gives misleading results.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Flipkart's seller onboarding team uses CONCAT to build formatted seller profile strings for their internal seller dashboard. Seller first name, last name, store name, and city are stored separately but displayed together. A single CONCAT query in their reporting layer assembles these into readable profiles without touching the normalized source tables.</p>
+
+<p>Jio's customer service platform uses LOWER on all incoming email lookups. When a customer service agent searches by email, the system applies LOWER to the search input and LOWER to the database column before comparing. This means it does not matter if the customer signed up with <code>JIO@GMAIL.COM</code> or <code>jio@gmail.com</code> — the system finds them either way. This one change reduced "customer not found" errors by a significant margin when they rolled it out.</p>
+
+<p>IRCTC uses LENGTH extensively in their data validation pipeline. PAN card numbers should be 10 characters, Aadhaar should be 12 digits, train numbers have specific lengths. Automated nightly jobs run LENGTH checks across key fields and flag records that fall outside expected ranges for manual review. This catches data entry errors before they cause downstream problems in ticketing or refunds.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>CONCAT
+  Input:  "Rahul" + " " + "Sharma"
+  Output: "Rahul Sharma"
+
+LENGTH
+  Input:  "9876543210"
+  Output: 10
+
+UPPER
+  Input:  "rahul sharma"
+  Output: "RAHUL SHARMA"
+
+LOWER
+  Input:  "RAHUL@GMAIL.COM"
+  Output: "rahul@gmail.com"
+
+Chained:
+  CONCAT(UPPER("rahul"), " ", UPPER("sharma"))
+    Step 1: UPPER("rahul")   → "RAHUL"
+    Step 2: UPPER("sharma")  → "SHARMA"
+    Step 3: CONCAT           → "RAHUL SHARMA"</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>CONCAT joins two or more strings — always include separators explicitly.</li><li>LENGTH returns character or byte count — use CHAR_LENGTH in MySQL for multi-byte safety.</li><li>UPPER and LOWER affect only alphabetic characters — numbers and symbols pass through unchanged.</li><li>NULL in CONCAT produces NULL output — use COALESCE to handle this.</li><li>These functions do not change your table data — they only affect query output.</li><li>Use LOWER in WHERE clauses for case-insensitive comparisons.</li><li>For large tables, applying functions in WHERE clauses prevents index use — consider storing normalized data.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<p>Use this table called <code>employees</code>:</p>
+
+<table>
+<thead><tr><th>emp_id</th><th>first_name</th><th>last_name</th><th>email</th><th>department</th><th>phone</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>arjun</td><td>kumar</td><td>ARJUN@COMPANY.COM</td><td>engineering</td><td>9876543210</td></tr>
+<tr><td>2</td><td>SIMRAN</td><td>KAUR</td><td>simran@company.com</td><td>Marketing</td><td>987654</td></tr>
+<tr><td>3</td><td>Aman</td><td>verma</td><td>AMAN@COMPANY.COM</td><td>engineering</td><td>8765432109</td></tr>
+<tr><td>4</td><td>RIYA</td><td>Singh</td><td>riya@company.com</td><td>HR</td><td>7654321098</td></tr>
+<tr><td>5</td><td>neha</td><td>MISHRA</td><td>NEHA@COMPANY.COM</td><td>Marketing</td><td>6543210987</td></tr>
+</tbody></table>
+
+<ol><li>Write a query to display each employee's full name (first + last) in uppercase.</li><li>Find all employees in the engineering department — but the data has inconsistent casing, so handle that.</li><li>Display email addresses in all lowercase. How many employees have a <code>@company.com</code> email?</li><li>Find employees with invalid phone numbers (not exactly 10 digits).</li><li>Build a column called <code>employee_label</code> in the format: <code>"[DEPT] - Full Name"</code> — for example <code>"ENGINEERING - Arjun Kumar"</code>.</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Aman at Zomato did not need to become a software engineer to solve his Monday morning data formatting problems. He just needed four functions that every SQL database has had for decades. CONCAT, LENGTH, UPPER, and LOWER are simple, reliable, and work exactly as advertised.</p>
+
+<p>The real skill is not memorizing the syntax — that takes five minutes. The real skill is recognizing when to use them. When you see inconsistent casing in a column you need to filter, reach for LOWER or UPPER. When you need to combine fields for display, reach for CONCAT. When you need to validate field lengths, reach for LENGTH with TRIM.</p>
+
+<p>These four functions handle a huge share of the text cleaning work that comes up in real analytics and reporting jobs. Once you get comfortable using them in SELECT statements, try using them in WHERE clauses. Then try nesting them. Then try using them in UPDATE statements to permanently clean your data. Each step makes you more capable with real messy data.</p>
+
+<p>The data is always going to be messy. These functions exist specifically to help you deal with that.</p>
+
+  `,
+  'mod11-t3': `
+    <h1>SUBSTRING, TRIM, REPLACE — Cutting, Cleaning, and Fixing Text in SQL</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Neha is a data engineer at Paytm's Noida office. Her team receives transaction data from multiple payment sources — UPI, credit cards, wallets. Each source sends data in its own format. UPI transaction IDs come in as <code>"UPI-TXN-9876543210-20240115"</code> but the finance team only needs the 10-digit transaction number in the middle. Credit card numbers are stored as 16-digit strings, but for display, only the last 4 digits should be visible.</p>
+
+<p>On top of that, customer-entered data has random issues: phone numbers with dashes like <code>"98765-43210"</code>, addresses with <code>"
+"</code> newline characters or extra spaces at the beginning, product names with the word <code>"OLD:"</code> prepended from a legacy system migration.</p>
+
+<p>Every one of these problems has an exact SQL solution. SUBSTRING extracts the part of a string you care about. TRIM removes unwanted characters from the edges. REPLACE swaps out one piece of text for another. Neha's pipeline uses all three, in almost every data cleaning job she runs.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>Imagine you are working at an e-commerce company like Myntra and your product catalog has 2 million records. A data migration from the old system added the prefix <code>"LEGACY<em>"</code> to every product code — so what used to be <code>"MYN-12345"</code> is now <code>"LEGACY</em>MYN-12345"</code> across the whole table.</p>
+
+<p>At the same time, customer addresses were imported from a CSV file, and many of them have extra spaces at the start or end of the string — <code>"  Koregaon Park, Pune  "</code> instead of <code>"Koregaon Park, Pune"</code>. Your delivery system rejects addresses with leading spaces.</p>
+
+<p>And your marketing team wants to extract just the PIN code from address strings that look like <code>"123 MG Road, Bengaluru - 560001"</code>. The PIN code is always the last 6 characters.</p>
+
+<p>You need REPLACE to strip the <code>"LEGACY_"</code> prefix, TRIM to clean the addresses, and SUBSTRING to extract the PIN code. Three functions, three specific problems, all solved inside SQL without touching the original data.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>TRIM was one of the earliest string functions added to SQL because trailing and leading spaces are invisible to the human eye but cause real problems in comparisons. When data arrives from text files, user forms, or manual entry, extra whitespace is almost guaranteed. Without TRIM, analysts had to clean data before even loading it into the database. TRIM moved that cleaning into the database layer where it belongs.</p>
+
+<p>SUBSTRING (also called SUBSTR in some databases) was added because database designers normalize data into structured columns, but real-world data is often semi-structured. Transaction IDs, product codes, serial numbers, and addresses often encode multiple pieces of information in a single string. SUBSTRING lets you extract just the piece you need.</p>
+
+<p>REPLACE was added to solve find-and-replace needs in bulk data operations. Before REPLACE, fixing a systematic error in a text column (like changing "Mumbai" to "Bombay" across a million rows, or removing a prefix added by a migration script) required exporting data, editing it, and re-importing it. REPLACE made this a one-line UPDATE query.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think about using scissors and a template to cut shapes from paper.</p>
+
+<p>SUBSTRING is like a cookie cutter — you press it down at a specific position on the dough and cut out exactly the shape and size you want. You tell it where to start and how much to take.</p>
+
+<p>TRIM is like trimming the crust off a sandwich. You are not changing the middle of the sandwich at all, just removing the unwanted edges. You can trim just the left side, just the right side, or both.</p>
+
+<p>REPLACE is like using correction fluid on a document. You cover the old text and write the new text in its place. You specify what to look for, and every instance of it gets replaced with what you provide.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Picture an Aadhaar card number: <code>"1234 5678 9012"</code>. This is one string that contains three groups of four digits separated by spaces.</p>
+
+<p>To extract just the first group, you use SUBSTRING starting at position 1, taking 4 characters.</p>
+<p>To extract just the last group, you use SUBSTRING starting at position 11, taking 4 characters.</p>
+<p>To remove the spaces and get <code>"123456789012"</code>, you use REPLACE to swap every <code>" "</code> with <code>""</code> (empty string).</p>
+<p>If someone entered it as <code>"  1234 5678 9012  "</code> with extra spaces, TRIM removes those edge spaces before anything else.</p>
+
+<p>These three functions let you slice, clean, and reshape any string into exactly what you need.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p><strong>SUBSTRING</strong> takes a string, a starting position, and optionally a length. Positions in SQL strings are 1-indexed — the first character is at position 1, not position 0 (unlike Python or JavaScript). If you call <code>SUBSTRING('Hyderabad', 1, 5)</code>, you get <code>'Hydera'</code> — wait, that is 6 characters? No: H(1), y(2), d(3), e(4), r(5) — so you get <code>'Hyder'</code>. If you omit the length argument, SUBSTRING returns everything from the start position to the end of the string.</p>
+
+<p><strong>TRIM</strong> by default removes spaces from both the left and right sides of a string. You can be more specific: <code>LTRIM</code> removes only left-side (leading) spaces, <code>RTRIM</code> removes only right-side (trailing) spaces. In MySQL and PostgreSQL, you can also specify a character to remove: <code>TRIM('x' FROM 'xxxhelloxx')</code> removes all <code>x</code> characters from the edges. It does not touch spaces or characters in the middle of the string.</p>
+
+<p><strong>REPLACE</strong> scans the entire string for every occurrence of the search string and replaces each one with the replacement string. It is case-sensitive in MySQL by default. <code>REPLACE('Hello World', 'o', '0')</code> gives you <code>'Hell0 W0rld'</code> — both occurrences of <code>'o'</code> were replaced. If you pass an empty string <code>''</code> as the replacement, REPLACE effectively deletes every occurrence of the search string.</p>
+
+<p>All three functions return a new string value — they do not modify the original column data unless used in an UPDATE statement.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<pre><code class="language-sql">-- SUBSTRING: extract characters from a specific position
+SELECT SUBSTRING(transaction_id, 5, 10) AS txn_number FROM payments;
+-- Starts at position 5, takes 10 characters
+
+-- SUBSTRING: from position to end of string
+SELECT SUBSTRING(product_code, 8) AS code_without_prefix FROM products;
+-- Starts at position 8, takes everything to the end
+
+-- TRIM: remove leading and trailing spaces
+SELECT TRIM(customer_address) AS clean_address FROM orders;
+
+-- LTRIM / RTRIM: remove only one side
+SELECT LTRIM(seller_name) AS left_trimmed FROM sellers;
+
+-- REPLACE: remove a prefix from all product codes
+SELECT REPLACE(product_code, 'LEGACY_', '') AS clean_code FROM products;
+
+-- REPLACE: remove dashes from phone numbers
+SELECT REPLACE(phone, '-', '') AS clean_phone FROM customers;
+
+-- Combining all three
+SELECT
+    TRIM(REPLACE(SUBSTRING(raw_id, 5, 10), '-', '')) AS clean_id
+FROM transactions;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Function</th><th>Syntax</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td><code>SUBSTRING</code></td><td><code>SUBSTRING(str, start, length)</code></td><td>Extracts part of a string starting at <code>start</code>, taking <code>length</code> characters</td></tr>
+<tr><td><code>SUBSTRING</code> (to end)</td><td><code>SUBSTRING(str, start)</code></td><td>Extracts from <code>start</code> to the end of the string</td></tr>
+<tr><td><code>TRIM</code></td><td><code>TRIM(str)</code></td><td>Removes spaces from both sides</td></tr>
+<tr><td><code>LTRIM</code></td><td><code>LTRIM(str)</code></td><td>Removes spaces from the left (leading) side only</td></tr>
+<tr><td><code>RTRIM</code></td><td><code>RTRIM(str)</code></td><td>Removes spaces from the right (trailing) side only</td></tr>
+<tr><td><code>REPLACE</code></td><td><code>REPLACE(str, find, replace_with)</code></td><td>Replaces every occurrence of <code>find</code> with <code>replace_with</code></td></tr>
+<tr><td>Empty string replacement</td><td><code>REPLACE(str, 'x', '')</code></td><td>Effectively deletes every occurrence of <code>'x'</code></td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p>Here is a sample table, <code>transactions</code>:</p>
+
+<table>
+<thead><tr><th>txn_id</th><th>raw_code</th><th>customer_address</th><th>phone</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>UPI-TXN-9876543210</td><td><code>  123 MG Road, Bengaluru  </code></td><td>98765-43210</td></tr>
+<tr><td>2</td><td>UPI-TXN-8765432109</td><td>Koregaon Park, Pune</td><td>87654-32109</td></tr>
+<tr><td>3</td><td>UPI-TXN-7654321098</td><td><code>  Lajpat Nagar, Delhi</code></td><td>7654321098</td></tr>
+<tr><td>4</td><td>UPI-TXN-6543210987</td><td>Banjara Hills, Hyderabad  \`</td><td>65432-10987</td></tr>
+</tbody></table>
+
+<h3>Example 1: Extract the 10-digit transaction number from raw_code</h3>
+
+<pre><code class="language-sql">SELECT txn_id, SUBSTRING(raw_code, 9, 10) AS txn_number FROM transactions;</code></pre>
+
+<p><code>"UPI-TXN-9876543210"</code> — position 9 is where <code>9876543210</code> starts (after <code>UPI-TXN-</code>). Taking 10 characters gives us the transaction number. This works consistently because every code follows the same prefix format.</p>
+
+<h3>Example 2: Clean up customer addresses</h3>
+
+<pre><code class="language-sql">SELECT txn_id, TRIM(customer_address) AS clean_address FROM transactions;</code></pre>
+
+<p>Row 1 changes from <code>"  123 MG Road, Bengaluru  "</code> to <code>"123 MG Road, Bengaluru"</code>. Row 3 loses its leading space. Rows 2 and 4 are clean already — TRIM on them returns the original value unchanged.</p>
+
+<h3>Example 3: Remove dashes from phone numbers</h3>
+
+<pre><code class="language-sql">SELECT txn_id, REPLACE(phone, '-', '') AS clean_phone FROM transactions;</code></pre>
+
+<p><code>"98765-43210"</code> becomes <code>"9876543210"</code>. <code>"7654321098"</code> has no dash, so REPLACE returns it unchanged. This is the correct behavior — REPLACE does nothing if the search string is not found.</p>
+
+<h3>Example 4: Combined cleaning — trim and remove dashes</h3>
+
+<pre><code class="language-sql">SELECT
+    txn_id,
+    TRIM(customer_address) AS address,
+    REPLACE(phone, '-', '') AS phone_clean,
+    SUBSTRING(raw_code, 9, 10) AS txn_number
+FROM transactions;</code></pre>
+
+<p>One query handles all three cleaning tasks simultaneously, returning clean data from messy source columns.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>SUBSTRING positions start at 1, not 0 — why does my result look off by one?</strong></p>
+<p>This trips up everyone coming from a programming language background. Python uses 0-based indexing. SQL uses 1-based. Position 1 is the first character. If your result is one character off, this is almost certainly the reason.</p>
+
+<p><strong>TRIM only removes spaces — what if I have other characters to remove?</strong></p>
+<p>By default, TRIM removes only space characters. If you have tabs, newlines, or other whitespace, they will not be removed by a plain TRIM. Some databases support <code>TRIM(BOTH ' ' FROM str)</code> syntax where you can specify the character to remove. For newlines and tabs, you would need REPLACE — for example, <code>REPLACE(column, '
+', '')</code>.</p>
+
+<p><strong>REPLACE is case-sensitive — is there a case-insensitive version?</strong></p>
+<p>In MySQL, REPLACE is case-sensitive. There is no built-in case-insensitive REPLACE in standard SQL. You would need to apply UPPER or LOWER first, or in some databases use regular expression functions like REGEXP_REPLACE. If you need to replace both <code>"OLD"</code> and <code>"old"</code>, you would need to chain two REPLACE calls.</p>
+
+<p><strong>What does REPLACE return if the search string is not found?</strong></p>
+<p>It returns the original string unchanged. This is correct and expected behavior. There is no error or NULL returned. This makes REPLACE safe to use even when you are not sure if the pattern exists.</p>
+
+<p><strong>Can SUBSTRING return an empty string?</strong></p>
+<p>If you specify a start position beyond the end of the string, SUBSTRING returns an empty string <code>''</code>, not NULL. For example, <code>SUBSTRING('Hello', 10, 5)</code> returns <code>''</code> because there are no characters at position 10 of a 5-character string.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Wrong starting position in SUBSTRING</strong> — Forgetting that SQL is 1-indexed, not 0-indexed, is the most common error. Count from 1.</li><li><strong>Using TRIM and expecting middle spaces to be removed</strong> — TRIM only works on the edges. <code>TRIM('hello  world')</code> returns <code>'hello  world'</code> — the internal double space is unchanged. Use REPLACE to fix internal spacing.</li><li><strong>REPLACE changing more than intended</strong> — If you REPLACE <code>'A'</code> with <code>'B'</code> in a product description, every single <code>'A'</code> in the entire string gets replaced. Be specific about what you are searching for.</li><li><strong>Forgetting the length argument in SUBSTRING</strong> — <code>SUBSTRING(str, 5)</code> returns everything from position 5 to the end. <code>SUBSTRING(str, 5, 1)</code> returns exactly 1 character. Omitting length is not always wrong, but make sure it is intentional.</li><li><strong>Applying TRIM in SELECT but not in WHERE</strong> — If you clean data in SELECT but your WHERE clause uses the uncleaned column, you may get unexpected results. Be consistent about where you apply TRIM.</li><li><strong>Chaining too many REPLACEs without readability</strong> — <code>REPLACE(REPLACE(REPLACE(col, 'a', ''), 'b', ''), 'c', '')</code> works but is hard to read. Consider a CTE or comment to explain what you are doing.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Always TRIM input from user-entered fields before storing or comparing.</li><li>Use SUBSTRING with a fixed length when parsing structured codes (transaction IDs, account numbers) — it is more predictable than splitting on characters.</li><li>When using REPLACE to delete a string (replacing with <code>''</code>), double-check what else might match your search pattern.</li><li>Use <code>LTRIM</code> or <code>RTRIM</code> when you only need to clean one side — it is more efficient and intentional than full TRIM.</li><li>Store clean data when you can — running TRIM and REPLACE on every query adds processing overhead. A one-time UPDATE to fix the data is better than cleaning it in every SELECT.</li><li>Test SUBSTRING positions manually on one sample row before applying to a full table.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Paytm's transaction processing team uses SUBSTRING extensively to parse structured transaction IDs. Every transaction ID encodes the payment method, merchant type, and timestamp in specific positions of the string. Their reporting queries use SUBSTRING to extract each component separately and join them to reference tables. What looks like a single string column is actually several pieces of data that SUBSTRING unpacks.</p>
+
+<p>Swiggy uses REPLACE in their restaurant data cleaning pipeline. Restaurant names imported from Google Places often contain trademark symbols, HTML entities like <code>&amp;</code>, or copyright characters. Automated daily cleanup queries use REPLACE to strip these out before the data appears in the app. They have a catalog of known patterns and a scheduled job that applies REPLACE for each one.</p>
+
+<p>Amazon India's logistics team uses TRIM on every customer address before it is passed to their delivery partner APIs. External APIs reject addresses with leading or trailing spaces, causing delivery failures. Adding TRIM to the query that pulls addresses for the API feed reduced delivery exception rates. The underlying data is not cleaned (that would require touching millions of historical records), but the output that goes to the API is always trimmed.</p>
+
+<p>IRCTC's booking system uses SUBSTRING to extract the train number and date from booking reference codes. Each booking reference follows a fixed format where specific character positions encode specific data. Rather than parsing these codes in application code, their reporting queries use SUBSTRING to extract the components they need directly in SQL, keeping the transformation logic in one place.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>Original String: "  UPI-TXN-9876543210  "
+                  |             |        |
+                  |             |        +-- Trailing spaces → RTRIM or TRIM
+                  |             |
+                  |             +-- Characters 9-18 → SUBSTRING(str, 9, 10)
+                  |
+                  +-- Leading spaces → LTRIM or TRIM
+
+TRIM result:   "UPI-TXN-9876543210"
+SUBSTRING(9, 10): "9876543210"
+REPLACE('-', ''): "UPITXN9876543210"
+
+Chained:
+  TRIM("  UPI-TXN-9876543210  ")
+    → "UPI-TXN-9876543210"
+  SUBSTRING(result, 9, 10)
+    → "9876543210"</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>SUBSTRING uses 1-based indexing — position 1 is the first character.</li><li>TRIM removes spaces from edges only, not from the middle of a string.</li><li>REPLACE is case-sensitive by default in MySQL.</li><li>REPLACE with an empty string <code>''</code> effectively deletes every occurrence of the search pattern.</li><li>If any input to these functions is NULL, the result is NULL — handle NULLs with COALESCE.</li><li>These functions do not change table data — only query output. Use UPDATE to permanently fix data.</li><li>Combining TRIM + SUBSTRING + REPLACE is common for parsing and cleaning structured text fields.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<p>Use this table called <code>orders</code>:</p>
+
+<table>
+<thead><tr><th>order_id</th><th>order_code</th><th>delivery_address</th><th>contact</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>ORD-2024-001234</td><td><code>  12 Park Street, Kolkata  </code></td><td>98765-43210</td></tr>
+<tr><td>2</td><td>ORD-2024-002345</td><td>Sector 17, Chandigarh</td><td>87654-32109</td></tr>
+<tr><td>3</td><td>ORD-2024-003456</td><td><code>  MG Road, Bengaluru</code></td><td>7654321098</td></tr>
+<tr><td>4</td><td>ORD-2024-004567</td><td>Jubilee Hills, Hyderabad</td><td>65432-10987</td></tr>
+<tr><td>5</td><td>ORD-2024-005678</td><td>Anna Nagar, Chennai</td><td>9988776655</td></tr>
+</tbody></table>
+
+<ol><li>Extract just the 6-digit order number from the end of each <code>order_code</code> (e.g., <code>"001234"</code> from <code>"ORD-2024-001234"</code>).</li><li>Clean all <code>delivery_address</code> values by removing leading and trailing spaces.</li><li>Remove dashes from all <code>contact</code> phone numbers using REPLACE.</li><li>Extract the year from <code>order_code</code> — it is always at positions 5-8.</li><li>Write a single query that returns: clean address (trimmed), clean phone (no dashes), and order number (last 6 digits of order_code).</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Neha's data pipeline at Paytm did not need a complex ETL tool or custom Python scripts to handle the string cleaning problems she faced. SUBSTRING, TRIM, and REPLACE covered almost everything. Three functions with clear, predictable behavior that work on every SQL database.</p>
+
+<p>The pattern you will see in real work is that data arrives messy in predictable ways. Transaction codes have known structures that SUBSTRING can parse. User-entered fields always have whitespace issues that TRIM handles. Legacy system migrations leave known prefixes or suffixes that REPLACE can strip. Once you recognize these patterns, reaching for the right function becomes automatic.</p>
+
+<p>What makes these three functions powerful is how well they combine. TRIM the edges, then REPLACE the problem characters, then SUBSTRING the piece you need. Each function does one thing, and together they handle the full range of text extraction and cleaning tasks that come up in real database work.</p>
+
+<p>Get comfortable with the position counting in SUBSTRING — that is the one thing that regularly catches people. Write out a sample value, number each position starting from 1, and verify your start and length before running on the full table. That five-minute check saves you from shipping wrong data.</p>
+
+  `,
+  'mod11-t4': `
+    <h1>Date Functions in SQL — Working with Time the Right Way</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Rahul is a business analyst at IRCTC's reporting team in New Delhi. Every quarter, his manager asks the same set of questions: How many tickets were booked last month? What day of the week sees the most cancellations? How long does it take on average between booking and travel date? Which months have the highest refund volume?</p>
+
+<p>All of these questions are about time. And time is stored as dates in the database. Rahul quickly learned that just having a date column is not enough — you need to extract parts of that date, calculate differences between dates, filter by date ranges, and format dates for different output requirements.</p>
+
+<p>When Rahul first started, he would pull the raw date data, export it to Excel, and do all the time-based calculations there. It worked, but it was slow and error-prone. Then he spent a week learning SQL date functions, and now he answers every one of those quarterly questions with a single query that runs in under a second.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>You have an <code>orders</code> table with a <code>created_at</code> column that stores timestamps like <code>"2024-01-15 14:32:10"</code>. Your manager wants:</p>
+
+<ol><li>All orders placed in January 2024</li><li>Orders placed on a Monday</li><li>Orders placed in the last 30 days</li><li>The number of days between the order date and the delivery date</li></ol>
+
+<p>If you just write <code>WHERE created_at = '2024-01'</code>, the database will tell you there are zero results — because <code>'2024-01-15 14:32:10'</code> does not equal <code>'2024-01'</code>. You need date functions to extract the year and month from the timestamp before comparing.</p>
+
+<p>Similarly, you cannot subtract two date columns and automatically get a number of days in all databases — you need DATEDIFF or similar functions. Working with dates in SQL requires knowing a handful of specific functions, because dates are not plain text and they are not plain numbers.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Dates and times are fundamentally complex. A date has a year, month, day, hour, minute, second, and timezone. Comparing, calculating, and formatting this data is much more involved than comparing two numbers or two strings.</p>
+
+<p>Early database systems expected application code to handle all date math. But this meant the same date calculations were being written over and over in Java, C, COBOL, or whatever language the application used. These calculations were often wrong — off-by-one errors in day counting, wrong handling of leap years, timezone bugs. Moving date logic into the database meant it only had to be written and tested once.</p>
+
+<p>SQL standards committees added date functions progressively over the years, and every major database (MySQL, PostgreSQL, Oracle, SQL Server) has now built up a rich set of date functions. The core ones — getting the current date, extracting year/month/day, adding or subtracting intervals, calculating differences — are available everywhere, though the exact syntax varies between databases.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think about how you would answer "how long ago was something?" in everyday life. If someone asks "when did you move to this city?", you do not just say a date — you calculate: "About three years ago." You took the date you moved and compared it to today.</p>
+
+<p>SQL date functions let you do this automatically on millions of rows. Instead of storing just a date and leaving the math to the user, you can have the database calculate "days since order", "months until subscription expires", or "which week of the year is this" right inside your query.</p>
+
+<p>The database knows what "today" is, it knows how to add 30 days to a date, it knows how many days are in February in a leap year. All of this logic is built into the date functions so you do not have to handle it yourself.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think of dates like addresses. An address has a country, state, city, street, and building number. You would not search for an address by comparing the entire string — you would search by city, or by PIN code, or by state.</p>
+
+<p>A date is similar. It has a year, month, day, hour, minute, second. When you want to find "all records from 2024," you do not compare the entire timestamp — you extract just the year part and compare that. When you want to group data by month, you extract the month part and group by that.</p>
+
+<p>Date functions are the tools that let you reach into a date value and pull out exactly the part you need, just like how you might search an address database by PIN code rather than by the full address string.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>SQL stores dates internally as numbers — usually as the number of days since a reference date (like January 1, 1970 for Unix timestamps). This is why date math works. Adding 30 days to a date is literally adding 30 to the internal number. The database just displays it as a date.</p>
+
+<p>When you call a date function, the database converts the internal number representation back into the date components you asked for. <code>YEAR('2024-01-15')</code> is the database unpacking the internal number for that date and returning just the year portion.</p>
+
+<p>This internal number representation is also why you can compare dates directly: <code>WHERE order_date > '2024-01-01'</code> works because both sides get converted to their internal numeric form before the comparison happens.</p>
+
+<p>Different databases use different date types: <code>DATE</code> stores just the date (year-month-day), <code>DATETIME</code> stores date and time, <code>TIMESTAMP</code> also stores date and time but with timezone awareness and a different storage range than DATETIME. Understanding which type your column uses matters because some date functions behave differently on DATE versus TIMESTAMP columns.</p>
+
+<p>The current date and time is provided by functions like <code>NOW()</code>, <code>CURDATE()</code>, <code>SYSDATE()</code>, or <code>CURRENT_DATE</code> depending on the database. These are the anchor points for most "last 30 days", "this month", or "since yesterday" queries.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<pre><code class="language-sql">-- Get the current date and time
+SELECT NOW();          -- returns: 2024-01-15 14:32:10
+SELECT CURDATE();      -- returns: 2024-01-15 (date only, no time)
+
+-- Extract parts of a date
+SELECT YEAR(order_date) FROM orders;
+SELECT MONTH(order_date) FROM orders;
+SELECT DAY(order_date) FROM orders;
+
+-- Filter by a date range
+SELECT * FROM orders
+WHERE order_date BETWEEN '2024-01-01' AND '2024-01-31';
+
+-- Filter by year and month
+SELECT * FROM orders
+WHERE YEAR(order_date) = 2024 AND MONTH(order_date) = 1;
+
+-- Add and subtract intervals
+SELECT DATE_ADD(order_date, INTERVAL 30 DAY) AS delivery_deadline FROM orders;
+SELECT DATE_SUB(NOW(), INTERVAL 7 DAY) AS one_week_ago;
+
+-- Get last 30 days of orders
+SELECT * FROM orders
+WHERE order_date &gt;= DATE_SUB(CURDATE(), INTERVAL 30 DAY);</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Function / Keyword</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td><code>NOW()</code></td><td>Returns current date and time (datetime)</td></tr>
+<tr><td><code>CURDATE()</code></td><td>Returns current date only (no time component)</td></tr>
+<tr><td><code>YEAR(date)</code></td><td>Extracts the year from a date</td></tr>
+<tr><td><code>MONTH(date)</code></td><td>Extracts the month number (1–12)</td></tr>
+<tr><td><code>DAY(date)</code></td><td>Extracts the day of the month (1–31)</td></tr>
+<tr><td><code>DATE_ADD(date, INTERVAL n UNIT)</code></td><td>Adds an interval (days, months, years) to a date</td></tr>
+<tr><td><code>DATE_SUB(date, INTERVAL n UNIT)</code></td><td>Subtracts an interval from a date</td></tr>
+<tr><td><code>BETWEEN ... AND ...</code></td><td>Filters rows where date falls within a range (inclusive)</td></tr>
+<tr><td><code>INTERVAL</code></td><td>Keyword for specifying a time period (DAY, MONTH, YEAR, HOUR, etc.)</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p>Here is a sample table, <code>bookings</code>:</p>
+
+<table>
+<thead><tr><th>booking_id</th><th>customer_name</th><th>booking_date</th><th>travel_date</th><th>amount</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Rahul Sharma</td><td>2024-01-10</td><td>2024-01-25</td><td>1500</td></tr>
+<tr><td>2</td><td>Priya Patel</td><td>2024-01-20</td><td>2024-02-05</td><td>2200</td></tr>
+<tr><td>3</td><td>Arjun Mehta</td><td>2024-02-05</td><td>2024-02-10</td><td>800</td></tr>
+<tr><td>4</td><td>Neha Singh</td><td>2024-02-15</td><td>2024-03-01</td><td>3100</td></tr>
+<tr><td>5</td><td>Aman Kumar</td><td>2024-03-01</td><td>2024-03-15</td><td>1750</td></tr>
+</tbody></table>
+
+<h3>Example 1: Get all bookings from January 2024</h3>
+
+<pre><code class="language-sql">SELECT * FROM bookings
+WHERE YEAR(booking_date) = 2024 AND MONTH(booking_date) = 1;</code></pre>
+
+<p>Returns rows 1 and 2 — Rahul and Priya both booked in January 2024. Rows 3, 4, 5 are from February and March.</p>
+
+<h3>Example 2: Find bookings where travel is more than 15 days after booking</h3>
+
+<pre><code class="language-sql">SELECT booking_id, customer_name,
+    booking_date, travel_date,
+    DATEDIFF(travel_date, booking_date) AS days_advance
+FROM bookings
+WHERE DATEDIFF(travel_date, booking_date) &gt; 15;</code></pre>
+
+<p>Rahul booked 15 days in advance (25 - 10 = 15, not more than 15, so excluded). Priya booked 16 days in advance — included. Neha booked 14 days in advance — excluded. Aman booked 14 days — excluded. Only Priya qualifies.</p>
+
+<h3>Example 3: Add a 7-day cancellation deadline column</h3>
+
+<pre><code class="language-sql">SELECT booking_id, customer_name, booking_date,
+    DATE_ADD(booking_date, INTERVAL 7 DAY) AS cancel_by
+FROM bookings;</code></pre>
+
+<p>This creates a column showing the last date each customer can cancel — 7 days after booking. Rahul's cancel-by date is 2024-01-17, Priya's is 2024-01-27, and so on.</p>
+
+<h3>Example 4: Group bookings by month</h3>
+
+<pre><code class="language-sql">SELECT MONTH(booking_date) AS booking_month,
+    COUNT(*) AS total_bookings,
+    SUM(amount) AS total_revenue
+FROM bookings
+GROUP BY MONTH(booking_date);</code></pre>
+
+<p>Returns three rows: month 1 (January) with 2 bookings, month 2 (February) with 2 bookings, month 3 (March) with 1 booking, along with revenue totals for each.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Why does <code>WHERE order_date = '2024-01-15'</code> miss some rows that clearly have that date?</strong></p>
+<p>If your column stores datetime (date + time), then <code>'2024-01-15 14:32:10'</code> does not equal <code>'2024-01-15'</code>. The time component makes them different. Use <code>DATE(order<em>date) = '2024-01-15'</code> to strip the time before comparing, or use a range: <code>WHERE order</em>date >= '2024-01-15' AND order_date < '2024-01-16'</code>.</p>
+
+<p><strong>What is the difference between DATE, DATETIME, and TIMESTAMP?</strong></p>
+<p><code>DATE</code> stores only year-month-day. <code>DATETIME</code> stores year-month-day plus hours-minutes-seconds. <code>TIMESTAMP</code> also stores the full datetime but is stored internally as a UTC value and converted to local time on display — and it has a smaller range (up to 2038). Most transactional data uses DATETIME or TIMESTAMP.</p>
+
+<p><strong>Can I compare dates stored as VARCHAR strings?</strong></p>
+<p>Technically yes, if they are stored in <code>'YYYY-MM-DD'</code> format (ISO 8601), because string sorting matches date sorting for that format. But this is fragile. If someone stores <code>'15-01-2024'</code> or <code>'Jan 15, 2024'</code>, string comparison breaks. Always store dates as proper DATE or DATETIME types.</p>
+
+<p><strong>MONTH() returns a number, not a name. How do I get "January" instead of 1?</strong></p>
+<p>Use <code>MONTHNAME(date)</code> in MySQL to get the full month name, or <code>DATE<em>FORMAT(date, '%M')</code> for the same result. To get the abbreviated month name, use <code>DATE</em>FORMAT(date, '%b')</code>.</p>
+
+<p><strong>Is BETWEEN inclusive of the end date?</strong></p>
+<p>Yes. <code>BETWEEN '2024-01-01' AND '2024-01-31'</code> includes both January 1 and January 31. But be careful with datetimes — <code>BETWEEN '2024-01-01' AND '2024-01-31'</code> will miss records from <code>'2024-01-31 12:00:00'</code> if the end date is treated as midnight. Use <code>< '2024-02-01'</code> for safe date-range filtering on datetime columns.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Comparing datetime columns to date strings</strong> — <code>order_date = '2024-01-15'</code> misses time-stamped records from that day. Use DATE() or a range.</li><li><strong>Storing dates as VARCHAR</strong> — Sorting, filtering, and date math all break. Always use proper DATE/DATETIME types.</li><li><strong>Forgetting timezone differences</strong> — TIMESTAMP columns store UTC. If your server and users are in different timezones, displayed times will differ. Use <code>CONVERT_TZ()</code> when timezone matters.</li><li><strong>Using BETWEEN with open-ended datetime ranges</strong> — <code>BETWEEN '2024-01-01' AND '2024-01-31'</code> technically misses times after midnight on Jan 31. Use <code>>= '2024-01-01' AND < '2024-02-01'</code> instead.</li><li><strong>Grouping by date when column has time</strong> — <code>GROUP BY order<em>date</code> on a DATETIME column groups by the full timestamp, not the date. Use <code>GROUP BY DATE(order</em>date)</code> to group by date only.</li><li><strong>Confusing YEAR/MONTH/DAY with date range filters</strong> — <code>WHERE MONTH(date) = 1</code> returns January of ALL years. If you only want January 2024, add <code>AND YEAR(date) = 2024</code>.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Always use ISO 8601 format (<code>YYYY-MM-DD</code>) when comparing or inserting dates — it is unambiguous and works across all databases.</li><li>Use <code>CURDATE()</code> or <code>NOW()</code> for dynamic date filters rather than hardcoding dates — your query stays correct as time passes.</li><li>Index date columns that are frequently used in WHERE clauses — date range filters benefit greatly from indexes.</li><li>Store datetimes in UTC and convert to local time at the application layer to avoid timezone confusion.</li><li>Use <code>DATE(datetime_column)</code> to strip the time component when comparing datetime columns to date values.</li><li>Add comments in your query when using complex date arithmetic so future readers understand the intent.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>IRCTC runs daily reporting queries that use date functions constantly. Their cancellation rate report groups bookings by <code>MONTH(booking<em>date)</code> and <code>YEAR(booking</em>date)</code> to show trends. Their advance booking report uses <code>DATEDIFF(travel<em>date, booking</em>date)</code> to calculate how far in advance each customer booked, then buckets the results into groups like 0-7 days, 8-30 days, 30+ days. These queries run automatically every morning and feed dashboards that the operations team uses for planning.</p>
+
+<p>Byju's uses date functions for their subscription management. Their "at-risk" customer query finds users whose subscription expires within the next 7 days using <code>WHERE expiry<em>date BETWEEN CURDATE() AND DATE</em>ADD(CURDATE(), INTERVAL 7 DAY)</code>. These customers get flagged for retention campaigns. The query runs nightly and the output feeds directly into their CRM for the sales team to act on.</p>
+
+<p>Flipkart's supply chain team uses date arithmetic to calculate SLA compliance. Every order has an expected delivery date. Their compliance report computes <code>DATEDIFF(actual<em>delivery</em>date, expected<em>delivery</em>date)</code> for each order. Positive values mean late delivery, zero or negative means on-time or early. They group this by warehouse, carrier, and month to find systemic delays.</p>
+
+<p>PhonePe uses <code>NOW()</code> and <code>DATE<em>SUB()</code> in their fraud detection queries. Transactions that happen within a very short time window (multiple transactions within 60 seconds from the same account) are flagged. Their query uses <code>WHERE transaction</em>time >= DATE_SUB(NOW(), INTERVAL 60 SECOND)</code> as part of a real-time check.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>DATE value: 2024-01-15 14:32:10
+                |   |  |  | |  |
+                |   |  |  | |  +-- SECOND  → 10
+                |   |  |  | +---- MINUTE   → 32
+                |   |  |  +------ HOUR     → 14
+                |   |  +--------- DAY      → 15
+                |   +------------ MONTH    → 1 (January)
+                +---------------- YEAR     → 2024
+
+Date Functions Map:
+  YEAR(date)         → extracts year
+  MONTH(date)        → extracts month number
+  DAY(date)          → extracts day of month
+  DATE(datetime)     → strips time, returns date only
+  NOW()              → current date + time
+  CURDATE()          → current date only
+  DATE_ADD(d, INTERVAL n DAY)   → d + n days
+  DATE_SUB(d, INTERVAL n DAY)   → d - n days
+  DATEDIFF(d1, d2)   → number of days between d1 and d2</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>Dates are stored internally as numbers — this is what makes date math work.</li><li>Use <code>DATE()</code> to strip the time component from a DATETIME column before comparing.</li><li><code>CURDATE()</code> returns today's date; <code>NOW()</code> returns current date and time.</li><li><code>YEAR()</code>, <code>MONTH()</code>, <code>DAY()</code> extract individual components of a date.</li><li><code>DATE<em>ADD</code> and <code>DATE</em>SUB</code> add or subtract time intervals from dates.</li><li><code>BETWEEN</code> is inclusive on both ends — be careful with datetime columns.</li><li>Always filter by both YEAR and MONTH when you mean a specific month, not all years.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<p>Use this table called <code>sales</code>:</p>
+
+<table>
+<thead><tr><th>sale_id</th><th>product</th><th>sale_date</th><th>delivery_date</th><th>amount</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Laptop</td><td>2024-02-10</td><td>2024-02-15</td><td>65000</td></tr>
+<tr><td>2</td><td>Phone</td><td>2024-02-20</td><td>2024-02-23</td><td>18000</td></tr>
+<tr><td>3</td><td>Tablet</td><td>2024-03-05</td><td>2024-03-12</td><td>32000</td></tr>
+<tr><td>4</td><td>Headphones</td><td>2024-03-15</td><td>2024-03-17</td><td>3500</td></tr>
+<tr><td>5</td><td>Smartwatch</td><td>2024-04-01</td><td>2024-04-06</td><td>12000</td></tr>
+</tbody></table>
+
+<ol><li>Find all sales from March 2024.</li><li>Calculate the number of days between sale<em>date and delivery</em>date for each order.</li><li>Find sales where delivery took more than 5 days.</li><li>Show the total revenue grouped by month.</li><li>Add a column showing the 30-day return deadline (30 days after sale_date).</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Rahul's quarterly reports used to take him half a day each — pulling data, exporting to Excel, doing date calculations in spreadsheet formulas, formatting the results. Now each one takes about ten minutes to write the query and another five seconds to run it. The time saved is real and it compounds every week.</p>
+
+<p>Date functions are not optional knowledge for anyone working with transactional or event-based data. Every business tracks when things happened. When customers signed up, when orders were placed, when payments were received, when subscriptions expire. All of these are dates, and all of the interesting business questions about them require date functions to answer.</p>
+
+<p>The functions covered in this article — extracting date parts, calculating differences, adding and subtracting intervals, filtering by date ranges — cover the vast majority of what you will need in practice. There are more advanced functions (week numbers, quarter calculations, timezone conversions), but these basics will get you through 80% of real-world date analysis.</p>
+
+<p>The one thing to remember above all else: dates stored as text are trouble. They sort wrong, they compare wrong, date math does not work on them. Always use proper DATE or DATETIME column types, and you will find that SQL's date functions make time-based analysis genuinely straightforward.</p>
+
+  `,
+  'mod11-t5': `
+    <h1>DATE_FORMAT, EXTRACT, DATEDIFF — Formatting, Parsing, and Measuring Dates</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Simran works as a senior data analyst at Flipkart's Bengaluru office. Her team generates dozens of reports every week — customer growth reports, order volume reports, delivery performance dashboards, and monthly revenue summaries shared with the senior leadership team.</p>
+
+<p>The problem she kept running into was that dates looked different in every report. The operations team wanted dates in <code>"DD-MM-YYYY"</code> format. The finance team wanted <code>"Month YYYY"</code> like <code>"January 2024"</code>. The international teams wanted ISO format <code>"YYYY-MM-DD"</code>. And the delivery performance report needed to show the number of days between order placement and delivery as a single integer.</p>
+
+<p>She also needed to group data by quarter, by week of the year, and extract just the hour of day from timestamps to understand peak ordering times. She was handling all of this in Python after pulling the data from MySQL. Then she learned that MySQL's <code>DATE_FORMAT</code>, <code>EXTRACT</code>, and <code>DATEDIFF</code> functions could do all of this directly in the query. The Python post-processing step went away entirely.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>You have an orders table with a <code>created_at</code> DATETIME column. You need to:</p>
+
+<ol><li>Display dates as <code>"15 Jan, 2024"</code> for a customer-facing report</li><li>Group orders by quarter to see Q1 vs Q2 vs Q3 performance</li><li>Calculate the exact number of days between order placement and delivery</li><li>Extract the hour of day to see when most orders are placed</li></ol>
+
+<p>Each of these is a different kind of date manipulation. DATE_FORMAT handles the display formatting. EXTRACT handles pulling specific parts like quarter or hour. DATEDIFF handles the difference calculation.</p>
+
+<p>Trying to do these things without these functions forces you to either write complex CASE statements and string manipulation, or pull the data out and process it in application code. Both approaches are slower and more error-prone than using the right SQL functions.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>DATE<em>FORMAT was built because different regions, organizations, and systems all have different conventions for displaying dates. In India, <code>DD/MM/YYYY</code> is common. In the US, it is <code>MM/DD/YYYY</code>. ISO standard uses <code>YYYY-MM-DD</code>. Without a formatting function, the database would always output dates in one fixed format and every application using that database would have to handle its own formatting. DATE</em>FORMAT puts this control at the query level.</p>
+
+<p>EXTRACT was added as part of the SQL standard because the original individual functions like <code>YEAR()</code>, <code>MONTH()</code>, <code>DAY()</code> were not portable across databases. EXTRACT uses a standardized syntax — <code>EXTRACT(YEAR FROM date)</code> — that works the same way in PostgreSQL, MySQL, and Oracle (with minor variations). It also supports components that do not have dedicated functions, like <code>QUARTER</code> or <code>DOW</code> (day of week).</p>
+
+<p>DATEDIFF exists because subtraction between two dates does not work the same way in all databases. In MySQL, if you try <code>date1 - date2</code>, you do not get the number of days — you get a strange numeric result based on the internal date representation. DATEDIFF gives you a clean, reliable integer result for the number of days between two dates.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think about how a calendar is displayed differently in different contexts. A wall calendar shows "January 2024" in big text with days below. A phone notification shows "Sat, 15 Jan." A formal letter header shows "15th January, 2024." A database record might store <code>"2024-01-15 08:30:00"</code>.</p>
+
+<p>The underlying information is the same — it is the same moment in time. DATE_FORMAT is what lets you take the raw date stored in the database and present it in any of these formats depending on who is reading the output.</p>
+
+<p>DATEDIFF is like calculating "how many days until my flight?" You know today's date and you know the flight date. You subtract them and get a number of days. That arithmetic is what DATEDIFF automates.</p>
+
+<p>EXTRACT is like looking at just one part of a clock. You might want only the hour, only the minutes, or only the seconds. EXTRACT lets you look at just one component of a date without being distracted by the rest.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Picture a bank statement. At the top, it shows your account period as <code>"01 January 2024 to 31 January 2024"</code> — that is DATE_FORMAT at work, converting the raw dates into readable English. In the transaction table, each row shows <code>"15 Jan 24"</code> — a different format using the same function.</p>
+
+<p>At the bottom, there might be a note: "Your last statement was 31 days ago." That 31 is DATEDIFF between the two statement dates.</p>
+
+<p>And if you called your bank and asked "what time do most transactions happen?" — they would use EXTRACT to pull just the hour from all transaction timestamps, count them, and tell you "mostly between 10 AM and 2 PM."</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p><strong>DATE<em>FORMAT</strong> takes a date or datetime value and a format string. The format string uses special codes (called format specifiers) that act as placeholders — <code>%Y</code> means four-digit year, <code>%m</code> means two-digit month, <code>%d</code> means two-digit day, and so on. DATE</em>FORMAT replaces these codes with the actual values from the date and returns the result as a text string. Once formatted, the result is a string, not a date — which means you cannot do further date math on it directly.</p>
+
+<p><strong>EXTRACT</strong> takes a date or datetime value and a unit keyword — YEAR, MONTH, DAY, HOUR, MINUTE, SECOND, QUARTER, WEEK. It returns an integer for the specified component. <code>EXTRACT(QUARTER FROM '2024-04-15')</code> returns 2 because April falls in Q2. <code>EXTRACT(HOUR FROM '2024-01-15 14:32:10')</code> returns 14. This is particularly useful for grouping and filtering where you need one specific component.</p>
+
+<p><strong>DATEDIFF</strong> in MySQL takes two date values and returns the number of days from the second date to the first date — that is, <code>DATEDIFF(end<em>date, start</em>date)</code>. If the end date is after the start date, the result is positive. If before, it is negative. The function only counts whole days — it ignores the time component even on DATETIME columns. PostgreSQL handles this differently: you use <code>date1 - date2</code> directly, or the <code>AGE()</code> function.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<pre><code class="language-sql">-- DATE_FORMAT: display date in DD-MM-YYYY format
+SELECT DATE_FORMAT(order_date, '%d-%m-%Y') AS formatted_date FROM orders;
+-- Output: "15-01-2024"
+
+-- DATE_FORMAT: Month and Year only
+SELECT DATE_FORMAT(order_date, '%M %Y') AS month_year FROM orders;
+-- Output: "January 2024"
+
+-- DATE_FORMAT: 12-hour time with AM/PM
+SELECT DATE_FORMAT(created_at, '%d %b %Y %h:%i %p') AS display_time FROM events;
+-- Output: "15 Jan 2024 02:32 PM"
+
+-- EXTRACT: get the quarter of the year
+SELECT EXTRACT(QUARTER FROM order_date) AS quarter FROM orders;
+
+-- EXTRACT: get the hour of day from a timestamp
+SELECT EXTRACT(HOUR FROM created_at) AS order_hour, COUNT(*) AS orders
+FROM orders
+GROUP BY EXTRACT(HOUR FROM created_at)
+ORDER BY order_hour;
+
+-- DATEDIFF: days between order and delivery
+SELECT order_id,
+    DATEDIFF(delivery_date, order_date) AS delivery_days
+FROM orders;
+
+-- DATEDIFF: find orders delivered in more than 5 days
+SELECT * FROM orders
+WHERE DATEDIFF(delivery_date, order_date) &gt; 5;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Function / Specifier</th><th>Syntax</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td><code>DATE_FORMAT</code></td><td><code>DATE<em>FORMAT(date, format</em>str)</code></td><td>Formats a date as a string using format codes</td></tr>
+<tr><td><code>%Y</code></td><td>Format code in DATE_FORMAT</td><td>Four-digit year (2024)</td></tr>
+<tr><td><code>%m</code></td><td>Format code in DATE_FORMAT</td><td>Two-digit month (01–12)</td></tr>
+<tr><td><code>%M</code></td><td>Format code in DATE_FORMAT</td><td>Full month name (January)</td></tr>
+<tr><td><code>%d</code></td><td>Format code in DATE_FORMAT</td><td>Two-digit day (01–31)</td></tr>
+<tr><td><code>%b</code></td><td>Format code in DATE_FORMAT</td><td>Abbreviated month name (Jan)</td></tr>
+<tr><td><code>%H</code></td><td>Format code in DATE_FORMAT</td><td>Hour in 24-hour format (00–23)</td></tr>
+<tr><td><code>%h</code></td><td>Format code in DATE_FORMAT</td><td>Hour in 12-hour format (01–12)</td></tr>
+<tr><td><code>EXTRACT</code></td><td><code>EXTRACT(unit FROM date)</code></td><td>Returns an integer for the specified date component</td></tr>
+<tr><td><code>QUARTER</code></td><td>Unit in EXTRACT</td><td>Quarter of the year (1–4)</td></tr>
+<tr><td><code>WEEK</code></td><td>Unit in EXTRACT</td><td>Week number of the year (0–52)</td></tr>
+<tr><td><code>DATEDIFF</code></td><td><code>DATEDIFF(date1, date2)</code></td><td>Returns integer number of days between date1 and date2</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p>Here is our sample table, <code>orders</code>:</p>
+
+<table>
+<thead><tr><th>order_id</th><th>customer</th><th>order_date</th><th>delivery_date</th><th>amount</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Rahul Sharma</td><td>2024-01-10 09:30:00</td><td>2024-01-13 18:00:00</td><td>2500</td></tr>
+<tr><td>2</td><td>Priya Patel</td><td>2024-02-20 14:15:00</td><td>2024-02-27 10:00:00</td><td>8200</td></tr>
+<tr><td>3</td><td>Arjun Mehta</td><td>2024-04-05 11:00:00</td><td>2024-04-08 16:30:00</td><td>1100</td></tr>
+<tr><td>4</td><td>Neha Singh</td><td>2024-07-18 20:45:00</td><td>2024-07-25 09:00:00</td><td>4500</td></tr>
+</tbody></table>
+
+<h3>Example 1: Format order dates for a customer-facing report</h3>
+
+<pre><code class="language-sql">SELECT
+    order_id,
+    customer,
+    DATE_FORMAT(order_date, '%d %M, %Y') AS order_display
+FROM orders;</code></pre>
+
+<p>Results: <code>"10 January, 2024"</code>, <code>"20 February, 2024"</code>, <code>"05 April, 2024"</code>, <code>"18 July, 2024"</code>. These are human-readable strings that look good in a report — much cleaner than the raw <code>"2024-01-10 09:30:00"</code>.</p>
+
+<h3>Example 2: Group orders by quarter</h3>
+
+<pre><code class="language-sql">SELECT
+    EXTRACT(QUARTER FROM order_date) AS quarter,
+    COUNT(*) AS order_count,
+    SUM(amount) AS total_revenue
+FROM orders
+GROUP BY EXTRACT(QUARTER FROM order_date)
+ORDER BY quarter;</code></pre>
+
+<p>Returns: Q1 (2 orders: Rahul and Priya), Q2 (1 order: Arjun), Q3 (1 order: Neha). This immediately tells you which quarter had the most orders without any post-processing.</p>
+
+<h3>Example 3: Calculate delivery time and flag slow deliveries</h3>
+
+<pre><code class="language-sql">SELECT
+    order_id,
+    customer,
+    DATEDIFF(delivery_date, order_date) AS delivery_days,
+    CASE WHEN DATEDIFF(delivery_date, order_date) &gt; 5
+         THEN 'DELAYED' ELSE 'ON TIME' END AS status
+FROM orders;</code></pre>
+
+<p>Rahul's delivery: 3 days (ON TIME). Priya: 7 days (DELAYED). Arjun: 3 days (ON TIME). Neha: 7 days (DELAYED). DATEDIFF calculates the days, and CASE turns it into a readable status.</p>
+
+<h3>Example 4: Find the peak ordering hour</h3>
+
+<pre><code class="language-sql">SELECT
+    EXTRACT(HOUR FROM order_date) AS hour_of_day,
+    COUNT(*) AS order_count
+FROM orders
+GROUP BY EXTRACT(HOUR FROM order_date)
+ORDER BY order_count DESC;</code></pre>
+
+<p>From our sample: hour 9 has 1 order, hour 11 has 1 order, hour 14 has 1 order, hour 20 has 1 order. On a real dataset with thousands of orders, this query reveals your peak business hours — crucial for capacity planning.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>DATE_FORMAT returns a string, not a date. Why does this matter?</strong></p>
+<p>Once you use DATE<em>FORMAT, the result is a text string. You cannot do date math on it — you cannot add days to it or compare it using date functions. Use DATE</em>FORMAT only at the final output stage, not in intermediate calculations. If you need to sort by a formatted date string, it sorts alphabetically, which may not match chronological order unless your format starts with year.</p>
+
+<p><strong>DATEDIFF gives a negative number — is something wrong?</strong></p>
+<p>No. If the second argument (start date) is later than the first argument (end date), DATEDIFF returns a negative number. <code>DATEDIFF('2024-01-01', '2024-01-15')</code> returns -14. This means you need to be consistent about argument order: <code>DATEDIFF(end<em>date, start</em>date)</code> gives you positive values for the duration.</p>
+
+<p><strong>EXTRACT(QUARTER FROM date) gives the quarter but what are the boundaries?</strong></p>
+<p>Q1 = January, February, March. Q2 = April, May, June. Q3 = July, August, September. Q4 = October, November, December. This is standard in MySQL, PostgreSQL, and Oracle.</p>
+
+<p><strong>Does DATEDIFF count the start day, the end day, or both?</strong></p>
+<p>DATEDIFF counts the number of days between the two dates, not including the start day. <code>DATEDIFF('2024-01-15', '2024-01-10')</code> returns 5, not 6. If you need to count both the start and end day, add 1 to the result.</p>
+
+<p><strong>What format codes does DATE_FORMAT use?</strong></p>
+<p>MySQL's DATE<em>FORMAT uses <code>%Y</code>, <code>%m</code>, <code>%d</code>, etc. — the same codes as the C <code>strftime</code> function. PostgreSQL's equivalent, <code>TO</em>CHAR(date, format)</code>, uses different codes like <code>YYYY</code>, <code>MM</code>, <code>DD</code>. Always check which database you are using.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Sorting on a DATE_FORMAT result</strong> — String sorting does not match date sorting unless you format as <code>YYYY-MM-DD</code>. A format like <code>"15 Jan 2024"</code> sorts alphabetically, putting April before January.</li><li><strong>Wrong DATEDIFF argument order</strong> — <code>DATEDIFF(start, end)</code> gives a negative number. Always put the later date first to get a positive number of days.</li><li><strong>Using DATE<em>FORMAT in WHERE clause for date filtering</strong> — <code>WHERE DATE</em>FORMAT(date, '%Y-%m') = '2024-01'</code> works but is slow because the function must be applied to every row. Use <code>WHERE date >= '2024-01-01' AND date < '2024-02-01'</code> instead.</li><li><strong>Confusing <code>%m</code> (month number) with <code>%M</code> (month name) in DATE_FORMAT</strong> — lowercase <code>%m</code> gives you <code>"01"</code>, uppercase <code>%M</code> gives you <code>"January"</code>. They look similar but return very different results.</li><li><strong>Assuming DATEDIFF counts time, not just days</strong> — <code>DATEDIFF('2024-01-15 23:59', '2024-01-15 00:01')</code> returns 0, not 1. DATEDIFF only looks at the date portion, not the time.</li><li><strong>Using EXTRACT instead of YEAR/MONTH for portability without checking syntax</strong> — MySQL supports <code>EXTRACT(YEAR FROM date)</code> but the specific units supported vary by database. Test in your target database.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Apply DATE_FORMAT only in the final SELECT — never in WHERE or JOIN conditions where it will hurt performance.</li><li>Always put the later date as the first argument in DATEDIFF to get positive values.</li><li>Use <code>EXTRACT(QUARTER FROM date)</code> for quarterly grouping — it is cleaner than calculating quarters with CASE.</li><li>Include the year when using EXTRACT(MONTH ...) or EXTRACT(QUARTER ...) in GROUP BY to avoid mixing months across multiple years.</li><li>Document your DATE_FORMAT strings in a comment: <code>-- FORMAT: DD Mon, YYYY (e.g., 15 Jan, 2024)</code> makes queries easier to maintain.</li><li>For date range filtering, use <code>>= start AND < next<em>period</em>start</code> rather than DATE_FORMAT comparison — it uses indexes.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Flipkart's revenue reporting team uses DATE<em>FORMAT to generate monthly board reports. The raw <code>created</em>at</code> timestamp is formatted into <code>"Month YYYY"</code> using <code>DATE<em>FORMAT(created</em>at, '%M %Y')</code> and used as a GROUP BY key. The resulting table shows <code>"January 2024 | 2,34,567 orders | ₹12.4 crore"</code> — formatted directly from SQL without any post-processing.</p>
+
+<p>Swiggy's delivery operations team uses DATEDIFF and EXTRACT together. They calculate <code>DATEDIFF(delivered<em>at, ordered</em>at)</code> for every order (though they use seconds via TIMESTAMPDIFF for more precision). They then use EXTRACT to look at order volumes by hour of day, finding that 8 PM to 10 PM is peak dinner ordering time. This informs how many delivery partners they roster for each time slot.</p>
+
+<p>Paytm's billing team uses DATE<em>FORMAT to generate invoice dates in the format required by each enterprise client. Some clients need <code>"DD/MM/YYYY"</code>, others need <code>"MMMM DD, YYYY"</code>. Rather than maintaining separate code paths, a single parametrized DATE</em>FORMAT call handles all formats. The format string is stored in the client configuration table and passed into the query.</p>
+
+<p>PhonePe uses EXTRACT(QUARTER ...) in their financial dashboards. Quarterly performance reviews require Q1, Q2, Q3, Q4 breakdowns of transaction volume and value. Their reporting query groups by <code>YEAR(transaction<em>date)</code> and <code>EXTRACT(QUARTER FROM transaction</em>date)</code> to produce clean quarterly summaries that match the format their finance and investor relations teams need.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>Input date: 2024-07-18 20:45:30
+
+DATE_FORMAT options:
+  '%d-%m-%Y'         → "18-07-2024"
+  '%d %M, %Y'        → "18 July, 2024"
+  '%M %Y'            → "July 2024"
+  '%d/%m/%y'         → "18/07/24"
+  '%Y-%m-%d %H:%i'   → "2024-07-18 20:45"
+
+EXTRACT options:
+  EXTRACT(YEAR      FROM date)    → 2024
+  EXTRACT(MONTH     FROM date)    → 7
+  EXTRACT(DAY       FROM date)    → 18
+  EXTRACT(HOUR      FROM date)    → 20
+  EXTRACT(QUARTER   FROM date)    → 3
+  EXTRACT(WEEK      FROM date)    → 29
+
+DATEDIFF:
+  DATEDIFF('2024-07-25', '2024-07-18')  → 7 (days)
+  DATEDIFF('2024-07-18', '2024-07-25')  → -7 (negative: start &gt; end)</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>DATE_FORMAT converts a date to a formatted string — output is text, not a date.</li><li>DATE_FORMAT format codes: <code>%Y</code> (year), <code>%m</code> (month number), <code>%M</code> (month name), <code>%d</code> (day), <code>%H</code> (hour 24h).</li><li>EXTRACT returns an integer — use it for grouping and filtering on date components.</li><li>DATEDIFF(date1, date2) = date1 - date2 in days; put the later date first for positive results.</li><li>Never use DATE_FORMAT in WHERE clause for filtering — it prevents index use.</li><li>DATEDIFF ignores the time component — it only compares the date portions.</li><li>EXTRACT(QUARTER ...) returns 1–4; use it to group by business quarter without CASE statements.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<p>Use this table called <code>subscriptions</code>:</p>
+
+<table>
+<thead><tr><th>sub_id</th><th>customer</th><th>start_date</th><th>end_date</th><th>plan</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Arjun</td><td>2024-01-15</td><td>2024-04-15</td><td>Quarterly</td></tr>
+<tr><td>2</td><td>Simran</td><td>2024-02-01</td><td>2025-02-01</td><td>Annual</td></tr>
+<tr><td>3</td><td>Aman</td><td>2024-03-10</td><td>2024-06-10</td><td>Quarterly</td></tr>
+<tr><td>4</td><td>Riya</td><td>2024-04-20</td><td>2024-07-20</td><td>Quarterly</td></tr>
+<tr><td>5</td><td>Neha</td><td>2024-06-01</td><td>2025-06-01</td><td>Annual</td></tr>
+</tbody></table>
+
+<ol><li>Display each subscription's start_date in the format <code>"DD Mon YYYY"</code> (e.g., <code>"15 Jan 2024"</code>).</li><li>Calculate the total duration in days for each subscription using DATEDIFF.</li><li>Group subscriptions by the quarter in which they started.</li><li>Find all subscriptions that started in Q1 (January–March) 2024.</li><li>Display start and end dates in the format <code>"MM/YYYY"</code> and calculate how many months each subscription runs (use DATEDIFF divided by 30 as an approximation).</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Simran's situation at Flipkart was common: the data was right, but getting it into the right format for each audience was taking unnecessary extra steps. Once she moved the formatting and calculation logic into SQL itself, her reporting pipeline got simpler and faster.</p>
+
+<p>DATE_FORMAT, EXTRACT, and DATEDIFF are not just convenience functions. They represent a philosophy: do the transformation where the data is, not after you have moved it somewhere else. Every transformation that happens in SQL is one less transformation you need to write, test, and maintain in application code.</p>
+
+<p>The format strings in DATE_FORMAT are worth memorizing the common ones: <code>%Y-%m-%d</code> for ISO format, <code>%d %M, %Y</code> for Indian-style readable dates, <code>%M %Y</code> for monthly grouping labels. The rest you can look up when you need them. DATEDIFF's argument order trips everyone up at first — just remember that "end minus start gives positive days" and you will get it right.</p>
+
+<p>These three functions together cover most of what finance, operations, and business analytics teams ask for when it comes to date presentation and measurement. Learn them well and date-based reporting stops feeling like a special skill and starts feeling routine.</p>
+
+  `,
+  'mod11-t6': `
+    <h1>Working with Timestamps in SQL — Precise Time Tracking for Real Systems</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Arjun is a backend data engineer at PhonePe in Bengaluru. His team handles transaction data — millions of payments processed every day. When a customer transfers money using UPI, the system needs to record not just that the payment happened, but exactly when it happened: the date, the hour, the minute, the second, and sometimes even sub-second precision.</p>
+
+<p>This matters because fraud detection runs on time patterns. If three transactions happen from the same account within 60 seconds, that is a flag. If a merchant receives payments at 3 AM when they are normally closed, that needs investigation. The difference between <code>"2024-01-15"</code> and <code>"2024-01-15 03:17:42"</code> is the difference between seeing a pattern and missing it entirely.</p>
+
+<p>Arjun's team also operates across time zones. PhonePe users are in India, but their systems connect to banks and payment networks that operate in UTC. When a transaction shows <code>"2024-01-15 03:17:42"</code>, does that mean 3:17 AM India time, or 3:17 AM UTC? Getting this wrong by even 5 hours and 30 minutes can break audit trails and cause legal compliance failures. Working with timestamps correctly is not optional when you are handling financial data — it is essential.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>You have a <code>payments</code> table where every transaction is recorded with a <code>created_at</code> TIMESTAMP column. Your team gets a support ticket: "Customer Priya says she made a payment at 11 PM on January 15th but it shows as January 16th in the system."</p>
+
+<p>You investigate and find that the database server stores all timestamps in UTC. Priya made her payment at 11:00 PM IST — which is 5:30 PM UTC (India is UTC+5:30). But the system displayed the UTC time, not IST. What shows as <code>"2024-01-15 17:30:00"</code> in the database is actually <code>"2024-01-15 23:00:00"</code> in Indian Standard Time.</p>
+
+<p>Now imagine this at scale. You have daily reports that count transactions grouped by date. If you group by the raw UTC timestamp, every transaction between midnight and 5:30 AM IST appears on the previous day in your report. Your daily counts are systematically wrong. You need to understand timestamps, UTC, and timezone conversion to fix this correctly.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>The DATE type in SQL stores just a calendar date — year, month, day. That was enough for early business applications that cared only about "when did this event happen?" in terms of days. But as software systems became more complex, tracking precise time became critical — for logging, auditing, fraud detection, billing, and system synchronization.</p>
+
+<p>The TIMESTAMP type was built to store both date and time with precision down to the second (and in modern databases, microseconds). More importantly, TIMESTAMP was designed to work with the concept of a fixed reference point — Coordinated Universal Time (UTC). By storing all timestamps in UTC internally and converting to local time for display, databases can correctly represent the same moment in time regardless of what timezone a user is in.</p>
+
+<p>The functions for working with timestamps — <code>NOW()</code>, <code>UNIX<em>TIMESTAMP()</code>, <code>FROM</em>UNIXTIME()</code>, <code>TIMESTAMPDIFF()</code>, <code>CONVERT_TZ()</code> — were built to make these conversions reliable and deterministic. Without them, every application would need to handle timezone math and timestamp arithmetic separately, which historically led to countless bugs.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think about how a flight schedule works. Your Mumbai to London flight is shown in two times: departure in IST (Indian Standard Time) and arrival in BST (British Summer Time). Both times are real, both are correct — they just represent the same events from different reference points.</p>
+
+<p>A database timestamp is like flight time in UTC. The system stores everything in one universal clock — UTC — and converts to local time when displaying to the user. Just as a traveler in Mumbai does not need to mentally convert London time when booking a flight, an analyst should not need to manually convert timestamps — the database's timezone functions should handle it.</p>
+
+<p>UNIX timestamps take this one step further: they represent a moment in time as a single large number (seconds since January 1, 1970 UTC). This number is timezone-independent. <code>1705295862</code> means the same moment everywhere on Earth. Converting this to a human-readable date requires <code>FROM_UNIXTIME()</code>.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Picture a train station's departure board across different cities. The train departs at 14:30. In Mumbai, that is 14:30 IST. In London (in winter), the same departure is at 09:00 UTC. In New York, it is 04:00 EST. They are all the same departure.</p>
+
+<p>A TIMESTAMP column in a database is like recording that departure in UTC — one standard. When a user in Mumbai asks "when does this train leave?", the system takes the UTC value and adds 5 hours 30 minutes to show them IST. When a user in London asks, it shows UTC directly.</p>
+
+<p><code>CONVERT_TZ(timestamp, 'UTC', 'Asia/Kolkata')</code> is the database doing this calculation automatically. You give it the stored UTC value and tell it what timezone you want the output in. It handles the offset, including daylight saving time where applicable.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p><strong>TIMESTAMP vs DATETIME</strong> is the first thing to understand. Both store date and time. The difference: DATETIME stores the literal value you put in — <code>"2024-01-15 14:30:00"</code> stores as exactly that. TIMESTAMP converts to UTC when storing and converts back to local timezone when retrieving. TIMESTAMP also has a range of 1970-01-01 to 2038-01-19 (due to 32-bit Unix time storage). DATETIME goes from year 1000 to 9999.</p>
+
+<p><strong><code>NOW()</code></strong> returns the current datetime in the server's local timezone. <strong><code>UTC<em>TIMESTAMP()</code></strong> returns the current datetime in UTC. If your MySQL server is configured to IST, <code>NOW()</code> and <code>UTC</em>TIMESTAMP()</code> will differ by 5 hours 30 minutes. This distinction matters enormously for applications that need to be timezone-aware.</p>
+
+<p><strong><code>UNIX<em>TIMESTAMP()</code></strong> converts a datetime value to a Unix timestamp — the number of seconds since 1970-01-01 00:00:00 UTC. <strong><code>FROM</em>UNIXTIME()</code></strong> does the reverse — converts a Unix timestamp integer back to a human-readable datetime. These are essential when integrating with external systems (APIs, log files, mobile apps) that communicate timestamps as Unix integers.</p>
+
+<p><strong><code>TIMESTAMPDIFF()</code></strong> calculates the difference between two datetime values in a specified unit — SECOND, MINUTE, HOUR, DAY, MONTH, or YEAR. Unlike DATEDIFF which only gives days, TIMESTAMPDIFF gives you flexibility. <code>TIMESTAMPDIFF(MINUTE, start<em>time, end</em>time)</code> tells you the duration in minutes — critical for call center analytics, delivery time measurement, or session duration tracking.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<pre><code class="language-sql">-- Get current timestamp in server timezone
+SELECT NOW();
+-- Output: 2024-01-15 14:32:10
+
+-- Get current timestamp in UTC
+SELECT UTC_TIMESTAMP();
+-- Output: 2024-01-15 09:02:10  (if server is in IST, UTC is 5h30m behind)
+
+-- Convert a stored UTC timestamp to IST for display
+SELECT CONVERT_TZ(created_at, 'UTC', 'Asia/Kolkata') AS ist_time
+FROM payments;
+
+-- Get Unix timestamp for a datetime
+SELECT UNIX_TIMESTAMP('2024-01-15 14:30:00') AS unix_ts;
+-- Output: 1705302600
+
+-- Convert a Unix timestamp to readable datetime
+SELECT FROM_UNIXTIME(1705302600) AS readable_time;
+-- Output: 2024-01-15 14:30:00
+
+-- TIMESTAMPDIFF: how many minutes between two events
+SELECT
+    payment_id,
+    TIMESTAMPDIFF(MINUTE, initiated_at, completed_at) AS duration_minutes
+FROM payments;
+
+-- TIMESTAMPDIFF: sessions longer than 30 minutes
+SELECT user_id, session_start, session_end
+FROM user_sessions
+WHERE TIMESTAMPDIFF(MINUTE, session_start, session_end) &gt; 30;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Function</th><th>Syntax</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td><code>NOW()</code></td><td><code>NOW()</code></td><td>Current date and time in server timezone</td></tr>
+<tr><td><code>UTC_TIMESTAMP()</code></td><td><code>UTC_TIMESTAMP()</code></td><td>Current date and time in UTC</td></tr>
+<tr><td><code>CONVERT_TZ</code></td><td><code>CONVERT<em>TZ(dt, from</em>tz, to_tz)</code></td><td>Converts a datetime from one timezone to another</td></tr>
+<tr><td><code>UNIX_TIMESTAMP</code></td><td><code>UNIX_TIMESTAMP(datetime)</code></td><td>Converts datetime to seconds since Unix epoch (Jan 1 1970 UTC)</td></tr>
+<tr><td><code>FROM_UNIXTIME</code></td><td><code>FROM<em>UNIXTIME(unix</em>int)</code></td><td>Converts Unix timestamp integer to readable datetime</td></tr>
+<tr><td><code>TIMESTAMPDIFF</code></td><td><code>TIMESTAMPDIFF(unit, start, end)</code></td><td>Returns the difference between two datetimes in the specified unit</td></tr>
+<tr><td><code>CURRENT_TIMESTAMP</code></td><td><code>CURRENT_TIMESTAMP</code></td><td>Same as NOW() — standard SQL syntax</td></tr>
+<tr><td>Unit options</td><td>SECOND, MINUTE, HOUR, DAY, MONTH, YEAR</td><td>Time units for TIMESTAMPDIFF</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p>Here is a sample table, <code>payments</code>:</p>
+
+<table>
+<thead><tr><th>payment_id</th><th>user</th><th>initiated_at</th><th>completed_at</th><th>amount</th><th>timezone</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Rahul</td><td>2024-01-15 14:30:00</td><td>2024-01-15 14:30:45</td><td>500</td><td>IST</td></tr>
+<tr><td>2</td><td>Priya</td><td>2024-01-15 23:45:00</td><td>2024-01-15 23:45:12</td><td>1200</td><td>IST</td></tr>
+<tr><td>3</td><td>Arjun</td><td>2024-01-16 02:15:00</td><td>2024-01-16 02:17:30</td><td>8000</td><td>IST</td></tr>
+<tr><td>4</td><td>Neha</td><td>2024-01-16 09:00:00</td><td>2024-01-16 09:00:08</td><td>250</td><td>IST</td></tr>
+</tbody></table>
+
+<p>(Note: for this exercise, assume these are stored as IST values in a DATETIME column)</p>
+
+<h3>Example 1: Calculate payment processing duration in seconds</h3>
+
+<pre><code class="language-sql">SELECT
+    payment_id,
+    user,
+    TIMESTAMPDIFF(SECOND, initiated_at, completed_at) AS processing_seconds
+FROM payments;</code></pre>
+
+<p>Rahul: 45 seconds. Priya: 12 seconds. Arjun: 150 seconds (2 minutes 30 seconds — flagged as unusually slow). Neha: 8 seconds. TIMESTAMPDIFF in SECOND gives us the exact duration.</p>
+
+<h3>Example 2: Flag payments that took more than 60 seconds</h3>
+
+<pre><code class="language-sql">SELECT payment_id, user, amount,
+    TIMESTAMPDIFF(SECOND, initiated_at, completed_at) AS processing_sec
+FROM payments
+WHERE TIMESTAMPDIFF(SECOND, initiated_at, completed_at) &gt; 60;</code></pre>
+
+<p>Only Arjun's payment (150 seconds) is returned. These slow transactions would be investigated for technical issues or suspicious activity.</p>
+
+<h3>Example 3: Convert timestamps to Unix format for API output</h3>
+
+<pre><code class="language-sql">SELECT
+    payment_id,
+    user,
+    UNIX_TIMESTAMP(initiated_at) AS unix_initiated,
+    UNIX_TIMESTAMP(completed_at) AS unix_completed
+FROM payments;</code></pre>
+
+<p>This converts all timestamps to Unix integers — required format when sending data to external APIs that expect epoch seconds rather than formatted datetimes.</p>
+
+<h3>Example 4: Group transactions by hour of day</h3>
+
+<pre><code class="language-sql">SELECT
+    EXTRACT(HOUR FROM initiated_at) AS hour_of_day,
+    COUNT(*) AS transaction_count,
+    SUM(amount) AS total_amount
+FROM payments
+GROUP BY EXTRACT(HOUR FROM initiated_at)
+ORDER BY hour_of_day;</code></pre>
+
+<p>Shows transactions distributed by hour: 14:00, 23:00, 02:00, 09:00. On a real dataset, this shows peak transaction hours — important for infrastructure scaling and fraud monitoring.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>What is the difference between TIMESTAMP and DATETIME in MySQL?</strong></p>
+<p>TIMESTAMP converts input to UTC when storing, and converts back to the session's timezone when reading. DATETIME stores exactly what you put in — no conversion. TIMESTAMP range is 1970–2038. DATETIME range is 1000–9999. For most transactional data, TIMESTAMP is recommended because it handles timezone conversions automatically.</p>
+
+<p><strong>NOW() and UTC_TIMESTAMP() — when do I use each?</strong></p>
+<p>Use <code>UTC_TIMESTAMP()</code> when you want to store the current time in UTC (best practice for new systems). Use <code>NOW()</code> when you want the current time in the server's local timezone. If your server and users are all in IST, they will produce the same result — but if you ever move servers or work with international teams, the difference matters.</p>
+
+<p><strong>Why does FROM_UNIXTIME give me a different time than expected?</strong></p>
+<p><code>FROM<em>UNIXTIME()</code> converts the Unix timestamp to the MySQL server's local timezone. If your server is in UTC but you expected IST output, the result will be 5 hours 30 minutes behind. Use <code>CONVERT</em>TZ(FROM<em>UNIXTIME(unix</em>ts), 'UTC', 'Asia/Kolkata')</code> to get IST output.</p>
+
+<p><strong>TIMESTAMPDIFF vs DATEDIFF — which should I use?</strong></p>
+<p>Use DATEDIFF when you only care about the number of days (it ignores time). Use TIMESTAMPDIFF when you need sub-day precision — minutes, hours, or seconds. Also, TIMESTAMPDIFF works with any unit, while DATEDIFF only gives days.</p>
+
+<p><strong>The 2038 problem — should I worry about TIMESTAMP columns?</strong></p>
+<p>The original Unix 32-bit timestamp overflows on January 19, 2038. MySQL's TIMESTAMP type has this limitation. For new systems, if you are storing dates beyond 2038, use DATETIME instead of TIMESTAMP. In practice, MySQL 8+ has updated TIMESTAMP handling to reduce this risk, but it is still worth knowing.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Storing timestamps as VARCHAR</strong> — Once again, the worst possible approach. String comparisons will not work correctly, and timestamp functions will not work at all. Always use TIMESTAMP or DATETIME.</li><li><strong>Using NOW() for historical timestamps</strong> — <code>NOW()</code> gives you the current time. If you need to store when an event happened, capture the timestamp at the time the event occurs — do not use NOW() in a report that runs later.</li><li><strong>Mixing TIMESTAMP and DATETIME in joins</strong> — Comparing a TIMESTAMP column with a DATETIME column can produce unexpected results because of timezone handling differences. Be consistent in the types you use.</li><li><strong>Ignoring timezone when comparing timestamps from different sources</strong> — If your app sends UTC timestamps but your database session is IST, stored values might be off by 5:30 hours. Always confirm your database session timezone with <code>SELECT @@session.time_zone</code>.</li><li><strong>Using TIMESTAMPDIFF with MONTH or YEAR on dates close to boundaries</strong> — <code>TIMESTAMPDIFF(MONTH, '2024-01-31', '2024-02-28')</code> returns 0 in some databases because the day hasn't "fully" passed. Always test boundary cases.</li><li><strong>Assuming all servers use the same timezone</strong> — In a distributed system, different servers may be in different timezones. Always store UTC and convert at display time.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Store all timestamps in UTC — convert to local timezone only when displaying to users.</li><li>Use <code>UTC_TIMESTAMP()</code> instead of <code>NOW()</code> when inserting timestamps into TIMESTAMP or DATETIME columns that should be timezone-neutral.</li><li>Use DATETIME for dates that should not be affected by timezone changes (e.g., a scheduled event date: "the event is on Jan 15, 2024" should not shift with timezone).</li><li>Use TIMESTAMP (auto-converts to UTC) for recording when something happened — log entries, transaction times, user activity.</li><li>Verify your MySQL session timezone before writing time-sensitive queries: <code>SELECT @@session.time_zone</code>.</li><li>Use TIMESTAMPDIFF instead of DATEDIFF whenever you need sub-day precision — it is more versatile.</li><li>Index TIMESTAMP and DATETIME columns used in WHERE clauses for range queries.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>PhonePe stores all transaction timestamps in UTC in their database, even though they primarily serve Indian users. Their reporting layer uses <code>CONVERT<em>TZ(transaction</em>time, 'UTC', 'Asia/Kolkata')</code> to display times in IST for users and analysts. Their fraud detection system uses <code>TIMESTAMPDIFF(SECOND, ...)</code> to detect burst patterns — multiple transactions from the same account within a 120-second window trigger automatic review. This works precisely because they have second-level granularity in their timestamps.</p>
+
+<p>Byju's live class platform records session start and end times as DATETIME columns. Their analytics team uses <code>TIMESTAMPDIFF(MINUTE, session<em>start, session</em>end)</code> to calculate how long students stayed in each live class. They group these by subject, teacher, and time of day to understand engagement patterns. Classes where average session duration drops below 40 minutes of a 60-minute class are flagged for content quality review.</p>
+
+<p>Jio's network operations center uses UNIX timestamps in their log aggregation system because Unix integers are easy to compare and sort across different programming languages and systems. Logs come in as Unix epoch values. Their SQL analysis layer uses <code>FROM<em>UNIXTIME()</code> to convert these into readable datetimes for analysis, and <code>UNIX</em>TIMESTAMP()</code> when storing current-time markers. The conversion happens at the boundary between the log ingestion system and the analytics layer.</p>
+
+<p>IRCTC's booking system uses TIMESTAMP columns with UTC storage for all booking and payment records. When a passenger books a ticket and the booking timestamp needs to appear on the physical ticket, <code>CONVERT<em>TZ</code> converts it to IST for printing. Their cancellation time window calculations use <code>TIMESTAMPDIFF(HOUR, booking</em>time, NOW())</code> to determine how many hours ago a booking was made — which determines whether a full refund or partial refund applies under their cancellation policy.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>Timezone Handling:
+  User in Mumbai types: "11:00 PM IST"
+  System stores:        "17:30:00 UTC" (11:00 PM - 5h30m = 5:30 PM UTC)
+  Query displays:       CONVERT_TZ(stored, 'UTC', 'Asia/Kolkata') → "23:00:00 IST"
+
+TIMESTAMP vs DATETIME:
+  TIMESTAMP: stores UTC, shows in session timezone → use for "when did this happen"
+  DATETIME:  stores literal value, no conversion   → use for "what time was scheduled"
+
+TIMESTAMPDIFF:
+  TIMESTAMPDIFF(SECOND, '14:30:00', '14:30:45') → 45
+  TIMESTAMPDIFF(MINUTE, '14:30:00', '14:35:00') → 5
+  TIMESTAMPDIFF(HOUR,   '14:00:00', '18:30:00') → 4 (truncated, not rounded)
+
+Unix Timestamp:
+  '2024-01-15 14:30:00' → UNIX_TIMESTAMP() → 1705302600
+  1705302600 → FROM_UNIXTIME() → '2024-01-15 14:30:00'</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>TIMESTAMP stores UTC and auto-converts to session timezone; DATETIME stores the literal value you give it.</li><li>Use <code>UTC_TIMESTAMP()</code> to get the current time in UTC; use <code>NOW()</code> for server local time.</li><li><code>CONVERT_TZ(dt, 'UTC', 'Asia/Kolkata')</code> converts a UTC datetime to IST.</li><li><code>UNIX<em>TIMESTAMP()</code> converts datetime to epoch seconds; <code>FROM</em>UNIXTIME()</code> converts back.</li><li><code>TIMESTAMPDIFF(unit, start, end)</code> gives difference in SECOND, MINUTE, HOUR, DAY, MONTH, or YEAR.</li><li>Always store timestamps in UTC in multi-timezone or internationally-facing systems.</li><li>TIMESTAMPDIFF is more versatile than DATEDIFF — use it when you need precision below a day.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<p>Use this table called <code>user_sessions</code>:</p>
+
+<table>
+<thead><tr><th>session_id</th><th>user</th><th>login_time</th><th>logout_time</th><th>device</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Arjun</td><td>2024-03-10 09:00:00</td><td>2024-03-10 09:45:30</td><td>Mobile</td></tr>
+<tr><td>2</td><td>Simran</td><td>2024-03-10 14:30:00</td><td>2024-03-10 16:15:00</td><td>Desktop</td></tr>
+<tr><td>3</td><td>Aman</td><td>2024-03-10 20:00:00</td><td>2024-03-10 20:12:45</td><td>Mobile</td></tr>
+<tr><td>4</td><td>Riya</td><td>2024-03-11 08:00:00</td><td>2024-03-11 10:30:00</td><td>Desktop</td></tr>
+<tr><td>5</td><td>Neha</td><td>2024-03-11 22:30:00</td><td>2024-03-11 22:35:10</td><td>Mobile</td></tr>
+</tbody></table>
+
+<ol><li>Calculate the session duration in minutes for each user.</li><li>Find sessions that lasted longer than 60 minutes.</li><li>Convert all login_time values to Unix timestamps.</li><li>Group sessions by device type and calculate average duration in minutes.</li><li>Find sessions that started between 8 PM and 11 PM (evening sessions) — use EXTRACT(HOUR ...).</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Arjun's work at PhonePe highlighted what happens when timestamp handling goes wrong at scale: mismatched timezones show payments on the wrong day, fraud patterns get missed because second-level precision is absent, and audit trails fail compliance checks. Getting timestamps right is not a nice-to-have — for financial, healthcare, or logistics systems, it is a hard requirement.</p>
+
+<p>The mental shift that helps most with timestamps is accepting that a moment in time is absolute, but its representation is relative to a timezone. UTC is the anchor. Everything else is an offset from that anchor. Once you internalize this, working with <code>CONVERT<em>TZ</code>, <code>UTC</em>TIMESTAMP</code>, and timezone-aware columns becomes straightforward.</p>
+
+<p>TIMESTAMPDIFF is probably the function you will underuse at first. Most analysts start with DATEDIFF because they learned it first. But TIMESTAMPDIFF's flexibility — any unit from seconds to years — makes it the right tool for most duration calculations. The second-level precision it provides opens up analyses that DATEDIFF simply cannot support.</p>
+
+<p>Start by checking what timezone your database server is in (<code>SELECT @@global.time_zone</code>). If it is not UTC and you are building a system that will be used across cities or internationally, plan for UTC storage now. Retrofitting timezone handling into an existing production system is one of the most painful database migrations you can face. Getting it right from the start, or understanding the existing setup before writing queries, saves enormous trouble later.</p>
+
+  `,
 
   // ── Module 12 ────────────────────────────────────────────────
-  'mod12-t1': `<h1>What are Stored Procedures?</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod12-t2': `<h1>Creating a Stored Procedure</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod12-t3': `<h1>Parameters in Stored Procedures</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod12-t4': `<h1>User-Defined Functions (UDFs)</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod12-t5': `<h1>Scalar vs Table-Valued Functions</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod12-t6': `<h1>Triggers</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod12-t7': `<h1>Cursors (and When to Avoid Them)</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod12-t1': `
+    <h1>What are Stored Procedures?</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Rahul works as a backend developer at IRCTC in Pune. Every time someone books a train ticket on the website, about 12 different database operations run in a specific order — check seat availability, lock the seat, create a booking record, deduct the amount from the wallet, send a confirmation, update the train manifest, and so on. These 12 steps never change. They run exactly the same way, millions of times a day.</p>
+
+<p>For the first few months, Rahul's team handled this by writing long SQL queries in the application code itself. Every service that needed to book a ticket had its own copy of those queries. When the business logic changed — say, the GST calculation formula was updated — someone had to hunt down every copy across 6 different microservices and update each one manually.</p>
+
+<p>One night, a hotfix went wrong because one service was updated and another wasn't. Some customers got charged the old rate. Rahul's manager pulled him aside and said, "There has to be a better way." There was. It's called a stored procedure.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>Imagine you work at Swiggy and you need to generate an "order summary" report. The report involves joining the orders table with the customers table, filtering by date range, calculating totals, applying discount logic, and grouping by city. The query is about 40 lines long.</p>
+
+<p>Now, 5 different parts of the application need this report — the analytics dashboard, the restaurant partner portal, the finance team's export tool, the operations team's monitoring screen, and a weekly email job. Every team writes the same 40 lines. When Swiggy changes the discount structure (which happens regularly), all 5 copies need updating.</p>
+
+<p>This is the real problem stored procedures solve. You write the logic once, store it inside the database, give it a name, and every application just calls that name. The logic lives in one place. Updates happen in one place. Testing happens in one place.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Early databases in the 1980s were accessed by applications that sent raw SQL strings over the network. For every query, the database had to receive the SQL text, parse it, figure out the best way to run it (called query planning), and then execute it. For simple queries, this was fine. But for complex multi-step operations, it was slow and inefficient.</p>
+
+<p>Database vendors — starting with Oracle and Sybase in the late 1980s — introduced stored procedures so that complex logic could live inside the database itself. The query planning step would happen once, when the procedure was created or first run, and the compiled plan would be stored. Subsequent calls would skip the planning step entirely. For high-traffic systems, this made a noticeable difference.</p>
+
+<p>There was also a security motivation. If your application only calls stored procedures and never sends raw SQL, it becomes much harder for attackers to inject malicious SQL into your queries. The stored procedure acts as a gatekeeper — it only accepts the parameters it expects. This security benefit turned out to be just as valuable as the performance benefit.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think of a stored procedure like a recipe saved in a recipe book.</p>
+
+<p>When you want to make dal makhani, you don't figure out the recipe from scratch every time. You open the book, find the saved recipe, and follow it. The recipe has a name ("Dal Makhani"), it accepts parameters (how spicy, how many servings), and it produces a predictable result every time. If you want to update the recipe — say, use less butter — you change it in the book once, and every cook in the kitchen follows the new version automatically.</p>
+
+<p>A stored procedure works the same way. It has a name, it accepts parameters, and it produces a predictable result. The "recipe book" is the database itself. Any application that connects to the database can call the procedure by name without knowing the underlying SQL.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think of a stored procedure like an ATM machine.</p>
+
+<p>When you press "Withdraw ₹2000", you don't see what happens inside. The ATM checks your balance, verifies your PIN, deducts the amount, records the transaction, and dispenses the cash — all as one bundled operation. You just pressed one button. If the bank changes its internal fee structure, the ATM's internal logic updates. You still press the same button.</p>
+
+<p>That's exactly what a stored procedure does. The application calls <code>EXEC ProcessWithdrawal @AccountID = 12345, @Amount = 2000</code>. Everything that needs to happen, happens. The application doesn't need to know the steps.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>When you create a stored procedure, the database server receives the SQL code and goes through two important steps. First, it parses and validates the syntax — checking that all table names, column names, and keywords are correct. Second, it compiles the procedure and stores both the code and an execution plan. This stored plan is what makes repeated calls fast.</p>
+
+<p>When an application calls the procedure for the first time, the database uses the stored execution plan to run the queries. On subsequent calls, it reuses the same plan (sometimes adjusting for different parameter values). This is called plan caching, and it avoids the overhead of re-planning complex queries every time.</p>
+
+<p>Stored procedures run inside the database server itself, not in the application layer. This means all the data processing happens close to where the data lives, reducing the amount of data that needs to travel over the network. Instead of fetching a million rows to the application and filtering them there, the procedure filters them inside the database and sends back only what's needed.</p>
+
+<p>Stored procedures also support transaction control. You can write a procedure that either completes all its steps successfully or rolls back everything if something goes wrong. This is critical for financial operations like payments, where you cannot have a situation where money is deducted but the booking isn't confirmed.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<p><strong>Creating a basic stored procedure:</strong></p>
+
+<pre><code class="language-sql">CREATE PROCEDURE GetCustomerOrders
+AS
+BEGIN
+    SELECT order_id, customer_name, total_amount, order_date
+    FROM orders
+    WHERE status = 'DELIVERED';
+END;</code></pre>
+
+<p><strong>Calling (executing) a stored procedure:</strong></p>
+
+<pre><code class="language-sql">EXEC GetCustomerOrders;</code></pre>
+
+<p><strong>Creating a procedure with input parameters:</strong></p>
+
+<pre><code class="language-sql">CREATE PROCEDURE GetOrdersByCity
+    @CityName VARCHAR(100)
+AS
+BEGIN
+    SELECT order_id, customer_name, total_amount
+    FROM orders
+    WHERE city = @CityName;
+END;</code></pre>
+
+<p><strong>Calling it with a parameter:</strong></p>
+
+<pre><code class="language-sql">EXEC GetOrdersByCity @CityName = 'Mumbai';</code></pre>
+
+<p><strong>A procedure with multiple steps and a transaction:</strong></p>
+
+<pre><code class="language-sql">CREATE PROCEDURE PlaceOrder
+    @CustomerID INT,
+    @ProductID INT,
+    @Quantity INT
+AS
+BEGIN
+    BEGIN TRANSACTION;
+    
+    INSERT INTO orders (customer_id, product_id, quantity, order_date)
+    VALUES (@CustomerID, @ProductID, @Quantity, GETDATE());
+    
+    UPDATE inventory
+    SET stock = stock - @Quantity
+    WHERE product_id = @ProductID;
+    
+    COMMIT TRANSACTION;
+END;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Keyword / Component</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td><code>CREATE PROCEDURE</code></td><td>Tells the database to create and store a new procedure with the given name</td></tr>
+<tr><td><code>AS BEGIN ... END</code></td><td>Marks the start and end of the procedure's body — all SQL logic goes here</td></tr>
+<tr><td><code>@ParameterName DataType</code></td><td>Declares an input parameter the procedure accepts when called</td></tr>
+<tr><td><code>EXEC</code> or <code>EXECUTE</code></td><td>The command used to run a stored procedure</td></tr>
+<tr><td><code>BEGIN TRANSACTION</code></td><td>Starts a transaction — all steps either succeed together or roll back together</td></tr>
+<tr><td><code>COMMIT</code></td><td>Saves all changes made within the transaction permanently</td></tr>
+<tr><td><code>ROLLBACK</code></td><td>Undoes all changes if something went wrong mid-procedure</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p><strong>Sample table: orders</strong></p>
+
+<table>
+<thead><tr><th>order_id</th><th>customer_name</th><th>city</th><th>total_amount</th><th>status</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Priya Sharma</td><td>Mumbai</td><td>850</td><td>DELIVERED</td></tr>
+<tr><td>2</td><td>Aman Verma</td><td>Delhi</td><td>1200</td><td>PENDING</td></tr>
+<tr><td>3</td><td>Neha Joshi</td><td>Bengaluru</td><td>640</td><td>DELIVERED</td></tr>
+<tr><td>4</td><td>Arjun Singh</td><td>Mumbai</td><td>2100</td><td>CANCELLED</td></tr>
+<tr><td>5</td><td>Simran Kaur</td><td>Pune</td><td>980</td><td>DELIVERED</td></tr>
+</tbody></table>
+
+<h3>Example 1: Get all delivered orders</h3>
+
+<pre><code class="language-sql">CREATE PROCEDURE GetDeliveredOrders
+AS
+BEGIN
+    SELECT order_id, customer_name, total_amount
+    FROM orders
+    WHERE status = 'DELIVERED';
+END;
+
+EXEC GetDeliveredOrders;</code></pre>
+
+<p>This returns orders 1, 3, and 5 — the rows where status is DELIVERED. Arjun's cancelled order and Aman's pending order are excluded.</p>
+
+<h3>Example 2: Get orders from a specific city</h3>
+
+<pre><code class="language-sql">CREATE PROCEDURE GetOrdersByCity
+    @CityName VARCHAR(100)
+AS
+BEGIN
+    SELECT order_id, customer_name, total_amount, status
+    FROM orders
+    WHERE city = @CityName;
+END;
+
+EXEC GetOrdersByCity @CityName = 'Mumbai';</code></pre>
+
+<p>Returns orders 1 and 4 — Priya's and Arjun's orders, both from Mumbai. The city filter is applied inside the procedure.</p>
+
+<h3>Example 3: Get orders above a minimum amount</h3>
+
+<pre><code class="language-sql">CREATE PROCEDURE GetHighValueOrders
+    @MinAmount DECIMAL(10,2)
+AS
+BEGIN
+    SELECT order_id, customer_name, city, total_amount
+    FROM orders
+    WHERE total_amount &gt;= @MinAmount
+    ORDER BY total_amount DESC;
+END;
+
+EXEC GetHighValueOrders @MinAmount = 1000;</code></pre>
+
+<p>Returns Arjun's order (₹2100) and Aman's order (₹1200). Priya's ₹850, Neha's ₹640, and Simran's ₹980 fall below the threshold.</p>
+
+<h3>Example 4: Update order status</h3>
+
+<pre><code class="language-sql">CREATE PROCEDURE UpdateOrderStatus
+    @OrderID INT,
+    @NewStatus VARCHAR(50)
+AS
+BEGIN
+    UPDATE orders
+    SET status = @NewStatus
+    WHERE order_id = @OrderID;
+    
+    PRINT 'Order status updated successfully.';
+END;
+
+EXEC UpdateOrderStatus @OrderID = 2, @NewStatus = 'DELIVERED';</code></pre>
+
+<p>Finds order 2 (Aman's ₹1200 order) and changes its status from PENDING to DELIVERED.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Is a stored procedure the same as a function?</strong></p>
+<p>No. A stored procedure is called with EXEC and can perform any kind of operation — inserts, updates, deletes, selects. A function is called inside a query (like in a SELECT or WHERE clause) and is meant to return a value. Procedures can also manage transactions; most functions cannot.</p>
+
+<p><strong>Can I change a stored procedure after creating it?</strong></p>
+<p>Yes. Use <code>ALTER PROCEDURE</code> instead of <code>CREATE PROCEDURE</code>. This rewrites the procedure while keeping its name and any permissions assigned to it. If you drop and recreate it, you lose any permissions that were granted.</p>
+
+<p><strong>Do stored procedures make applications faster?</strong></p>
+<p>Usually yes, but it depends. The main gains come from reduced network traffic, plan caching, and fewer round trips. For simple single-table queries, the difference is small. For complex multi-step operations with lots of data, the difference can be significant.</p>
+
+<p><strong>What happens if a procedure fails halfway through?</strong></p>
+<p>If you used <code>BEGIN TRANSACTION</code> and the procedure hits an error, you can catch it and call <code>ROLLBACK</code> to undo everything. Without a transaction, whatever ran before the error stays committed. This is why wrapping multi-step operations in transactions matters.</p>
+
+<p><strong>Can one stored procedure call another?</strong></p>
+<p>Yes. Procedures can call other procedures. This is called nesting. It is perfectly valid and often useful for breaking complex logic into smaller, reusable pieces. Just be aware that deeply nested procedures can become hard to debug.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Not using transactions for multi-step procedures</strong> — If you insert into one table and then update another, and the update fails, you end up with inconsistent data. Always wrap related operations in a transaction.</li><li><strong>Hardcoding values that should be parameters</strong> — Writing <code>WHERE city = 'Mumbai'</code> inside a procedure makes it useless for other cities. Use parameters.</li><li><strong>Not handling errors</strong> — A procedure that doesn't handle errors silently fails or returns partial results. Use TRY...CATCH blocks in SQL Server.</li><li><strong>Creating procedures for trivial single-line queries</strong> — A procedure that just does <code>SELECT * FROM orders</code> adds overhead without benefit. Use procedures for logic that is complex, reused, or needs to be secured.</li><li><strong>Forgetting to grant EXECUTE permission</strong> — Creating a procedure doesn't automatically let all users run it. You need to explicitly grant EXECUTE permission to the relevant users or roles.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Always use a naming convention — for example, prefix with <code>usp<em></code> (user stored procedure) or the module name (<code>order</em>GetByCity</code>) so procedures are easy to find and organize.</li><li>Keep procedures focused on one responsibility. A procedure that does 15 unrelated things is hard to test and maintain.</li><li>Use <code>SET NOCOUNT ON</code> at the start of procedures in SQL Server — this stops the "X rows affected" messages from being sent back to the application, which reduces unnecessary network traffic.</li><li>Always include error handling with TRY...CATCH and meaningful error messages.</li><li>Document what each procedure does, what parameters it expects, and what it returns — even a two-line comment at the top is better than nothing.</li><li>Test procedures with edge cases: empty parameters, zero amounts, non-existent IDs.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>At IRCTC, stored procedures handle the entire ticket booking flow. When you hit "Pay Now", a procedure runs that checks seat availability, marks the seat as booked, processes payment, creates a PNR, and updates the train's seat inventory — all in one atomic operation. If the payment gateway times out, the transaction rolls back and the seat is released. This prevents ghost bookings where a seat is marked taken but no one paid for it.</p>
+
+<p>Flipkart uses stored procedures extensively in their warehouse management system. When an item is picked, packed, and dispatched, a series of procedures update inventory counts, generate shipment records, trigger billing, and update the seller's dashboard. Because these procedures run inside the database, they process thousands of dispatch events per minute without the application layer becoming a bottleneck.</p>
+
+<p>Paytm's fraud detection system uses stored procedures that run on every transaction. Before a payment is approved, a procedure checks transaction velocity (how many payments in the last 5 minutes), device fingerprint history, and geographical anomalies. The procedure either approves, holds, or flags the transaction. Running this logic as a procedure inside the database is faster than sending data to an external service for every single transaction.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>Application Layer                    Database Layer
+─────────────────                    ──────────────
+                                     
+[Swiggy App]  ──EXEC PlaceOrder──►  ┌─────────────────────────┐
+                  (@CustomerID,      │   Stored Procedure:      │
+                   @ProductID,       │   PlaceOrder             │
+                   @Quantity)        │                          │
+                                     │  1. Check inventory      │
+[Restaurant   ──EXEC PlaceOrder──►  │  2. INSERT into orders   │
+  Portal]                            │  3. UPDATE inventory     │
+                                     │  4. INSERT into billing  │
+[Analytics    ──EXEC PlaceOrder──►  │  5. COMMIT or ROLLBACK   │
+  Service]                           └─────────────────────────┘
+                                              │
+                                              ▼
+                                     ┌─────────────────┐
+                                     │   Database       │
+                                     │   Tables         │
+                                     └─────────────────┘</code></pre>
+
+<p>All three application services call the same procedure. The logic is in one place.</p>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>A stored procedure is a saved, named block of SQL that lives inside the database.</li><li>It runs when called with EXEC, not automatically.</li><li>It accepts parameters, supports transactions, and can do inserts, updates, deletes, and selects.</li><li>The database caches the execution plan, making repeated calls faster.</li><li>It reduces code duplication across applications and centralises business logic.</li><li>Permissions are granted at the procedure level, adding a security layer.</li><li>It is different from a function — procedures are called standalone; functions are called inside queries.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<p>Use this table for practice:</p>
+
+<p><strong>employees</strong> (employee_id, name, department, city, salary)</p>
+
+<ol><li>Write a stored procedure called <code>GetEmployeesByDept</code> that accepts a department name and returns all employees in that department.</li><li>Write a procedure called <code>GiveSalaryHike</code> that accepts an employee_id and a percentage, and updates the employee's salary by that percentage.</li><li>Write a procedure called <code>GetHighEarners</code> that accepts a minimum salary and returns all employees earning above it, sorted by salary descending.</li><li>Write a procedure that accepts a city name and returns the count of employees in that city along with their average salary.</li><li>Write a procedure called <code>TransferEmployee</code> that accepts an employee_id and a new department name, and updates the employee's department. Wrap it in a transaction.</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Rahul's team at IRCTC eventually migrated all their booking logic into stored procedures. The change didn't happen overnight — it took a few weeks of careful work. But once done, they had a single source of truth for every database operation. When the GST rules changed, one developer updated one procedure. Every application that called that procedure got the new behaviour automatically.</p>
+
+<p>The real value of stored procedures isn't performance (though that helps). It's about where your logic lives. When business rules are scattered across six different application codebases, you spend your time hunting down inconsistencies. When they live in the database, in named, versioned, tested procedures, you can trust that the logic is consistent.</p>
+
+<p>If you're just starting out, don't feel like you need to convert every query into a procedure. Start with the operations that are complex, run frequently, or need to be shared across multiple systems. Those are the ones that benefit most.</p>
+
+<p>Stored procedures are one of those features that feel like extra work until the first time they save you from a production incident. Then you understand exactly why Rahul's manager pointed him toward them.</p>
+
+  `,
+  'mod12-t2': `
+    <h1>Creating a Stored Procedure</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Neha is a data engineer at Zomato in Bengaluru. Her team handles restaurant analytics — which restaurants are getting the most orders, what time slots are busiest, and which areas have the highest cancellation rates. Every morning, the operations team asks for an updated report. Neha runs the same 35-line SQL query, adjusts the date filter, and sends the result.</p>
+
+<p>One Monday she was travelling, her laptop battery died, and the operations team had no idea how to run the query themselves. Her manager could not find the query in the shared folder because Neha kept it in a local file with a confusing name. That morning was a mess.</p>
+
+<p>Her tech lead Arjun sat her down and said, "Let's put this in a stored procedure. Once it's there, anyone with database access can run it with one line. You don't need to be around." Neha spent 30 minutes converting the query into a procedure. The operations team never had to wait on her again.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>Creating a stored procedure sounds simple — just wrap your SQL in a CREATE PROCEDURE block. But in practice, people run into small issues that cause big frustrations: syntax errors that don't point to the real problem, procedures that get created but don't do what they expect, or procedures that work in isolation but fail when called from the application.</p>
+
+<p>The other problem is knowing what belongs inside a procedure and how to structure it cleanly. A procedure is not just a SQL query with a name tag. It can have local variables, conditional logic, loops, error handling, and multiple SQL statements. Knowing how to put all of that together correctly is what this article is about.</p>
+
+<p>Understanding the exact syntax and the order of declarations matters because SQL Server and MySQL have slightly different rules, and getting them wrong produces cryptic error messages that send you in the wrong direction.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Before stored procedures, developers had two choices: embed SQL directly in application code (messy, insecure, hard to maintain) or use ad-hoc queries sent from the application layer (slow because every execution re-planned). Stored procedures were designed to solve both problems simultaneously.</p>
+
+<p>The CREATE syntax was modelled after how programming languages handle function definitions — you declare the function, give it a name, specify what it takes in, write the body, and save it. The database system adopted this pattern because it made database logic feel more like proper software engineering with reusable, named units of work.</p>
+
+<p>Over time, the CREATE PROCEDURE syntax gained features like ALTER (to modify without losing permissions), DROP (to remove), and system catalog views (to inspect all procedures). This turned procedures from a performance trick into a full lifecycle-managed part of a database application.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think of creating a stored procedure like setting up an automated form on a website.</p>
+
+<p>When you build a "Contact Us" form, you define the fields (name, email, message), the validation rules, and what happens when Submit is clicked (send an email, save to database, show a success message). Once the form is set up, any visitor can use it without understanding HTML or backend code. The setup happens once; the usage happens thousands of times.</p>
+
+<p>Creating a stored procedure is the same setup. You define what inputs it takes (parameters), write what happens when it's called (the procedure body), and save it to the database. From that point, any application or user who needs that operation just calls the procedure name — they don't need to know what's inside.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Picture a restaurant kitchen that has printed recipe cards pinned on the wall.</p>
+
+<p>A new chef walks in on their first day. They don't know how to make the restaurant's signature dishes from scratch. But every recipe is on a card with a name, ingredient list, and steps. The chef reads the card and makes the dish exactly as intended. The restaurant's quality stays consistent whether it's the head chef or a new hire running the kitchen.</p>
+
+<p>Stored procedures are those recipe cards. The database is the kitchen wall. Once a procedure is created and saved, anyone with the right access can execute it and get the same consistent result.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>When you run <code>CREATE PROCEDURE</code>, the database server does several things in sequence. First, it parses the SQL text — checks for syntax errors, verifies that the tables and columns referenced actually exist, and validates data types. If anything is wrong at this stage, the CREATE fails with an error.</p>
+
+<p>If parsing succeeds, the database stores the procedure text in a system catalog table. In SQL Server, this is <code>sys.sql<em>modules</code>. In MySQL, it's <code>information</em>schema.ROUTINES</code>. The procedure now exists as a database object, similar to how a table is a database object.</p>
+
+<p>The first time the procedure is executed, the database creates an execution plan — a step-by-step instruction set for how to retrieve or modify data efficiently. This plan is stored in memory (the plan cache). Future executions of the same procedure reuse this cached plan, skipping the planning step entirely.</p>
+
+<p>When you use <code>ALTER PROCEDURE</code>, the database replaces the procedure text in the catalog and invalidates the cached plan so a new plan is generated on next execution. When you <code>DROP PROCEDURE</code>, the object is removed from the catalog and can no longer be called.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<p><strong>Basic procedure with no parameters:</strong></p>
+
+<pre><code class="language-sql">CREATE PROCEDURE GetAllRestaurants
+AS
+BEGIN
+    SELECT restaurant_id, name, city, rating
+    FROM restaurants
+    ORDER BY rating DESC;
+END;</code></pre>
+
+<p><strong>Modifying an existing procedure:</strong></p>
+
+<pre><code class="language-sql">ALTER PROCEDURE GetAllRestaurants
+AS
+BEGIN
+    SELECT restaurant_id, name, city, rating, total_orders
+    FROM restaurants
+    WHERE is_active = 1
+    ORDER BY rating DESC;
+END;</code></pre>
+
+<p><strong>Deleting a procedure:</strong></p>
+
+<pre><code class="language-sql">DROP PROCEDURE GetAllRestaurants;</code></pre>
+
+<p><strong>Procedure with local variables:</strong></p>
+
+<pre><code class="language-sql">CREATE PROCEDURE GetRestaurantSummary
+AS
+BEGIN
+    DECLARE @TotalRestaurants INT;
+    DECLARE @AvgRating DECIMAL(3,2);
+    
+    SELECT @TotalRestaurants = COUNT(*), @AvgRating = AVG(rating)
+    FROM restaurants
+    WHERE is_active = 1;
+    
+    SELECT @TotalRestaurants AS total_restaurants,
+           @AvgRating AS average_rating;
+END;</code></pre>
+
+<p><strong>Procedure with conditional logic:</strong></p>
+
+<pre><code class="language-sql">CREATE PROCEDURE GetOrdersByStatus
+    @StatusFilter VARCHAR(50)
+AS
+BEGIN
+    IF @StatusFilter = 'ALL'
+    BEGIN
+        SELECT * FROM orders;
+    END
+    ELSE
+    BEGIN
+        SELECT * FROM orders WHERE status = @StatusFilter;
+    END
+END;</code></pre>
+
+<p><strong>Checking if a procedure exists before creating:</strong></p>
+
+<pre><code class="language-sql">IF OBJECT_ID('GetAllRestaurants', 'P') IS NOT NULL
+    DROP PROCEDURE GetAllRestaurants;
+GO
+
+CREATE PROCEDURE GetAllRestaurants
+AS
+BEGIN
+    SELECT restaurant_id, name, city, rating
+    FROM restaurants;
+END;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Component</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td><code>CREATE PROCEDURE procedure_name</code></td><td>Registers a new procedure with the given name in the database</td></tr>
+<tr><td><code>ALTER PROCEDURE procedure_name</code></td><td>Replaces the body of an existing procedure — does not lose permissions</td></tr>
+<tr><td><code>DROP PROCEDURE procedure_name</code></td><td>Permanently removes the procedure from the database</td></tr>
+<tr><td><code>AS BEGIN ... END</code></td><td>Marks the executable body of the procedure</td></tr>
+<tr><td><code>DECLARE @variable datatype</code></td><td>Declares a local variable that exists only for the duration of the procedure's execution</td></tr>
+<tr><td><code>SET @variable = value</code></td><td>Assigns a value to a local variable</td></tr>
+<tr><td><code>IF ... BEGIN ... END ELSE BEGIN ... END</code></td><td>Adds branching logic inside the procedure</td></tr>
+<tr><td><code>GO</code></td><td>Batch separator in SQL Server — tells the client tool to send the preceding statements as one batch</td></tr>
+<tr><td><code>SET NOCOUNT ON</code></td><td>Suppresses "N rows affected" messages being sent back to the caller</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p><strong>Sample table: restaurant_orders</strong></p>
+
+<table>
+<thead><tr><th>order_id</th><th>restaurant_name</th><th>city</th><th>order_amount</th><th>status</th><th>order_date</th></tr></thead>
+<tbody>
+<tr><td>101</td><td>Behrouz Biryani</td><td>Mumbai</td><td>650</td><td>DELIVERED</td><td>2024-05-01</td></tr>
+<tr><td>102</td><td>Faasos</td><td>Delhi</td><td>420</td><td>CANCELLED</td><td>2024-05-01</td></tr>
+<tr><td>103</td><td>Pizza Hut</td><td>Bengaluru</td><td>890</td><td>DELIVERED</td><td>2024-05-02</td></tr>
+<tr><td>104</td><td>KFC</td><td>Mumbai</td><td>560</td><td>PENDING</td><td>2024-05-02</td></tr>
+<tr><td>105</td><td>Burger King</td><td>Chennai</td><td>330</td><td>DELIVERED</td><td>2024-05-03</td></tr>
+</tbody></table>
+
+<h3>Example 1: Create a simple read procedure</h3>
+
+<pre><code class="language-sql">CREATE PROCEDURE GetDeliveredOrders
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT order_id, restaurant_name, city, order_amount
+    FROM restaurant_orders
+    WHERE status = 'DELIVERED';
+END;
+
+EXEC GetDeliveredOrders;</code></pre>
+
+<p>Returns orders 101, 103, and 105 — the three rows with DELIVERED status. Orders 102 and 104 are excluded.</p>
+
+<h3>Example 2: Procedure with a local variable for a calculated result</h3>
+
+<pre><code class="language-sql">CREATE PROCEDURE GetTotalRevenue
+AS
+BEGIN
+    DECLARE @Revenue DECIMAL(12,2);
+    
+    SELECT @Revenue = SUM(order_amount)
+    FROM restaurant_orders
+    WHERE status = 'DELIVERED';
+    
+    SELECT @Revenue AS total_delivered_revenue;
+END;
+
+EXEC GetTotalRevenue;</code></pre>
+
+<p>The procedure adds up 650 + 890 + 330 = 1870 for delivered orders and returns that single value.</p>
+
+<h3>Example 3: Conditional logic inside a procedure</h3>
+
+<pre><code class="language-sql">CREATE PROCEDURE GetOrdersByCity
+    @City VARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    IF @City = 'ALL'
+    BEGIN
+        SELECT * FROM restaurant_orders;
+    END
+    ELSE
+    BEGIN
+        SELECT * FROM restaurant_orders WHERE city = @City;
+    END
+END;
+
+EXEC GetOrdersByCity @City = 'Mumbai';</code></pre>
+
+<p>Calling with 'Mumbai' returns orders 101 and 104. Calling with 'ALL' returns all 5 rows.</p>
+
+<h3>Example 4: Alter a procedure to add a new column</h3>
+
+<pre><code class="language-sql">ALTER PROCEDURE GetDeliveredOrders
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT order_id, restaurant_name, city, order_amount, order_date
+    FROM restaurant_orders
+    WHERE status = 'DELIVERED'
+    ORDER BY order_date DESC;
+END;
+
+EXEC GetDeliveredOrders;</code></pre>
+
+<p>The altered procedure now also returns order_date and sorts results with newest first. All permissions granted on this procedure are still intact.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Why does my procedure create successfully but return wrong results?</strong></p>
+<p>SQL validates that table names exist at creation time, but it doesn't check your WHERE logic or business rules. A procedure can be created perfectly and still return wrong data because the logic inside is incorrect. Always test with known sample data after creating a procedure.</p>
+
+<p><strong>What's the difference between CREATE and ALTER?</strong></p>
+<p>CREATE makes a new procedure. If a procedure with that name already exists, CREATE fails. ALTER replaces the body of an existing procedure. If the procedure doesn't exist, ALTER fails. Some developers use DROP + CREATE as a workaround, but this loses any permissions that were granted to the procedure. ALTER is the correct approach for updates.</p>
+
+<p><strong>Why do I need GO before CREATE PROCEDURE?</strong></p>
+<p>In SQL Server, <code>CREATE PROCEDURE</code> must be the first statement in a batch. GO ends the previous batch and starts a new one. If you put other statements before CREATE PROCEDURE in the same batch without GO, you'll get a syntax error. This is a SQL Server tool-specific rule, not a SQL language rule.</p>
+
+<p><strong>Can I return data from a stored procedure?</strong></p>
+<p>Yes, in two ways. A procedure can have SELECT statements that return result sets to the caller. It can also use OUTPUT parameters to pass specific values back. Result sets work like query results — the calling application receives them as rows and columns.</p>
+
+<p><strong>What happens to a procedure if I drop the table it uses?</strong></p>
+<p>The procedure continues to exist in the catalog but will fail at runtime when called. SQL Server will mark it as invalid but won't automatically delete it. You'll need to either recreate the table or update the procedure to reference the correct table.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Using CREATE when you mean ALTER</strong> — Trying to recreate an existing procedure with CREATE causes an error. Use ALTER to modify existing procedures.</li><li><strong>Forgetting SET NOCOUNT ON</strong> — Without this, every INSERT/UPDATE/DELETE inside the procedure sends a "rows affected" message back to the caller, which can confuse applications that aren't expecting it.</li><li><strong>Not testing with edge cases</strong> — Testing only the happy path misses null inputs, empty tables, or extreme values that cause the procedure to behave unexpectedly.</li><li><strong>Writing everything in one giant procedure</strong> — A 200-line procedure that does 10 different things is hard to debug and maintain. Break it into smaller, focused procedures.</li><li><strong>Referencing hardcoded database names</strong> — Writing <code>mydb.dbo.orders</code> inside a procedure ties it to one specific database. If the procedure is moved or the database is renamed, it breaks. Use two-part names (<code>dbo.orders</code>) instead.</li><li><strong>Not using meaningful procedure names</strong> — Names like <code>Proc1</code> or <code>GetData</code> tell you nothing. Use names that describe the operation clearly: <code>Order<em>GetByCustomerID</code>, <code>Invoice</em>GenerateMonthly</code>.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Start every procedure body with <code>SET NOCOUNT ON</code> to reduce unnecessary network traffic.</li><li>Always use schema-qualified names for objects inside procedures (e.g., <code>dbo.orders</code> not just <code>orders</code>).</li><li>Use consistent naming conventions across your team — whether that's <code>usp_</code>, module prefix, or verb-noun style.</li><li>Include a brief comment block at the top of each procedure with the purpose, parameters, and last-modified date.</li><li>Use ALTER instead of DROP + CREATE when updating procedures in production to preserve permissions.</li><li>Test the procedure immediately after creation by calling it with EXEC and checking the output against expected results.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Zomato's restaurant onboarding team uses a stored procedure called something like <code>Restaurant_Activate</code> that, when executed with a restaurant ID, updates the restaurant's status to active, creates default menu categories, sets up delivery radius defaults, and inserts an audit log entry. What used to require 4 separate queries from the application is now one procedure call. The onboarding team even built an admin UI where a non-technical person can click "Activate" and the procedure runs behind it.</p>
+
+<p>At Byju's, content procedures handle the creation of new learning modules. When a new chapter is created, a procedure creates the chapter record, generates quiz placeholders for each section, links the chapter to the correct course, and updates the course's chapter count. This ensures that no chapter is ever created without its required supporting records.</p>
+
+<p>PhonePe uses stored procedures for their reconciliation jobs. At the end of each day, a series of procedures runs that matches transaction records against bank settlement files, flags discrepancies, and generates a summary report. Because the logic is in procedures, the reconciliation team can test changes in a staging environment using the same procedure names without touching application code.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>Development Phase                     Runtime Phase
+─────────────────                     ─────────────
+
+Developer writes SQL          
+and runs:                     
+                               App calls:
+CREATE PROCEDURE               EXEC GetDeliveredOrders
+  GetDeliveredOrders
+AS BEGIN                      ┌──────────────────────────┐
+  SELECT ...                  │ SQL Server Engine:        │
+  FROM orders                 │                           │
+  WHERE status='DELIVERED'    │ 1. Look up procedure      │
+END                     ──►   │    in sys.sql_modules     │
+                              │ 2. Check plan cache       │
+          │                   │ 3. Use cached plan (fast) │
+          ▼                   │    OR create new plan     │
+   Stored in catalog          │ 4. Execute queries        │
+   (sys.sql_modules)          │ 5. Return results         │
+                              └──────────────────────────┘</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li><code>CREATE PROCEDURE</code> stores the SQL in the database catalog with a name.</li><li><code>ALTER PROCEDURE</code> updates the procedure body without losing permissions.</li><li><code>DROP PROCEDURE</code> permanently removes the procedure.</li><li>Local variables declared with <code>DECLARE</code> live only for that procedure's execution.</li><li><code>SET NOCOUNT ON</code> is a good habit to prevent unwanted messages being sent to callers.</li><li>The procedure body goes between <code>AS BEGIN</code> and <code>END</code>.</li><li>Always test immediately after creating — syntax validity doesn't guarantee correct behaviour.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<p>Use this table for practice:</p>
+
+<p><strong>students</strong> (student<em>id, name, city, course, fee</em>paid, enrollment_date)</p>
+
+<ol><li>Write a stored procedure called <code>GetStudentsByCourse</code> that accepts a course name and returns all students enrolled in that course.</li><li>Create a procedure called <code>GetCourseStats</code> that returns the total number of students and total fee collected for all courses combined.</li><li>Write a procedure with a local variable that calculates and returns the highest fee paid by any student.</li><li>Create a procedure called <code>GetRecentEnrollments</code> that accepts a number N and returns students who enrolled in the last N days.</li><li>Write a procedure, then use ALTER to add an ORDER BY clause to it. Confirm the update worked by running it.</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Neha's situation at Zomato is one that almost every developer goes through. You have a query that works, it lives on your laptop, and everything is fine until the moment you're not available. Converting it to a stored procedure takes 10 minutes. The payoff lasts for years.</p>
+
+<p>Creating a stored procedure well means more than just wrapping SQL in a CREATE block. It means naming it clearly, handling edge cases, using transactions where needed, and keeping the logic focused. A well-created procedure is something you can hand off to another developer and they'll understand it without needing to call you.</p>
+
+<p>The syntax itself is not complicated. The discipline comes from building the habit of doing it right — using SET NOCOUNT ON, naming things clearly, testing before committing. These small habits are what separate procedures that quietly work for years from ones that cause debugging sessions at 2 AM.</p>
+
+<p>Start with one procedure today. Take a query you run often and give it a permanent home in the database. You'll see immediately how much cleaner it makes things.</p>
+
+  `,
+  'mod12-t3': `
+    <h1>Parameters in Stored Procedures</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Simran works as a database developer at Flipkart in Bengaluru. Her team manages the seller analytics system — a dashboard that sellers use to check their order volumes, revenue, and return rates. When she first built the system, she wrote a different stored procedure for every report: one for Mumbai sellers, one for Delhi sellers, one for this month, one for last month.</p>
+
+<p>Within three months, she had 47 stored procedures. Most of them were 90% identical, with just a city name or a date changed. When the reporting logic needed an update — which happened every few weeks — she had to open all 47 procedures and make the same change 47 times.</p>
+
+<p>Her senior, Arjun, looked at the list and laughed. "Simran, you need parameters." One hour later, she had 6 procedures that could handle what 47 used to handle. The difference was that each procedure now accepted inputs — the city, the date range, the seller ID — instead of having those values baked in.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>The most common mistake beginners make with stored procedures is hardcoding values inside them. It feels natural at first — you need a procedure that gets orders from Mumbai, so you write <code>WHERE city = 'Mumbai'</code>. Then someone asks for Delhi, and you copy the procedure and change the city name. Then Hyderabad. Then Chennai. You end up with a pile of near-identical procedures.</p>
+
+<p>Parameters solve this by making procedures dynamic. Instead of a fixed city value, the procedure accepts <code>@City</code> as an input. The caller passes in whatever city they need. The procedure adapts.</p>
+
+<p>The challenge most people face isn't understanding what parameters are — it's understanding the different kinds (input, output, default values) and knowing when to use each. A procedure with the wrong parameter setup causes confusing errors and forces callers to work around limitations that shouldn't exist.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Parameters were included in stored procedures from the very beginning of the feature in the late 1980s. Without parameters, stored procedures would essentially be macros — static blocks of SQL that always do exactly one thing. They'd be useful for saving code but not for anything that needed to adapt to different inputs.</p>
+
+<p>The concept came directly from how function parameters work in programming languages like C and Pascal, which were mainstream at the time. The idea was straightforward: if you're going to give developers the ability to write reusable SQL, those reusable units need to accept inputs and optionally return outputs, just like regular functions.</p>
+
+<p>OUTPUT parameters specifically were added to handle cases where a procedure needs to report back a single value to the caller without returning a full result set — for example, after inserting a row, returning the ID of the new record.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think of a stored procedure with parameters like a food order at a restaurant.</p>
+
+<p>When you order a dosa at a restaurant in Chennai, you don't just say "give me food." You say "Masala dosa, less spicy, extra chutney." The kitchen has one process for making a dosa, but your specifications (parameters) tell them exactly how to make yours. Another customer might say "Plain dosa, regular spice, no chutney." Same procedure, different parameters, different result.</p>
+
+<p>A stored procedure with parameters works the same way. The procedure is the process. The parameters are what you specify when you place the order. The kitchen (database engine) executes the process using your exact specifications.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think of a stored procedure as a vending machine.</p>
+
+<p>A vending machine has one mechanism — you insert money, press a button, and get a product. The button is the parameter. Press A1 and you get chips. Press B3 and you get water. Press C2 and you get chocolate. The machine does the same work for every button press; the button you press (the parameter) determines what comes out.</p>
+
+<p>An OUTPUT parameter is like a receipt the machine prints after your purchase — it gives you information back (the change dispensed, the product code). You don't need to go query the machine's internal log; it hands you the result directly.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>When you define a parameter in a stored procedure, you're telling the database to expect a value of a specific type when the procedure is called. The database allocates a slot for that value in the procedure's execution context — essentially a local variable that the caller fills in.</p>
+
+<p>INPUT parameters (the default type) carry information into the procedure. The caller supplies the value, and the procedure uses it inside its SQL statements. The caller cannot see or change what happens to that value inside the procedure.</p>
+
+<p>OUTPUT parameters work differently. The caller declares a variable before calling the procedure, then passes it with the OUTPUT keyword. Inside the procedure, the procedure assigns a value to that parameter. When the procedure finishes, the caller's variable contains whatever value the procedure put there.</p>
+
+<p>DEFAULT parameters allow the caller to skip providing a value. If the caller doesn't pass an argument for a parameter that has a default, the default value is used automatically. This makes procedures backward-compatible — you can add new parameters with defaults without breaking code that calls the old version.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<p><strong>Basic input parameter:</strong></p>
+
+<pre><code class="language-sql">CREATE PROCEDURE GetSellersByCity
+    @City VARCHAR(100)
+AS
+BEGIN
+    SELECT seller_id, name, total_orders
+    FROM sellers
+    WHERE city = @City;
+END;
+
+EXEC GetSellersByCity @City = 'Delhi';</code></pre>
+
+<p><strong>Multiple input parameters:</strong></p>
+
+<pre><code class="language-sql">CREATE PROCEDURE GetOrdersByDateRange
+    @StartDate DATE,
+    @EndDate DATE
+AS
+BEGIN
+    SELECT order_id, seller_name, amount, order_date
+    FROM orders
+    WHERE order_date BETWEEN @StartDate AND @EndDate;
+END;
+
+EXEC GetOrdersByDateRange @StartDate = '2024-05-01', @EndDate = '2024-05-31';</code></pre>
+
+<p><strong>Parameter with a default value:</strong></p>
+
+<pre><code class="language-sql">CREATE PROCEDURE GetTopSellers
+    @City VARCHAR(100) = 'Bengaluru',
+    @TopN INT = 10
+AS
+BEGIN
+    SELECT TOP (@TopN) seller_id, name, total_revenue
+    FROM sellers
+    WHERE city = @City
+    ORDER BY total_revenue DESC;
+END;
+
+-- Call with all defaults (returns top 10 from Bengaluru)
+EXEC GetTopSellers;
+
+-- Call with just city changed
+EXEC GetTopSellers @City = 'Mumbai';
+
+-- Call with both parameters
+EXEC GetTopSellers @City = 'Chennai', @TopN = 5;</code></pre>
+
+<p><strong>OUTPUT parameter to return a computed value:</strong></p>
+
+<pre><code class="language-sql">CREATE PROCEDURE InsertNewOrder
+    @SellerID INT,
+    @Amount DECIMAL(10,2),
+    @NewOrderID INT OUTPUT
+AS
+BEGIN
+    INSERT INTO orders (seller_id, amount, order_date)
+    VALUES (@SellerID, @Amount, GETDATE());
+    
+    SET @NewOrderID = SCOPE_IDENTITY();
+END;
+
+-- Calling a procedure with an OUTPUT parameter:
+DECLARE @CreatedOrderID INT;
+
+EXEC InsertNewOrder
+    @SellerID = 42,
+    @Amount = 1500.00,
+    @NewOrderID = @CreatedOrderID OUTPUT;
+
+SELECT @CreatedOrderID AS new_order_id;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Component</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td><code>@ParameterName DataType</code></td><td>Declares an input parameter — caller must provide this value unless a default exists</td></tr>
+<tr><td><code>@ParameterName DataType = DefaultValue</code></td><td>Declares an input parameter with a fallback value if the caller doesn't provide one</td></tr>
+<tr><td><code>@ParameterName DataType OUTPUT</code></td><td>Declares an output parameter — the procedure assigns a value to it, which the caller can read after execution</td></tr>
+<tr><td><code>EXEC ProcName @Param = value</code></td><td>Calls the procedure using named parameter syntax (recommended — order doesn't matter)</td></tr>
+<tr><td><code>EXEC ProcName value</code></td><td>Calls the procedure using positional syntax (order must match declaration order)</td></tr>
+<tr><td><code>DECLARE @var DataType</code></td><td>Declares a local variable in the caller's scope to receive an OUTPUT parameter</td></tr>
+<tr><td><code>SCOPE_IDENTITY()</code></td><td>Returns the identity value of the most recently inserted row in the current scope — often used with OUTPUT params</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p><strong>Sample table: seller_orders</strong></p>
+
+<table>
+<thead><tr><th>order_id</th><th>seller_name</th><th>city</th><th>category</th><th>amount</th><th>order_date</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Sharma Textiles</td><td>Delhi</td><td>Clothing</td><td>4500</td><td>2024-05-10</td></tr>
+<tr><td>2</td><td>Patel Electronics</td><td>Mumbai</td><td>Electronics</td><td>12000</td><td>2024-05-12</td></tr>
+<tr><td>3</td><td>Ravi Handicrafts</td><td>Bengaluru</td><td>Crafts</td><td>2100</td><td>2024-05-13</td></tr>
+<tr><td>4</td><td>Gupta Fashion</td><td>Delhi</td><td>Clothing</td><td>3800</td><td>2024-05-15</td></tr>
+<tr><td>5</td><td>Mehta Gadgets</td><td>Mumbai</td><td>Electronics</td><td>8500</td><td>2024-05-16</td></tr>
+</tbody></table>
+
+<h3>Example 1: Single input parameter</h3>
+
+<pre><code class="language-sql">CREATE PROCEDURE GetOrdersByCity
+    @City VARCHAR(100)
+AS
+BEGIN
+    SELECT order_id, seller_name, category, amount
+    FROM seller_orders
+    WHERE city = @City;
+END;
+
+EXEC GetOrdersByCity @City = 'Delhi';</code></pre>
+
+<p>Returns orders 1 and 4 — Sharma Textiles and Gupta Fashion, both from Delhi.</p>
+
+<h3>Example 2: Two input parameters</h3>
+
+<pre><code class="language-sql">CREATE PROCEDURE GetOrdersByCityAndCategory
+    @City VARCHAR(100),
+    @Category VARCHAR(100)
+AS
+BEGIN
+    SELECT order_id, seller_name, amount, order_date
+    FROM seller_orders
+    WHERE city = @City AND category = @Category;
+END;
+
+EXEC GetOrdersByCityAndCategory @City = 'Mumbai', @Category = 'Electronics';</code></pre>
+
+<p>Returns orders 2 and 5 — Patel Electronics and Mehta Gadgets, which are both from Mumbai and in the Electronics category.</p>
+
+<h3>Example 3: Default parameter in action</h3>
+
+<pre><code class="language-sql">CREATE PROCEDURE GetOrdersAboveAmount
+    @MinAmount DECIMAL(10,2) = 3000,
+    @City VARCHAR(100) = NULL
+AS
+BEGIN
+    SELECT order_id, seller_name, city, amount
+    FROM seller_orders
+    WHERE amount &gt;= @MinAmount
+      AND (@City IS NULL OR city = @City);
+END;
+
+-- No parameters — uses defaults (min 3000, all cities)
+EXEC GetOrdersAboveAmount;
+
+-- Only override city
+EXEC GetOrdersAboveAmount @City = 'Mumbai';</code></pre>
+
+<p>The first call returns orders 1, 2, 4, and 5 (all above ₹3000). The second call returns orders 2 and 5 (above ₹3000 AND from Mumbai).</p>
+
+<h3>Example 4: OUTPUT parameter returning the total amount</h3>
+
+<pre><code class="language-sql">CREATE PROCEDURE GetCityOrderTotal
+    @City VARCHAR(100),
+    @Total DECIMAL(12,2) OUTPUT
+AS
+BEGIN
+    SELECT @Total = SUM(amount)
+    FROM seller_orders
+    WHERE city = @City;
+END;
+
+DECLARE @DelhiTotal DECIMAL(12,2);
+EXEC GetCityOrderTotal @City = 'Delhi', @Total = @DelhiTotal OUTPUT;
+SELECT @DelhiTotal AS delhi_total_revenue;</code></pre>
+
+<p>The procedure sums Delhi's orders (4500 + 3800 = 8300) and puts that value into @DelhiTotal, which the caller then reads.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Do I always need to specify parameter names when calling a procedure?</strong></p>
+<p>No, but you should. You can pass values positionally — <code>EXEC MyProc 'Delhi', 3000</code> — and SQL will match them to parameters in declaration order. But if the order ever changes or you skip an optional parameter, positional calls break silently. Named parameters (<code>@City = 'Delhi'</code>) are explicit and don't depend on order.</p>
+
+<p><strong>Why does my OUTPUT parameter return NULL even though I set it inside the procedure?</strong></p>
+<p>Most likely you forgot to include the OUTPUT keyword when calling the procedure. You need it in both the procedure definition AND in the EXEC call. <code>EXEC GetCityOrderTotal @City = 'Delhi', @Total = @DelhiTotal OUTPUT</code> — that OUTPUT at the end is required, not optional.</p>
+
+<p><strong>Can I pass NULL as a parameter value?</strong></p>
+<p>Yes. <code>EXEC GetOrdersByCity @City = NULL</code> is valid syntax. Whether your procedure handles NULL gracefully is up to your logic inside. A <code>WHERE city = NULL</code> will never match anything — use <code>WHERE city IS NULL</code> or <code>WHERE (@City IS NULL OR city = @City)</code> to handle null inputs properly.</p>
+
+<p><strong>What's the maximum number of parameters a procedure can have?</strong></p>
+<p>In SQL Server, the limit is 2100 parameters. In practice, if you're approaching even 20 parameters, your procedure is probably trying to do too many different things and should be split up.</p>
+
+<p><strong>Can I use a parameter in an ORDER BY clause?</strong></p>
+<p>For sorting direction or column names — not directly, because SQL doesn't allow variable column names in ORDER BY. You'd need to use a CASE expression or dynamic SQL. But for values (like <code>TOP (@N)</code>), yes, parameters work fine.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Forgetting OUTPUT in the EXEC call</strong> — Defining a parameter as OUTPUT in the procedure is not enough. The caller must also use OUTPUT when passing the variable, or the value won't come back.</li><li><strong>Using defaults but not handling NULL</strong> — If a parameter has a default of NULL, the SQL inside must explicitly handle the NULL case. <code>WHERE city = NULL</code> never returns rows.</li><li><strong>Passing parameters in the wrong order without using named syntax</strong> — Positional parameter calls break when parameters are reordered. Always use <code>@ParameterName = value</code> syntax.</li><li><strong>Not validating input parameters</strong> — A procedure that accepts a date range should check that StartDate is before EndDate. Skipping validation leads to empty results or wrong data with no error message.</li><li><strong>Using VARCHAR without a length</strong> — Writing <code>@City VARCHAR</code> instead of <code>@City VARCHAR(100)</code> uses a default of VARCHAR(1) in some databases, silently truncating your input. Always specify the length.</li><li><strong>Assuming default parameters are always optional from the caller's view</strong> — Defaults only make parameters optional for direct EXEC calls. If the procedure is called through a wrapper or an older API, some callers may still need to pass all parameters explicitly.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Always specify parameter lengths for string types — <code>VARCHAR(100)</code> not just <code>VARCHAR</code>.</li><li>Use named parameter syntax in EXEC calls for readability and resilience to parameter reordering.</li><li>Set sensible defaults for optional parameters so the procedure works out of the box for the most common use case.</li><li>Validate parameters at the start of the procedure — check for NULLs where they're not allowed and raise a meaningful error if found.</li><li>Document what each parameter means and what valid values look like, especially for codes and flags.</li><li>Keep the number of parameters manageable — if a procedure needs more than 8-10 parameters, consider whether it's trying to do too much.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>At Flipkart, the seller reporting system uses parameterised procedures extensively. A single procedure called something like <code>Seller<em>GetPerformanceSummary</code> accepts parameters for seller</em>id, start<em>date, end</em>date, and metric_type. The same procedure powers the seller's own dashboard, the category manager's Excel exports, and the finance team's quarterly reports. Everyone gets the right slice of data by changing the parameters — nobody maintains separate report procedures.</p>
+
+<p>IRCTC's PNR status system is backed by a procedure that accepts the PNR number as a parameter and returns all the relevant journey details. The same procedure is called by the website, the mobile app, the SMS service, and the station inquiry kiosks. Every channel passes a different PNR; the procedure handles all of them identically.</p>
+
+<p>At PhonePe, transaction procedures accept parameters like transaction<em>id, merchant</em>id, amount, and transaction<em>type. The OUTPUT parameters return approval</em>code and response_message. The calling application receives these values and uses them to tell the customer whether the payment succeeded. This pattern — pass in transaction details, get back a status code — is fundamental to how payment processing works.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>Caller (Application / Script)          Stored Procedure
+───────────────────────────            ─────────────────
+
+DECLARE @TotalOut DECIMAL;             CREATE PROCEDURE GetCityStats
+                                           @City VARCHAR(100),    ← INPUT
+EXEC GetCityStats                          @MinAmt DECIMAL = 0,   ← INPUT with DEFAULT
+    @City = 'Mumbai',     ────────►        @Total DECIMAL OUTPUT  ← OUTPUT
+    @MinAmt = 5000,
+    @Total = @TotalOut OUTPUT              AS BEGIN
+                                               SELECT @Total = SUM(amount)
+                          ◄── value ────       FROM orders
+                              flows back        WHERE city = @City
+                                               AND amount &gt;= @MinAmt;
+SELECT @TotalOut;                          END;</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>Parameters make procedures dynamic — the same procedure can serve different inputs.</li><li>INPUT parameters carry data in; OUTPUT parameters carry data back to the caller.</li><li>Default values make parameters optional — the procedure uses the default if the caller doesn't provide a value.</li><li>Always use named parameter syntax in EXEC calls to avoid order-dependency issues.</li><li>OUTPUT parameters require the OUTPUT keyword in both the procedure definition and the EXEC call.</li><li>Validate parameters inside the procedure — never assume the caller passed correct values.</li><li>Specify data type lengths for all string parameters.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<p>Use this table for practice:</p>
+
+<p><strong>orders</strong> (order<em>id, customer</em>name, city, product<em>category, amount, order</em>date, status)</p>
+
+<ol><li>Write a procedure that accepts a city name and returns all orders from that city.</li><li>Write a procedure that accepts a minimum and maximum amount and returns all orders within that range.</li><li>Write a procedure with a default city of 'Delhi' and a default status of 'DELIVERED' that can be called with no parameters, one parameter, or both.</li><li>Write a procedure that accepts a city name and an OUTPUT parameter, and returns the count of orders from that city via the output parameter.</li><li>Write a procedure that accepts customer<em>name and new</em>status, and updates all orders for that customer to the new status. After updating, use an OUTPUT parameter to return how many rows were updated.</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Simran's breakthrough at Flipkart came when she realised that parameters are not just a technical feature — they're a design principle. When you write a procedure with hardcoded values, you're writing code that works for one scenario. When you write a procedure with parameters, you're building something that can adapt to many scenarios.</p>
+
+<p>The discipline of using parameters well — specifying the right types, setting sensible defaults, handling NULLs, using OUTPUT parameters where appropriate — is what separates a database that's easy to maintain from one that's a patchwork of duplicated procedures.</p>
+
+<p>You'll find that once you start thinking in terms of parameterised procedures, you'll naturally write more reusable code everywhere, not just in SQL. The habit of asking "what should be variable here, and what should be fixed?" is a good one to build early.</p>
+
+<p>Take Simran's path: start with one over-specific procedure you've written, identify the hardcoded values in it, and replace them with parameters. You'll immediately see why this matters.</p>
+
+  `,
+  'mod12-t4': `
+    <h1>User-Defined Functions (UDFs)</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Priya is a SQL developer at Paytm in Noida. Her team manages the billing system for Paytm's merchant services. Merchants get charged based on transaction volume — but the calculation isn't simple. There are different slabs, GST on top of the fee, a minimum charge threshold, and rounding rules. Every invoice query has this same 12-line calculation block repeated in it.</p>
+
+<p>One day, a new developer on her team wrote a report with the wrong version of the calculation — he'd copied the formula but missed updating the GST rate when it changed last quarter. The report went out to 800 merchants with incorrect figures. It took three days to fix and re-send.</p>
+
+<p>Priya's tech lead came to her with a solution: "Put that calculation in a function. Everywhere the calculation is needed, just call the function. When the rate changes, update the function once." That was her introduction to User-Defined Functions, and it changed how she thought about writing SQL.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>Complex calculations or business rules in SQL tend to get copy-pasted everywhere. The calculation for "applicable GST on a transaction" ends up in 20 different queries, reports, and views. When the rule changes — and it always changes — you have to find and update every copy. Miss one, and you have a data inconsistency.</p>
+
+<p>A related problem: SQL has built-in functions like <code>UPPER()</code>, <code>LEN()</code>, <code>ROUND()</code>, and <code>DATEDIFF()</code> for common operations. But built-in functions don't know your business rules. You need something custom — your own function that encapsulates your specific logic and can be called just like a built-in function, inline in a query.</p>
+
+<p>That's exactly what a User-Defined Function (UDF) is: a custom function you write, stored in the database, that can be called inside SELECT, WHERE, or other clauses just like built-in functions. The logic lives in one place, the name describes what it does, and any query that needs that logic just calls the function by name.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Stored procedures existed before UDFs and could encapsulate logic, but they couldn't be called inline in queries. You couldn't write <code>SELECT dbo.CalculateGST(amount) FROM invoices</code> with a stored procedure — you'd have to execute it separately and store results in a temp table first. That was cumbersome for calculations that needed to be part of a SELECT or WHERE clause.</p>
+
+<p>SQL Server introduced scalar UDFs in SQL Server 2000. The goal was to let developers extend SQL's expression language with custom logic. A UDF returns a value (or a table) and can be embedded anywhere an expression is valid. This made complex custom calculations as easy to use as built-in functions.</p>
+
+<p>The concept mirrored what Oracle had done with PL/SQL functions and MySQL with its stored functions. All major databases adopted some form of user-defined functions because the pattern was so obviously useful — custom logic that behaves syntactically like a built-in function.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think of a UDF like a custom formula in a spreadsheet.</p>
+
+<p>In Excel, you have built-in formulas: SUM, AVERAGE, VLOOKUP. But sometimes your business has a specific calculation — say, "apply a 2% fee for amounts above ₹10,000 and a 1.5% fee below" — that no built-in formula handles. In modern Excel, you'd define a custom formula once and use it in any cell.</p>
+
+<p>A SQL UDF is the same idea. You define your custom calculation once — <code>CREATE FUNCTION CalculateMerchantFee(@Amount DECIMAL)</code> — and then use it in any query: <code>SELECT CalculateMerchantFee(transaction_amount) FROM transactions</code>. The function handles the logic; the query just calls the name.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think of a UDF like a custom stamp at a post office.</p>
+
+<p>The post office has standard stamps for common postage rates. But if you're a business sending a special type of package — fragile, express, cash-on-delivery — you need a custom stamp with a custom rate calculation. You register your custom stamp once. From that point, the clerk can apply it to any package without doing the calculation from scratch each time.</p>
+
+<p>The function is your custom stamp. Every query that needs that calculation applies it by name. The calculation logic is sealed inside — you only see the result.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>A User-Defined Function (UDF) in SQL is a database object that accepts zero or more input parameters, executes some SQL logic, and returns a result. Unlike stored procedures, functions must return something — either a single value (scalar functions) or a table (table-valued functions, covered in the next article).</p>
+
+<p>When SQL Server encounters a UDF call in a query — say <code>dbo.CalculateGST(amount)</code> — it pauses the main query's execution, runs the function's code with the provided input, gets the return value, and substitutes it into the main query at that point. This happens row by row for scalar functions, which is why scalar UDFs can be slow on large datasets.</p>
+
+<p>Functions have strict rules compared to stored procedures. They cannot modify data (no INSERT, UPDATE, DELETE, TRUNCATE). They cannot use non-deterministic functions like <code>GETDATE()</code> in some contexts. They must have a RETURN statement that returns a value matching the declared return type. These restrictions exist so the database can safely embed a function call inside a query's execution plan.</p>
+
+<p>UDFs are owned by a schema (typically <code>dbo</code>) and called with the full name: <code>dbo.FunctionName(parameters)</code>. This is different from stored procedures, which can be called without the schema prefix in some contexts.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<p><strong>Basic scalar function:</strong></p>
+
+<pre><code class="language-sql">CREATE FUNCTION dbo.CalculateGST
+(
+    @Amount DECIMAL(10,2),
+    @GSTRate DECIMAL(5,2)
+)
+RETURNS DECIMAL(10,2)
+AS
+BEGIN
+    DECLARE @GSTAmount DECIMAL(10,2);
+    SET @GSTAmount = @Amount * (@GSTRate / 100);
+    RETURN @GSTAmount;
+END;</code></pre>
+
+<p><strong>Calling a scalar function in a SELECT:</strong></p>
+
+<pre><code class="language-sql">SELECT 
+    invoice_id,
+    base_amount,
+    dbo.CalculateGST(base_amount, 18.0) AS gst_amount,
+    base_amount + dbo.CalculateGST(base_amount, 18.0) AS total_amount
+FROM invoices;</code></pre>
+
+<p><strong>Function with conditional logic:</strong></p>
+
+<pre><code class="language-sql">CREATE FUNCTION dbo.GetMerchantFeeRate
+(
+    @TransactionAmount DECIMAL(10,2)
+)
+RETURNS DECIMAL(5,3)
+AS
+BEGIN
+    DECLARE @Rate DECIMAL(5,3);
+    
+    IF @TransactionAmount &gt;= 10000
+        SET @Rate = 0.020;
+    ELSE IF @TransactionAmount &gt;= 1000
+        SET @Rate = 0.025;
+    ELSE
+        SET @Rate = 0.030;
+    
+    RETURN @Rate;
+END;</code></pre>
+
+<p><strong>Using a UDF in a WHERE clause:</strong></p>
+
+<pre><code class="language-sql">SELECT invoice_id, base_amount
+FROM invoices
+WHERE dbo.CalculateGST(base_amount, 18.0) &gt; 500;</code></pre>
+
+<p><strong>Altering and dropping a function:</strong></p>
+
+<pre><code class="language-sql">ALTER FUNCTION dbo.CalculateGST
+(
+    @Amount DECIMAL(10,2),
+    @GSTRate DECIMAL(5,2)
+)
+RETURNS DECIMAL(10,2)
+AS
+BEGIN
+    RETURN ROUND(@Amount * (@GSTRate / 100), 2);
+END;
+
+DROP FUNCTION dbo.CalculateGST;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Component</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td><code>CREATE FUNCTION schema.FunctionName</code></td><td>Creates a new UDF owned by the specified schema</td></tr>
+<tr><td><code>(@Param DataType)</code></td><td>Declares input parameters — the values the function receives when called</td></tr>
+<tr><td><code>RETURNS DataType</code></td><td>Specifies what type of value the function will return (for scalar functions)</td></tr>
+<tr><td><code>AS BEGIN ... END</code></td><td>Marks the function body where the logic lives</td></tr>
+<tr><td><code>RETURN expression</code></td><td>Sends a value back to the caller — mandatory for scalar functions</td></tr>
+<tr><td><code>DECLARE @var DataType</code></td><td>Declares a local variable that exists only inside the function</td></tr>
+<tr><td><code>dbo.FunctionName(args)</code></td><td>How you call a UDF — must include the schema prefix</td></tr>
+<tr><td><code>ALTER FUNCTION</code></td><td>Updates the logic of an existing function without dropping and recreating</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p><strong>Sample table: merchant_transactions</strong></p>
+
+<table>
+<thead><tr><th>txn_id</th><th>merchant_name</th><th>city</th><th>txn_amount</th><th>txn_date</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Sharma Store</td><td>Delhi</td><td>850</td><td>2024-06-01</td></tr>
+<tr><td>2</td><td>Patel Mart</td><td>Mumbai</td><td>12500</td><td>2024-06-02</td></tr>
+<tr><td>3</td><td>Ravi Kirana</td><td>Bengaluru</td><td>4200</td><td>2024-06-03</td></tr>
+<tr><td>4</td><td>Gupta Textiles</td><td>Jaipur</td><td>980</td><td>2024-06-04</td></tr>
+<tr><td>5</td><td>Mehta Electronics</td><td>Hyderabad</td><td>28000</td><td>2024-06-05</td></tr>
+</tbody></table>
+
+<h3>Example 1: Calculate fee for each transaction</h3>
+
+<pre><code class="language-sql">-- First create the function
+CREATE FUNCTION dbo.GetMerchantFee(@Amount DECIMAL(10,2))
+RETURNS DECIMAL(10,2)
+AS
+BEGIN
+    DECLARE @Rate DECIMAL(5,3);
+    IF @Amount &gt;= 10000 SET @Rate = 0.020;
+    ELSE IF @Amount &gt;= 1000 SET @Rate = 0.025;
+    ELSE SET @Rate = 0.030;
+    RETURN ROUND(@Amount * @Rate, 2);
+END;
+
+-- Now use it in a query
+SELECT 
+    merchant_name,
+    txn_amount,
+    dbo.GetMerchantFee(txn_amount) AS platform_fee
+FROM merchant_transactions;</code></pre>
+
+<p>Sharma Store (₹850) gets 3% = ₹25.50. Patel Mart (₹12,500) gets 2% = ₹250. Mehta Electronics (₹28,000) gets 2% = ₹560.</p>
+
+<h3>Example 2: Use function in WHERE clause</h3>
+
+<pre><code class="language-sql">SELECT merchant_name, txn_amount
+FROM merchant_transactions
+WHERE dbo.GetMerchantFee(txn_amount) &gt; 100;</code></pre>
+
+<p>Returns Patel Mart, Ravi Kirana, and Mehta Electronics — the transactions where the calculated fee exceeds ₹100. Sharma Store's fee is ₹25.50 and Gupta Textiles' is ₹24.50, both below ₹100.</p>
+
+<h3>Example 3: Add GST on top of the fee</h3>
+
+<pre><code class="language-sql">CREATE FUNCTION dbo.GetTotalCharge
+(
+    @Amount DECIMAL(10,2),
+    @GSTRate DECIMAL(5,2)
+)
+RETURNS DECIMAL(10,2)
+AS
+BEGIN
+    DECLARE @Fee DECIMAL(10,2);
+    DECLARE @GST DECIMAL(10,2);
+    SET @Fee = dbo.GetMerchantFee(@Amount);
+    SET @GST = @Fee * (@GSTRate / 100);
+    RETURN ROUND(@Fee + @GST, 2);
+END;
+
+SELECT 
+    merchant_name,
+    txn_amount,
+    dbo.GetTotalCharge(txn_amount, 18.0) AS total_deduction
+FROM merchant_transactions;</code></pre>
+
+<p>This calls one UDF inside another. Patel Mart's fee is ₹250, GST on that is ₹45, total deduction = ₹295.</p>
+
+<h3>Example 4: A string formatting function</h3>
+
+<pre><code class="language-sql">CREATE FUNCTION dbo.FormatMerchantLabel
+(
+    @MerchantName VARCHAR(100),
+    @City VARCHAR(100)
+)
+RETURNS VARCHAR(200)
+AS
+BEGIN
+    RETURN @MerchantName + ' (' + @City + ')';
+END;
+
+SELECT dbo.FormatMerchantLabel(merchant_name, city) AS label, txn_amount
+FROM merchant_transactions;</code></pre>
+
+<p>Returns formatted labels like "Sharma Store (Delhi)", "Patel Mart (Mumbai)" — useful for reports and exports.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Why can't I use GETDATE() inside a UDF?</strong></p>
+<p>Scalar UDFs must be deterministic in certain contexts — meaning the same inputs always produce the same output. <code>GETDATE()</code> returns a different value every time, making the function non-deterministic. SQL Server restricts or flags non-deterministic functions in UDFs because they can cause issues in computed columns, indexed views, and query optimisation. Use a datetime parameter instead if you need the current date.</p>
+
+<p><strong>Why is my query slow after adding a UDF?</strong></p>
+<p>Scalar UDFs often cause significant performance problems because they're called once per row. For a million-row table, the function runs a million times, each time as a separate context switch. This is a known limitation of scalar UDFs in SQL Server before version 2019. If you're seeing slowness, consider rewriting the function logic as a CASE expression in the query directly, or use an inline table-valued function instead.</p>
+
+<p><strong>Can a UDF call a stored procedure?</strong></p>
+<p>No. Functions cannot call stored procedures. This is one of the key restrictions. Functions are designed to be side-effect-free and embedded in queries; stored procedures can do anything, including modifying data, which is not allowed inside a function.</p>
+
+<p><strong>Do I need the schema prefix (dbo.) when calling a function?</strong></p>
+<p>Yes, always. Unlike stored procedures, user-defined functions require the schema prefix when called. <code>SELECT CalculateGST(100, 18)</code> will fail; <code>SELECT dbo.CalculateGST(100, 18)</code> will work. This is a common source of errors for beginners.</p>
+
+<p><strong>Can a function return multiple values?</strong></p>
+<p>A scalar function returns exactly one value. If you need to return multiple columns or rows, you need a table-valued function (covered in the next article). You can work around single-value limits by returning a delimited string, but that's messy — table-valued functions are the right tool for multi-value returns.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Forgetting the schema prefix</strong> — <code>dbo.FunctionName()</code> is required when calling UDFs. Omitting it causes "object not found" errors even if the function exists.</li><li><strong>Not handling NULL inputs</strong> — If a parameter can be NULL and your function doesn't handle it, the function might return NULL or an unexpected value. Use <code>ISNULL(@Param, default)</code> or add a NULL check at the start.</li><li><strong>Using scalar UDFs on large tables without considering performance</strong> — Scalar UDFs called in WHERE or SELECT on tables with millions of rows will be very slow. Benchmark before deploying.</li><li><strong>Trying to do INSERT/UPDATE/DELETE inside a function</strong> — Functions are read-only. Any attempt to modify data will cause a compilation error.</li><li><strong>Returning the wrong data type</strong> — If the RETURNS clause says <code>DECIMAL(10,2)</code> but your RETURN statement sends back an <code>INT</code>, implicit conversion happens silently and you lose decimal precision.</li><li><strong>Calling GETDATE() or other non-deterministic functions inside a scalar UDF</strong> — This restricts where the function can be used and may cause errors in computed columns or indexed views.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Name functions with a clear verb-noun pattern: <code>GetMerchantFee</code>, <code>CalculateGST</code>, <code>FormatInvoiceLabel</code>.</li><li>Keep functions focused — one function, one job. A function that does 10 different calculations is hard to test and understand.</li><li>Handle NULL inputs explicitly — add <code>IF @Param IS NULL RETURN NULL</code> or use ISNULL/COALESCE at the top.</li><li>For performance-sensitive queries on large tables, consider whether an inline CASE expression or a table-valued function might be faster than a scalar UDF.</li><li>Test the function by calling it directly with a SELECT before embedding it in complex queries: <code>SELECT dbo.CalculateGST(1000, 18)</code>.</li><li>Grant EXECUTE permission on functions just like procedures — don't rely on implicit access.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Paytm's billing system uses several UDFs to calculate the charges applied to merchants. A function like <code>dbo.GetMerchantServiceFee</code> encapsulates the tiered fee structure — percentage rate varies by transaction amount band. Another function calculates GST on the fee. The invoice generation query calls both functions for every transaction. When SEBI or NPCI changes fee regulations, the team updates the function once, and every invoice generated from that point uses the new logic.</p>
+
+<p>Flipkart uses UDFs to standardise address formatting in their logistics system. A function called something like <code>dbo.FormatDeliveryAddress</code> takes raw address fields — house number, street, area, city, pin code — and returns a formatted string for printing on shipping labels. Every part of the system that needs a formatted address calls this one function. When the formatting rule changed (they added district to the format), one function update propagated to every label system automatically.</p>
+
+<p>Jio uses date calculation functions in their recharge and plan expiry systems. A function calculates plan validity end dates based on plan type — prepaid plans count from activation date, postpaid plans from billing cycle date. This calculation appears in billing queries, notification queries, and account status checks. Having it as a UDF means the calculation is consistent across all systems, and a change in validity calculation logic only needs to happen once.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>Query:
+SELECT merchant_name,
+       txn_amount,
+       dbo.GetMerchantFee(txn_amount)   ← UDF called here
+FROM merchant_transactions;
+
+                    │
+                    ▼ (for each row)
+         ┌──────────────────────────┐
+         │  dbo.GetMerchantFee      │
+         │  @Amount = 12500         │
+         │                          │
+         │  IF Amount &gt;= 10000      │
+         │    Rate = 0.020          │
+         │  RETURN 12500 * 0.020    │
+         │       = 250.00           │
+         └──────────────────────────┘
+                    │
+                    ▼
+         250.00 substituted
+         back into the main query</code></pre>
+
+<p>The function runs once per row, substituting the calculated value into the result set.</p>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>A UDF is a custom function stored in the database that returns a value and can be called inline in queries.</li><li>Scalar UDFs return a single value; table-valued UDFs return a table (covered in the next article).</li><li>UDFs must include a RETURN statement; this is mandatory, not optional.</li><li>Functions cannot modify data — no INSERT, UPDATE, DELETE inside a function.</li><li>Always use the schema prefix when calling a UDF: <code>dbo.FunctionName()</code>.</li><li>Scalar UDFs called on large result sets can be slow — test performance with realistic data volumes.</li><li>Use ALTER FUNCTION to update logic without losing permissions.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<p>Use this table for practice:</p>
+
+<p><strong>employees</strong> (employee<em>id, name, department, salary, experience</em>years, city)</p>
+
+<ol><li>Write a scalar UDF called <code>dbo.GetAnnualSalary</code> that accepts a monthly salary and returns the annual salary (monthly × 12).</li><li>Write a UDF called <code>dbo.GetExperienceCategory</code> that accepts experience_years and returns 'Junior' (0-2 years), 'Mid' (3-6 years), or 'Senior' (7+ years).</li><li>Use both UDFs above in a single SELECT query to show each employee's annual salary and experience category.</li><li>Write a UDF that accepts a salary and returns the income tax amount — assume 10% for salary below ₹50,000/month and 20% above.</li><li>Write a UDF called <code>dbo.FormatEmployeeTitle</code> that accepts a name and department and returns a formatted string like "Priya Sharma — Engineering".</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Priya's problem at Paytm was a classic case of duplicated logic causing a real business incident. The merchant rebilling exercise cost the team three days of work and damaged trust with hundreds of merchants. One function could have prevented all of it.</p>
+
+<p>The insight behind UDFs is that SQL is an expression language. When you write <code>SELECT amount * 1.18 FROM invoices</code>, you're writing a calculation inline. But when that calculation has 8 conditions, 3 intermediate variables, and specific rounding rules, you don't want it inline in every query. You want it named, tested, and in one place. That's what a UDF gives you.</p>
+
+<p>The limitation to keep in mind — and this is real — is performance. Scalar UDFs on large tables are slower than equivalent inline expressions. This doesn't mean you shouldn't use them; it means you should test them with your actual data volumes before putting them into production queries that touch millions of rows.</p>
+
+<p>Start by identifying the calculations in your codebase that appear more than twice. Each one is a candidate for a UDF. Extract it, name it well, test it with edge cases, and then replace every occurrence with the function call. You'll be surprised how much cleaner your queries become.</p>
+
+  `,
+  'mod12-t5': `
+    <h1>Scalar vs Table-Valued Functions</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Aman is a senior developer at Byju's in Bengaluru. His team manages the student progress tracking system. Teachers use a dashboard that shows each student's performance across subjects, and the data powering that dashboard comes from a mix of quiz scores, assignment marks, and attendance data spread across multiple tables.</p>
+
+<p>One day, a teacher asked for a report that shows, for any given student, their complete subject-wise performance summary. Aman built a scalar function that calculated the average score for one subject. But then the teacher said, "I need this for all 8 subjects side by side." A scalar function returns one value. Aman needed something that could return a whole table of results.</p>
+
+<p>His colleague Neha pointed him toward table-valued functions. "It's like a scalar function, but instead of returning one number, it returns a table. You can JOIN it, SELECT from it, filter it — just like a regular table." Aman rebuilt the function in 20 minutes and the teacher's report worked perfectly.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>Scalar functions are easy to understand and use, but they have a fundamental limitation: they return exactly one value. One number, one string, one date. That's it.</p>
+
+<p>Many real-world calculations don't fit this constraint. You might need a function that returns multiple rows for a given input — all orders for a customer, all subjects a student is enrolled in, or all transactions in a time window. A scalar function cannot do this.</p>
+
+<p>Without table-valued functions, the workaround is to write the query logic directly in every place you need it, or use a stored procedure and dump results into a temporary table. Both approaches are messy. Table-valued functions give you a cleaner option: a reusable, parameterised query that behaves exactly like a table inside any SQL statement.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>After scalar UDFs shipped in SQL Server 2000, developers quickly hit the wall of "but I need to return multiple rows." The logical next step was a function that returned a table instead of a scalar value.</p>
+
+<p>SQL Server 2000 also introduced table-valued functions alongside scalar ones. Two types were defined: multi-statement table-valued functions (where you build a table explicitly using INSERT statements) and inline table-valued functions (where the return is simply a single SELECT statement). Inline TVFs turned out to be much faster because the query optimiser can look inside them and optimise the overall query, something it cannot do with multi-statement TVFs.</p>
+
+<p>PostgreSQL, Oracle, and MySQL developed their own variants of table-returning functions. The common thread across all databases was the same need: a parameterised, reusable piece of SQL that returns a result set you can query like a table.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Imagine a scalar function as a cashier at a bank who tells you your account balance. You give them your account number (the input), they check the system, and they say "₹42,500" (one value back). That's a scalar function.</p>
+
+<p>Now imagine a table-valued function as a teller who pulls out your full statement — every transaction, every date, every amount — and hands you a printed list. You gave them one input (your account number), but you got back multiple rows of data.</p>
+
+<p>The "statement" they gave you can be sorted, filtered, and combined with other information. That's what makes a table-valued function powerful — the output is a full table you can work with, not just a single number.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think of scalar vs table-valued functions like two kinds of phone service representatives.</p>
+
+<p>The first rep answers one question: "What's my current bill amount?" They give you a number. Done. That's a scalar function.</p>
+
+<p>The second rep generates your itemised bill: every call, every SMS, every data charge, listed by date. You asked one question (your account number), but you received a whole structured list that you can examine in detail. That's a table-valued function.</p>
+
+<p>Both are useful. The first is simpler and fits wherever a single value fits. The second is more powerful and fits wherever a full result set is needed.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p><strong>Scalar functions</strong> run a block of SQL logic and return a single value of a declared type — INT, VARCHAR, DECIMAL, DATE, etc. The function is called in an expression context. SQL evaluates it per row when used in SELECT or WHERE.</p>
+
+<p><strong>Table-Valued Functions (TVFs)</strong> run a query and return a table. They're used in the FROM clause of a query, just like a real table or a subquery. You can JOIN to them, apply WHERE filters on their output, and alias them.</p>
+
+<p>There are two kinds of TVFs:</p>
+
+<p><strong>Inline TVFs</strong> — contain a single SELECT statement as their body. No variables, no multi-step logic. They look like a parameterised view. The optimiser can "expand" the inline TVF into the outer query, optimising the whole thing as one unit. This makes inline TVFs fast.</p>
+
+<p><strong>Multi-statement TVFs</strong> — declare a return table variable, populate it with INSERT statements inside the function body, and return it at the end. This allows complex logic but is slower because the optimiser treats the returned table as a black box and cannot optimise across it.</p>
+
+<p>As a general rule: prefer inline TVFs for performance. Use multi-statement TVFs only when you genuinely need multi-step logic that cannot be expressed in a single SELECT.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<p><strong>Scalar function (for comparison):</strong></p>
+
+<pre><code class="language-sql">CREATE FUNCTION dbo.GetAverageScore(@StudentID INT)
+RETURNS DECIMAL(5,2)
+AS
+BEGIN
+    DECLARE @Avg DECIMAL(5,2);
+    SELECT @Avg = AVG(score) FROM quiz_results WHERE student_id = @StudentID;
+    RETURN @Avg;
+END;
+
+-- Called in a SELECT expression:
+SELECT student_id, dbo.GetAverageScore(student_id) AS avg_score
+FROM students;</code></pre>
+
+<p><strong>Inline Table-Valued Function:</strong></p>
+
+<pre><code class="language-sql">CREATE FUNCTION dbo.GetStudentResults(@StudentID INT)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT subject, score, exam_date
+    FROM quiz_results
+    WHERE student_id = @StudentID
+);</code></pre>
+
+<p><strong>Calling an inline TVF (in FROM clause):</strong></p>
+
+<pre><code class="language-sql">SELECT subject, score, exam_date
+FROM dbo.GetStudentResults(101);</code></pre>
+
+<p><strong>Joining a TVF like a table:</strong></p>
+
+<pre><code class="language-sql">SELECT s.name, r.subject, r.score
+FROM students s
+CROSS APPLY dbo.GetStudentResults(s.student_id) r
+WHERE r.score &gt;= 80;</code></pre>
+
+<p><strong>Multi-statement Table-Valued Function:</strong></p>
+
+<pre><code class="language-sql">CREATE FUNCTION dbo.GetStudentReport(@StudentID INT)
+RETURNS @Results TABLE
+(
+    subject       VARCHAR(100),
+    avg_score     DECIMAL(5,2),
+    grade         VARCHAR(5)
+)
+AS
+BEGIN
+    INSERT INTO @Results (subject, avg_score, grade)
+    SELECT 
+        subject,
+        AVG(score),
+        CASE 
+            WHEN AVG(score) &gt;= 90 THEN 'A'
+            WHEN AVG(score) &gt;= 75 THEN 'B'
+            WHEN AVG(score) &gt;= 60 THEN 'C'
+            ELSE 'D'
+        END
+    FROM quiz_results
+    WHERE student_id = @StudentID
+    GROUP BY subject;
+    
+    RETURN;
+END;
+
+-- Calling the multi-statement TVF:
+SELECT subject, avg_score, grade
+FROM dbo.GetStudentReport(101);</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Component</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td><code>RETURNS scalar_type</code></td><td>Used in scalar functions — declares the single value type being returned</td></tr>
+<tr><td><code>RETURNS TABLE AS RETURN (SELECT ...)</code></td><td>Inline TVF syntax — the entire function body is one SELECT, and its result is the return table</td></tr>
+<tr><td><code>RETURNS @TableVar TABLE (col definitions)</code></td><td>Multi-statement TVF syntax — declares a table variable that will be populated and returned</td></tr>
+<tr><td><code>FROM dbo.FunctionName(params)</code></td><td>How you call a TVF — in the FROM clause, like any table</td></tr>
+<tr><td><code>CROSS APPLY</code></td><td>Calls a TVF for each row of the left table, returning all matching rows from the TVF for each</td></tr>
+<tr><td><code>OUTER APPLY</code></td><td>Like CROSS APPLY but keeps left-table rows even when the TVF returns no rows (like LEFT JOIN)</td></tr>
+<tr><td><code>RETURN;</code> (end of multi-statement TVF)</td><td>Signals that the function should return the populated table variable</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p><strong>Sample tables:</strong></p>
+
+<p><strong>students</strong></p>
+
+<table>
+<thead><tr><th>student_id</th><th>name</th><th>city</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Rahul Gupta</td><td>Delhi</td></tr>
+<tr><td>2</td><td>Priya Singh</td><td>Mumbai</td></tr>
+<tr><td>3</td><td>Arjun Rao</td><td>Bengaluru</td></tr>
+</tbody></table>
+
+<p><strong>quiz_results</strong></p>
+
+<table>
+<thead><tr><th>result_id</th><th>student_id</th><th>subject</th><th>score</th><th>exam_date</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>1</td><td>Maths</td><td>88</td><td>2024-03-10</td></tr>
+<tr><td>2</td><td>1</td><td>Science</td><td>74</td><td>2024-03-11</td></tr>
+<tr><td>3</td><td>1</td><td>English</td><td>92</td><td>2024-03-12</td></tr>
+<tr><td>4</td><td>2</td><td>Maths</td><td>95</td><td>2024-03-10</td></tr>
+<tr><td>5</td><td>2</td><td>Science</td><td>81</td><td>2024-03-11</td></tr>
+<tr><td>6</td><td>3</td><td>Maths</td><td>67</td><td>2024-03-10</td></tr>
+</tbody></table>
+
+<h3>Example 1: Scalar function — single average</h3>
+
+<pre><code class="language-sql">CREATE FUNCTION dbo.GetOverallAvg(@StudentID INT)
+RETURNS DECIMAL(5,2)
+AS
+BEGIN
+    DECLARE @Avg DECIMAL(5,2);
+    SELECT @Avg = AVG(CAST(score AS DECIMAL(5,2))) FROM quiz_results WHERE student_id = @StudentID;
+    RETURN @Avg;
+END;
+
+SELECT name, dbo.GetOverallAvg(student_id) AS overall_avg
+FROM students;</code></pre>
+
+<p>Returns one average per student: Rahul 84.67, Priya 88.00, Arjun 67.00.</p>
+
+<h3>Example 2: Inline TVF — all results for a student</h3>
+
+<pre><code class="language-sql">CREATE FUNCTION dbo.GetResultsForStudent(@StudentID INT)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT subject, score, exam_date
+    FROM quiz_results
+    WHERE student_id = @StudentID
+    ORDER BY subject
+);
+
+SELECT * FROM dbo.GetResultsForStudent(1);</code></pre>
+
+<p>Returns 3 rows for student 1 (Rahul): Maths 88, Science 74, English 92.</p>
+
+<h3>Example 3: CROSS APPLY to get results for all students</h3>
+
+<pre><code class="language-sql">SELECT s.name, r.subject, r.score
+FROM students s
+CROSS APPLY dbo.GetResultsForStudent(s.student_id) r
+ORDER BY s.name, r.score DESC;</code></pre>
+
+<p>Returns all quiz results for all students, with the student name joined in. Students with no results are excluded (CROSS APPLY behaviour).</p>
+
+<h3>Example 4: Multi-statement TVF for grade calculation</h3>
+
+<pre><code class="language-sql">CREATE FUNCTION dbo.GetGradeReport(@StudentID INT)
+RETURNS @GradeTable TABLE
+(
+    subject   VARCHAR(100),
+    avg_score DECIMAL(5,2),
+    grade     CHAR(1)
+)
+AS
+BEGIN
+    INSERT INTO @GradeTable
+    SELECT subject, AVG(CAST(score AS DECIMAL(5,2))),
+        CASE WHEN AVG(score) &gt;= 90 THEN 'A'
+             WHEN AVG(score) &gt;= 75 THEN 'B'
+             WHEN AVG(score) &gt;= 60 THEN 'C'
+             ELSE 'D' END
+    FROM quiz_results
+    WHERE student_id = @StudentID
+    GROUP BY subject;
+    RETURN;
+END;
+
+SELECT * FROM dbo.GetGradeReport(1);</code></pre>
+
+<p>Returns Rahul's grades: Maths B (88), Science C (74), English A (92).</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>When should I use an inline TVF instead of a view?</strong></p>
+<p>A view has no parameters — it always shows the same data (though you can filter it in the outer query). An inline TVF accepts parameters, so it can return different data based on input. Use a view when the result set is always the same; use an inline TVF when the result depends on an input value.</p>
+
+<p><strong>Why is my multi-statement TVF much slower than expected?</strong></p>
+<p>The query optimiser treats the output of a multi-statement TVF as a black box with an estimated 1 row (or a small default). It cannot optimise joins or filters across this boundary. For performance-critical queries, rewrite the logic as an inline TVF or a regular query with a CTE. Inline TVFs are transparent to the optimiser and perform much better.</p>
+
+<p><strong>Can I use ORDER BY inside a TVF?</strong></p>
+<p>In inline TVFs, ORDER BY in the returned SELECT is not guaranteed to be preserved when you query the TVF from outside. The outer query controls ordering. Add ORDER BY in the outer query that calls the TVF, not inside the TVF definition.</p>
+
+<p><strong>Can I call a TVF with OUTER APPLY instead of CROSS APPLY?</strong></p>
+<p>Yes. CROSS APPLY is like an INNER JOIN — if the TVF returns no rows for a given input, that input row is excluded from results. OUTER APPLY is like a LEFT JOIN — the input row is kept, with NULLs for the TVF columns where there are no matches. Use OUTER APPLY when you want to preserve rows that have no TVF results.</p>
+
+<p><strong>Can I INSERT, UPDATE, or DELETE inside a TVF?</strong></p>
+<p>No. Like all user-defined functions, TVFs are read-only. You cannot modify data inside a function. If you need to modify data as part of a process, use a stored procedure.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Using multi-statement TVFs when an inline TVF would work</strong> — Multi-statement TVFs are slower. If the logic can be expressed in a single SELECT (with JOINs, CTEs, CASE expressions), use an inline TVF.</li><li><strong>Forgetting the schema prefix when calling a TVF</strong> — Just like scalar UDFs, TVFs require <code>dbo.FunctionName()</code> — not just <code>FunctionName()</code>.</li><li><strong>Putting ORDER BY inside an inline TVF and expecting it to be preserved</strong> — The outer query controls row order. Ordering inside a TVF is undefined and may be ignored.</li><li><strong>Using CROSS APPLY when you mean OUTER APPLY</strong> — If you want to keep rows from the left table even when the TVF returns nothing, you need OUTER APPLY.</li><li><strong>Not indexing the table variable in multi-statement TVFs</strong> — The @Table variable in a multi-statement TVF has no statistics and no indexes by default, which makes joins on the returned table slow. Add a PRIMARY KEY or indexes to the table variable declaration where needed.</li><li><strong>Passing NULLs to TVFs without handling them</strong> — If a parameter is NULL and the function doesn't handle it, the WHERE clause may return no rows silently.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Default to inline TVFs over multi-statement TVFs for better performance.</li><li>Use TVFs when the same parameterised query is needed in multiple places — they're the table equivalent of a scalar UDF.</li><li>Use CROSS APPLY / OUTER APPLY with TVFs when you need to call the function for each row of another table.</li><li>Name inline TVFs to indicate they behave like views: <code>GetStudentResults</code>, <code>GetOrderHistory</code>, <code>GetMonthlySummary</code>.</li><li>For multi-statement TVFs, define the return table with appropriate data types and consider adding a PRIMARY KEY to improve join performance.</li><li>Test TVFs standalone before embedding them in larger queries: <code>SELECT * FROM dbo.GetStudentResults(1)</code>.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Byju's uses inline TVFs to power teacher dashboards. A function like <code>dbo.GetClassPerformance(@ClassID, @SubjectID)</code> accepts a class and subject, and returns all students with their scores and grades. The teacher portal queries this TVF with the teacher's class ID, and the whole result set renders as a grade table. When the grading algorithm changed, the team updated one function, and every teacher's view reflected the change immediately.</p>
+
+<p>At Jio, TVFs are used in the customer care system. When a representative opens a customer account, the system calls a function like <code>dbo.GetCustomerRechargeHistory(@MobileNumber, @Days)</code> which returns all recharges for the last N days. The same function is called by the automated chatbot, the web portal, and the internal CRM — all passing different values for @Days depending on the context (chatbot shows 30 days, web portal shows 90 days, CRM shows all).</p>
+
+<p>Flipkart uses CROSS APPLY with TVFs in their seller analytics system. A query iterates over all sellers in a category and for each seller, calls a TVF that returns their last 7 days of order metrics. The CROSS APPLY pattern lets them write this as a single clean query rather than a loop or a massive UNION.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>SCALAR FUNCTION                    TABLE-VALUED FUNCTION
+───────────────                    ─────────────────────
+
+SELECT name,                       SELECT s.name, r.subject, r.score
+  dbo.GetAvg(student_id)           FROM students s
+FROM students;                     CROSS APPLY
+                                     dbo.GetResults(s.student_id) r;
+       │                                       │
+       ▼                                       ▼
+Returns ONE value per row          Returns MULTIPLE rows per input
+Used in SELECT/WHERE/expressions   Used in FROM clause like a table
+       │                                       │
+ ┌─────┴─────┐                       ┌─────────┴──────────┐
+ │  84.67    │                       │ Maths  | 88 | ...  │
+ └───────────┘                       │ Science| 74 | ...  │
+                                     │ English| 92 | ...  │
+                                     └────────────────────┘</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>Scalar functions return one value; table-valued functions return a table (multiple rows and columns).</li><li>Inline TVFs contain a single SELECT and are fast — the optimiser can look inside them.</li><li>Multi-statement TVFs build a table variable across multiple steps — more flexible but slower.</li><li>TVFs are called in the FROM clause: <code>SELECT * FROM dbo.FunctionName(params)</code>.</li><li>CROSS APPLY calls a TVF for each row of another table and excludes non-matching rows.</li><li>OUTER APPLY is like CROSS APPLY but keeps rows from the left table even with no TVF results.</li><li>Always include the schema prefix when calling any UDF or TVF.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<p>Use these tables for practice:</p>
+
+<p><strong>courses</strong> (course<em>id, course</em>name, instructor, fees)</p>
+<p><strong>enrollments</strong> (enrollment<em>id, student</em>id, course<em>id, enrollment</em>date, score)</p>
+<p><strong>students</strong> (student_id, name, city)</p>
+
+<ol><li>Write a scalar function <code>dbo.GetStudentCourseCount</code> that accepts a student_id and returns the number of courses that student is enrolled in.</li><li>Write an inline TVF <code>dbo.GetEnrolledCourses</code> that accepts a student_id and returns all courses (with course name, fees, enrollment date) that the student is enrolled in.</li><li>Use CROSS APPLY with the TVF from question 2 to show every student alongside the courses they're enrolled in.</li><li>Write a multi-statement TVF <code>dbo.GetCoursePerformance</code> that accepts a course_id and returns a summary table with student name, score, and grade (A/B/C/D based on score bands).</li><li>Write an inline TVF <code>dbo.GetTopStudentsByCity</code> that accepts a city name and a number N, and returns the top N students from that city by average score.</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Aman's problem at Byju's — needing to return a table of results, not just a single value — is one of the most common moments where developers discover table-valued functions. Once you understand that a TVF is simply a function that acts like a table, the use cases become obvious.</p>
+
+<p>The scalar vs table-valued distinction maps cleanly onto a real question: "Am I computing one value, or am I retrieving a structured result?" For one value — a fee, a grade, a formatted string — use a scalar function. For a list of records that you want to JOIN, filter, or aggregate — use a table-valued function.</p>
+
+<p>The performance note about inline vs multi-statement TVFs is worth remembering. The inline form is almost always the right choice unless your logic genuinely requires multiple steps. Most of the time, what looks like it needs multiple steps can be written as a CTE inside a single SELECT — which means an inline TVF can handle it.</p>
+
+<p>Build the habit of asking "where does this logic appear more than once?" and packaging it into the right kind of function. Your queries will be cleaner, your logic will be consistent, and your teammates will thank you.</p>
+
+  `,
+  'mod12-t6': `
+    <h1>Triggers</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Arjun is a database administrator at a mid-sized fintech company in Mumbai that processes UPI payments. Every time a payment goes through, a record is created in the <code>transactions</code> table. But the compliance team also needs a complete, tamper-proof audit trail — who updated a record, when, what it looked like before, what it looks like after.</p>
+
+<p>When Arjun joined, there was no audit trail at all. A record could be modified and nobody would know. The compliance team kept asking the development team to add audit logging to every application that touched the transactions table. But there were 6 different services — mobile app, web app, batch jobs, admin portal, refund processor, reconciliation engine. Getting all 6 teams to add logging was a months-long coordination exercise that never quite finished.</p>
+
+<p>Arjun solved it in an afternoon. He added a trigger on the transactions table. Every time any application modifies a record — regardless of which service did it — the trigger fires automatically and writes an audit log entry. The compliance team was happy. The 6 development teams didn't have to change a single line of code.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>The core challenge with maintaining consistency across a database is that data changes come from many places. An application backend, a scheduled job, an admin running a manual update, a stored procedure — all of these can modify your tables. If you rely on the application layer to enforce business rules or maintain related records, you're depending on every caller to do it right, every time.</p>
+
+<p>What happens when someone runs a direct UPDATE from a SQL client and bypasses the application entirely? What if a new service is built that doesn't know about the rule "whenever an order is cancelled, reduce the seller's revenue total"? These gaps cause data inconsistencies that are hard to detect and harder to fix.</p>
+
+<p>Triggers solve this by moving certain rules and reactions into the database itself. A trigger says: "Whenever event X happens on this table, automatically run this code." No application needs to remember to do it. The database enforces it.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Triggers appeared in commercial databases in the 1980s, derived from the concept of event-driven programming. The idea was that a database should be able to react to events (data changes) automatically, not just passively store whatever it's told.</p>
+
+<p>Early triggers were mainly used for two things: maintaining audit logs and enforcing referential integrity rules that were too complex for standard foreign key constraints. As databases became more central to business logic, triggers also took on roles in cascading updates, computed column maintenance, and cross-table synchronisation.</p>
+
+<p>The AFTER trigger (which runs after a change is committed) was the original form. INSTEAD OF triggers came later in SQL Server, allowing you to intercept a DML operation and replace it with custom logic — useful for making non-updatable views writable.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>A trigger is like a motion sensor security light.</p>
+
+<p>You don't turn the light on manually every time someone approaches. You set up the sensor once. After that, whenever the defined event happens (motion is detected), the light turns on automatically. You don't have to remember. The rule is built into the system.</p>
+
+<p>A database trigger works the same way. You define the rule once: "After any UPDATE to the transactions table, write an audit record." From that point, every UPDATE — no matter who or what causes it — triggers the audit write automatically. You don't have to remember. The rule is in the database.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think of a trigger like an automatic SMS alert from your bank.</p>
+
+<p>You don't send yourself a text every time a transaction happens on your account. The bank's system is configured to send you a message automatically whenever money moves. The event (transaction) fires the alert. You receive the information without doing anything.</p>
+
+<p>A trigger is the database's version of that alert system. The event is a data change (INSERT, UPDATE, or DELETE). The "SMS" is whatever SQL the trigger runs — logging, updating a related table, enforcing a rule, sending a notification.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>A trigger is a special kind of stored procedure that the database runs automatically in response to a DML event (INSERT, UPDATE, DELETE) or DDL event (CREATE, ALTER, DROP) on a specific table or view.</p>
+
+<p>When a trigger fires, the database makes two special virtual tables available inside the trigger's code: <code>INSERTED</code> and <code>DELETED</code>. These are not actual stored tables — they're in-memory snapshots created for the duration of the trigger's execution.</p>
+
+<ul><li><code>INSERTED</code> contains the new version of the rows being added or modified.</li><li><code>DELETED</code> contains the old version of the rows being removed or modified.</li><li>For an INSERT, only <code>INSERTED</code> has rows (no old version).</li><li>For a DELETE, only <code>DELETED</code> has rows (no new version).</li><li>For an UPDATE, both tables have rows — <code>DELETED</code> shows the before state, <code>INSERTED</code> shows the after state.</li></ul>
+
+<p><strong>AFTER triggers</strong> (also called FOR triggers) run after the DML statement completes. The change has already happened by the time the trigger code runs. If the trigger raises an error and rolls back, the entire transaction (including the original change) is rolled back.</p>
+
+<p><strong>INSTEAD OF triggers</strong> intercept the DML statement before it executes. The trigger code runs instead of the original INSERT, UPDATE, or DELETE. This is useful for implementing custom validation or making views writable.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<p><strong>AFTER INSERT trigger for audit logging:</strong></p>
+
+<pre><code class="language-sql">CREATE TRIGGER trg_TransactionAudit_Insert
+ON transactions
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    INSERT INTO transaction_audit (txn_id, action, new_amount, new_status, changed_at)
+    SELECT txn_id, 'INSERT', amount, status, GETDATE()
+    FROM INSERTED;
+END;</code></pre>
+
+<p><strong>AFTER UPDATE trigger to log the before and after state:</strong></p>
+
+<pre><code class="language-sql">CREATE TRIGGER trg_TransactionAudit_Update
+ON transactions
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    INSERT INTO transaction_audit (txn_id, action, old_amount, new_amount, old_status, new_status, changed_at)
+    SELECT 
+        i.txn_id,
+        'UPDATE',
+        d.amount,
+        i.amount,
+        d.status,
+        i.status,
+        GETDATE()
+    FROM INSERTED i
+    JOIN DELETED d ON i.txn_id = d.txn_id;
+END;</code></pre>
+
+<p><strong>AFTER DELETE trigger:</strong></p>
+
+<pre><code class="language-sql">CREATE TRIGGER trg_TransactionAudit_Delete
+ON transactions
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    INSERT INTO transaction_audit (txn_id, action, old_amount, old_status, changed_at)
+    SELECT txn_id, 'DELETE', amount, status, GETDATE()
+    FROM DELETED;
+END;</code></pre>
+
+<p><strong>INSTEAD OF trigger to enforce a business rule:</strong></p>
+
+<pre><code class="language-sql">CREATE TRIGGER trg_PreventCompletedUpdate
+ON transactions
+INSTEAD OF UPDATE
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM DELETED WHERE status = 'COMPLETED')
+    BEGIN
+        RAISERROR('Cannot modify a COMPLETED transaction.', 16, 1);
+        ROLLBACK;
+        RETURN;
+    END
+    
+    UPDATE transactions
+    SET amount = i.amount, status = i.status
+    FROM transactions t
+    JOIN INSERTED i ON t.txn_id = i.txn_id;
+END;</code></pre>
+
+<p><strong>Dropping a trigger:</strong></p>
+
+<pre><code class="language-sql">DROP TRIGGER trg_TransactionAudit_Insert;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Component</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td><code>CREATE TRIGGER trigger_name</code></td><td>Creates a new trigger with the specified name</td></tr>
+<tr><td><code>ON table_name</code></td><td>Specifies which table (or view) this trigger monitors</td></tr>
+<tr><td><code>AFTER INSERT / UPDATE / DELETE</code></td><td>Defines which DML event fires the trigger — runs after the event</td></tr>
+<tr><td><code>INSTEAD OF INSERT / UPDATE / DELETE</code></td><td>Intercepts the event — trigger runs instead of the DML statement</td></tr>
+<tr><td><code>INSERTED</code></td><td>Virtual table containing the new (post-change) version of affected rows</td></tr>
+<tr><td><code>DELETED</code></td><td>Virtual table containing the old (pre-change) version of affected rows</td></tr>
+<tr><td><code>SET NOCOUNT ON</code></td><td>Prevents "rows affected" messages from being sent to the caller</td></tr>
+<tr><td><code>RAISERROR</code></td><td>Raises a custom error message — used in triggers to reject invalid operations</td></tr>
+<tr><td><code>ROLLBACK</code></td><td>Inside a trigger, undoes the triggering statement and the trigger itself</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p><strong>Sample table: orders</strong></p>
+
+<table>
+<thead><tr><th>order_id</th><th>customer_name</th><th>city</th><th>amount</th><th>status</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Priya Sharma</td><td>Mumbai</td><td>1200</td><td>PENDING</td></tr>
+<tr><td>2</td><td>Aman Verma</td><td>Delhi</td><td>850</td><td>DELIVERED</td></tr>
+<tr><td>3</td><td>Neha Joshi</td><td>Bengaluru</td><td>2100</td><td>PENDING</td></tr>
+</tbody></table>
+
+<p><strong>Audit table: orders_audit</strong></p>
+
+<table>
+<thead><tr><th>audit_id</th><th>order_id</th><th>action</th><th>old_status</th><th>new_status</th><th>changed_at</th></tr></thead>
+<tbody>
+<tr><td>(empty at start)</td></tr>
+</tbody></table>
+
+<h3>Example 1: Trigger that logs every status change</h3>
+
+<pre><code class="language-sql">CREATE TRIGGER trg_OrderStatusLog
+ON orders
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    IF UPDATE(status)
+    BEGIN
+        INSERT INTO orders_audit (order_id, action, old_status, new_status, changed_at)
+        SELECT i.order_id, 'STATUS_CHANGE', d.status, i.status, GETDATE()
+        FROM INSERTED i
+        JOIN DELETED d ON i.order_id = d.order_id
+        WHERE i.status &lt;&gt; d.status;
+    END
+END;
+
+-- Now update an order:
+UPDATE orders SET status = 'DELIVERED' WHERE order_id = 1;</code></pre>
+
+<p>The trigger fires automatically. It sees that order 1's status changed from PENDING to DELIVERED and writes a row to orders_audit. No application code needed to do this.</p>
+
+<h3>Example 2: Trigger that prevents deletion of delivered orders</h3>
+
+<pre><code class="language-sql">CREATE TRIGGER trg_PreventDeliveredDelete
+ON orders
+INSTEAD OF DELETE
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM DELETED WHERE status = 'DELIVERED')
+    BEGIN
+        RAISERROR('Cannot delete a DELIVERED order.', 16, 1);
+        RETURN;
+    END
+    
+    DELETE FROM orders WHERE order_id IN (SELECT order_id FROM DELETED);
+END;
+
+-- Try to delete a delivered order:
+DELETE FROM orders WHERE order_id = 2;
+-- Result: Error — Cannot delete a DELIVERED order.
+
+-- Delete a non-delivered order:
+DELETE FROM orders WHERE order_id = 1;
+-- Result: Succeeds (order 1 is PENDING)</code></pre>
+
+<p>The trigger checks whether any row being deleted has DELIVERED status. If yes, it blocks the delete entirely.</p>
+
+<h3>Example 3: Trigger to keep a summary table updated</h3>
+
+<pre><code class="language-sql">CREATE TRIGGER trg_UpdateCityRevenue
+ON orders
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Recalculate revenue for affected cities
+    WITH AffectedCities AS (
+        SELECT city FROM INSERTED
+        UNION
+        SELECT city FROM DELETED
+    )
+    UPDATE city_revenue_summary
+    SET total_revenue = (
+        SELECT ISNULL(SUM(amount), 0) FROM orders o WHERE o.city = crs.city
+    )
+    FROM city_revenue_summary crs
+    WHERE crs.city IN (SELECT city FROM AffectedCities);
+END;</code></pre>
+
+<p>After any change to the orders table, the city<em>revenue</em>summary table is automatically recalculated for the affected cities.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Does a trigger fire once per statement or once per row?</strong></p>
+<p>In SQL Server, triggers fire once per statement, not once per row. If you UPDATE 500 rows, the trigger fires once, and INSERTED contains all 500 new rows and DELETED contains all 500 old rows. Write trigger code that handles multiple rows — never assume INSERTED has just one row.</p>
+
+<p><strong>What happens if a trigger raises an error?</strong></p>
+<p>If the trigger calls ROLLBACK, the entire transaction — including the original DML statement that fired the trigger — is rolled back. The data change does not happen. This is useful for enforcement triggers but dangerous if not carefully controlled, as it can reject legitimate operations unexpectedly.</p>
+
+<p><strong>Can a trigger cause another trigger to fire?</strong></p>
+<p>Yes. If a trigger modifies a table that has its own trigger, the second trigger fires. This is called trigger chaining or cascading triggers. It can get complex quickly and make debugging very hard. Most databases limit nesting depth, and it's generally best to keep trigger chains short.</p>
+
+<p><strong>Can I disable a trigger temporarily?</strong></p>
+<p>Yes. <code>DISABLE TRIGGER trigger<em>name ON table</em>name</code> stops the trigger from firing without dropping it. <code>ENABLE TRIGGER trigger<em>name ON table</em>name</code> turns it back on. This is useful during bulk data loads where you don't want audit triggers firing for millions of rows.</p>
+
+<p><strong>Are triggers a good place for business logic?</strong></p>
+<p>Opinions vary, but the consensus is: use triggers for cross-cutting concerns like auditing, enforcing integrity rules, and keeping derived tables updated. Avoid putting complex business logic in triggers because it's hard to test, debug, and document. Logic that belongs in the application layer should stay there.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Writing trigger code that assumes only one row is affected</strong> — Using <code>SELECT @Variable = column FROM INSERTED</code> fails when multiple rows are updated. Always write set-based trigger code that handles multiple rows.</li><li><strong>Creating triggers that cause infinite loops</strong> — If trigger A modifies a table, and that modification fires trigger B, which modifies the first table again — you get an infinite loop. Be careful about what tables your triggers modify.</li><li><strong>Using triggers for every business rule</strong> — Triggers are powerful but invisible. If all your business rules live in triggers, new developers won't find them and may work around them unknowingly. Use triggers selectively.</li><li><strong>Not handling INSERTED/DELETED symmetrically for updates</strong> — For UPDATE triggers, always JOIN INSERTED and DELETED to get the before and after state together. Querying just one of them gives you an incomplete picture.</li><li><strong>Forgetting SET NOCOUNT ON</strong> — Without this, the trigger's INSERT/UPDATE operations send "rows affected" messages back to the caller, which can confuse application code that's counting rows.</li><li><strong>Not documenting that a trigger exists on a table</strong> — Triggers are invisible to application developers who don't know to look for them. Always document what triggers exist on critical tables.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Keep triggers focused and short — one trigger, one purpose.</li><li>Always write set-based code inside triggers — never assume a single row.</li><li>Include <code>SET NOCOUNT ON</code> at the top of every trigger.</li><li>Use trigger names that clearly describe what they do: <code>trg<em>Orders</em>AuditUpdate</code>, <code>trg<em>Transactions</em>PreventDelete</code>.</li><li>Document all triggers on a table in the table's description or a separate wiki page.</li><li>Disable triggers during bulk data migrations and re-enable after — log the disable/enable in a change record.</li><li>Regularly review trigger logic as business rules change — stale triggers enforcing outdated rules cause more problems than no trigger at all.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>At IRCTC, triggers maintain the audit trail for the entire ticketing system. Every time a PNR record is modified — whether by the web app, the mobile app, the cancellation service, or an internal admin tool — an AFTER UPDATE trigger records the before and after state in an audit table. This is critical for handling customer disputes about cancellations, refunds, and booking changes. The audit trail is court-admissible evidence that the right actions happened.</p>
+
+<p>Paytm uses INSTEAD OF triggers on certain views to handle complex write operations. The transaction view combines data from multiple tables for easy reading, but writing to a view that spans multiple tables is normally not possible. The INSTEAD OF trigger intercepts the write, breaks it into the correct INSERT/UPDATE operations on the underlying tables, and handles the transaction correctly. This lets the application code write to the view as if it were a simple table.</p>
+
+<p>Flipkart's inventory system uses AFTER UPDATE triggers on the inventory table to keep the warehouse dashboard updated in near-real-time. Whenever stock levels change, the trigger updates an aggregated summary table that the dashboard reads. This avoids expensive real-time aggregation queries on the main inventory table while keeping the dashboard reasonably current.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>Application / Service / Admin Script
+            │
+            │  UPDATE orders SET status = 'DELIVERED'
+            │  WHERE order_id = 101;
+            ▼
+┌──────────────────────────────────────────┐
+│           SQL Server Engine              │
+│                                          │
+│  1. Apply the UPDATE to orders table     │
+│  2. Detect AFTER UPDATE trigger exists   │
+│  3. Build INSERTED (new rows)            │
+│     Build DELETED (old rows)             │
+│  4. Execute trigger body:                │
+│     INSERT INTO orders_audit ...         │
+│     FROM INSERTED JOIN DELETED ...       │
+│  5. COMMIT (or ROLLBACK if trigger fails)│
+└──────────────────────────────────────────┘
+            │
+            ▼
+  orders table updated + audit record written
+  Both happen as part of the same transaction</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>A trigger is code that runs automatically when a specific event (INSERT/UPDATE/DELETE) happens on a table.</li><li>AFTER triggers run after the DML completes; INSTEAD OF triggers replace the DML with custom code.</li><li>INSERTED holds the new/post-change rows; DELETED holds the old/pre-change rows.</li><li>Triggers fire once per statement, not once per row — always write set-based code.</li><li>Triggers are useful for audit logs, enforcing integrity, and keeping derived tables updated.</li><li>Rolling back inside a trigger also rolls back the original DML statement.</li><li>Disable triggers during bulk loads; re-enable them after.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<p>Use these tables for practice:</p>
+
+<p><strong>employees</strong> (employee<em>id, name, department, salary, last</em>updated)</p>
+<p><strong>employee<em>audit</strong> (audit</em>id, employee<em>id, action, old</em>salary, new<em>salary, changed</em>at, changed_by)</p>
+
+<ol><li>Write a trigger that fires after any UPDATE to the employees table and logs old and new salary values into employee_audit.</li><li>Write a trigger that fires after an INSERT to the employees table and logs the new employee's details into employee_audit with action = 'INSERT'.</li><li>Write an INSTEAD OF DELETE trigger that prevents deleting employees from the 'Finance' department and raises a meaningful error message.</li><li>Write a trigger that automatically updates the <code>last_updated</code> column in the employees table to GETDATE() whenever a row is updated.</li><li>Write a trigger that fires after UPDATE and only logs changes where the salary actually changed (not when other columns changed).</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Arjun's compliance problem at the fintech company is a perfect example of why triggers exist. The alternative — coordinating 6 development teams to each add audit logging — is not just slow, it's fragile. Team 4 gets to it in sprint 3. Team 6 deprioritises it. Two years later, some services log and others don't.</p>
+
+<p>A trigger puts the rule where it can't be bypassed or forgotten. The database enforces it. It doesn't matter which service, which developer, or which tool makes the change — the trigger fires every time.</p>
+
+<p>The caution about overusing triggers is equally important. Triggers are invisible to most people looking at a system. If you put 20 triggers on your main tables, a new developer will have no idea why their UPDATE is causing 5 other tables to change. Document every trigger. Keep them focused. Use them for cross-cutting concerns, not business rules that belong in the application.</p>
+
+<p>Used thoughtfully, triggers are one of the most reliable ways to maintain data integrity across a complex system. Arjun's afternoon of work gave the compliance team something the application teams couldn't deliver in months.</p>
+
+  `,
+  'mod12-t7': `
+    <h1>Cursors (and When to Avoid Them)</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Rahul is a SQL developer at a logistics company in Chennai that handles last-mile delivery for several e-commerce partners. One Friday afternoon, his manager dropped a request: "For each delivery agent, calculate their weekly bonus based on the number of deliveries, apply a different bonus formula for agents in Tier 1 vs Tier 2 cities, and update their payout record."</p>
+
+<p>The table had 4,000 delivery agents. Rahul had used cursors in his previous job and figured this was a good use case — process each agent one by one, check their city tier, calculate the formula, and update. He wrote a cursor that looped through all 4,000 agents and ran an UPDATE for each one.</p>
+
+<p>The query ran for 22 minutes. His manager walked over and said, "The database is hung, is that your query?" It was. When Rahul finally looked for an alternative — a single set-based UPDATE with a CASE expression — it ran in 4 seconds.</p>
+
+<p>Rahul never wrote a cursor without asking "do I really need this?" again.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>SQL is a set-based language. It's designed to operate on entire sets of rows at once. When you write <code>UPDATE orders SET status = 'SHIPPED' WHERE city = 'Delhi'</code>, the database engine processes all matching rows in one efficient operation. The query optimiser uses indexes, parallel execution, and other techniques to make this fast.</p>
+
+<p>A cursor flips this model. It processes rows one at a time in a loop — fetch a row, do something, move to the next row. For databases that are built for set operations, this is like driving a sports car in first gear. It technically works, but you're using the vehicle completely wrong.</p>
+
+<p>The problem most beginners face is that one-row-at-a-time logic feels intuitive. Cursors look like a for-loop that you'd write in Python or Java. So when the logic seems complex, the instinct is to reach for a cursor. Understanding when that instinct is leading you wrong — and what to use instead — is what this article is about.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Cursors were included in SQL from early on because there are genuinely some operations where row-by-row processing is the only option. Calling an external API for each row, running a stored procedure that takes a single input for each record, printing labels one at a time through a slow peripheral device — these are cases where you must process one row at a time and there's no set-based alternative.</p>
+
+<p>SQL standards body included cursor syntax in SQL-92 specifically because enterprise applications regularly needed to pass database rows to host programs (written in COBOL, C, or FORTRAN) one record at a time. The cursor was the bridge between SQL's set world and procedural code's row-at-a-time world.</p>
+
+<p>The problem is that developers coming from procedural programming backgrounds started using cursors for everything, including things that SQL handles much better as set operations. Performance disasters followed, and cursors developed a bad reputation — not because they're inherently bad, but because they're habitually misused.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Imagine you need to move 1,000 books from one room to another.</p>
+
+<p>The set-based approach is hiring a crew of 10 people with trolleys. They pack boxes in parallel, wheel multiple loads at once, and have the job done in an hour. This is how SQL set operations work — the engine optimises and parallelises.</p>
+
+<p>The cursor approach is one person carrying one book at a time, walking back and forth 1,000 times. It will eventually get done, but it takes 10 hours and exhausts everyone.</p>
+
+<p>Both methods move the books. One is dramatically more efficient. When developers use cursors for set operations, they're choosing the one-book-at-a-time method.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think of a cursor like reading a physical register at a bank counter.</p>
+
+<p>The clerk opens the register, reads the first entry, processes it (stamps it, writes a note, moves to the next ledger), then reads the second entry, and so on. One entry at a time, in strict sequence.</p>
+
+<p>Compare this to a computer that processes the entire register as a dataset — finds all entries matching a criterion, updates all of them, and reports the results. Same outcome, vastly different speed.</p>
+
+<p>A cursor is the first approach. SQL set operations are the second. For small registers (small tables), the difference is invisible. For large ones, it's the difference between seconds and hours.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>A cursor in SQL is a database object that lets you iterate over a result set row by row. The lifecycle has five steps: DECLARE (define the cursor and its query), OPEN (execute the query and position the cursor before the first row), FETCH (retrieve the current row into variables), process and advance (repeat fetch until no rows remain), and CLOSE/DEALLOCATE (release the cursor resources).</p>
+
+<p>When you OPEN a cursor, the database may materialise the entire result set into a temporary buffer (depending on cursor type). When you FETCH, you move to the next row and copy its values into local variables. Your processing logic runs on those variables. Then you FETCH again.</p>
+
+<p>This row-by-row process means the database cannot use bulk optimisations. Indexes help per-row lookups, but there's no opportunity for batch I/O, parallel execution, or bulk update optimisation. Each FETCH is a separate operation with overhead. For 100,000 rows, that's 100,000 individual operations with full overhead each.</p>
+
+<p>There are different cursor types (STATIC, DYNAMIC, FAST<em>FORWARD) that affect whether the cursor sees changes made to the underlying data during iteration and how much memory it uses. FAST</em>FORWARD cursors are the most efficient — they're forward-only, read-only, and use a minimum of resources. Always use FAST_FORWARD if you only need to read data forward through the cursor.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<p><strong>Basic cursor structure:</strong></p>
+
+<pre><code class="language-sql">DECLARE @AgentID INT;
+DECLARE @AgentCity VARCHAR(100);
+DECLARE @BonusAmount DECIMAL(10,2);
+
+DECLARE agent_cursor CURSOR FAST_FORWARD FOR
+    SELECT agent_id, city
+    FROM delivery_agents
+    WHERE is_active = 1;
+
+OPEN agent_cursor;
+
+FETCH NEXT FROM agent_cursor INTO @AgentID, @AgentCity;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    -- Calculate bonus based on city tier
+    IF @AgentCity IN ('Mumbai', 'Delhi', 'Bengaluru', 'Chennai', 'Hyderabad')
+        SET @BonusAmount = 500;
+    ELSE
+        SET @BonusAmount = 300;
+    
+    UPDATE agent_payouts
+    SET bonus = @BonusAmount
+    WHERE agent_id = @AgentID;
+    
+    FETCH NEXT FROM agent_cursor INTO @AgentID, @AgentCity;
+END;
+
+CLOSE agent_cursor;
+DEALLOCATE agent_cursor;</code></pre>
+
+<p><strong>The set-based equivalent (much better):</strong></p>
+
+<pre><code class="language-sql">UPDATE ap
+SET bonus = CASE 
+    WHEN da.city IN ('Mumbai', 'Delhi', 'Bengaluru', 'Chennai', 'Hyderabad') THEN 500
+    ELSE 300
+END
+FROM agent_payouts ap
+JOIN delivery_agents da ON ap.agent_id = da.agent_id
+WHERE da.is_active = 1;</code></pre>
+
+<p><strong>Cursor for a case where row-by-row genuinely makes sense (calling a stored procedure per row):</strong></p>
+
+<pre><code class="language-sql">DECLARE @OrderID INT;
+
+DECLARE order_cursor CURSOR FAST_FORWARD FOR
+    SELECT order_id FROM orders WHERE status = 'PENDING' AND requires_manual_review = 1;
+
+OPEN order_cursor;
+FETCH NEXT FROM order_cursor INTO @OrderID;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    EXEC usp_ManualReviewProcess @OrderID = @OrderID;
+    FETCH NEXT FROM order_cursor INTO @OrderID;
+END;
+
+CLOSE order_cursor;
+DEALLOCATE order_cursor;</code></pre>
+
+<p><strong>Using @@FETCH_STATUS correctly:</strong></p>
+
+<pre><code class="language-sql">-- @@FETCH_STATUS values:
+-- 0  = row fetched successfully
+-- -1 = fetch failed or row is beyond result set
+-- -2 = row is missing (for scrollable cursors with deleted rows)
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    -- Your logic here
+    FETCH NEXT FROM cursor_name INTO @variables;
+END;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Component</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td><code>DECLARE cursor_name CURSOR</code></td><td>Creates a named cursor object linked to a SELECT query</td></tr>
+<tr><td><code>FAST_FORWARD</code></td><td>Cursor type — forward-only, read-only. Most efficient option when you only need to move forward</td></tr>
+<tr><td><code>FOR SELECT ...</code></td><td>The query whose result set the cursor will iterate over</td></tr>
+<tr><td><code>OPEN cursor_name</code></td><td>Executes the cursor's query and positions the cursor before the first row</td></tr>
+<tr><td><code>FETCH NEXT FROM cursor_name INTO @vars</code></td><td>Retrieves the next row and puts column values into local variables</td></tr>
+<tr><td><code>@@FETCH_STATUS</code></td><td>System variable — 0 means a row was successfully fetched, non-zero means end or error</td></tr>
+<tr><td><code>WHILE @@FETCH_STATUS = 0</code></td><td>Standard loop pattern — keep looping as long as rows are being fetched</td></tr>
+<tr><td><code>CLOSE cursor_name</code></td><td>Releases the current row set but keeps the cursor structure in memory</td></tr>
+<tr><td><code>DEALLOCATE cursor_name</code></td><td>Releases all resources and removes the cursor object completely</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p><strong>Sample table: delivery_agents</strong></p>
+
+<table>
+<thead><tr><th>agent_id</th><th>name</th><th>city</th><th>deliveries_this_week</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Rohit Kumar</td><td>Mumbai</td><td>45</td></tr>
+<tr><td>2</td><td>Suresh Nair</td><td>Kochi</td><td>38</td></tr>
+<tr><td>3</td><td>Anjali Menon</td><td>Delhi</td><td>52</td></tr>
+<tr><td>4</td><td>Vikram Patel</td><td>Surat</td><td>29</td></tr>
+<tr><td>5</td><td>Divya Rao</td><td>Bengaluru</td><td>61</td></tr>
+</tbody></table>
+
+<h3>Example 1: Cursor approach (works, but slow at scale)</h3>
+
+<pre><code class="language-sql">DECLARE @ID INT, @City VARCHAR(100), @Deliveries INT, @Bonus DECIMAL(10,2);
+
+DECLARE bonus_cursor CURSOR FAST_FORWARD FOR
+    SELECT agent_id, city, deliveries_this_week FROM delivery_agents;
+
+OPEN bonus_cursor;
+FETCH NEXT FROM bonus_cursor INTO @ID, @City, @Deliveries;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    SET @Bonus = CASE 
+        WHEN @City IN ('Mumbai','Delhi','Bengaluru','Chennai','Hyderabad') AND @Deliveries &gt; 50 THEN 800
+        WHEN @City IN ('Mumbai','Delhi','Bengaluru','Chennai','Hyderabad') THEN 500
+        WHEN @Deliveries &gt; 50 THEN 600
+        ELSE 300
+    END;
+    
+    UPDATE delivery_agents SET weekly_bonus = @Bonus WHERE agent_id = @ID;
+    FETCH NEXT FROM bonus_cursor INTO @ID, @City, @Deliveries;
+END;
+
+CLOSE bonus_cursor;
+DEALLOCATE bonus_cursor;</code></pre>
+
+<p>This works correctly — each agent gets the right bonus — but processes one row at a time.</p>
+
+<h3>Example 2: Set-based equivalent (same result, much faster)</h3>
+
+<pre><code class="language-sql">UPDATE delivery_agents
+SET weekly_bonus = CASE 
+    WHEN city IN ('Mumbai','Delhi','Bengaluru','Chennai','Hyderabad') AND deliveries_this_week &gt; 50 THEN 800
+    WHEN city IN ('Mumbai','Delhi','Bengaluru','Chennai','Hyderabad') THEN 500
+    WHEN deliveries_this_week &gt; 50 THEN 600
+    ELSE 300
+END;</code></pre>
+
+<p>Produces identical results in a fraction of the time. One UPDATE, all rows at once.</p>
+
+<h3>Example 3: A legitimate cursor use — calling a procedure per row</h3>
+
+<pre><code class="language-sql">DECLARE @AgentID INT;
+
+DECLARE review_cursor CURSOR FAST_FORWARD FOR
+    SELECT agent_id FROM delivery_agents WHERE deliveries_this_week = 0;
+
+OPEN review_cursor;
+FETCH NEXT FROM review_cursor INTO @AgentID;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    EXEC usp_FlagAgentForReview @AgentID = @AgentID;
+    FETCH NEXT FROM review_cursor INTO @AgentID;
+END;
+
+CLOSE review_cursor;
+DEALLOCATE review_cursor;</code></pre>
+
+<p>Here a stored procedure must be called individually for each agent. There's no set-based way to call a stored procedure on multiple rows simultaneously. This is a valid cursor use.</p>
+
+<h3>Example 4: Using a WHILE loop with a counter (alternative to cursor)</h3>
+
+<pre><code class="language-sql">-- Sometimes a WHILE loop with a row_number is cleaner than a cursor
+DECLARE @Counter INT = 1;
+DECLARE @MaxID INT;
+SELECT @MaxID = MAX(agent_id) FROM delivery_agents;
+
+WHILE @Counter &lt;= @MaxID
+BEGIN
+    IF EXISTS (SELECT 1 FROM delivery_agents WHERE agent_id = @Counter)
+    BEGIN
+        EXEC usp_FlagAgentForReview @AgentID = @Counter;
+    END
+    SET @Counter = @Counter + 1;
+END;</code></pre>
+
+<p>This is a cursor-style loop using IDs. It's sometimes used but has gaps issues if IDs are non-sequential.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>When is using a cursor actually acceptable?</strong></p>
+<p>When you genuinely need to call a stored procedure once per row and that procedure has no set-based equivalent. When you're doing administrative tasks on database objects (not data rows) — like looping through a list of tables to rebuild indexes. When you need to generate sequential identifiers that depend on previous iterations. Outside these cases, there's almost always a faster set-based alternative.</p>
+
+<p><strong>Can I replace all cursor logic with set-based SQL?</strong></p>
+<p>Not always. But the vast majority of cursor usage in practice is unnecessary. The common ones — calculating per-row values, applying conditional updates, transforming data — are all solvable with CASE expressions, JOINs, CTEs, and window functions. If you're not sure, try to write the set-based version first. If you can't, then consider a cursor.</p>
+
+<p><strong>What's wrong with a WHILE loop as an alternative to a cursor?</strong></p>
+<p>WHILE loops that iterate through rows using an incrementing ID have the same row-by-row performance problem as cursors. They're cursors in disguise. The issue isn't the cursor syntax — it's processing rows one at a time. Whether you use a CURSOR, a WHILE loop, or a manually managed iteration, if you're touching one row per iteration, you have the same performance problem.</p>
+
+<p><strong>Does cursor performance matter for small tables?</strong></p>
+<p>For 100-row tables, no, it's negligible. For 10,000 rows, you'll notice the difference. For 1 million rows, a cursor can take hours where a set operation takes seconds. The habit of using cursors "because it works" on small tables creates problems when those tables grow, which they always do.</p>
+
+<p><strong>Can I use cursors inside triggers or functions?</strong></p>
+<p>Technically yes, but it's a bad idea. Triggers already fire per statement — adding a cursor inside that operates row-by-row compounds the performance problem. Functions with cursors are especially problematic because functions are called per row in queries, so a cursor inside a function means a cursor inside a cursor.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Using a cursor when a single UPDATE with a CASE expression would work</strong> — This is the most common mistake. Conditional row-by-row updates are almost always expressible as set-based SQL.</li><li><strong>Forgetting DEALLOCATE</strong> — Closing a cursor releases the row set but not the cursor object. Without DEALLOCATE, the cursor remains in memory and will cause an error if you try to DECLARE a cursor with the same name again in the same session.</li><li><strong>Not using FAST<em>FORWARD when appropriate</strong> — If you're just reading forward through a cursor and not modifying it, use FAST</em>FORWARD. Scrollable, dynamic cursors use much more memory and lock resources longer.</li><li><strong>Nesting cursors</strong> — An outer cursor loops through tables, an inner cursor loops through rows in each table. Cursor nesting multiplies the performance problem. Almost always rewritable as a JOIN.</li><li><strong>Opening a cursor inside a transaction and doing slow work</strong> — If your cursor holds a transaction open while processing thousands of rows slowly, you're holding locks for the entire duration. Other queries waiting for those locks are blocked.</li><li><strong>Assuming cursor order matches the ORDER BY in the declaration</strong> — For FAST_FORWARD cursors, row order is generally respected, but it's not guaranteed in all cursor types. If order matters for your logic, be explicit.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Before writing a cursor, spend 5 minutes trying to write the set-based version. If you can, use that instead.</li><li>Always specify <code>FAST_FORWARD</code> for read-only, forward-only cursors — it's the most efficient type.</li><li>Always <code>CLOSE</code> then <code>DEALLOCATE</code> when done — in that order, every time.</li><li>Keep transactions as short as possible when using cursors inside them to minimise lock duration.</li><li>If you must use a cursor, add a comment explaining why the set-based alternative wasn't used.</li><li>Test cursor performance with realistic data volumes before deploying — problems that are invisible at 500 rows can be catastrophic at 500,000.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Swiggy uses cursors in their nightly batch jobs for a narrow set of operations that genuinely require sequential processing — specifically, regenerating personalised weekly review emails for each restaurant partner. The email content is built using a stored procedure that calls several external formatting functions and renders a template. Because this procedure must run per-restaurant and returns a complex output, it runs inside a cursor. The batch job runs at 2 AM when load is low.</p>
+
+<p>At Jio, database administrators use cursors in maintenance scripts to loop through every table in a list and rebuild fragmented indexes. This is the textbook legitimate cursor use — iterating over schema objects, not data rows. Each iteration executes <code>ALTER INDEX ALL ON table_name REBUILD</code>. This can't be done as a single set-based statement.</p>
+
+<p>IRCTC's reporting team initially used cursors in their legacy reconciliation jobs, running through hundreds of thousands of ticket records one at a time. These jobs ran for 4-6 hours each night and frequently ran over into peak hours. A rewrite by a performance tuning team replaced cursor logic with set-based CTEs and window functions. The jobs now run in 12 minutes. The cursor code was 400 lines; the set-based version was 80 lines.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>CURSOR (row-by-row)                 SET-BASED (all at once)
+───────────────────                 ───────────────────────
+
+FETCH row 1 → process → UPDATE  ┐   UPDATE delivery_agents
+FETCH row 2 → process → UPDATE  │   SET bonus = CASE
+FETCH row 3 → process → UPDATE  │       WHEN city = 'Mumbai' ... 
+FETCH row 4 → process → UPDATE  │       ELSE ...
+FETCH row 5 → process → UPDATE  │   END;
+...                              │
+FETCH row 4000 → process → UPDATE┘          │
+                                             ▼
+        │                           One operation
+        ▼                           processes all rows
+4000 separate operations            in parallel
+(with per-row overhead)             4 seconds
+22 minutes</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>A cursor processes rows one at a time in a loop — the opposite of SQL's set-based design.</li><li>DECLARE → OPEN → FETCH (loop) → CLOSE → DEALLOCATE is the cursor lifecycle.</li><li><code>@@FETCH_STATUS = 0</code> means a row was fetched successfully; loop until it's non-zero.</li><li>FAST_FORWARD is the most efficient cursor type for forward-only reads.</li><li>Most cursor logic can be rewritten as set-based SQL — which is dramatically faster at scale.</li><li>Legitimate cursor uses: calling a stored procedure per row, looping over schema objects, sequential operations with dependencies between iterations.</li><li>Always DEALLOCATE after CLOSE — failing to deallocate leaves the cursor object in memory.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<p>Use this table for practice:</p>
+
+<p><strong>employees</strong> (employee<em>id, name, department, city, salary, performance</em>rating)</p>
+<p><strong>salary<em>updates</strong> (update</em>id, employee<em>id, old</em>salary, new<em>salary, updated</em>at)</p>
+
+<ol><li>Write a cursor that loops through all employees and prints their name and salary. Then rewrite it as a simple SELECT.</li><li>Write a cursor that gives a 10% raise to each employee in the 'Engineering' department, one at a time. Then rewrite it as a single UPDATE.</li><li>Write a cursor that calls a hypothetical stored procedure <code>usp<em>SendAppraisalEmail(@EmployeeID)</code> for each employee who has a performance</em>rating of 5. (This is a legitimate cursor use — no set-based alternative for per-row procedure calls.)</li><li>The cursor below has a bug — find it and fix it:</li></ol>
+<pre><code class="language-sql">   DECLARE @EmpID INT;
+   DECLARE emp_cursor CURSOR FOR SELECT employee_id FROM employees;
+   OPEN emp_cursor;
+   WHILE @@FETCH_STATUS = 0
+   BEGIN
+       EXEC usp_ProcessEmployee @EmpID;
+       FETCH NEXT FROM emp_cursor INTO @EmpID;
+   END;
+   CLOSE emp_cursor;</code></pre>
+<ol><li>Write a set-based UPDATE that gives employees in Tier 1 cities (Mumbai, Delhi, Bengaluru) a 15% raise and employees in other cities a 10% raise — without using a cursor.</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Rahul's 22-minute query that ran in 4 seconds as a set-based operation is a story that almost every SQL developer has in some form. Cursors are one of those constructs that feel right because they match how we think about processing things — one at a time, in a loop. But SQL databases don't think that way, and fighting the design of the tool is always expensive.</p>
+
+<p>The key insight to take away is that cursors are not wrong — they're a tool for specific situations. The mistake is reaching for them out of habit or because the row-by-row mental model feels easier. Before you write a cursor, write the set-based version. If it works, use that. If it genuinely can't be done as a set operation, then a cursor is the right call.</p>
+
+<p>Understanding when to use and when to avoid cursors is also a marker of experience. Junior developers often use cursors everywhere because the logic is easy to follow. Senior developers almost never use them, because they've learned to think in sets. Getting to that mindset is a progression, not a switch — every time you convert a cursor to set-based SQL, you get a little better at it.</p>
+
+<p>The 4 seconds vs 22 minutes difference isn't just about this one query. It's about building systems that stay fast as data grows. Your delivery agents table today has 4,000 rows. In two years it might have 400,000. The set-based query still runs in seconds. The cursor runs for an hour.</p>
+
+  `,
 
   // ── Module 13 ────────────────────────────────────────────────
   'mod13-t1': `<h1>What is an Index?</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
