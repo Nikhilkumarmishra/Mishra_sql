@@ -3955,8 +3955,8 @@ async function init() {
     buildLandingCards();
     updateHeroCount();
     initTestimonials();
+    initEditor();                // editor must exist before renderQuestion() runs
     handleRoute(_initialPath);   // route to wherever the user actually landed
-    initEditor();
 
   } catch(e) {
     document.getElementById('loadingScreen').innerHTML =
