@@ -18634,20 +18634,3549 @@ FETCH row 4000 → process → UPDATE┘          │
   `,
 
   // ── Module 13 ────────────────────────────────────────────────
-  'mod13-t1': `<h1>What is an Index?</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod13-t2': `<h1>Clustered vs Non-Clustered Index</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod13-t3': `<h1>Composite Indexes</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod13-t4': `<h1>EXPLAIN / Query Execution Plans</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod13-t5': `<h1>Index Best Practices</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod13-t6': `<h1>Common Performance Anti-patterns</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod13-t1': `
+    <h1>What is an Index?</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Arjun joined Flipkart's analytics team six months ago. His first big task was to build a dashboard that showed order history for any customer the support team looked up. Simple enough.</p>
+
+<p>For the first few weeks, everything was fine. The support team would type in a customer ID, and the order history would load in under a second. Arjun felt good about his work.</p>
+
+<p>Then Flipkart ran a big sale. The customer base grew from 2 million to 8 million users almost overnight. Suddenly, the same query that loaded in under a second was now taking 12 to 15 seconds. Support agents were frustrated. Customers on hold were angry. Arjun's manager called him into a meeting. The table hadn't changed. The query hadn't changed. What went wrong?</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>Here is what Arjun's query looked like:</p>
+
+<pre><code class="language-sql">SELECT * FROM orders WHERE customer_id = 4872910;</code></pre>
+
+<p>Simple. But what was happening inside the database? With 8 million customers and tens of millions of orders, the database was reading every single row in the orders table, one by one, to find the ones belonging to customer 4872910. That's called a full table scan. Even if there were only 5 orders for that customer, the database was still checking all 50 million rows before it could say "done."</p>
+
+<p>This is the core problem. Databases store data in pages on disk. Reading 50 million rows means reading thousands of pages. It's slow not because the query is wrong, but because the database has no shortcut to find the right data quickly.</p>
+
+<p>This is exactly the problem indexes were built to solve.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Early databases in the 1970s had no indexing at all. Every query scanned the entire table. For small datasets with thousands of rows, that was acceptable. But as businesses started using databases to store millions of records, performance became a serious problem.</p>
+
+<p>Database researchers borrowed an idea from the world of books. Books have had indexes for centuries. If you want to find every page where "photosynthesis" is mentioned, you don't read the whole book. You flip to the index in the back, find "photosynthesis," and it tells you exactly which pages to go to.</p>
+
+<p>IBM's System R project in the 1970s introduced B-tree indexes, and the idea stuck. Almost every relational database today — MySQL, PostgreSQL, SQL Server, Oracle — uses some form of indexing. It became a fundamental part of how databases work.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Imagine a large post office in Mumbai that receives 10,000 parcels a day. The parcels are stored in a giant warehouse with no system. When someone comes to pick up their parcel, the worker has to walk through the entire warehouse, checking every single parcel until they find the right one.</p>
+
+<p>Now imagine the warehouse manager creates a register. Every time a parcel arrives, its tracking number and shelf location are written in the register. The register is sorted by tracking number. Now when someone comes to pick up a parcel, the worker just looks up the tracking number in the register, notes the shelf location, and goes directly there.</p>
+
+<p>The register is the index. The warehouse is the table. The tracking number is the indexed column. The worker's time savings is the query performance improvement. The register doesn't store the parcels themselves. It just tells you where to find them.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think of a phone book. Phone books list names in alphabetical order. If you want to find "Sharma, Rajiv," you don't start at page 1 and read every entry. You open roughly to the S section, narrow down to "Sh," and find the entry in seconds.</p>
+
+<p>That alphabetical ordering is the index. The database does something very similar. It keeps a separate, sorted data structure that maps column values (like customer IDs or phone numbers) to the actual row locations on disk.</p>
+
+<p>Without that sorted structure, finding "Sharma, Rajiv" in a phone book with 10 million names would mean reading every single entry. With it, you find him in seconds. Same idea, different scale.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>When you create an index on a column, the database builds a separate data structure — most commonly a B-tree (balanced tree). This B-tree stores the values of the indexed column in sorted order, along with a pointer to the actual row's location on disk (called a row pointer or page reference).</p>
+
+<p>When a query filters on that column — say <code>WHERE customer<em>id = 4872910</code> — the database checks if an index exists on <code>customer</em>id</code>. If yes, it uses the B-tree to quickly locate the value 4872910 in the sorted structure. Finding a value in a sorted B-tree is very fast — it takes roughly log(n) steps, not n steps. For 50 million rows, that's the difference between about 26 steps and 50 million steps.</p>
+
+<p>Once the B-tree gives the database the row pointer (the exact location on disk), the database jumps directly to that page and reads the row. No scanning. No wasted reads.</p>
+
+<p>The trade-off is that the index takes up space on disk. It also needs to be updated every time a row is inserted, updated, or deleted. That's why indexes speed up reads but can slightly slow down writes. The goal is to index smartly, not blindly.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<p>Creating an index is straightforward:</p>
+
+<pre><code class="language-sql">-- Basic index on a single column
+CREATE INDEX idx_customer_id ON orders(customer_id);</code></pre>
+
+<pre><code class="language-sql">-- Index with a descriptive name
+CREATE INDEX idx_orders_status ON orders(order_status);</code></pre>
+
+<pre><code class="language-sql">-- Unique index (also enforces uniqueness)
+CREATE UNIQUE INDEX idx_email ON users(email);</code></pre>
+
+<pre><code class="language-sql">-- Dropping an index
+DROP INDEX idx_customer_id ON orders;  -- MySQL syntax
+-- or
+DROP INDEX idx_customer_id;  -- PostgreSQL syntax</code></pre>
+
+<pre><code class="language-sql">-- Checking indexes on a table (MySQL)
+SHOW INDEX FROM orders;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Part</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td><code>CREATE INDEX</code></td><td>Tells the database to build a new index data structure</td></tr>
+<tr><td><code>idx<em>customer</em>id</code></td><td>The name you give the index — used to drop or reference it later</td></tr>
+<tr><td><code>ON orders</code></td><td>Specifies which table the index belongs to</td></tr>
+<tr><td><code>(customer_id)</code></td><td>The column(s) to index — the values that will be stored in the B-tree</td></tr>
+<tr><td><code>UNIQUE</code></td><td>Optional — ensures no two rows can have the same value in this column</td></tr>
+<tr><td><code>DROP INDEX</code></td><td>Removes the index from the database (the data is unaffected)</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p><strong>Sample table:</strong></p>
+
+<table>
+<thead><tr><th>order_id</th><th>customer_id</th><th>city</th><th>order_status</th><th>amount</th></tr></thead>
+<tbody>
+<tr><td>1001</td><td>4872910</td><td>Mumbai</td><td>delivered</td><td>1299</td></tr>
+<tr><td>1002</td><td>3391045</td><td>Delhi</td><td>pending</td><td>599</td></tr>
+<tr><td>1003</td><td>4872910</td><td>Mumbai</td><td>delivered</td><td>2499</td></tr>
+<tr><td>1004</td><td>7712233</td><td>Bangalore</td><td>cancelled</td><td>899</td></tr>
+<tr><td>1005</td><td>3391045</td><td>Delhi</td><td>delivered</td><td>3299</td></tr>
+</tbody></table>
+
+<h3>Example 1: Create an index and run a lookup</h3>
+
+<pre><code class="language-sql">CREATE INDEX idx_customer_id ON orders(customer_id);
+
+SELECT * FROM orders WHERE customer_id = 4872910;</code></pre>
+
+<p>Without the index, the database scans all 5 rows (and in production, all 50 million). With the index on <code>customer<em>id</code>, the database goes directly to the rows where <code>customer</em>id = 4872910</code> and returns rows 1001 and 1003 instantly.</p>
+
+<h3>Example 2: Index on order_status</h3>
+
+<pre><code class="language-sql">CREATE INDEX idx_order_status ON orders(order_status);
+
+SELECT * FROM orders WHERE order_status = 'delivered';</code></pre>
+
+<p>The database uses the index on <code>order_status</code> to jump straight to all delivered orders. Useful when support agents frequently filter by status.</p>
+
+<h3>Example 3: Unique index on email</h3>
+
+<pre><code class="language-sql">CREATE UNIQUE INDEX idx_user_email ON users(email);
+
+INSERT INTO users (name, email) VALUES ('Priya Sharma', 'priya@example.com');
+-- Second insert with same email will fail:
+INSERT INTO users (name, email) VALUES ('Priya Gupta', 'priya@example.com');
+-- Error: Duplicate entry for key 'idx_user_email'</code></pre>
+
+<p>The unique index both speeds up lookups by email AND prevents duplicate email entries.</p>
+
+<h3>Example 4: Checking if an index exists (MySQL)</h3>
+
+<pre><code class="language-sql">SHOW INDEX FROM orders;</code></pre>
+
+<p>This returns all indexes on the <code>orders</code> table, including the index name, column it's on, and whether it's unique. Useful before creating an index to avoid duplicates.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Does creating an index change my data?</strong></p>
+<p>No. An index is a separate structure that points to your data. Your actual table rows stay exactly as they are. Dropping an index also doesn't remove any data — it only removes the lookup shortcut.</p>
+
+<p><strong>Will the database always use my index?</strong></p>
+<p>Not always. The database's query optimizer decides whether using the index is faster than a full scan. For small tables (a few hundred rows), a full scan is often faster because the overhead of using the index isn't worth it. The optimizer makes this decision automatically.</p>
+
+<p><strong>Can I have too many indexes?</strong></p>
+<p>Yes, absolutely. Each index takes up disk space and must be maintained on every INSERT, UPDATE, and DELETE. A table with 15 indexes on it will have noticeably slower writes. Index only the columns you actually query frequently.</p>
+
+<p><strong>Does the order of rows in my table affect whether an index helps?</strong></p>
+<p>No. The table's physical row order doesn't matter to a non-clustered index. The index is its own sorted structure. However, clustered indexes do affect physical row order — that's a separate topic.</p>
+
+<p><strong>Why is my index not speeding things up?</strong></p>
+<p>Several reasons: you might be using a function on the indexed column (like <code>WHERE YEAR(created_at) = 2024</code>), the column might have very low cardinality (like a boolean), or the table might be too small for the optimizer to bother with the index.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Indexing every column</strong> — indexes cost disk space and slow down writes. Index only what you filter or join on frequently.</li><li><strong>Forgetting to name indexes sensibly</strong> — names like <code>idx1</code> or <code>index2</code> make maintenance a nightmare. Use names like <code>idx<em>tablename</em>columnname</code>.</li><li><strong>Using functions on indexed columns in WHERE</strong> — <code>WHERE UPPER(email) = 'PRIYA@EXAMPLE.COM'</code> won't use an index on <code>email</code>. Store values consistently instead.</li><li><strong>Adding indexes on low-cardinality columns without thought</strong> — indexing a column with only 2-3 distinct values (like <code>gender</code> or <code>is_active</code>) often doesn't help much.</li><li><strong>Never reviewing or dropping unused indexes</strong> — old indexes from features that no longer exist slow down every write. Audit your indexes periodically.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Index columns used in <code>WHERE</code>, <code>JOIN ON</code>, and <code>ORDER BY</code> clauses most frequently.</li><li>Use descriptive index names that include the table and column: <code>idx<em>orders</em>customer_id</code>.</li><li>Check existing indexes before creating new ones to avoid duplicates.</li><li>Monitor slow query logs to find queries that would benefit from an index.</li><li>Consider the write-to-read ratio of a table before indexing heavily — write-heavy tables suffer more from too many indexes.</li><li>Test index impact with <code>EXPLAIN</code> before and after to confirm it actually helps.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Zomato processes hundreds of thousands of food orders every hour. Their orders table is queried constantly — by restaurant ID to show incoming orders, by customer ID to show order history, by delivery partner ID to show assigned deliveries. Without indexes on these columns, every query would scan the entire table. Zomato has indexes on all three of those columns, and likely composite indexes for combined lookups.</p>
+
+<p>IRCTC handles millions of train ticket queries every day. When you search for trains from Delhi to Mumbai on a specific date, the database needs to filter by source, destination, and date simultaneously. IRCTC uses indexes on exactly these columns so that search results come back in under a second despite millions of rows.</p>
+
+<p>Paytm processes millions of transactions daily. Their transactions table is indexed on <code>user<em>id</code>, <code>transaction</em>date</code>, and <code>merchant_id</code>. Customer service agents looking up transaction history for a specific user get results immediately rather than waiting for the database to scan billions of rows.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>Query: SELECT * FROM orders WHERE customer_id = 4872910
+
+WITHOUT INDEX:
+orders table (50 million rows)
+[row 1] → check customer_id → not a match
+[row 2] → check customer_id → not a match
+[row 3] → check customer_id → not a match
+... (50 million checks) ...
+[row 4,872,910] → match! return row
+... keep scanning to end ...
+Time: 12-15 seconds
+
+WITH INDEX on customer_id:
+B-tree index (sorted)
+       [5000000]
+      /         \
+  [2500000]   [7500000]
+  /      \
+[4872910] → row pointer → page 9842, slot 7
+                                 ↓
+                         Jump directly to row
+Time: &lt; 50 milliseconds</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>An index is a separate, sorted data structure that stores column values and pointers to the actual rows.</li><li>Indexes speed up reads (SELECT, WHERE, JOIN) but slightly slow down writes (INSERT, UPDATE, DELETE).</li><li>The database's query optimizer decides whether to use an index — it won't always use one.</li><li>The most common index type is a B-tree, which supports equality and range queries.</li><li>Index columns that appear in WHERE, JOIN ON, and ORDER BY clauses.</li><li>Too many indexes hurt write performance; too few hurt read performance. Balance is key.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>You have a <code>products</code> table at a Flipkart warehouse with 5 million rows. You frequently run <code>SELECT * FROM products WHERE category = 'Electronics'</code>. What index would you create?</li><li>A <code>payments</code> table has columns: <code>payment<em>id</code>, <code>user</em>id</code>, <code>amount</code>, <code>status</code>, <code>created_at</code>. Which columns would you index first and why?</li><li>What happens to an index when you delete a row from the table?</li><li>You created an index on <code>email</code> in the <code>users</code> table. A query <code>SELECT * FROM users WHERE LOWER(email) = 'arjun@example.com'</code> is still slow. Why?</li><li>Your <code>orders</code> table write performance has degraded. You check and find 11 indexes on the table. What would you investigate and how?</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Arjun's problem wasn't a bad query or bad data. It was a missing shortcut. Once he added an index on <code>customer_id</code>, that 12-second query dropped to under 100 milliseconds. His manager was relieved. The support team stopped complaining. Arjun learned something that day that took some engineers years to figure out: the data matters, but how the database finds the data matters just as much.</p>
+
+<p>Indexes are one of the first tools you reach for when queries get slow. They're not magic — they have trade-offs and they need to be chosen carefully. But understanding them is non-negotiable if you work with databases at any serious scale.</p>
+
+<p>The good news is that the concept is simple. A sorted shortcut that points you to the right place. You've seen that in phone books, library catalogs, and book indexes. Databases just do the same thing, faster, and at much larger scale.</p>
+
+<p>As you move forward into more advanced topics like clustered vs non-clustered indexes and query execution plans, you'll build on exactly what you learned here. The foundation is solid.</p>
+
+  `,
+  'mod13-t2': `
+    <h1>Clustered vs Non-Clustered Index</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Neha works on the data engineering team at IRCTC. Her job is to make sure the ticket booking system stays fast even when crores of people try to book train tickets at the same time — especially during Tatkal booking windows when traffic spikes within seconds.</p>
+
+<p>One afternoon, she noticed a strange pattern. Queries searching for tickets by <code>train<em>number</code> were lightning fast. But queries searching by <code>passenger</em>name</code> were noticeably slower, even though both columns had indexes. She ran both queries in the test environment, checked the execution plans, and that's when she saw it: one was using a clustered index, and the other was using a non-clustered index. Same index concept, very different behavior.</p>
+
+<p>Neha hadn't really thought hard about the difference before that day. After she dug into it, she told her team: "This is something everyone should know before they create their first index."</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>Consider a <code>bookings</code> table at IRCTC with 200 million rows. There are two common queries:</p>
+
+<pre><code class="language-sql">-- Query 1: By booking_id (primary key)
+SELECT * FROM bookings WHERE booking_id = 98234710;
+
+-- Query 2: By passenger name
+SELECT * FROM bookings WHERE passenger_name = 'Rahul Verma';</code></pre>
+
+<p>Both queries have indexes. But query 1 completes in under 5 milliseconds, while query 2 takes 80-100 milliseconds. Why?</p>
+
+<p>Query 1 uses the clustered index (the primary key). The rows in the table are physically stored in <code>booking_id</code> order. Finding booking 98234710 means going directly to the exact spot on disk where that row lives.</p>
+
+<p>Query 2 uses a non-clustered index. The index finds the right row pointers, but then has to do a second lookup to go fetch the actual row from the table. That second step — called a key lookup or bookmark lookup — adds time.</p>
+
+<p>The difference between clustered and non-clustered indexes isn't just naming — it's about where and how your data actually lives on disk.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Early databases stored data as simple files with rows written one after another in insertion order. Retrieval meant scanning from the beginning each time. Indexes helped, but there was still the problem of that second lookup: find the index entry, then go get the row.</p>
+
+<p>Database engineers at companies like IBM realized that if you sorted the actual rows of the table in the same order as a frequently-used index, you could skip that second lookup entirely. The table itself becomes the index. This became the clustered index.</p>
+
+<p>The name "clustered" comes from the idea that rows are clustered together on disk in sorted order. Non-clustered is everything else — an index structure that's separate from the table data and still needs to do a second hop to fetch the full row.</p>
+
+<p>SQL Server formalized this distinction in the 1990s. MySQL's InnoDB storage engine treats the primary key as the clustered index by default. PostgreSQL implements a similar concept through its physical storage, though it uses different terminology. The idea is now universal across relational databases.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Imagine a filing cabinet in an HR department at a company in Pune. The HR manager arranges all employee files in alphabetical order by employee ID. The files themselves — the physical folders — sit in that order.</p>
+
+<p>When you need employee file for ID 00724, you go to the cabinet and pull it out directly from its position. There's no extra step. The files are stored in the order you'd look them up. That's a clustered index.</p>
+
+<p>Now imagine there's also a separate binder on the desk. This binder has a sorted list of employee names, and next to each name, it says which drawer and position in the cabinet contains that person's file. When you want "Sharma, Priya," you open the binder, find the entry, note "Drawer 3, Position 47," and then go to the cabinet to pull the file.</p>
+
+<p>That binder is a non-clustered index. It's helpful, but it involves two steps: look up the binder, then go get the file.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think of a dictionary. The words in a dictionary are physically arranged in alphabetical order from A to Z. There's only one way to physically arrange the pages, so there can only be one "physical order." That's the clustered index.</p>
+
+<p>Now think of the reference section at the back of a thick textbook — an index that says "see page 247 for photosynthesis, page 312 for osmosis." That reference section is separate from the actual content of the book. It tells you where to find things, but you still have to flip to that page to read the content. That's a non-clustered index.</p>
+
+<p>A table can have only one clustered index (just like a dictionary can only be in one physical order), but it can have many non-clustered indexes (like a book can have multiple reference lists at the back).</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>A clustered index physically reorders the rows of the table on disk according to the index key. When you set a primary key in MySQL's InnoDB engine, InnoDB automatically creates a clustered index using that key. The rows are stored in a B-tree where the leaf nodes (the bottom of the tree) are the actual data rows themselves, not pointers to rows.</p>
+
+<p>When you query by the clustered index key, the database traverses the B-tree and ends up directly at the data. One operation. No follow-up needed.</p>
+
+<p>A non-clustered index is a separate B-tree structure. Its leaf nodes contain the index key value and a pointer to the actual row (in MySQL InnoDB, this pointer is the primary key value, not a direct disk address). When you query by a non-clustered index, the database first traverses the non-clustered B-tree to find the matching entries, then uses those pointers to do a second lookup into the clustered index to fetch the full row data. This second step is called a "key lookup."</p>
+
+<p>Because there can only be one physical arrangement of rows, a table can have only one clustered index. But it can have dozens of non-clustered indexes, each offering a different lookup path. Each non-clustered index adds a little overhead to writes because all indexes must be updated when data changes.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<pre><code class="language-sql">-- In MySQL/InnoDB, the PRIMARY KEY is automatically the clustered index
+CREATE TABLE bookings (
+    booking_id INT PRIMARY KEY,  -- This becomes the clustered index
+    train_number VARCHAR(10),
+    passenger_name VARCHAR(100),
+    journey_date DATE,
+    class CHAR(2)
+);</code></pre>
+
+<pre><code class="language-sql">-- Non-clustered index on passenger_name
+CREATE INDEX idx_passenger_name ON bookings(passenger_name);</code></pre>
+
+<pre><code class="language-sql">-- Non-clustered index on journey_date
+CREATE INDEX idx_journey_date ON bookings(journey_date);</code></pre>
+
+<pre><code class="language-sql">-- In SQL Server: explicitly create a clustered index
+CREATE CLUSTERED INDEX idx_booking_id ON bookings(booking_id);
+
+-- Non-clustered in SQL Server
+CREATE NONCLUSTERED INDEX idx_passenger ON bookings(passenger_name);</code></pre>
+
+<pre><code class="language-sql">-- PostgreSQL: CLUSTER command physically reorders the table by an index
+CLUSTER bookings USING idx_booking_id;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Term</th><th>What It Means</th></tr></thead>
+<tbody>
+<tr><td>Clustered Index</td><td>Rows are physically stored on disk in the order of this index key. Only one per table.</td></tr>
+<tr><td>Non-Clustered Index</td><td>A separate B-tree structure that stores keys + row pointers. Multiple allowed.</td></tr>
+<tr><td>Primary Key (MySQL InnoDB)</td><td>Automatically becomes the clustered index</td></tr>
+<tr><td>Key Lookup / Bookmark Lookup</td><td>The second step a non-clustered index must do to fetch the full row from the clustered index</td></tr>
+<tr><td>Leaf Node</td><td>The bottom level of a B-tree — in a clustered index, it's the actual data; in non-clustered, it's a pointer</td></tr>
+<tr><td>Covering Index</td><td>A non-clustered index that includes all columns needed by a query, avoiding the key lookup</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p><strong>Sample table: <code>train_bookings</code> at IRCTC</strong></p>
+
+<table>
+<thead><tr><th>booking_id</th><th>train_number</th><th>passenger_name</th><th>journey_date</th><th>class</th><th>fare</th></tr></thead>
+<tbody>
+<tr><td>1001</td><td>12301</td><td>Rahul Verma</td><td>2024-12-25</td><td>3A</td><td>1245</td></tr>
+<tr><td>1002</td><td>12302</td><td>Priya Singh</td><td>2024-12-25</td><td>SL</td><td>545</td></tr>
+<tr><td>1003</td><td>12301</td><td>Neha Joshi</td><td>2024-12-26</td><td>2A</td><td>1890</td></tr>
+<tr><td>1004</td><td>12303</td><td>Aman Kumar</td><td>2024-12-26</td><td>CC</td><td>2100</td></tr>
+<tr><td>1005</td><td>12302</td><td>Rahul Verma</td><td>2024-12-27</td><td>SL</td><td>545</td></tr>
+</tbody></table>
+
+<h3>Example 1: Query using the clustered index (primary key)</h3>
+
+<pre><code class="language-sql">SELECT * FROM train_bookings WHERE booking_id = 1003;</code></pre>
+
+<p>The database traverses the clustered B-tree using <code>booking_id = 1003</code>. The leaf node of the B-tree IS the actual row data. Result returned in a single operation. No second lookup needed.</p>
+
+<h3>Example 2: Query using a non-clustered index</h3>
+
+<pre><code class="language-sql">CREATE INDEX idx_passenger_name ON train_bookings(passenger_name);
+
+SELECT * FROM train_bookings WHERE passenger_name = 'Rahul Verma';</code></pre>
+
+<p>The database uses the non-clustered index on <code>passenger<em>name</code> to find entries for "Rahul Verma" — it finds booking</em>ids 1001 and 1005. It then does a key lookup using those booking_ids to fetch the full rows from the clustered index. Two steps total.</p>
+
+<h3>Example 3: Covering index to avoid key lookup</h3>
+
+<pre><code class="language-sql">CREATE INDEX idx_covering ON train_bookings(passenger_name, journey_date, fare);
+
+SELECT passenger_name, journey_date, fare 
+FROM train_bookings 
+WHERE passenger_name = 'Rahul Verma';</code></pre>
+
+<p>This non-clustered index includes all three columns the query needs. The database doesn't need to do a key lookup — everything needed is already in the index. This is a covering index and it's almost as fast as using the clustered index directly.</p>
+
+<h3>Example 4: Choosing the right clustered index key matters</h3>
+
+<pre><code class="language-sql">-- Bad design: using a random UUID as primary key
+CREATE TABLE payments (
+    payment_id CHAR(36) PRIMARY KEY,  -- UUID, random order
+    ...
+);</code></pre>
+
+<p>With random UUIDs as the clustered index, new inserts go to random positions in the B-tree, causing page splits and fragmentation. Sequential integer primary keys (1, 2, 3...) cause new inserts to always go to the end, which is much more efficient.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Can I create a clustered index on any column I want?</strong></p>
+<p>In SQL Server, yes. In MySQL InnoDB, the primary key is always the clustered index — you can't change that. If you don't define a primary key, InnoDB picks the first unique NOT NULL column, or creates a hidden row ID column. You don't always have explicit control.</p>
+
+<p><strong>If non-clustered indexes are slower, why use them at all?</strong></p>
+<p>Because you can only have one clustered index. Your table might be queried by 5 different columns. The clustered index handles one of them optimally. Non-clustered indexes handle the rest, even if they're slightly slower. The alternative — no index — is far worse.</p>
+
+<p><strong>Does a non-clustered index always do a key lookup?</strong></p>
+<p>Not if it's a covering index. If the index contains all the columns a query needs, the database never needs to touch the actual table. Covering indexes are a powerful optimization technique.</p>
+
+<p><strong>Should I always put the primary key as the clustered index?</strong></p>
+<p>Usually yes, especially if your primary key is an auto-incrementing integer. Sequential keys mean rows are always appended to the end, minimizing page splits. Random-order keys (like UUIDs) cause lots of page splits and degrade performance over time.</p>
+
+<p><strong>How many non-clustered indexes should I have?</strong></p>
+<p>There's no universal number. Each one helps specific queries but slows down writes. A table with heavy reads might have 5-8 non-clustered indexes. A write-heavy table should have very few.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Using UUIDs or random strings as primary keys</strong> — the clustered index becomes fragmented because inserts go to random positions in the B-tree.</li><li><strong>Assuming every index works the same way</strong> — not knowing that a non-clustered index does a key lookup for columns not in the index leads to unexplained slowness.</li><li><strong>Creating a non-clustered index when a covering index would be much better</strong> — if you always query the same 3 columns together, include all 3 in one index.</li><li><strong>Not knowing that MySQL InnoDB uses the primary key as the clustered index</strong> — this means your primary key choice has a much bigger impact on performance than many developers realise.</li><li><strong>Dropping and recreating clustered indexes on large tables in production</strong> — this physically reorders all the data and can lock a table for minutes or hours.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Use an auto-incrementing integer (INT or BIGINT) as your primary key in MySQL to get the benefits of a well-ordered clustered index.</li><li>Think about which column(s) your most frequent and most critical queries filter on — that's your best candidate for influencing your clustered index design.</li><li>Use covering indexes for frequently-run queries that always access the same set of columns.</li><li>Include the primary key in your mental model of every non-clustered index — in MySQL InnoDB, it's always appended to the non-clustered index leaf nodes.</li><li>In SQL Server, every table should have a clustered index. A table without one is called a "heap" and usually performs worse.</li><li>Avoid wide clustered index keys (many columns or long strings) — every non-clustered index stores a copy of the clustered index key, so wide keys multiply storage costs.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Flipkart's product catalog has hundreds of millions of SKUs. The <code>products</code> table is clustered on <code>product<em>id</code> (auto-increment). Queries by product ID — the most common query for the product page — are nearly instant. Non-clustered indexes on <code>category</em>id</code>, <code>brand_id</code>, and <code>price</code> handle all the browsing and filtering queries.</p>
+
+<p>PhonePe's transaction table is clustered on an auto-increment <code>transaction<em>id</code>. But the most common operational query is "show all transactions for user X in the last 30 days." This uses a non-clustered index on <code>(user</em>id, transaction_date)</code>. PhonePe likely uses a covering index that includes <code>amount</code> and <code>status</code> as well, so the key lookup is skipped for the most common display queries.</p>
+
+<p>Swiggy's order management system clusters orders on <code>order<em>id</code>. Restaurant-facing queries filtering by <code>restaurant</em>id</code> and <code>order_time</code> use non-clustered indexes. Swiggy's engineering team has blogged about how getting clustered index design right was critical for sustaining performance during peak dinner hours when order volume triples.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>CLUSTERED INDEX (table data IS the index):
+
+        B-tree
+       [1003]
+      /       \
+  [1001]    [1005]
+  /    \
+[1001]  [1002]  ← Leaf nodes = actual row data
+ row      row
+ data     data
+
+Query: WHERE booking_id = 1003
+→ Traverse B-tree → arrive at the data directly
+→ 1 step
+
+
+NON-CLUSTERED INDEX (separate structure + pointer):
+
+Non-Clustered B-tree        Clustered Index (table)
+  [Neha Joshi → 1003]  →→→  [1003: full row data]
+  [Priya Singh → 1002] →→→  [1002: full row data]
+  [Rahul Verma → 1001] →→→  [1001: full row data]
+  [Rahul Verma → 1005] →→→  [1005: full row data]
+
+Query: WHERE passenger_name = 'Rahul Verma'
+→ Traverse non-clustered B-tree → find booking_ids 1001, 1005
+→ Key lookup using 1001 and 1005 in clustered index
+→ 2 steps (but still fast — much faster than full scan)</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>A clustered index physically orders the rows on disk. Only one per table.</li><li>In MySQL InnoDB, the primary key is always the clustered index.</li><li>Non-clustered indexes are separate structures that point back to the clustered index. Multiple allowed.</li><li>Non-clustered index lookups involve two steps: find the pointer, then fetch the row.</li><li>A covering index includes all columns a query needs, eliminating the second step.</li><li>Auto-increment integers make better clustered index keys than random UUIDs.</li><li>The difference between clustered and non-clustered matters most at scale — millions of rows, high query volume.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>You have a <code>customers</code> table at Paytm with primary key <code>customer<em>id</code> (auto-increment int). What type of index is automatically created on <code>customer</em>id</code> in MySQL?</li><li>A query <code>SELECT name, email FROM users WHERE email = 'arjun@example.com'</code> is slow. You have a non-clustered index on <code>email</code>. What kind of index would you create to eliminate the key lookup entirely?</li><li>Your team is designing a new <code>transactions</code> table. Someone suggests using a UUID string as the primary key. What performance concern would you raise?</li><li>A table in SQL Server has no clustered index. What is such a table called, and why is it generally a problem?</li><li>You have 8 non-clustered indexes on a <code>shipments</code> table at a logistics company. New shipment inserts are becoming slow. What would you investigate and how would you decide which indexes to remove?</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Neha's discovery that day wasn't that non-clustered indexes were bad — they're not. She discovered that understanding how data is physically stored changes how you design queries, tables, and indexes. She went back and created a covering index for the passenger name query, and the performance difference was significant.</p>
+
+<p>The clustered vs non-clustered distinction is one of those things that feels abstract until you actually see query execution plans side by side. Once you see that extra "key lookup" step in an execution plan for a non-clustered index query, it clicks permanently.</p>
+
+<p>This knowledge changes how you design tables, not just how you add indexes after the fact. Choosing the right primary key, thinking about which queries are most critical, and planning your index strategy upfront — that's the difference between a database that scales gracefully and one that falls over during every high-traffic moment.</p>
+
+<p>Start with the primary key choice. Everything else builds on that.</p>
+
+  `,
+  'mod13-t3': `
+    <h1>Composite Indexes</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Simran works as a backend engineer at Swiggy in Bangalore. Her team owns the "order history" feature — the screen in the app that shows a user's past orders. Straightforward enough.</p>
+
+<p>The query behind that screen looked like this:</p>
+
+<pre><code class="language-sql">SELECT * FROM orders WHERE user_id = 88821 AND order_date &gt;= '2024-01-01';</code></pre>
+
+<p>They had individual indexes on <code>user<em>id</code> and on <code>order</em>date</code>. The query was still taking 300-400 milliseconds on large accounts — users who had hundreds of orders going back years. That wasn't acceptable for a screen that users check multiple times a day.</p>
+
+<p>Her tech lead said: "You need a composite index." Simran had heard the term but had never really used one deliberately. An hour later, after adding a single composite index and testing, the query was running in under 20 milliseconds. She's never forgotten the lesson.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>Individual single-column indexes work great when you filter by one column at a time. But in real applications, queries almost always filter on multiple columns together.</p>
+
+<p>Think about an e-commerce order system. You rarely want "all orders ever." You want:</p>
+<ul><li>All orders for user 88821 that are pending</li><li>All orders placed in Delhi in December</li><li>All delivered orders for restaurant 504 today</li></ul>
+
+<p>Each of those queries has two or more filter conditions. A single-column index on <code>user_id</code> alone would give the database a list of ALL orders for user 88821 — maybe 500 rows — and then the database still needs to filter those 500 rows by date. With millions of users this partial optimization isn't enough.</p>
+
+<p>A composite index (also called a multi-column index) covers two or more columns in a single index structure. Done right, it makes the database filter on all conditions at once, returning only the exact rows needed.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>When SQL databases were first being used for real business applications in the 1980s, engineers quickly found that single-column indexes weren't sufficient for complex reporting and application queries. Real queries had WHERE clauses with 3, 4, sometimes 5 conditions.</p>
+
+<p>The answer was composite indexes — index structures that encode multiple column values together. The database could then satisfy a multi-condition WHERE clause using a single index traversal instead of multiple index lookups followed by merging.</p>
+
+<p>The challenge was that composite indexes introduced column ordering as a critical design decision. The order of columns in a composite index determines which queries can use it effectively. Getting this wrong means the index exists but doesn't help. Getting it right means one index can serve many query patterns efficiently.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Imagine a large library in Chennai with a physical card catalog. Cards are sorted first by subject, then by author within each subject, then by title within each author. This is a composite catalog — three levels of sorting.</p>
+
+<p>If you're looking for science books by Kalam, you open the drawer marked "Science," flip to "Kalam" within it, and immediately find all his titles. The catalog works perfectly for: science books by a specific author, all science books, or all books by Kalam within science.</p>
+
+<p>But if someone asks "show me all books by Kalam across ALL subjects," the catalog is less helpful because it's sorted by subject first, not by author first. You'd have to check every subject section for Kalam.</p>
+
+<p>This is exactly how composite indexes behave. The leftmost column is the first sort order. The second column is sorted within the first. The index works best when you use the leftmost columns in your query conditions. This is called the "leftmost prefix rule."</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think of how contacts are stored in a phone book sorted by last name, then first name. If you want to find "Sharma, Rahul," you go to S, find Sharma, then find Rahul within Sharma. Fast.</p>
+
+<p>If you want all people named "Rahul" (regardless of last name), the phone book is useless — Rahul could be under any last name. You'd have to scan the whole book.</p>
+
+<p>A composite index <code>(last<em>name, first</em>name)</code> works great for:</p>
+<ul><li>Filtering by last name only</li><li>Filtering by last name AND first name together</li></ul>
+
+<p>It does NOT work well for:</p>
+<ul><li>Filtering by first name only</li></ul>
+
+<p>The same logic applies to composite indexes in databases. Always design them around how you actually query — starting from the most selective or most frequently filtered column.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>A composite index builds a B-tree where each key is a combination of the indexed column values, concatenated in order. For an index on <code>(user<em>id, order</em>date)</code>, each B-tree key is something like <code>[88821, 2024-03-15]</code>.</p>
+
+<p>The B-tree is sorted first by <code>user<em>id</code>, then by <code>order</em>date</code> within each <code>user_id</code>. This means:</p>
+<ul><li>Queries filtering only on <code>user<em>id</code> can use this index — they find all entries starting at the right user</em>id value.</li><li>Queries filtering on both <code>user<em>id</code> AND <code>order</em>date</code> can use this index fully — they narrow down to an exact user and date range.</li><li>Queries filtering ONLY on <code>order<em>date</code> (without <code>user</em>id</code>) cannot use this index effectively — because <code>order<em>date</code> values are only sorted within each user</em>id grouping, not globally sorted.</li></ul>
+
+<p>This is the leftmost prefix rule: a composite index on <code>(A, B, C)</code> can support queries filtering on <code>A</code>, <code>A+B</code>, or <code>A+B+C</code>. But it cannot support queries filtering only on <code>B</code>, only on <code>C</code>, or only on <code>B+C</code> — because the B-tree's global sort order starts with A.</p>
+
+<p>Column order in a composite index is not arbitrary. It's a design decision that determines which queries the index can serve.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<pre><code class="language-sql">-- Composite index on two columns
+CREATE INDEX idx_user_date ON orders(user_id, order_date);</code></pre>
+
+<pre><code class="language-sql">-- Composite index on three columns
+CREATE INDEX idx_restaurant_status_date ON orders(restaurant_id, order_status, order_date);</code></pre>
+
+<pre><code class="language-sql">-- Composite index covering query columns (covering index)
+CREATE INDEX idx_user_date_covering 
+ON orders(user_id, order_date, order_status, total_amount);</code></pre>
+
+<pre><code class="language-sql">-- Unique composite index (combination must be unique)
+CREATE UNIQUE INDEX idx_user_product 
+ON cart(user_id, product_id);</code></pre>
+
+<pre><code class="language-sql">-- Check what indexes exist on a table (MySQL)
+SHOW INDEX FROM orders;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Component</th><th>What It Means</th></tr></thead>
+<tbody>
+<tr><td><code>(user<em>id, order</em>date)</code></td><td>Column order — the B-tree sorts by user<em>id first, then order</em>date within each user_id</td></tr>
+<tr><td>Leftmost prefix</td><td>Queries must use the first column(s) of the composite index to benefit from it</td></tr>
+<tr><td>Covering index</td><td>When the composite index includes all columns needed by the query — no key lookup required</td></tr>
+<tr><td>Cardinality</td><td>Number of distinct values — higher cardinality columns usually go first in the index</td></tr>
+<tr><td>Index selectivity</td><td>How narrowly an index filters rows — a highly selective index returns fewer rows per lookup</td></tr>
+<tr><td>Column order</td><td>The most critical design decision for composite indexes — determines which queries can use it</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p><strong>Sample table: <code>orders</code> at Swiggy</strong></p>
+
+<table>
+<thead><tr><th>order_id</th><th>user_id</th><th>restaurant_id</th><th>order_date</th><th>order_status</th><th>total_amount</th></tr></thead>
+<tbody>
+<tr><td>5001</td><td>88821</td><td>304</td><td>2024-03-01</td><td>delivered</td><td>450</td></tr>
+<tr><td>5002</td><td>88821</td><td>201</td><td>2024-03-15</td><td>delivered</td><td>280</td></tr>
+<tr><td>5003</td><td>72210</td><td>304</td><td>2024-03-15</td><td>cancelled</td><td>150</td></tr>
+<tr><td>5004</td><td>88821</td><td>510</td><td>2024-04-01</td><td>delivered</td><td>620</td></tr>
+<tr><td>5005</td><td>72210</td><td>201</td><td>2024-04-02</td><td>pending</td><td>340</td></tr>
+</tbody></table>
+
+<h3>Example 1: Composite index serving a two-condition query</h3>
+
+<pre><code class="language-sql">CREATE INDEX idx_user_date ON orders(user_id, order_date);
+
+SELECT * FROM orders 
+WHERE user_id = 88821 AND order_date &gt;= '2024-03-01';</code></pre>
+
+<p>The index on <code>(user<em>id, order</em>date)</code> lets the database go directly to user<em>id=88821 and then scan only the order</em>date range within that user's entries. Both conditions are resolved using the index. Extremely fast.</p>
+
+<h3>Example 2: Using only the leftmost column — still works</h3>
+
+<pre><code class="language-sql">SELECT * FROM orders WHERE user_id = 88821;</code></pre>
+
+<p>Even though the index is <code>(user<em>id, order</em>date)</code>, this query can still use the index — it uses just the leftmost prefix <code>user_id</code>. It returns all orders for user 88821 efficiently.</p>
+
+<h3>Example 3: Skipping the leftmost column — index not usable</h3>
+
+<pre><code class="language-sql">SELECT * FROM orders WHERE order_date &gt;= '2024-04-01';</code></pre>
+
+<p>This query filters only on <code>order<em>date</code>, which is the second column in the <code>(user</em>id, order<em>date)</code> index. The database cannot use this index efficiently because <code>order</em>date</code> is only sorted within each user<em>id group, not globally. The database falls back to a full table scan. A separate index on <code>order</em>date</code> alone would be needed for this query.</p>
+
+<h3>Example 4: Three-column composite with range on the last column</h3>
+
+<pre><code class="language-sql">CREATE INDEX idx_restaurant_status_date 
+ON orders(restaurant_id, order_status, order_date);
+
+SELECT * FROM orders 
+WHERE restaurant_id = 304 
+  AND order_status = 'delivered' 
+  AND order_date &gt;= '2024-03-01';</code></pre>
+
+<p>This query uses all three columns of the composite index. The database first narrows to restaurant 304, then to delivered orders within that restaurant, then to the date range. All three filters are applied using the index. This is the composite index working at full efficiency.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>I have individual indexes on both columns — why isn't the composite index better?</strong></p>
+<p>Individual indexes on <code>user<em>id</code> and <code>order</em>date</code> mean the database can use one of them and then filter the result set manually, or in some databases, merge both index results. A composite index on <code>(user<em>id, order</em>date)</code> is almost always faster for a two-condition query because it resolves both conditions in a single B-tree traversal without merging.</p>
+
+<p><strong>Does the order of conditions in WHERE matter?</strong></p>
+<p>No. <code>WHERE user<em>id = 88821 AND order</em>date >= '2024-01-01'</code> and <code>WHERE order<em>date >= '2024-01-01' AND user</em>id = 88821</code> are equivalent. The query optimizer reorders conditions to match available indexes. What matters is the column order in the index definition, not the WHERE clause.</p>
+
+<p><strong>Can I put a range condition column first in a composite index?</strong></p>
+<p>You can, but it limits the index's usefulness. If the index is <code>(order<em>date, user</em>id)</code> and your query is <code>WHERE order<em>date >= '2024-01-01' AND user</em>id = 88821</code>, the database can use the range on order<em>date but cannot efficiently use the user</em>id filter within the index (because after a range scan on order<em>date, the user</em>id values aren't in any predictable order). Equality conditions should generally come before range conditions in a composite index.</p>
+
+<p><strong>Will a composite index replace my single-column indexes?</strong></p>
+<p>Sometimes. A composite index on <code>(user<em>id, order</em>date)</code> also functions as an index on <code>user<em>id</code> alone (leftmost prefix). So you might be able to drop a standalone <code>user</em>id</code> index if you have this composite index. But it won't replace a standalone <code>order_date</code> index.</p>
+
+<p><strong>How many columns should a composite index have?</strong></p>
+<p>Usually 2-4. Beyond that, the index key gets wide, taking up more disk space and more memory in the buffer pool. Also, very wide composite indexes are rarely used for their full key. Design indexes around actual query patterns, not theoretical combinations.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Putting the low-cardinality column first</strong> — indexing <code>(order<em>status, user</em>id)</code> when <code>order_status</code> has only 4 values means the first level of the B-tree barely narrows anything down. Put the more selective column first.</li><li><strong>Ignoring the leftmost prefix rule</strong> — creating <code>(user<em>id, order</em>date)</code> and then running queries that only filter on <code>order_date</code>, and wondering why it's still slow.</li><li><strong>Creating redundant indexes</strong> — having both <code>(user<em>id)</code> and <code>(user</em>id, order<em>date)</code> when all user</em>id queries are accompanied by an order_date filter. The composite index is sufficient.</li><li><strong>Putting range condition columns before equality columns</strong> — <code>(order<em>date, user</em>id)</code> is less efficient than <code>(user<em>id, order</em>date)</code> for queries that combine an equality on user<em>id with a range on order</em>date.</li><li><strong>Not using covering indexes</strong> — when a query always selects the same set of columns, adding those columns to the composite index eliminates the key lookup and makes the query significantly faster.</li><li><strong>Creating composite indexes for every possible column combination</strong> — each index costs storage and write performance. Design each one to serve a specific, real query pattern.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Put equality filter columns before range filter columns in composite indexes.</li><li>Put higher-cardinality columns earlier in the index for better selectivity.</li><li>Use covering indexes for your most frequent, most critical queries.</li><li>Check the leftmost prefix rule — ensure your most common queries use the index from the leftmost column.</li><li>Consolidate: one good composite index can replace two or three single-column indexes.</li><li>Always verify with <code>EXPLAIN</code> that the optimizer is actually using your composite index as intended.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Myntra has a <code>products</code> table with millions of SKUs. The product listing page filters by <code>category<em>id</code>, <code>brand</em>id</code>, and <code>price<em>range</code>. Myntra uses a composite index on <code>(category</em>id, brand_id, price)</code> — equality on category and brand first, range on price last. This serves the most common browsing pattern perfectly.</p>
+
+<p>Amazon India's order management system has a composite index on <code>(customer<em>id, order</em>date, status)</code> for the "My Orders" page. Customers typically filter by their ID and a date range, and optionally by status (returns, delivered, etc.). The composite index handles all these combinations efficiently from the leftmost prefix.</p>
+
+<p>Paytm's bill payment system has a <code>transactions</code> table with a composite index on <code>(user<em>id, biller</em>type, transaction<em>date)</code>. When a user opens their electricity bill payment history, the query filters on user</em>id and biller_type, with an optional date range — exactly what this composite index was designed for.</p>
+
+<p>Ola's ride history feature uses a composite index on <code>(rider<em>id, ride</em>date)</code> on their <code>rides</code> table. Every single call to the ride history API uses this index. The engineering team estimated this composite index handles several million queries per day without triggering full table scans.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>Composite Index: (user_id, order_date) on orders table
+
+B-tree structure (conceptual):
+
+Level 1 (user_id):   [10000] [50000] [88821] [99999] ...
+                                         |
+Level 2 (order_date within user 88821):
+                             [2024-01-05] [2024-03-01] [2024-03-15] [2024-04-01]
+
+Query: WHERE user_id = 88821 AND order_date &gt;= '2024-03-01'
+Step 1: Navigate to user_id = 88821 in the B-tree
+Step 2: Within that branch, scan from order_date = 2024-03-01 onwards
+Step 3: Return matching rows (or do key lookup for full row)
+→ Only reads entries for user 88821 after March 2024
+
+
+Query: WHERE order_date &gt;= '2024-03-01' (no user_id filter)
+→ order_date is only sorted WITHIN each user_id group
+→ Index cannot help — full table scan required
+→ Need a separate index on order_date for this query
+
+
+LEFTMOST PREFIX RULE:
+Index (A, B, C) supports:
+  ✓  WHERE A = ...
+  ✓  WHERE A = ... AND B = ...
+  ✓  WHERE A = ... AND B = ... AND C = ...
+  ✗  WHERE B = ...
+  ✗  WHERE C = ...
+  ✗  WHERE B = ... AND C = ...</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>A composite index covers two or more columns in a single B-tree structure.</li><li>The leftmost prefix rule determines which queries can use a composite index.</li><li>Column order in the index definition matters — equality conditions before range conditions.</li><li>Higher-cardinality columns should generally come first for better selectivity.</li><li>A composite index on <code>(A, B)</code> can also serve queries filtering only on <code>A</code>.</li><li>Covering indexes — composite indexes that include all columns a query needs — eliminate key lookups and are very efficient.</li><li>One well-designed composite index can replace multiple single-column indexes.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>You have a composite index on <code>(city, category)</code> on a <code>restaurants</code> table. Which of these queries will use the index? (a) <code>WHERE city = 'Mumbai'</code>, (b) <code>WHERE category = 'Pizza'</code>, (c) <code>WHERE city = 'Mumbai' AND category = 'Pizza'</code></li><li>Your most common query is <code>SELECT name, price FROM products WHERE category<em>id = 5 AND brand</em>id = 12</code>. What composite index would you create to make this a covering index?</li><li>You have <code>(user<em>id, status, created</em>at)</code> as a composite index. A query filters <code>WHERE user<em>id = 100 AND created</em>at >= '2024-01-01'</code> — will it fully use the index? What would you change?</li><li>A table has separate indexes on <code>(order<em>date)</code> and <code>(user</em>id)</code>. Your team wants to replace them with one composite index. What questions would you ask before deciding the column order?</li><li>A query <code>WHERE product<em>id = 500 AND warehouse</em>id = 3 AND quantity < 10</code> needs to be optimized. Design the ideal composite index and explain your column ordering choice.</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Simran's 20-millisecond query didn't happen because of magic. It happened because one composite index precisely matched the way the order history query was written. The <code>(user<em>id, order</em>date)</code> index fit the query like a key fits a lock.</p>
+
+<p>The beautiful thing about composite indexes is that they reward you for thinking carefully about your data access patterns before you build. If you know your most common queries, you can design indexes that make them fast by construction. You're not patching problems after the fact — you're building the right infrastructure from the start.</p>
+
+<p>The leftmost prefix rule might seem like a limitation, but it's actually a predictable design constraint. Once you internalize it, you can look at a composite index and immediately know which queries it serves and which it doesn't.</p>
+
+<p>Think about your actual queries first. Design your composite indexes around them. Then verify with EXPLAIN. That workflow — query first, index second, verify third — will serve you in every codebase you work in.</p>
+
+  `,
+  'mod13-t4': `
+    <h1>EXPLAIN / Query Execution Plans</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Rahul is a senior developer at Paytm's payments team in Noida. His manager came to him one afternoon with a complaint: the transaction history page for business accounts was timing out. Users with high transaction volumes were seeing a loading spinner for 30+ seconds, and some requests were just failing.</p>
+
+<p>Rahul looked at the query. It seemed fine. It had a WHERE clause. There was an index on <code>user_id</code>. He couldn't immediately see the problem just by reading the SQL. So he did what experienced engineers do when a query is slow but the reason isn't obvious. He ran <code>EXPLAIN</code> in front of the query.</p>
+
+<p>What came back showed him something he hadn't expected. The query was doing a full table scan on a 400 million row table, completely ignoring the index. One line in the EXPLAIN output told him more about the query's behavior than any amount of staring at the SQL. Within 10 minutes he'd identified the problem and fixed it. The feature was back to normal.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>You write a query. You think it should be fast. You've added indexes. But it's still slow. Without a way to see inside the database's head — to know exactly what plan it chose to execute your query — you're guessing.</p>
+
+<p>Did the database use your index? Which one? Did it do a full scan? Did it join the tables in the right order? Did it read 50 rows or 50 million? You have no idea unless you look at the execution plan.</p>
+
+<p>This is the everyday reality of query optimization. You can't optimize what you can't measure. EXPLAIN is your measurement tool. It shows you the database's plan of attack for a query before (or while) it runs. Every slow query investigation starts with EXPLAIN.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>As databases got more sophisticated in the 1980s and 1990s, they developed query optimizers — components that would analyze a SQL statement and decide the best way to execute it. The same SQL could be executed in dozens of different ways: different join orders, different index choices, different algorithms.</p>
+
+<p>The optimizer makes these decisions automatically. But sometimes it makes suboptimal choices — because of stale statistics, unusual data distributions, or complex query shapes. Engineers needed a way to see what plan the optimizer chose so they could understand why performance was good or bad.</p>
+
+<p>IBM DB2 introduced the concept of EXPLAIN in the early 1990s. MySQL, PostgreSQL, SQL Server (where it's called Execution Plan), and Oracle all implemented similar functionality. Today it's a standard part of every serious database and an essential skill for anyone who writes SQL professionally.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Imagine you ask a courier to deliver 500 packages across Mumbai. You want to know if they'll deliver them efficiently. The courier comes back and says: "Here's my plan — I'll start in Bandra, drive to Andheri, come back to Dadar, then go to Thane, then come back to Bandra."</p>
+
+<p>You immediately see the problem. That route is terrible. Going back and forth across the city wastes hours. You can see this because you have the plan in front of you.</p>
+
+<p>EXPLAIN is the courier showing you their delivery plan before they start driving — or while they're on the road. If the plan looks inefficient (going back and forth, covering the same ground twice), you can intervene and fix it. Without seeing the plan, you'd just notice the deliveries were late and have no idea why.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think of a GPS navigation app. When you enter a destination, you don't just see "you'll arrive in 45 minutes." You see the route — every turn, every road, every choice the GPS made. Satellite road in green (fast), congested highway in orange (slow), toll roads noted separately.</p>
+
+<p>You can look at the route and decide: "Actually, I don't want to take the expressway — I'll take the inner road even if it's slightly longer." You're making an informed decision based on visible information.</p>
+
+<p>EXPLAIN shows you the database's "route" for executing a query. The route includes which indexes were used (or skipped), how many rows were scanned, how tables were joined, and what operations happened in what order. Armed with that map, you can make better decisions about indexes and query rewrites.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>When you run <code>EXPLAIN SELECT ...</code>, the database's query optimizer analyzes the query and produces an execution plan — a step-by-step breakdown of how it intends to run the query. In MySQL and PostgreSQL, this plan is returned as a result set you can read directly.</p>
+
+<p>The key information in an execution plan includes:</p>
+
+<p><strong>type (MySQL) / scan type (PostgreSQL):</strong> How the table is being accessed. "ALL" means full table scan (bad for large tables). "ref" or "eq_ref" means using an index. "const" means a single-row lookup via primary key (best).</p>
+
+<p><strong>key:</strong> Which index (if any) the optimizer chose to use.</p>
+
+<p><strong>rows:</strong> The estimated number of rows the database expects to examine. This is an estimate, not a guarantee. For a 400 million row table, seeing "rows: 400000000" means a full scan is happening.</p>
+
+<p><strong>Extra:</strong> Additional information — "Using where" means filtering is happening, "Using index" means the query can be satisfied from the index alone (covering index), "Using filesort" means a sort operation that might be slow.</p>
+
+<p><code>EXPLAIN ANALYZE</code> (available in PostgreSQL and MySQL 8.0+) actually runs the query and returns both the estimated and actual row counts and timing data. This is more informative but also costs the time of actually running the query.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<pre><code class="language-sql">-- Basic EXPLAIN (MySQL)
+EXPLAIN SELECT * FROM orders WHERE user_id = 88821;</code></pre>
+
+<pre><code class="language-sql">-- EXPLAIN with JOIN (MySQL)
+EXPLAIN SELECT o.order_id, u.name 
+FROM orders o 
+JOIN users u ON o.user_id = u.user_id 
+WHERE o.order_status = 'pending';</code></pre>
+
+<pre><code class="language-sql">-- EXPLAIN ANALYZE — actually runs the query and shows real stats (PostgreSQL / MySQL 8.0+)
+EXPLAIN ANALYZE SELECT * FROM transactions WHERE user_id = 10023 AND created_at &gt;= '2024-01-01';</code></pre>
+
+<pre><code class="language-sql">-- EXPLAIN FORMAT=JSON for detailed structured output (MySQL)
+EXPLAIN FORMAT=JSON SELECT * FROM orders WHERE user_id = 88821;</code></pre>
+
+<pre><code class="language-sql">-- SQL Server equivalent: look at execution plan
+-- In SSMS, press Ctrl+L for estimated plan or Ctrl+M for actual plan
+-- Or use:
+SET STATISTICS IO ON;
+SELECT * FROM orders WHERE user_id = 88821;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Column in EXPLAIN Output</th><th>What It Tells You</th></tr></thead>
+<tbody>
+<tr><td><code>type</code></td><td>Access method — ALL (full scan), index, range, ref, eq_ref, const (best)</td></tr>
+<tr><td><code>key</code></td><td>The index the optimizer chose to use — NULL means no index used</td></tr>
+<tr><td><code>key_len</code></td><td>How much of a composite index was used (in bytes) — longer = more columns used</td></tr>
+<tr><td><code>rows</code></td><td>Estimated rows the database will examine — lower is better</td></tr>
+<tr><td><code>filtered</code></td><td>Estimated percentage of rows that pass the WHERE filter after the index scan</td></tr>
+<tr><td><code>Extra</code></td><td>Additional info — "Using index" (good), "Using filesort" (potential issue), "Using temporary" (potential issue)</td></tr>
+<tr><td><code>possible_keys</code></td><td>Indexes that could potentially be used — the optimizer chose from these</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p><strong>Sample table: <code>transactions</code> at Paytm (400 million rows)</strong></p>
+
+<table>
+<thead><tr><th>txn_id</th><th>user_id</th><th>merchant_id</th><th>amount</th><th>status</th><th>created_at</th></tr></thead>
+<tbody>
+<tr><td>9001</td><td>10023</td><td>501</td><td>2500</td><td>success</td><td>2024-03-01</td></tr>
+<tr><td>9002</td><td>10023</td><td>302</td><td>750</td><td>failed</td><td>2024-03-05</td></tr>
+<tr><td>9003</td><td>88821</td><td>501</td><td>1200</td><td>success</td><td>2024-03-10</td></tr>
+<tr><td>9004</td><td>10023</td><td>410</td><td>4500</td><td>success</td><td>2024-04-01</td></tr>
+<tr><td>9005</td><td>77001</td><td>302</td><td>890</td><td>pending</td><td>2024-04-02</td></tr>
+</tbody></table>
+
+<h3>Example 1: EXPLAIN showing a full table scan</h3>
+
+<pre><code class="language-sql">EXPLAIN SELECT * FROM transactions WHERE amount &gt; 1000;</code></pre>
+
+<p>Sample output:</p>
+<pre><code>id | select_type | table        | type | possible_keys | key  | rows      | Extra
+1  | SIMPLE      | transactions | ALL  | NULL          | NULL | 400000000 | Using where</code></pre>
+
+<p><code>type: ALL</code> and <code>rows: 400000000</code> — the database is scanning the entire table. There's no index on <code>amount</code>. This query will be very slow. Fix: add an index on <code>amount</code> if this is a common query, or reconsider whether this query is necessary.</p>
+
+<h3>Example 2: EXPLAIN showing index usage</h3>
+
+<pre><code class="language-sql">-- After creating: CREATE INDEX idx_user_id ON transactions(user_id);
+EXPLAIN SELECT * FROM transactions WHERE user_id = 10023;</code></pre>
+
+<p>Sample output:</p>
+<pre><code>id | select_type | table        | type | possible_keys | key         | rows | Extra
+1  | SIMPLE      | transactions | ref  | idx_user_id   | idx_user_id | 3    | NULL</code></pre>
+
+<p><code>type: ref</code> and <code>rows: 3</code> — the database is using the index and expects to examine only 3 rows. Excellent.</p>
+
+<h3>Example 3: EXPLAIN revealing a function breaking index usage</h3>
+
+<pre><code class="language-sql">EXPLAIN SELECT * FROM transactions WHERE YEAR(created_at) = 2024;</code></pre>
+
+<p>Sample output:</p>
+<pre><code>id | select_type | table        | type | possible_keys | key  | rows      | Extra
+1  | SIMPLE      | transactions | ALL  | NULL          | NULL | 400000000 | Using where</code></pre>
+
+<p>Even if there's an index on <code>created<em>at</code>, wrapping it in <code>YEAR()</code> prevents the index from being used. The fix is to rewrite the condition: <code>WHERE created</em>at >= '2024-01-01' AND created_at < '2025-01-01'</code>.</p>
+
+<h3>Example 4: EXPLAIN ANALYZE showing actual vs estimated rows</h3>
+
+<pre><code class="language-sql">EXPLAIN ANALYZE 
+SELECT * FROM transactions 
+WHERE user_id = 10023 AND created_at &gt;= '2024-01-01';</code></pre>
+
+<p>Sample output (PostgreSQL format):</p>
+<pre><code>Index Scan using idx_user_created on transactions
+  (cost=0.57..18.43 rows=4 width=120)
+  (actual time=0.123..0.189 rows=3 loops=1)
+  Index Cond: ((user_id = 10023) AND (created_at &gt;= '2024-01-01'))
+Planning Time: 0.8 ms
+Execution Time: 0.3 ms</code></pre>
+
+<p>This shows the optimizer estimated 4 rows but found 3. The index is being used. Planning time was 0.8ms. Execution was 0.3ms.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>EXPLAIN says rows: 50000 but the actual query returns 5 rows. Is something wrong?</strong></p>
+<p>Not necessarily. The <code>rows</code> column in a basic EXPLAIN is an <em>estimate</em> based on table statistics, not an exact count. The optimizer uses statistics (histograms, cardinality estimates) to make its plan. If your statistics are stale (not updated after a large data load), estimates can be wildly off. Run <code>ANALYZE TABLE tablename</code> (MySQL) or <code>ANALYZE tablename</code> (PostgreSQL) to refresh statistics.</p>
+
+<p><strong>The optimizer has an index available but isn't using it. Why?</strong></p>
+<p>The optimizer sometimes decides a full table scan is faster than an index scan — usually when it estimates the query will return a large fraction of the table's rows. Reading sequentially is often faster than random I/O via index. If you're sure the index should be used, you can force it with <code>USE INDEX</code> or <code>FORCE INDEX</code> hints in MySQL, though this is generally a last resort.</p>
+
+<p><strong>What does "Using filesort" mean in the Extra column? Should I worry?</strong></p>
+<p>"Using filesort" means the database needs to sort the results and can't use an index to do it. It doesn't always mean a slow query — for small result sets it's fine. For large result sets, it can be slow. The fix is usually to add an index that includes the ORDER BY columns.</p>
+
+<p><strong>What's the difference between EXPLAIN and EXPLAIN ANALYZE?</strong></p>
+<p><code>EXPLAIN</code> shows the optimizer's plan — what it <em>plans</em> to do, based on estimates. It doesn't actually run the query. <code>EXPLAIN ANALYZE</code> actually executes the query and shows you both the plan and what <em>actually</em> happened, including real row counts and timing. Use EXPLAIN for a quick check without waiting, and EXPLAIN ANALYZE when you need real numbers.</p>
+
+<p><strong>My query has multiple tables joined. How do I read the EXPLAIN output?</strong></p>
+<p>For multi-table queries, EXPLAIN shows one row per table access. Read from top to bottom — earlier rows are "inner" operations that feed into later rows. The <code>type</code> column for each table shows how that table is being accessed. Ideally every joined table should show "ref" or "eq_ref" rather than "ALL."</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Never running EXPLAIN on slow queries</strong> — guessing about query performance without checking the execution plan wastes time and often leads to wrong fixes.</li><li><strong>Adding indexes without verifying with EXPLAIN</strong> — just because you added an index doesn't mean the optimizer uses it. Always verify.</li><li><strong>Misreading "rows" as an exact count</strong> — it's an estimate. On tables with stale statistics, it can be orders of magnitude off.</li><li><strong>Ignoring "Using filesort" and "Using temporary" in the Extra column</strong> — these often indicate queries that need index adjustments to sort or group efficiently.</li><li><strong>Only running EXPLAIN on obviously slow queries</strong> — running it on all important queries periodically catches regressions before users notice.</li><li><strong>Not refreshing table statistics after bulk inserts</strong> — stale statistics cause the optimizer to make poor choices, and EXPLAIN won't reveal this unless you know to check.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Run EXPLAIN on every query you're about to add an index for — verify the index actually gets used.</li><li>After large data loads or schema changes, run <code>ANALYZE TABLE</code> to update statistics.</li><li>Focus on the <code>type</code> column first — "ALL" on large tables is almost always a problem.</li><li>Check <code>rows</code> × <code>filtered</code> to estimate actual rows processed — this gives you the real cost.</li><li>Use EXPLAIN ANALYZE in development and staging environments when you need exact timing data.</li><li>Save EXPLAIN outputs for critical queries and compare them before and after index changes to confirm improvement.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>At Flipkart, every query that goes into production for high-traffic features must pass a code review that includes an EXPLAIN output. Engineers paste the EXPLAIN results into the pull request description. Reviewers check that no full table scans are happening on large tables and that composite indexes are being used with at least the first two columns.</p>
+
+<p>Swiggy's database team runs automated slow query analysis every night. Any query that takes more than 500 milliseconds is flagged, and the system automatically runs EXPLAIN on it and logs the output. The engineering team reviews these logs each morning. This practice catches index-missing issues before they become user-facing outages.</p>
+
+<p>PhonePe operates in an environment where transaction queries must complete in under 100ms. Their performance engineering team uses EXPLAIN ANALYZE extensively during load testing to verify that query plans under high concurrency match what was expected during development. Surprises in execution plans under load have saved them from several potential production incidents.</p>
+
+<p>IRCTC's team learned the hard way during a Tatkal booking window that an innocent-looking date function in a WHERE clause was disabling an index on a 500 million row table. They now have a lint rule in their development process that flags any use of functions around indexed columns in WHERE clauses — a lesson born from one EXPLAIN output that changed their coding standards.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>EXPLAIN SELECT * FROM transactions WHERE user_id = 10023 AND YEAR(created_at) = 2024;
+
+Output:
+type: ALL    key: NULL    rows: 400,000,000
+                    ↑
+              Full table scan — index on created_at not usable because of YEAR() function
+
+Fix the query:
+EXPLAIN SELECT * FROM transactions 
+WHERE user_id = 10023 
+  AND created_at &gt;= '2024-01-01' 
+  AND created_at &lt; '2025-01-01';
+
+Output:
+type: range    key: idx_user_created    rows: 12
+                         ↑
+            Composite index used — scanned only 12 rows instead of 400 million
+
+
+HOW TO READ EXPLAIN type column (best to worst):
+const      → single row via primary key
+eq_ref     → one row per join from index
+ref        → multiple rows from non-unique index
+range      → index range scan
+index      → full index scan (better than ALL, still not great)
+ALL        → full table scan (warning on large tables)</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>EXPLAIN shows the database's execution plan for a query — which indexes it uses, how many rows it expects to scan, and what operations it performs.</li><li>The <code>type</code> column is the most important: "ALL" on large tables means full scan — investigate.</li><li>The <code>key</code> column shows which index was used — NULL means no index.</li><li>The <code>rows</code> column is an estimate, not a guarantee — stale statistics can make it inaccurate.</li><li>EXPLAIN ANALYZE actually runs the query and shows real timings and row counts.</li><li>Functions on indexed columns in WHERE clauses (like <code>YEAR(created_at)</code>) prevent index usage.</li><li>Always verify index changes with EXPLAIN — don't assume the optimizer will use your new index.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>You run EXPLAIN on a query and see <code>type: ALL</code> and <code>rows: 50000000</code> on your <code>payments</code> table. What does this mean and what would you investigate?</li><li>You have a composite index on <code>(user<em>id, created</em>at)</code>. EXPLAIN shows <code>key<em>len: 4</code> (integer size for user</em>id alone). What does this tell you about how the query is using the index?</li><li>EXPLAIN shows <code>Extra: Using filesort</code> on your order listing query. What is happening and how might you fix it?</li><li>A colleague says: "I added the index, EXPLAIN shows it in <code>possible_keys</code>, but it's not in <code>key</code>." What are two possible reasons the optimizer might be ignoring the index?</li><li>You need to investigate a slow JOIN query between <code>orders</code> and <code>users</code> tables. What would you look for in the EXPLAIN output for each table access?</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Rahul fixed the Paytm transaction history timeout in 10 minutes once he had the EXPLAIN output. The problem was a function call around a date column that silently disabled the index. Without EXPLAIN, he might have spent hours adding new indexes, rewriting business logic, or escalating to infrastructure — all while the real issue sat there, one EXPLAIN output away from being visible.</p>
+
+<p>That's the real value of query execution plans. They eliminate guesswork. They tell you exactly what the database is doing, not what you think it's doing. Fast engineers aren't the ones who can write the cleverest queries — they're the ones who verify their assumptions.</p>
+
+<p>EXPLAIN is the simplest habit that separates people who maintain slow queries for months from people who fix them in minutes. Add it to your workflow. Run it on every query that matters before you deploy it. Run it again when queries slow down later.</p>
+
+<p>The database is always doing something. EXPLAIN just tells you what.</p>
+
+  `,
+  'mod13-t5': `
+    <h1>Index Best Practices</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Aman joined Zomato's platform team in Hyderabad as a mid-level backend engineer. In his first month, he was asked to do a "quick health check" on the database tables he'd be working with. He ran a query to list all indexes on the main <code>orders</code> table and got back 23 rows. Twenty-three indexes on one table.</p>
+
+<p>He showed the list to his tech lead, Priya. She looked at it for a moment and said: "Half of these we probably don't need anymore. Three of them overlap. Two are definitely being used. The rest — I'm not even sure which queries they were added for."</p>
+
+<p>What followed was a two-week indexing audit. They removed 11 indexes that weren't being used. Write performance on the orders table improved measurably. But they also found two critical queries that had no index and were doing full scans on 300 million rows — and added targeted indexes for those.</p>
+
+<p>That audit taught Aman something no textbook does: index management isn't a one-time setup. It's an ongoing practice.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>Over time, almost every production database develops an indexing problem — either too many or too few. Too few indexes and your read queries are slow. Too many indexes and your write operations are slow, your disk usage balloons, and your buffer pool fills up with index pages instead of actual data.</p>
+
+<p>Both problems are common. A startup's database starts lean. As features are added and queries get slow, developers add indexes reactively — often without removing old ones when features change. Within a year or two, tables accumulate indexes like a drawer accumulates cables. Nobody knows what's needed and what isn't.</p>
+
+<p>The goal of index best practices is to have exactly the indexes you need — no more, no less — designed deliberately around your actual query patterns. Getting there requires understanding not just how to create indexes, but when to, when not to, and how to evaluate what you already have.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Indexing has always been a balance between read performance and write overhead. In the early days of relational databases, engineers treated indexing as a one-time design decision made before launch. The assumption was that once you set up indexes, you were done.</p>
+
+<p>Reality proved different. Data volumes grew. Query patterns changed as product features evolved. Columns that were once filtered frequently fell out of use. New query patterns emerged that nobody had anticipated at schema design time.</p>
+
+<p>Database vendors responded by building tooling to help: slow query logs to identify problem queries, information_schema tables to check index usage statistics, and optimizer hints for edge cases. Best practices emerged from engineers across companies — Uber, LinkedIn, Facebook, and in India, Flipkart and Paytm — sharing hard-won lessons about what works at scale.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think of a kitchen. A well-organized kitchen has knives, spatulas, and ladles all in specific places — reachable in seconds. A badly organized kitchen has duplicate tools stuffed everywhere — three can openers, two of the same knife, plus tools you haven't used in two years. Finding what you need takes longer because you have to sort through everything.</p>
+
+<p>A well-indexed database is like the organized kitchen: the right tools are exactly where they're needed. An over-indexed database is like the cluttered kitchen: there are so many tools that finding the right one (or storing new things) becomes inefficient.</p>
+
+<p>And just like you'd periodically clear out unused kitchen tools, you should periodically audit your indexes — remove what's not being used, add what's missing, and consolidate overlapping ones.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think of road signs on a highway. Good signage helps drivers reach their destination without confusion. But imagine if the highway department put up a new sign every time someone called to say they were confused about a turn. Within years, the highway has 50 signs per kilometer, some contradicting each other, some pointing to destinations nobody goes to anymore, and drivers spend more time reading signs than driving.</p>
+
+<p>Indexes added reactively without a strategy are those redundant signs. Each one made sense when it was added, but collectively they create noise, slow things down, and nobody knows which ones are actually helping.</p>
+
+<p>A systematic approach — designing indexes based on real query patterns, auditing periodically, removing the unused ones — is the equivalent of a well-maintained, sensible road sign system.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>Good index practice comes down to a few principles that work together:</p>
+
+<p><strong>Match indexes to queries, not columns.</strong> An index should exist because a specific, important query needs it. Start from the query, work backward to the index design. Don't index columns speculatively.</p>
+
+<p><strong>Understand the write cost.</strong> Every INSERT, UPDATE, or DELETE must update all indexes on the affected table. A table with 10 indexes takes roughly 10x more work per write compared to a table with 1 index (simplified, but directionally true). High-write tables need fewer, more targeted indexes.</p>
+
+<p><strong>Monitor what's actually used.</strong> Most databases track index usage statistics. In MySQL, <code>performance<em>schema.table</em>io<em>waits</em>summary<em>by</em>index_usage</code> shows how many times each index has been used since the server started. An index with zero reads and thousands of writes is a candidate for removal.</p>
+
+<p><strong>Design composite indexes with the access pattern in mind.</strong> One good composite index often replaces two or three single-column indexes. Think about which columns appear together in WHERE and JOIN clauses, and design composite indexes for those combinations.</p>
+
+<p><strong>Refresh statistics after large data changes.</strong> The query optimizer uses statistics to decide which execution plan to use. After bulk inserts or deletes affecting large percentages of a table, run <code>ANALYZE TABLE</code> (MySQL) or <code>ANALYZE</code> (PostgreSQL) to keep statistics accurate.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<pre><code class="language-sql">-- Check which indexes exist on a table (MySQL)
+SHOW INDEX FROM orders;</code></pre>
+
+<pre><code class="language-sql">-- Check index usage statistics (MySQL 8+)
+SELECT object_name, index_name, count_read, count_write
+FROM performance_schema.table_io_waits_summary_by_index_usage
+WHERE object_schema = 'zomato_db'
+  AND object_name = 'orders'
+ORDER BY count_read ASC;
+-- Indexes with count_read = 0 are never read — candidates for removal</code></pre>
+
+<pre><code class="language-sql">-- Find duplicate or redundant indexes (MySQL — look for overlapping prefixes)
+SELECT a.table_name, a.index_name, a.column_name, b.index_name AS duplicate_index
+FROM information_schema.statistics a
+JOIN information_schema.statistics b 
+  ON a.table_name = b.table_name 
+  AND a.seq_in_index = b.seq_in_index 
+  AND a.column_name = b.column_name 
+  AND a.index_name &lt;&gt; b.index_name
+WHERE a.table_schema = 'zomato_db';</code></pre>
+
+<pre><code class="language-sql">-- Rebuild/optimize a fragmented index (MySQL)
+OPTIMIZE TABLE orders;</code></pre>
+
+<pre><code class="language-sql">-- Update table statistics (MySQL)
+ANALYZE TABLE orders;
+
+-- PostgreSQL equivalent
+ANALYZE orders;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Practice</th><th>Why It Matters</th></tr></thead>
+<tbody>
+<tr><td>Index columns used in WHERE, JOIN ON, ORDER BY</td><td>These are the columns the database needs to filter or sort — indexes on them directly reduce work</td></tr>
+<tr><td>Put equality conditions before range conditions in composite indexes</td><td>The database can use all equality conditions efficiently; a range condition limits use of columns after it</td></tr>
+<tr><td>Avoid indexing low-cardinality columns alone</td><td>A column with 3 distinct values barely narrows the search — the index rarely saves much work</td></tr>
+<tr><td>Monitor index usage statistics</td><td>Unused indexes waste disk space and slow writes without helping any query</td></tr>
+<tr><td>Run ANALYZE TABLE after bulk data changes</td><td>Keeps optimizer statistics accurate — stale stats lead to bad execution plans</td></tr>
+<tr><td>Remove redundant indexes</td><td>An index on <code>(user<em>id)</code> is redundant if <code>(user</em>id, order_date)</code> already exists — the composite covers both</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p><strong>Sample scenario: <code>orders</code> table at Zomato (300 million rows)</strong></p>
+
+<table>
+<thead><tr><th>order_id</th><th>user_id</th><th>restaurant_id</th><th>city</th><th>order_status</th><th>order_date</th><th>total_amount</th></tr></thead>
+<tbody>
+<tr><td>10001</td><td>88821</td><td>304</td><td>Mumbai</td><td>delivered</td><td>2024-03-01</td><td>450</td></tr>
+<tr><td>10002</td><td>72210</td><td>201</td><td>Delhi</td><td>pending</td><td>2024-03-05</td><td>280</td></tr>
+<tr><td>10003</td><td>88821</td><td>510</td><td>Mumbai</td><td>cancelled</td><td>2024-03-10</td><td>620</td></tr>
+<tr><td>10004</td><td>50001</td><td>304</td><td>Bangalore</td><td>delivered</td><td>2024-04-01</td><td>190</td></tr>
+<tr><td>10005</td><td>72210</td><td>201</td><td>Delhi</td><td>delivered</td><td>2024-04-02</td><td>340</td></tr>
+</tbody></table>
+
+<h3>Example 1: Consolidating two single-column indexes into one composite index</h3>
+
+<pre><code class="language-sql">-- Before: two separate indexes
+CREATE INDEX idx_user_id ON orders(user_id);
+CREATE INDEX idx_order_date ON orders(order_date);
+
+-- The most common query uses both:
+SELECT * FROM orders WHERE user_id = 88821 AND order_date &gt;= '2024-03-01';
+
+-- Better: one composite index that handles both this query AND user_id-only queries
+DROP INDEX idx_user_id ON orders;
+-- Keep idx_order_date if you have queries filtering only on date
+CREATE INDEX idx_user_date ON orders(user_id, order_date);</code></pre>
+
+<p>The composite index serves <code>WHERE user<em>id = X</code>, <code>WHERE user</em>id = X AND order_date >= Y</code>, and reduces the total number of indexes to maintain.</p>
+
+<h3>Example 2: Checking for unused indexes</h3>
+
+<pre><code class="language-sql">SELECT index_name, count_read, count_write
+FROM performance_schema.table_io_waits_summary_by_index_usage
+WHERE object_name = 'orders'
+ORDER BY count_read ASC;</code></pre>
+
+<p>If you find an index with <code>count<em>read = 0</code> and <code>count</em>write = 500000</code>, that index has never been used for reading but is being updated 500,000 times. It's pure overhead — drop it.</p>
+
+<h3>Example 3: Avoiding an index on a low-cardinality column alone</h3>
+
+<pre><code class="language-sql">-- Bad: order_status has only 4 values (pending, delivered, cancelled, returned)
+CREATE INDEX idx_status ON orders(order_status);
+-- Queries like WHERE order_status = 'delivered' return 40% of all rows
+-- The optimizer may ignore this index and do a full scan anyway
+
+-- Better: use order_status as part of a composite index where it narrows results further
+CREATE INDEX idx_city_status ON orders(city, order_status);
+-- Now city narrows to a manageable set, and status narrows further within that</code></pre>
+
+<h3>Example 4: Using a covering index to eliminate key lookups</h3>
+
+<pre><code class="language-sql">-- Frequent query on the order history screen:
+SELECT order_id, order_date, order_status, total_amount 
+FROM orders 
+WHERE user_id = 88821;
+
+-- Regular non-clustered index requires key lookup for each row:
+CREATE INDEX idx_user ON orders(user_id);
+
+-- Covering index — includes all selected columns, no key lookup:
+CREATE INDEX idx_user_covering 
+ON orders(user_id, order_date, order_status, total_amount);</code></pre>
+
+<p>The covering index is larger but eliminates the key lookup step entirely, making this high-frequency query significantly faster.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Shouldn't I just index everything to be safe?</strong></p>
+<p>No. This is a very common mistake. Every index you add slows down every INSERT, UPDATE, and DELETE on that table because all indexes must be kept in sync. For tables with frequent writes — order inserts, transaction records, user activity logs — over-indexing can seriously hurt throughput. Index exactly what your real queries need.</p>
+
+<p><strong>I added an index but the query didn't get faster. Did I do something wrong?</strong></p>
+<p>Possibly. The most common reasons: the optimizer decided a full scan was cheaper (maybe the table is small, or the query returns most rows), a function is being used on the indexed column, the statistics are stale, or the wrong column is indexed. Run EXPLAIN to see what's actually happening.</p>
+
+<p><strong>How do I know if an index is fragmented?</strong></p>
+<p>Over time, as rows are inserted, updated, and deleted, B-tree indexes can become fragmented — their pages aren't fully utilized, and the tree structure becomes unbalanced. In MySQL, <code>SHOW TABLE STATUS</code> shows the <code>Data_free</code> value for fragmentation. Running <code>OPTIMIZE TABLE</code> or rebuilding indexes periodically can help, especially after large DELETE operations.</p>
+
+<p><strong>Should I index foreign key columns?</strong></p>
+<p>Almost always yes in MySQL (InnoDB). MySQL doesn't automatically index foreign key columns, but JOIN operations use them constantly. An unindexed foreign key means every JOIN on that column does a full table scan. PostgreSQL auto-creates indexes for primary keys but not foreign keys either — same principle applies.</p>
+
+<p><strong>When should I rebuild indexes?</strong></p>
+<p>After large bulk deletes or updates that affect a significant portion of the table. After loading large amounts of data. If EXPLAIN shows unexpectedly high row estimates that don't match reality (stale statistics). <code>ANALYZE TABLE</code> refreshes statistics without a full rebuild. <code>OPTIMIZE TABLE</code> does a fuller rebuild but locks the table.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Adding indexes without checking if one already exists</strong> — duplicate indexes waste space and slow down writes without providing any benefit.</li><li><strong>Indexing every foreign key without checking query patterns</strong> — not all foreign keys are used in frequent JOIN queries; index only the ones that are.</li><li><strong>Never auditing index usage</strong> — indexes added for old features that no longer exist keep slowing down writes indefinitely.</li><li><strong>Ignoring index fragmentation on tables with high deletes</strong> — over time, heavily deleted tables have sparse, fragmented indexes that are slower than they should be.</li><li><strong>Treating ANALYZE TABLE as optional</strong> — after large data changes, stale statistics can cause the optimizer to make significantly worse choices.</li><li><strong>Creating indexes in production during peak hours</strong> — adding an index on a large table locks it (or causes significant I/O load) and can cause outages. Always run DDL operations during maintenance windows.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Start from the query: identify your most frequent and most critical queries first, then design indexes for them.</li><li>Audit index usage monthly using <code>performance<em>schema.table</em>io<em>waits</em>summary<em>by</em>index_usage</code> (MySQL) — drop what's not being read.</li><li>Use composite indexes to consolidate multiple single-column indexes where queries consistently filter on multiple columns together.</li><li>Include high-cardinality columns first in composite indexes, and equality conditions before range conditions.</li><li>Run <code>ANALYZE TABLE</code> after bulk data operations to keep optimizer statistics fresh.</li><li>Always add indexes in off-peak hours for large tables — use <code>CREATE INDEX CONCURRENTLY</code> in PostgreSQL or <code>pt-online-schema-change</code> in MySQL for zero-downtime index creation on production tables.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Flipkart runs quarterly index audits on their core tables. A dedicated DBA team reviews index usage statistics and identifies both unused indexes (candidates for removal) and high-cost full table scans (candidates for new indexes). The result is a database that stays lean even as the schema evolves.</p>
+
+<p>Byju's had a significant write performance issue when their student activity logging table grew to 2 billion rows. An audit revealed 17 indexes on the table — many added during feature development and never removed. After removing 9 unused indexes, their logging write throughput increased by 40%.</p>
+
+<p>Jio's JioCinema platform uses a structured index review process as part of every database migration pull request. Engineers must include <code>EXPLAIN</code> output and a list of any indexes being added, modified, or removed. This gate has prevented several cases of over-indexing in early stages, where it's easy to accidentally add indexes you don't need.</p>
+
+<p>Meesho's catalog team maintains a "golden query set" — the 20 most critical production queries. Every week, an automated job runs these queries against a replica database, captures EXPLAIN outputs, and flags any that have changed execution plans. This catches cases where statistics drift caused the optimizer to switch from index scans to full table scans without anyone noticing.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>INDEX HEALTH CHECKLIST for a production table
+
+Step 1: List all indexes
+  SHOW INDEX FROM your_table;
+  → How many? More than 10 on a write-heavy table is a red flag.
+
+Step 2: Check usage statistics
+  SELECT index_name, count_read, count_write 
+  FROM performance_schema.table_io_waits_summary_by_index_usage
+  WHERE object_name = 'your_table';
+  → count_read = 0 with high count_write → candidate for removal
+
+Step 3: Check for redundancy
+  Index on (user_id) + Index on (user_id, order_date)?
+  → (user_id) is redundant — (user_id, order_date) covers it
+
+Step 4: Identify missing indexes
+  Check slow query log for full table scans
+  → Run EXPLAIN on slow queries
+  → type: ALL on large tables → missing index
+
+Step 5: Design targeted fixes
+  Remove unused → Add missing → Consolidate redundant
+  Always verify with EXPLAIN before and after
+
+Step 6: Schedule maintenance
+  ANALYZE TABLE → update statistics
+  OPTIMIZE TABLE → defragment (during off-peak hours)</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>Index only what you actually query — every index has a write cost.</li><li>Monitor index usage with <code>performance_schema</code> — drop indexes that are never read.</li><li>One well-designed composite index often replaces multiple single-column indexes.</li><li>Low-cardinality columns alone (like <code>status</code> with 4 values) rarely make good standalone indexes.</li><li>Keep optimizer statistics fresh with <code>ANALYZE TABLE</code> after large data changes.</li><li>Always add/remove production indexes during off-peak hours to avoid locking issues.</li><li>Treat index management as a recurring maintenance task, not a one-time setup.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>You're building a <code>reviews</code> table for a food delivery app. Common queries filter by <code>restaurant_id</code> and <code>rating</code>. What composite index would you create and why?</li><li>You check <code>performance<em>schema</code> and find an index <code>idx</em>old_feature</code> on your table has had 0 reads and 2 million writes in the past 3 months. What do you do?</li><li>Your <code>product<em>catalog</code> table has individual indexes on <code>category</em>id</code>, <code>brand_id</code>, and <code>price</code>. Your most common query filters on all three. How would you improve this?</li><li>After a nightly job deletes 10 million rows from your <code>logs</code> table, index performance degrades. What maintenance operation would you run and when?</li><li>A new developer on your team wants to add a unique index on a <code>status</code> column that has 3 possible values. What feedback would you give them?</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Aman's indexing audit at Zomato wasn't glamorous work. Removing indexes, checking usage stats, consolidating redundant ones — it doesn't feel like building a feature. But the result was a table that writes faster, reads faster, and uses less memory in the buffer pool. The downstream effects were real and measurable.</p>
+
+<p>The lesson he took away was that index design isn't a checkbox you complete when you create a table. It's an ongoing responsibility. Databases evolve. Query patterns shift as features change. Indexes that were essential a year ago might be obsolete today.</p>
+
+<p>Good index management is a habit, not a project. Run EXPLAIN on new queries. Monitor usage statistics quarterly. Remove what isn't helping. Refresh statistics when data changes significantly. These habits compound over time — a well-maintained database performs consistently better than one that's been left to accumulate technical debt in the form of unused or poorly designed indexes.</p>
+
+<p>The engineers who maintain the fastest databases aren't necessarily the ones who are smartest about adding indexes. They're the ones who are most disciplined about managing the ones they have.</p>
+
+  `,
+  'mod13-t6': `
+    <h1>Common Performance Anti-patterns</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Priya has been a data engineer at Byju's for three years. When she joined, the platform was small — a few lakh active students. Queries that felt slow were tolerated because "we'll fix it when we scale." Three years later, the platform had 10 crore registered users and 2 crore active learners. Every lazy query pattern that was tolerated in the early days had become a production incident.</p>
+
+<p>The worst incident she remembers was on a Sunday evening during exam season. Students were submitting practice tests and viewing results. The database CPU hit 100% and requests started failing. The root cause took 45 minutes to identify: a single query in the test result calculation feature was running inside a loop — once per student per question. For a test with 50 questions and 10,000 simultaneous submissions, that was 500,000 separate database queries per minute.</p>
+
+<p>The fix took two hours to deploy. The lesson took no time at all to learn: anti-patterns that are invisible at small scale become disasters at large scale.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>Anti-patterns are patterns in SQL code that seem reasonable when written but cause serious performance problems in production. They're not syntax errors — the queries run. They just run badly.</p>
+
+<p>The tricky part is that most anti-patterns look completely fine in development. You're working with a test database of 1000 rows. Everything returns in milliseconds. You ship to production, and that same code runs against 50 million rows. Suddenly what took 10ms takes 30 seconds, or fails entirely.</p>
+
+<p>By the time you've identified the anti-pattern, users are already affected. Anti-patterns are best learned and recognized before they reach production — which is exactly what this article is for.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Anti-patterns aren't bugs in SQL. They're misapplications of correct patterns. SQL was designed to operate on sets of data, not row by row. The language assumes you'll describe WHAT you want, and the database will figure out HOW to get it efficiently. Anti-patterns usually arise when engineers try to think row-by-row (procedurally) instead of thinking in sets.</p>
+
+<p>The database community has catalogued these patterns over decades of production experience. Books like "SQL Antipatterns" by Bill Karwin, engineering blogs from companies like Etsy, Instagram, and Flipkart, and database vendor documentation all document the same recurring mistakes. The underlying cause is almost always the same: not thinking about how the database executes the query.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Imagine you run a logistics company in Delhi and need to count how many packages are in each of 50 warehouses. You could drive to each warehouse, count the packages, drive back, then drive to the next one. That's 100 trips. Or you could call all 50 warehouses at once and ask them to report back. One trip's worth of effort.</p>
+
+<p>SQL anti-patterns are the "drive to each warehouse one by one" approach. You're making the database do 50 separate things when it could do one. The database is built for the "ask all at once" approach — that's what GROUP BY, JOINs, and subqueries are for. Anti-patterns short-circuit that design.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think of a factory assembly line. The line is designed to process hundreds of products simultaneously as they flow through. Someone decides to "simplify" by pulling each product off the line, processing it individually at a bench, then putting it back. The factory still works. But throughput drops to 1% of what it was.</p>
+
+<p>That's the N+1 query problem — the most common anti-pattern. The application pulls a list of 100 orders off the database, then goes back to the database 100 times, once per order, to get the restaurant name for each one. The database is designed to handle this in one JOIN. Doing it as 100 individual queries is the assembly-line equivalent of pulling every product off and processing it one by one.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>Performance anti-patterns work (or fail to work) for predictable reasons. Understanding the mechanics makes it easier to spot and fix them.</p>
+
+<p><strong>N+1 queries</strong> arise when application code loads a list of records and then queries for related data per record in a loop. If you load 100 orders and then run a separate query to get the restaurant details for each order, that's 101 database round trips. Each query has network latency, parsing overhead, and execution cost. The fix is almost always a single JOIN that gets everything in one query.</p>
+
+<p><strong>SELECT </strong>* means fetching every column in a table, even columns the query doesn't use. On wide tables (50+ columns), this transfers large amounts of data from database to application memory unnecessarily. It also prevents covering indexes from working — a covering index only helps if the query requests specific columns that are included in the index.</p>
+
+<p><strong>Functions on indexed columns in WHERE clauses</strong> disable indexes silently. <code>WHERE YEAR(created<em>at) = 2024</code> looks like a date filter but actually forces a full table scan because the database can't use an index on <code>created</em>at</code> to find results of <code>YEAR(created_at)</code>. The fix is to rewrite as a range condition.</p>
+
+<p><strong>Unbounded queries</strong> — queries with no LIMIT on large tables — can return millions of rows and exhaust application memory. Combined with ORDER BY, they can cause the database to sort the entire table before returning results.</p>
+
+<p><strong>Implicit type conversion</strong> happens when you compare a column of one type to a value of a different type. <code>WHERE user<em>id = '88821'</code> (string) on a column where <code>user</em>id</code> is an integer can prevent index usage in some databases.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<pre><code class="language-sql">-- ANTI-PATTERN: SELECT * on a wide table
+SELECT * FROM orders WHERE user_id = 88821;
+
+-- BETTER: Select only what you need
+SELECT order_id, order_date, order_status, total_amount 
+FROM orders WHERE user_id = 88821;</code></pre>
+
+<pre><code class="language-sql">-- ANTI-PATTERN: Function on indexed column
+SELECT * FROM transactions WHERE YEAR(created_at) = 2024;
+
+-- BETTER: Range condition preserves index usage
+SELECT * FROM transactions 
+WHERE created_at &gt;= '2024-01-01' AND created_at &lt; '2025-01-01';</code></pre>
+
+<pre><code class="language-sql">-- ANTI-PATTERN: N+1 (fetching restaurant name per order in a loop)
+-- In application code:
+-- orders = SELECT * FROM orders WHERE user_id = 88821
+-- for each order:
+--     restaurant = SELECT name FROM restaurants WHERE id = order.restaurant_id
+
+-- BETTER: Single JOIN
+SELECT o.order_id, o.order_date, r.name AS restaurant_name
+FROM orders o
+JOIN restaurants r ON o.restaurant_id = r.restaurant_id
+WHERE o.user_id = 88821;</code></pre>
+
+<pre><code class="language-sql">-- ANTI-PATTERN: Unbounded query on large table
+SELECT * FROM logs ORDER BY created_at DESC;
+
+-- BETTER: Paginated with LIMIT
+SELECT * FROM logs ORDER BY created_at DESC LIMIT 50 OFFSET 0;</code></pre>
+
+<pre><code class="language-sql">-- ANTI-PATTERN: LIKE with a leading wildcard (can't use index)
+SELECT * FROM products WHERE product_name LIKE '%shirt%';
+
+-- BETTER: Use full-text search for this type of query
+-- Or use a trailing wildcard (which CAN use a regular index):
+SELECT * FROM products WHERE product_name LIKE 'shirt%';</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Anti-pattern</th><th>Why It's a Problem</th><th>Typical Fix</th></tr></thead>
+<tbody>
+<tr><td>N+1 queries</td><td>1 query per row = hundreds of database round trips for a small result set</td><td>Use JOINs or IN clauses to fetch all related data in one query</td></tr>
+<tr><td>SELECT *</td><td>Fetches unused data, prevents covering indexes, breaks when schema changes</td><td>Specify only the columns you need</td></tr>
+<tr><td>Function on indexed column in WHERE</td><td>Prevents index usage, forces full table scan</td><td>Rewrite as a range condition or compute the function value on the application side</td></tr>
+<tr><td>LIKE with leading wildcard <code>%term</code></td><td>Cannot use a regular B-tree index, forces full table scan</td><td>Use full-text indexes or reconsider the search approach</td></tr>
+<tr><td>Unbounded queries</td><td>Can return millions of rows, exhaust memory, cause timeouts</td><td>Always add LIMIT; paginate results</td></tr>
+<tr><td>Implicit type conversion</td><td>May prevent index usage and cause unexpected behavior</td><td>Match data types in comparisons — don't compare int columns to string literals</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p><strong>Sample tables at a Byju's-style edtech platform:</strong></p>
+
+<p><code>student_tests</code> table:</p>
+
+<table>
+<thead><tr><th>test_id</th><th>student_id</th><th>subject</th><th>score</th><th>submitted_at</th></tr></thead>
+<tbody>
+<tr><td>3001</td><td>10023</td><td>Math</td><td>85</td><td>2024-03-01 10:15</td></tr>
+<tr><td>3002</td><td>10023</td><td>Science</td><td>72</td><td>2024-03-02 11:30</td></tr>
+<tr><td>3003</td><td>88821</td><td>Math</td><td>91</td><td>2024-03-01 09:45</td></tr>
+<tr><td>3004</td><td>72210</td><td>English</td><td>68</td><td>2024-03-03 14:00</td></tr>
+<tr><td>3005</td><td>88821</td><td>Science</td><td>88</td><td>2024-03-04 16:20</td></tr>
+</tbody></table>
+
+<h3>Example 1: Fixing a function-on-column anti-pattern</h3>
+
+<pre><code class="language-sql">-- Anti-pattern: wrapping submitted_at in DATE() disables the index
+SELECT * FROM student_tests 
+WHERE DATE(submitted_at) = '2024-03-01';
+
+-- Fix: use a range that the index can use
+SELECT * FROM student_tests 
+WHERE submitted_at &gt;= '2024-03-01 00:00:00' 
+  AND submitted_at &lt; '2024-03-02 00:00:00';</code></pre>
+
+<p>The range version lets the database use an index on <code>submitted_at</code>. The DATE() version forces a full table scan even if the index exists.</p>
+
+<h3>Example 2: Replacing N+1 with a single JOIN</h3>
+
+<pre><code class="language-sql">-- Anti-pattern: Fetch all tests, then query student name per test
+-- Query 1: SELECT * FROM student_tests WHERE subject = 'Math'
+-- Query 2 (per row): SELECT name FROM students WHERE student_id = 10023
+-- Query 3 (per row): SELECT name FROM students WHERE student_id = 88821
+-- ... N queries for N results
+
+-- Fix: JOIN gets everything in one query
+SELECT st.test_id, st.subject, st.score, s.name AS student_name
+FROM student_tests st
+JOIN students s ON st.student_id = s.student_id
+WHERE st.subject = 'Math';</code></pre>
+
+<p>One database round trip instead of N+1.</p>
+
+<h3>Example 3: Adding LIMIT to prevent runaway queries</h3>
+
+<pre><code class="language-sql">-- Anti-pattern: No LIMIT — returns millions of rows
+SELECT * FROM student_tests ORDER BY submitted_at DESC;
+
+-- Fix: Paginate
+SELECT test_id, student_id, subject, score, submitted_at 
+FROM student_tests 
+ORDER BY submitted_at DESC 
+LIMIT 20 OFFSET 0;
+-- For page 2: LIMIT 20 OFFSET 20</code></pre>
+
+<h3>Example 4: Avoiding leading wildcard in LIKE</h3>
+
+<pre><code class="language-sql">-- Anti-pattern: leading wildcard cannot use an index on subject
+SELECT * FROM student_tests WHERE subject LIKE '%ath%';
+
+-- Better: trailing wildcard CAN use an index
+SELECT * FROM student_tests WHERE subject LIKE 'Math%';
+
+-- For full-text search needs: use FULLTEXT index (MySQL) or tsvector (PostgreSQL)
+-- ALTER TABLE student_tests ADD FULLTEXT(subject);
+-- SELECT * FROM student_tests WHERE MATCH(subject) AGAINST ('math');</code></pre>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>The N+1 query problem looks fine in code — why is it slow only in production?</strong></p>
+<p>In development, you work with 10-20 rows. N+1 means 11-21 queries, which complete in milliseconds. In production with 10,000 rows, N+1 means 10,001 queries. The network latency alone (even at 1ms per query) adds up to 10 seconds. The problem scales linearly with the data size, so it's nearly invisible in development and catastrophic in production.</p>
+
+<p><strong>I used SELECT * because the columns change sometimes — is that really a problem?</strong></p>
+<p>Yes. Besides the performance cost of fetching unnecessary data, SELECT * can cause application bugs when columns are reordered, renamed, or added. If your code depends on column positions, adding a column to the table breaks things unexpectedly. Explicit column selection is safer and faster.</p>
+
+<p><strong>My LIKE query works fine — when does the leading wildcard become a problem?</strong></p>
+<p>On small tables, it's fine. On tables with millions of rows, <code>LIKE '%shirt%'</code> forces a full table scan every time it runs. If this is a search feature, the correct solution is a full-text index (MySQL FULLTEXT or PostgreSQL tsvector), not a LIKE with a leading wildcard. These are fundamentally different use cases — LIKE is for simple prefix matching, full-text search is for content searching.</p>
+
+<p><strong>Isn't implicit type conversion handled automatically by the database?</strong></p>
+<p>The database will usually handle it, but the conversion can prevent index usage. In MySQL, comparing a VARCHAR column to an integer causes the database to cast every row's value before comparing — effectively disabling the index. Always match the data type in your comparison. If <code>user_id</code> is an integer, compare it to <code>88821</code>, not <code>'88821'</code>.</p>
+
+<p><strong>What about using OR in WHERE clauses — is that an anti-pattern?</strong></p>
+<p>Not always, but large OR conditions can prevent index usage or cause the optimizer to use a suboptimal plan. <code>WHERE status = 'pending' OR status = 'processing'</code> is fine. Very large OR lists — <code>WHERE id = 1 OR id = 2 OR ... OR id = 1000</code> — should be replaced with <code>WHERE id IN (1, 2, ..., 1000)</code> which the optimizer handles better.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Running queries in loops</strong> — the database is built for set operations. If you find yourself calling a query inside a for-loop in your application code, that's almost always an N+1 pattern waiting to hurt you at scale.</li><li><strong>Using SELECT </strong>* — it's convenient but fragile and slow on wide tables. Get in the habit of listing columns explicitly.</li><li><strong>Using functions in WHERE without thinking about indexes</strong> — <code>MONTH()</code>, <code>YEAR()</code>, <code>DATE()</code>, <code>UPPER()</code>, <code>LOWER()</code>, <code>TRIM()</code> on indexed columns silently disable indexes.</li><li><strong>Not paginating results</strong> — every query that could return a variable number of rows should have a LIMIT unless there's a deliberate reason to fetch all rows.</li><li><strong>Using OFFSET-based pagination at large offsets</strong> — <code>LIMIT 20 OFFSET 1000000</code> is still slow because the database scans and discards 1 million rows. Use cursor-based pagination (WHERE id > last<em>seen</em>id) for deep pages.</li><li><strong>Treating COUNT(<em>) carelessly</strong> — <code>SELECT COUNT(</em>) FROM huge_table</code> without a WHERE clause causes a full scan in some databases. Use approximate counts for dashboards where exact counts aren't critical.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Always specify which columns you need instead of using SELECT *.</li><li>Rewrite function-based WHERE conditions as range conditions to preserve index usage.</li><li>Fetch related data with JOINs or batch queries instead of looping through results and querying per row.</li><li>Add LIMIT to every query that could return a large result set.</li><li>For cursor-based pagination (deep pages), use <code>WHERE id > :last_id</code> instead of <code>OFFSET</code>.</li><li>Run EXPLAIN on queries that live inside loops or are called from high-frequency application paths — these are the highest-impact queries to get right.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Myntra's mobile app team once shipped a feature that showed "similar products" under each item. The implementation fetched a list of 20 products and then, for each product, ran a query to find similar items by category. At 100,000 concurrent users, this generated 2 million database queries per minute. The fix was a single JOIN with a subquery, which replaced all those individual queries. Response time dropped from 8 seconds to 400ms.</p>
+
+<p>Swiggy's restaurant search had a leading-wildcard LIKE query for searching restaurant names: <code>WHERE name LIKE '%biryani%'</code>. At low scale it worked. As the restaurant count grew to 150,000+, the query began timing out during dinner hours. They migrated to a full-text search index, which reduced search query time by 98%.</p>
+
+<p>Meesho's seller portal had a reporting feature that generated monthly sales summaries. The original implementation had a nested SELECT COUNT(*) inside a GROUP BY — essentially counting rows one group at a time. The query took 45 seconds on their main catalog table. Rewriting it as a single aggregation query with proper indexing reduced it to 1.2 seconds.</p>
+
+<p>IRCTC's booking confirmation emails were being triggered by a background job that fetched 10,000 bookings in a batch, then looped through and did a separate query per booking to fetch passenger details. During Tatkal windows, this loop ran hundreds of times per second. Refactoring to a single JOIN query per batch eliminated the N+1 pattern and halved the database load during peak booking periods.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>COMMON ANTI-PATTERNS AND THEIR IMPACT
+
+1. N+1 QUERIES
+   Code: fetch 100 orders → loop → 100 queries for restaurant names
+   Impact: 101 round trips, 100x network latency
+   Fix:    1 JOIN query
+
+2. SELECT *
+   Code: SELECT * FROM wide_table WHERE id = 1
+   Impact: fetches 50 columns when you need 5, prevents covering index
+   Fix:    SELECT id, name, status, amount FROM table WHERE id = 1
+
+3. FUNCTION ON INDEXED COLUMN
+   Code: WHERE YEAR(created_at) = 2024
+   Impact: full table scan (400M rows), ignores index on created_at
+   Fix:    WHERE created_at &gt;= '2024-01-01' AND created_at &lt; '2025-01-01'
+
+4. LEADING WILDCARD
+   Code: WHERE name LIKE '%biryani%'
+   Impact: full table scan, no index possible
+   Fix:    Full-text index + MATCH() AGAINST(), or LIKE 'biryani%'
+
+5. NO LIMIT ON LARGE TABLE
+   Code: SELECT * FROM logs ORDER BY created_at DESC
+   Impact: returns millions of rows, exhausts memory, times out
+   Fix:    LIMIT 50 OFFSET 0 (or cursor-based pagination)
+
+6. OFFSET PAGINATION AT LARGE DEPTH
+   Code: LIMIT 20 OFFSET 500000
+   Impact: scans and discards 500,000 rows every time
+   Fix:    WHERE id &gt; :last_seen_id LIMIT 20</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>N+1 queries are the most common and most damaging anti-pattern — replace loops-with-queries with JOINs.</li><li>SELECT * fetches unnecessary data and prevents covering indexes from working.</li><li>Functions on indexed columns in WHERE clauses silently disable index usage — rewrite as range conditions.</li><li>Leading wildcards in LIKE (<code>%term</code>) force full table scans — use full-text indexes for content search.</li><li>Always add LIMIT to queries that could return large result sets.</li><li>For deep pagination, cursor-based pagination outperforms OFFSET by orders of magnitude.</li><li>Anti-patterns are invisible at small scale and catastrophic at large scale — learn to spot them in code review before they reach production.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>Your application code fetches a list of 50 invoices and then queries the <code>customers</code> table once per invoice to get the customer name. Rewrite this as a single SQL query.</li><li>The following query is slow: <code>SELECT * FROM orders WHERE MONTH(order_date) = 11</code>. Rewrite it to allow index usage.</li><li>A product search feature uses <code>WHERE product_name LIKE '%phone%'</code>. The table has 5 million products. What's the problem and what would you recommend?</li><li>A dashboard query is: <code>SELECT * FROM activity<em>logs ORDER BY created</em>at DESC</code>. The table has 200 million rows. What's wrong and how would you fix it?</li><li>Your API endpoint uses <code>SELECT * FROM user<em>profiles WHERE user</em>id = :id</code> on a table with 80 columns, but the endpoint only displays 5 fields. Why is this a problem and how do you fix it?</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Priya's Sunday night incident at Byju's was a painful but formative experience. After the post-mortem, her team instituted a simple rule: every query that runs inside a loop must be reviewed before it ships. That one rule caught 6 similar N+1 patterns in the next two months of code reviews, before they reached production.</p>
+
+<p>Anti-patterns aren't failures of intelligence. They're failures of scale awareness. A developer who has only worked with small datasets has no visceral reason to fear a full table scan or a loop query. The anti-patterns feel harmless because they are harmless, at that scale.</p>
+
+<p>The way to build good habits is to internalize the "what happens at 100 million rows" question before shipping any database query. Not every table will ever have 100 million rows. But the query patterns you build now will persist in your codebase long after the data grows.</p>
+
+<p>Run EXPLAIN. Think in sets, not loops. Fetch only what you need. Paginate everything. These habits cost almost nothing to develop, and they'll protect you from the kind of Sunday night that Priya would rather not repeat.</p>
+
+  `,
 
   // ── Module 14 ────────────────────────────────────────────────
-  'mod14-t1': `<h1>What is a Transaction?</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod14-t2': `<h1>ACID Properties</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod14-t3': `<h1>COMMIT and ROLLBACK</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod14-t4': `<h1>SAVEPOINT</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod14-t5': `<h1>Isolation Levels</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod14-t6': `<h1>Deadlocks and Locking</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod14-t1': `
+    <h1>What is a Transaction?</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Rahul works at PhonePe's backend team in Bengaluru. One afternoon, a user complained that ₹5,000 was deducted from their account but never reached the recipient. Rahul dug into the logs and found something alarming — the debit happened, but the credit step crashed midway due to a server hiccup. The money was gone from one account and hadn't landed in the other.</p>
+
+<p>Rahul's manager, Priya, had seen this before at her previous job. She knew exactly what was missing: the two operations — debit and credit — were running independently. They were not wrapped inside a transaction. So when the crash happened, half the job was done and half was not.</p>
+
+<p>This is the exact problem that database transactions were built to solve. A transaction says: either ALL of this happens, or NONE of it happens. There is no in-between.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>Imagine you are building a food ordering system for Zomato. A customer places an order. Your code needs to do three things: reduce the restaurant's inventory count, create an order record, and charge the customer's wallet. Three separate SQL statements.</p>
+
+<p>Now suppose the first two succeed but your server crashes before the third. You have an order in the system with no payment. Or suppose payment goes through but the order record fails to write. The customer is charged but has no order. Either way, your data is now inconsistent and you have a support ticket waiting.</p>
+
+<p>The problem is not your code logic. The problem is that these three steps are treated as three separate, independent operations. If they are not grouped as one atomic unit, any failure in the middle leaves your database in a broken state.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Early database systems in the 1970s treated every SQL statement as its own isolated operation. This worked fine for simple lookups and inserts. But as banks, airlines, and financial institutions started using databases for real money movement, the limitations became dangerous.</p>
+
+<p>IBM researchers working on System R — one of the first relational databases — realised that multi-step operations needed to be treated as a single unit. If you are transferring money, both the debit and the credit must succeed together or fail together. This led to the formal concept of a transaction being introduced into SQL.</p>
+
+<p>The idea was simple but powerful: group a set of SQL statements into one logical work unit. The database engine would guarantee that the unit either completed fully or left no trace at all. This became foundational to every serious database system — Oracle, MySQL, PostgreSQL, SQL Server — all of them implement transactions today.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think about what happens when you buy a train ticket on IRCTC. You fill in your details, choose your seat, and hit "Pay". Behind the scenes, several things need to happen: your seat needs to be reserved, your payment needs to be processed, and your booking confirmation needs to be generated.</p>
+
+<p>Now imagine the payment goes through but the seat reservation fails. You are charged but have no seat. Or the seat is blocked but payment fails. Someone else cannot book that seat even though it is not actually sold. IRCTC cannot allow either of these half-states to exist.</p>
+
+<p>A transaction is exactly like that booking process. It treats the whole multi-step operation as a single event. If everything goes through, the booking is confirmed. If anything fails, nothing is recorded — your seat is freed, your payment is refunded, it is as if you never started.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Picture a vending machine. You insert ₹50, select your item, the machine deducts your money, and then it drops the snack. Two things happen: money is taken, item is dispensed. These two things are linked.</p>
+
+<p>If the machine takes your money but jams before dropping the snack, you want a refund. You do not accept "well, the deduction worked fine." The full operation either works or it does not.</p>
+
+<p>A transaction in SQL is that contract. It bundles multiple steps and ensures they either all commit to permanent storage or all get rolled back as if they never happened. The database becomes the reliable vending machine that either gives you the snack and takes your money, or returns your money and keeps the snack.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>When you start a transaction in SQL, the database engine begins tracking every change you make. It does not write these changes permanently to the database files right away. Instead, it logs them in a temporary area — often called a transaction log or write-ahead log.</p>
+
+<p>While the transaction is open, the changes are visible to your own session but typically not to other users (depending on isolation settings). The database is holding the changes in a kind of staging area, waiting for your confirmation.</p>
+
+<p>When you issue a COMMIT, the database takes everything in that staging area and writes it permanently to disk. It is now official, visible to everyone, and cannot be undone through the transaction mechanism. The transaction is over.</p>
+
+<p>If something goes wrong before the COMMIT — your app crashes, you issue a ROLLBACK, or the database detects an error — all those staged changes are discarded. The database goes back to exactly the state it was in before the transaction started. No partial updates, no half-written records.</p>
+
+<p>This process relies heavily on the database's internal logging system. Even if the server crashes mid-transaction, when it restarts, it reads the log and knows which transactions were fully committed and which were not. Incomplete ones are rolled back automatically. This is how banks keep their data safe even during power outages.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<p>The basic structure of a transaction looks like this:</p>
+
+<pre><code class="language-sql">BEGIN TRANSACTION;
+
+-- your SQL statements here
+
+COMMIT;</code></pre>
+
+<p>A transaction that moves money between two accounts:</p>
+
+<pre><code class="language-sql">BEGIN TRANSACTION;
+
+UPDATE accounts SET balance = balance - 5000 WHERE account_id = 101;
+UPDATE accounts SET balance = balance + 5000 WHERE account_id = 202;
+
+COMMIT;</code></pre>
+
+<p>A transaction with a ROLLBACK if something goes wrong:</p>
+
+<pre><code class="language-sql">BEGIN TRANSACTION;
+
+UPDATE wallet SET balance = balance - 1000 WHERE user_id = 55;
+UPDATE orders SET status = 'paid' WHERE order_id = 9001;
+
+-- If any error occurred above, undo everything
+ROLLBACK;</code></pre>
+
+<p>In MySQL, autocommit is on by default, so each statement is its own transaction unless you explicitly group them:</p>
+
+<pre><code class="language-sql">SET autocommit = 0;
+
+BEGIN;
+INSERT INTO payments (user_id, amount, status) VALUES (201, 499, 'success');
+UPDATE subscriptions SET active = 1 WHERE user_id = 201;
+COMMIT;
+
+SET autocommit = 1;</code></pre>
+
+<p>In PostgreSQL, the syntax is similar but uses <code>BEGIN</code> without the <code>TRANSACTION</code> keyword:</p>
+
+<pre><code class="language-sql">BEGIN;
+
+DELETE FROM cart WHERE user_id = 77 AND ordered = true;
+INSERT INTO order_history (user_id, total) VALUES (77, 1299);
+
+COMMIT;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Keyword</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td><code>BEGIN</code> / <code>BEGIN TRANSACTION</code></td><td>Marks the start of a new transaction. All statements after this are part of the same unit.</td></tr>
+<tr><td><code>COMMIT</code></td><td>Permanently saves all changes made in the transaction to the database.</td></tr>
+<tr><td><code>ROLLBACK</code></td><td>Cancels all changes made in the transaction and restores the previous state.</td></tr>
+<tr><td><code>SAVEPOINT</code></td><td>Creates a checkpoint inside a transaction so you can partially rollback to that point.</td></tr>
+<tr><td><code>SET autocommit = 0</code></td><td>Turns off automatic committing so you must explicitly COMMIT or ROLLBACK.</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p><strong>Sample table used in examples:</strong></p>
+
+<table>
+<thead><tr><th>account_id</th><th>holder_name</th><th>balance</th></tr></thead>
+<tbody>
+<tr><td>101</td><td>Rahul Sharma</td><td>25000</td></tr>
+<tr><td>202</td><td>Priya Mehta</td><td>8000</td></tr>
+<tr><td>303</td><td>Arjun Nair</td><td>15000</td></tr>
+</tbody></table>
+
+<h3>Example 1:</h3>
+<p>Transfer ₹3,000 from Rahul to Priya.</p>
+
+<pre><code class="language-sql">BEGIN TRANSACTION;
+
+UPDATE accounts SET balance = balance - 3000 WHERE account_id = 101;
+UPDATE accounts SET balance = balance + 3000 WHERE account_id = 202;
+
+COMMIT;</code></pre>
+
+<p>Both updates run. COMMIT saves them permanently. Rahul now has ₹22,000 and Priya has ₹11,000. If either update had failed before COMMIT, a ROLLBACK would have kept both balances unchanged.</p>
+
+<h3>Example 2:</h3>
+<p>Insert a new order and deduct wallet balance together.</p>
+
+<pre><code class="language-sql">BEGIN;
+
+INSERT INTO orders (order_id, user_id, item, amount) VALUES (5001, 101, 'Biryani', 350);
+UPDATE wallet SET balance = balance - 350 WHERE user_id = 101;
+
+COMMIT;</code></pre>
+
+<p>The order is only recorded AND the wallet is only deducted if both succeed. They are tied together in one unit.</p>
+
+<h3>Example 3:</h3>
+<p>Demonstrate ROLLBACK — cancel a transaction before it is committed.</p>
+
+<pre><code class="language-sql">BEGIN;
+
+UPDATE accounts SET balance = balance - 10000 WHERE account_id = 303;
+
+-- Oops, wrong account. Cancel everything.
+ROLLBACK;</code></pre>
+
+<p>The deduction from Arjun's account never happened. ROLLBACK wiped the change before it was committed.</p>
+
+<h3>Example 4:</h3>
+<p>Create a booking with inventory check.</p>
+
+<pre><code class="language-sql">BEGIN;
+
+UPDATE seat_inventory SET available = available - 1 WHERE train_id = 'EXP22' AND class = '3A';
+INSERT INTO bookings (user_id, train_id, seat_class, status) VALUES (55, 'EXP22', '3A', 'confirmed');
+
+COMMIT;</code></pre>
+
+<p>Seat count drops by 1 and the booking record is created as one atomic operation.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Does every SQL statement automatically become a transaction?</strong></p>
+<p>In many databases, yes — this is called autocommit mode. Each individual statement is treated as its own mini-transaction. But that means if you need two statements to succeed or fail together, autocommit will not protect you. You must explicitly group them with BEGIN and COMMIT.</p>
+
+<p><strong>What happens if I forget to COMMIT?</strong></p>
+<p>Your changes exist in the session but are not saved permanently. Other sessions may not see them (depending on isolation level). If your connection drops without a COMMIT, the database will automatically ROLLBACK your changes. Data is not lost but your work is undone.</p>
+
+<p><strong>Can I undo a COMMIT?</strong></p>
+<p>No. Once you COMMIT, the changes are permanent from the transaction's perspective. You would need to run a new transaction that reverses the changes manually. Some databases have point-in-time recovery options, but that is a DBA-level operation, not a ROLLBACK.</p>
+
+<p><strong>Is a transaction limited to one table?</strong></p>
+<p>No. A single transaction can span multiple tables, multiple INSERT/UPDATE/DELETE statements, and even multiple databases in some systems. The entire group is treated as one unit.</p>
+
+<p><strong>What if two transactions try to change the same row at the same time?</strong></p>
+<p>This is the concurrency problem, and databases handle it through locking and isolation levels. One transaction will wait for the other to finish before it can proceed on the same row. This is covered in depth in the Isolation Levels topic.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Not wrapping related operations in a transaction.</strong> The most common mistake. Writing three separate UPDATE statements without a transaction means a crash between them leaves corrupted data.</li><li><strong>Forgetting COMMIT at the end.</strong> Especially common when testing in a database client. Your changes look correct in your session but nobody else can see them, and they vanish when you disconnect.</li><li><strong>Keeping transactions open too long.</strong> Long-running transactions hold locks on rows and tables, blocking other users and causing slowdowns. Keep transactions as short as possible.</li><li><strong>Putting non-database logic inside a transaction.</strong> Calling an external API, sending an email, or doing heavy computation inside a transaction holds locks unnecessarily. Finish database work first, then do external calls.</li><li><strong>Assuming ROLLBACK handles external side effects.</strong> If your transaction calls an API (like sending a payment request) and then gets rolled back, the database change is undone but the API call is not. ROLLBACK only affects database state.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Always wrap multi-step operations that must succeed or fail together inside a transaction.</li><li>Keep transactions short — do the minimum necessary SQL work and COMMIT quickly.</li><li>Handle errors explicitly. Use try/catch or equivalent in your application code to ROLLBACK on failure.</li><li>Avoid user interaction or waiting inside a transaction. Never open a transaction, wait for a user to click a button, and then commit.</li><li>Test ROLLBACK scenarios during development. Make sure your code handles the case where a transaction fails midway.</li><li>In application code, always close connections properly so uncommitted transactions are not left dangling.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>PhonePe processes millions of UPI transactions every day. Every single money transfer is wrapped in a database transaction. When you send ₹500 to a friend, the debit from your account and the credit to theirs are committed together. If anything fails — network timeout, database blip, server crash — the whole thing rolls back and neither account changes.</p>
+
+<p>Flipkart uses transactions during order placement. When you click "Place Order," the system reduces inventory, creates the order record, deducts from your Flipkart wallet or marks the payment intent, and logs the event — all inside one transaction. This ensures customers are never charged for an order that failed to create, and inventory is never reduced for a payment that did not go through.</p>
+
+<p>IRCTC's ticket booking system is one of the most transaction-heavy systems in India. During high-demand bookings like Tatkal, thousands of users try to book simultaneously. Transactions ensure that two people cannot get the same seat. The seat assignment, payment processing, and ticket generation are one atomic unit — either you get the confirmed ticket or the transaction rolls back and the seat opens up for someone else.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>START TRANSACTION
+        |
+        v
+  [SQL Statement 1]  -- UPDATE accounts ...
+        |
+        v
+  [SQL Statement 2]  -- INSERT INTO orders ...
+        |
+        v
+  [SQL Statement 3]  -- UPDATE inventory ...
+        |
+    ----+----
+   /         \
+  v           v
+Success?    Error?
+   |           |
+COMMIT      ROLLBACK
+   |           |
+Changes    Changes
+ saved     undone
+   |           |
+Database   Database
+consistent consistent</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>A transaction is a group of SQL statements that are treated as one single unit of work.</li><li>Either ALL statements in a transaction succeed (COMMIT), or NONE of them take effect (ROLLBACK).</li><li>Transactions protect data from partial updates caused by crashes, errors, or concurrency.</li><li><code>BEGIN</code> starts a transaction, <code>COMMIT</code> saves it permanently, <code>ROLLBACK</code> undoes it.</li><li>Autocommit mode treats each statement as its own transaction — you must explicitly group statements when needed.</li><li>Transactions can span multiple tables and multiple SQL operations.</li><li>Keep transactions short to avoid locking issues.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>Write a transaction that transfers ₹2,000 from account ID 10 to account ID 20. Include both the debit and credit as part of the same transaction.</li><li>What happens to the changes made inside a transaction if the database server crashes before a COMMIT is issued?</li><li>Write a transaction that inserts a new customer and creates their first order in the same atomic operation.</li><li>A developer writes three UPDATE statements without using BEGIN/COMMIT. What risk does this create if the second UPDATE fails?</li><li>Why is it a bad idea to call an external payment gateway API inside an open database transaction?</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Rahul's problem at PhonePe was not a bug in the traditional sense. The code logic was correct. The issue was a missing safety net — the absence of a transaction around two operations that absolutely had to happen together or not at all.</p>
+
+<p>Once the team wrapped the debit and credit inside a proper transaction, partial failures became impossible. Either the money moved fully or it did not move at all. The support tickets stopped. The system became trustworthy.</p>
+
+<p>This is what transactions give you: reliability in the face of an unreliable world. Servers crash. Networks drop. Errors happen. Transactions are the database's way of saying "I will protect your data even when things go wrong."</p>
+
+<p>Every time you write SQL that involves more than one step of related work, ask yourself: what happens if the second step fails? If the answer is "something bad," wrap it in a transaction. That single habit will prevent more data corruption bugs than almost anything else you will learn.</p>
+
+  `,
+  'mod14-t2': `
+    <h1>ACID Properties</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Neha is a backend engineer at Paytm in Noida. One quarter, her team was getting random complaints from users — sometimes a recharge would succeed but the user's balance would not update. Other times, two users would book the same cashback coupon simultaneously and both would get it, costing the company double.</p>
+
+<p>Her tech lead, Aman, pulled up the database design and spotted the problem immediately. The team had been writing fast, optimistic code without thinking about what guarantees the database needed to provide. They were relying on luck instead of building on ACID.</p>
+
+<p>ACID is a set of four properties that a database must guarantee for every transaction. These are not suggestions. They are the contract between your application and the database. Once you understand them, you will know exactly what your database promises you — and what your code must handle on its own.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>Imagine two Swiggy delivery agents both try to accept the same order at the exact same time. Your system checks availability and both see the order as unclaimed. Both accept it. Now two agents are heading to the same restaurant for the same order.</p>
+
+<p>Or imagine a Byju's student is paying for a course subscription. The payment service charges the card. Then your server throws a null pointer exception before writing the "subscription activated" record. The student is charged but has no access.</p>
+
+<p>Or imagine your database is in the middle of writing a large batch of records when the power goes out. When it restarts, half the batch is written. Now your data is in a half-updated, inconsistent state.</p>
+
+<p>Each of these is a different type of failure. ACID properties are what prevent each of them. Without ACID, none of your multi-user, multi-step database operations can be trusted.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>The term ACID was coined by Andreas Reuter and Theo Härder in 1983, building on Jim Gray's earlier work on transaction processing. At the time, relational databases were being adopted by financial institutions, and the need for formal guarantees was urgent.</p>
+
+<p>Banks needed to know: if I transfer money, is it guaranteed the debit and credit both happen? If my server crashes during a write, will the database recover correctly? If two tellers update the same account simultaneously, will the final balance be correct?</p>
+
+<p>These were not academic questions. Real money and real customer data depended on the answers. The ACID framework gave database designers a clear checklist of properties they needed to implement. It became the gold standard for relational databases and remains so today.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think about a bank's physical locker room. You walk in, the manager verifies your identity, you open your locker, take out some documents, put others in, close it, and walk out. Several things are guaranteed:</p>
+
+<p>You either complete the whole visit or nothing is recorded — you cannot partially access a locker. The locker contents are always in a valid state — no half-opened boxes. Your actions do not interfere with another customer using a different locker at the same time. And once you sign the register and leave, that visit is permanently recorded even if there is a power cut five minutes later.</p>
+
+<p>Those four guarantees map exactly to Atomicity, Consistency, Isolation, and Durability. The bank's system is ACID-compliant. Your database needs to be the same.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Picture a well-run government exam system like UPSC or JEE. When your answer sheet is submitted:</p>
+
+<p>The entire sheet is accepted or rejected — you cannot submit half an answer sheet (Atomicity). The exam rules ensure only valid responses count — no out-of-range roll numbers or duplicate entries (Consistency). Your sheet processing does not interfere with the candidate next to you (Isolation). Once accepted and stamped, your submission is on record even if the building loses power that evening (Durability).</p>
+
+<p>These are not separate features. They work together to make the entire system trustworthy. A database without all four is like an exam system that randomly loses papers or lets two candidates share the same roll number.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p><strong>Atomicity</strong> is handled by the transaction log. The database keeps a record of every change made inside an open transaction. If the transaction is committed, all changes are applied. If it is rolled back — whether manually or due to a crash — every change recorded in the log is reversed. The database engine does this automatically on startup if it finds uncommitted transactions in the log from before a crash.</p>
+
+<p><strong>Consistency</strong> is enforced through constraints and rules defined in the schema. Primary keys, foreign keys, NOT NULL constraints, CHECK constraints, and triggers are all tools for consistency. If a transaction would violate any of these rules, the database rejects it and rolls back. The database moves from one valid state to another valid state — never to an invalid one.</p>
+
+<p><strong>Isolation</strong> is managed through locking and multi-version concurrency control (MVCC). When one transaction is reading or writing a row, the database controls whether other transactions can see or touch that row simultaneously. Different isolation levels (READ COMMITTED, REPEATABLE READ, SERIALIZABLE) offer different trade-offs between strictness and performance. At the highest isolation level, transactions appear to run one after another even if they are actually overlapping in time.</p>
+
+<p><strong>Durability</strong> is guaranteed by writing committed data to persistent storage — usually through a write-ahead log (WAL). Before a COMMIT is acknowledged to your application, the database ensures the changes are flushed to disk. Even if the server crashes the moment after committing, the data is safe. When the server restarts, it replays the WAL and restores all committed transactions.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<p>ACID properties are enforced automatically by the database engine. You do not "write ACID" — you write proper transactions and constraints, and the database upholds the guarantees.</p>
+
+<p>Atomicity — group operations in a transaction:</p>
+
+<pre><code class="language-sql">BEGIN;
+UPDATE accounts SET balance = balance - 2000 WHERE user_id = 11;
+UPDATE accounts SET balance = balance + 2000 WHERE user_id = 22;
+COMMIT;</code></pre>
+
+<p>Consistency — define constraints that keep data valid:</p>
+
+<pre><code class="language-sql">CREATE TABLE orders (
+    order_id INT PRIMARY KEY,
+    user_id INT NOT NULL,
+    amount DECIMAL(10,2) CHECK (amount &gt; 0),
+    status VARCHAR(20) DEFAULT 'pending',
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);</code></pre>
+
+<p>Isolation — set the isolation level for a session or transaction:</p>
+
+<pre><code class="language-sql">-- MySQL / MariaDB
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
+BEGIN;
+SELECT balance FROM accounts WHERE user_id = 11;
+UPDATE accounts SET balance = balance - 500 WHERE user_id = 11;
+COMMIT;</code></pre>
+
+<p>Durability — this is automatic, but you can verify with a forced flush:</p>
+
+<pre><code class="language-sql">-- PostgreSQL: confirm WAL sync behaviour
+SHOW synchronous_commit;
+
+-- To ensure durability for a specific transaction:
+SET LOCAL synchronous_commit = ON;</code></pre>
+
+<p>Checking and adding a constraint for consistency:</p>
+
+<pre><code class="language-sql">ALTER TABLE wallets
+ADD CONSTRAINT balance_non_negative CHECK (balance &gt;= 0);</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>ACID Property</th><th>What It Guarantees</th><th>How the Database Enforces It</th></tr></thead>
+<tbody>
+<tr><td>Atomicity</td><td>All operations in a transaction succeed, or none of them do</td><td>Transaction log + automatic ROLLBACK on failure</td></tr>
+<tr><td>Consistency</td><td>A transaction takes the database from one valid state to another</td><td>Constraints (PK, FK, CHECK, NOT NULL), triggers</td></tr>
+<tr><td>Isolation</td><td>Concurrent transactions do not interfere with each other</td><td>Locks, MVCC (Multi-Version Concurrency Control)</td></tr>
+<tr><td>Durability</td><td>Once committed, data survives crashes and restarts</td><td>Write-ahead log (WAL), disk flush on COMMIT</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p><strong>Sample table used in examples:</strong></p>
+
+<table>
+<thead><tr><th>user_id</th><th>name</th><th>wallet_balance</th></tr></thead>
+<tbody>
+<tr><td>11</td><td>Neha Gupta</td><td>10000</td></tr>
+<tr><td>22</td><td>Simran Kaur</td><td>3000</td></tr>
+<tr><td>33</td><td>Arjun Nair</td><td>0</td></tr>
+</tbody></table>
+
+<h3>Example 1: Atomicity in action</h3>
+<p>Transfer from Neha to Simran — both steps must succeed.</p>
+
+<pre><code class="language-sql">BEGIN;
+UPDATE wallets SET wallet_balance = wallet_balance - 4000 WHERE user_id = 11;
+UPDATE wallets SET wallet_balance = wallet_balance + 4000 WHERE user_id = 22;
+COMMIT;</code></pre>
+
+<p>If the second UPDATE fails (say, user 22 does not exist), the ROLLBACK is triggered and Neha's balance is restored. Neither account changes. Atomicity is maintained.</p>
+
+<h3>Example 2: Consistency enforcement</h3>
+<p>Try to create a negative balance:</p>
+
+<pre><code class="language-sql">BEGIN;
+UPDATE wallets SET wallet_balance = wallet_balance - 50000 WHERE user_id = 33;
+COMMIT;</code></pre>
+
+<p>With a CHECK constraint (balance >= 0), this transaction is rejected because Arjun's balance is 0. The constraint violation triggers a ROLLBACK. The database stays consistent.</p>
+
+<h3>Example 3: Isolation between concurrent sessions</h3>
+<p>Session A starts a transaction and reads a balance. Session B updates the same row. Without proper isolation, Session A might see Session B's uncommitted change (dirty read). With READ COMMITTED or higher isolation:</p>
+
+<pre><code class="language-sql">-- Session A
+BEGIN;
+SELECT wallet_balance FROM wallets WHERE user_id = 11;
+-- Sees 10000, not affected by any uncommitted change from Session B
+
+COMMIT;</code></pre>
+
+<p>Session A always reads committed data only. Isolation prevents phantom reads and dirty reads.</p>
+
+<h3>Example 4: Durability after a crash</h3>
+<p>Once you commit a transaction, the data is durable:</p>
+
+<pre><code class="language-sql">BEGIN;
+INSERT INTO transactions (txn_id, user_id, amount, type) VALUES (9001, 11, 500, 'debit');
+UPDATE wallets SET wallet_balance = wallet_balance - 500 WHERE user_id = 11;
+COMMIT;
+-- Server crashes here</code></pre>
+
+<p>When the server restarts, the WAL shows this transaction was fully committed. Both the INSERT and UPDATE are present in the database. Nothing is lost.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Is ACID a feature I can turn on or off?</strong></p>
+<p>In fully ACID-compliant databases like PostgreSQL, MySQL InnoDB, and SQL Server, these properties are always on. Some NoSQL databases and MySQL's older MyISAM engine do not fully support ACID. If you are using InnoDB (MySQL's default), you have full ACID support. If you are ever unsure, check your storage engine.</p>
+
+<p><strong>Does Consistency mean the database checks business rules automatically?</strong></p>
+<p>Only the rules you define as constraints. The database does not know that a Zomato order cannot have zero items unless you have written a constraint saying so. Consistency in ACID means the database enforces the structural and constraint rules you have set up — not business logic you have not expressed in the schema.</p>
+
+<p><strong>Does Isolation mean two transactions can never run at the same time?</strong></p>
+<p>No. Isolation means the effects of concurrent transactions are controlled. Most databases run many transactions simultaneously using MVCC or locking. They appear isolated even though they overlap in time. Full isolation (SERIALIZABLE) does slow things down, which is why most applications use READ COMMITTED or REPEATABLE READ.</p>
+
+<p><strong>If my COMMIT succeeded, can data still be lost?</strong></p>
+<p>If your database is properly configured and your storage hardware is functioning, no. Durability guarantees committed data survives crashes. However, if your disk has a hardware failure with no backups, ACID cannot protect you from that — that is what backups and replication are for.</p>
+
+<p><strong>Can I have ACID without transactions?</strong></p>
+<p>No. Transactions are the mechanism through which ACID properties are implemented and enforced. Single statements in autocommit mode are implicitly wrapped in a transaction, so they still get ACID guarantees — but multi-step operations only get full ACID protection when you explicitly group them in a transaction.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Relying on the database for consistency rules you never defined.</strong> If you do not write CHECK constraints or foreign keys, the database cannot enforce consistency for you. It only checks rules that exist.</li><li><strong>Using a non-ACID storage engine.</strong> In MySQL, MyISAM does not support transactions. Using it for financial or order data is dangerous. Always use InnoDB for transactional tables.</li><li><strong>Confusing Isolation with security.</strong> Isolation is about concurrent transaction visibility, not about who can access data. Access control is handled by permissions, not ACID.</li><li><strong>Assuming high isolation levels are always better.</strong> SERIALIZABLE prevents all concurrency anomalies but can cause significant performance problems under heavy load. Choose the isolation level that matches your actual needs.</li><li><strong>Not testing crash recovery.</strong> Durability is automatic, but you should test it. Simulate a server restart and verify your committed data is there. Never assume it without testing in your environment.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Define all business rules that can be expressed as constraints — CHECK, NOT NULL, UNIQUE, FOREIGN KEY — at the schema level. These enforce Consistency automatically.</li><li>Use InnoDB (not MyISAM) in MySQL for any table that stores important data.</li><li>Choose the right isolation level per transaction, not just the default. Most OLTP systems work well with READ COMMITTED or REPEATABLE READ.</li><li>Keep transactions short to reduce lock contention while still maintaining Atomicity.</li><li>Monitor and test your write-ahead log configuration. Durability depends on synchronous<em>commit or innodb</em>flush<em>log</em>at<em>trx</em>commit being set correctly for your reliability needs.</li><li>Do not confuse ACID properties with application-level business rule validation. Both are needed — they work at different layers.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Paytm's payment system processes hundreds of transactions per second. ACID properties are what make this safe. Atomicity ensures a payment either goes through completely or does not happen at all. Consistency constraints ensure no account can ever go below zero or have invalid data. Isolation prevents two simultaneous payments from the same wallet from both succeeding when only one should. Durability ensures every completed payment is on record even during server restarts.</p>
+
+<p>Flipkart's inventory management relies on Consistency and Atomicity together. When a flash sale starts and thousands of users add the same item to their cart, the database's isolation mechanisms ensure only the correct number of units are sold. Constraints on stock count prevent negative inventory. The transaction wrapping each purchase ensures the inventory deduction and order creation always happen together.</p>
+
+<p>IRCTC's core booking system is one of the most demanding ACID implementations in India. During peak hours, millions of users attempt bookings simultaneously. Serializable isolation prevents double-booking of the same seat. Atomicity ensures payment and ticket issuance are tied together. Durability means a confirmed ticket is a confirmed ticket — no "it was committed but somehow lost" scenarios.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>              ACID PROPERTIES
+              ===============
+
+A — ATOMICITY
+    Transaction A: [Step 1] [Step 2] [Step 3]
+                   ALL succeed → COMMIT
+                   ANY fail    → ROLLBACK (all undone)
+
+C — CONSISTENCY
+    Before Transaction: Valid State (constraints satisfied)
+         ↓  (transaction runs)
+    After Transaction:  Valid State (constraints still satisfied)
+    (Any violation → transaction rejected)
+
+I — ISOLATION
+    Transaction A: ----[read]---[write]----COMMIT----
+    Transaction B:          ----[read]---[write]----COMMIT----
+    Result: B does not see A's uncommitted changes
+            A does not see B's uncommitted changes
+
+D — DURABILITY
+    COMMIT issued
+         ↓
+    Written to WAL (disk)
+         ↓
+    Server crashes immediately after
+         ↓
+    Server restarts → reads WAL → data is there</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>ACID stands for Atomicity, Consistency, Isolation, Durability.</li><li>Atomicity: all or nothing — a transaction either fully commits or fully rolls back.</li><li>Consistency: the database moves from one valid state to another — constraints are never violated.</li><li>Isolation: concurrent transactions do not see each other's uncommitted changes.</li><li>Durability: once committed, data survives crashes — write-ahead logs ensure this.</li><li>ACID properties are enforced by the database engine automatically when you use transactions and define constraints.</li><li>Different isolation levels offer different trade-offs between strictness and performance.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>Which ACID property is violated if a transfer deducts money from one account but fails to add it to the other, leaving the total money in the system changed?</li><li>You have a <code>products</code> table where <code>stock_quantity</code> must never be negative. Which ACID property does a CHECK constraint enforce, and how?</li><li>A developer sets MySQL's storage engine to MyISAM for the orders table. Which ACID properties are at risk and why?</li><li>Two users simultaneously try to apply the same discount coupon that can only be used once. Which ACID property protects against both of them succeeding?</li><li>After a server crash, how does a database recover to ensure Durability of committed transactions?</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Neha's team at Paytm fixed their problems not by rewriting application logic but by understanding what the database already guaranteed and what it needed help with. They added proper constraints for Consistency, wrapped critical operations in transactions for Atomicity, reviewed their isolation levels for the concurrency scenarios they faced, and verified their Durability settings for the transaction log.</p>
+
+<p>ACID is not a complicated idea. It is four clear promises that your database makes when you use it correctly. The trouble is that most developers learn SQL syntax first and ACID much later, after they have already seen data get corrupted in production.</p>
+
+<p>Think of ACID as the contract you sign when you use a relational database. You hold up your end by writing proper transactions and defining constraints. The database holds up its end by enforcing Atomicity, Consistency, Isolation, and Durability on every operation.</p>
+
+<p>Every time you write a transaction, these four properties are working silently in the background. Understanding them means you can design systems that are genuinely reliable — not systems that work fine in testing but fall apart when real users, real concurrency, and real server failures show up.</p>
+
+  `,
+  'mod14-t3': `
+    <h1>COMMIT and ROLLBACK</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Arjun is a data analyst at Flipkart's warehouse operations team in Hyderabad. One evening, he was running a batch script to update delivery statuses for 8,000 orders. The script ran fine through the first 6,000 rows. Then a mapping error caused it to write wrong status codes for the remaining 2,000.</p>
+
+<p>When he checked the orders table, the damage was done. 2,000 orders now showed incorrect statuses — some marked as "delivered" when they were still in transit. Customer support started getting calls. Arjun's manager, Simran, asked why this was not caught earlier.</p>
+
+<p>The answer was that Arjun had not used COMMIT and ROLLBACK properly. His script was running in autocommit mode — each update was committed the moment it ran. By the time the error appeared, thousands of rows were already permanently changed. Had he wrapped the entire batch in a single transaction with a COMMIT at the end, one ROLLBACK would have undone all 8,000 changes and left the table untouched.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>The everyday version of this problem is simpler but just as damaging. You write an UPDATE that accidentally affects too many rows — maybe you forgot the WHERE clause. The update runs, you press Enter, and 50,000 records just changed.</p>
+
+<p>Or you are migrating data from one table format to another. Halfway through, you realise the transformation logic was wrong. You cannot just re-run the migration because some rows are now in the new format and some are not.</p>
+
+<p>Or you are testing a new DELETE query in a production database. You run it to see what it deletes. It deletes the wrong rows. There is no ctrl-Z in SQL — unless you were inside a transaction and have not yet committed.</p>
+
+<p>COMMIT and ROLLBACK are the two controls that decide whether your work becomes permanent or disappears without a trace.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>In the earliest database systems, every write operation was immediately permanent. There was no way to "undo" a change once it was written. This was fine for single-user systems writing simple records, but it became a serious problem for multi-step operations and batch updates.</p>
+
+<p>As SQL databases became the backbone of banking, airline bookings, and e-commerce, developers needed a way to stage multiple changes and decide, as a final step, whether to commit them all or throw them all away. This is what COMMIT and ROLLBACK were designed for.</p>
+
+<p>The concept comes from transaction processing systems where the "commit point" was a formal checkpoint — before it, everything was reversible; after it, everything was final. SQL adopted this model directly and it has been central to how relational databases work ever since.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think about filling out a government form — say a passport application. You fill in every section carefully. Once you are happy with it, you submit it (COMMIT). After submission, it is permanent — the office has it, you cannot take it back.</p>
+
+<p>But while you are still filling it in — before you submit — you can crumple it up and start fresh (ROLLBACK). Nothing is official yet. Your half-filled form has no effect on anything.</p>
+
+<p>That is exactly what COMMIT and ROLLBACK do. You are filling in database changes. Until you COMMIT, nothing is final. ROLLBACK throws away everything you wrote and gives you a blank form again.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Imagine you are editing a shared Google Doc. You have made your changes but you have not clicked "save to main version." Your edits are visible to you in your editing session. At any point you can either accept changes (COMMIT — they become part of the main document) or discard changes (ROLLBACK — the document goes back to how it was before you started editing).</p>
+
+<p>In a database, before you COMMIT, your changes are in a kind of staging area. You can see them in your own session but they are not final. Other users may or may not see them depending on isolation settings. The moment you COMMIT, they are pushed to the main document permanently.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>When you begin a transaction and start making changes, the database writes those changes to a transaction log while also keeping the old values. This is sometimes called the "before image" and "after image" of the data.</p>
+
+<p>When you issue a COMMIT, the database marks the transaction as complete in the log, writes all "after images" to permanent storage, and releases any locks held by the transaction. Your changes are now visible to everyone and cannot be undone through SQL.</p>
+
+<p>When you issue a ROLLBACK, the database reads the "before images" from the log and uses them to reverse every change made in the transaction. The data is restored to its pre-transaction state. Locks are released. The log entries for this transaction are discarded. It is as if the transaction never happened.</p>
+
+<p>There is also implicit ROLLBACK. If your connection drops, your application crashes, or the database detects an error it cannot recover from within the transaction, it automatically rolls back any uncommitted changes. You do not need to do anything — the database cleans up for you.</p>
+
+<p>One important point: COMMIT and ROLLBACK work on DML (Data Manipulation Language) statements — INSERT, UPDATE, DELETE, MERGE. DDL statements like CREATE TABLE or ALTER TABLE are auto-committed in most databases. You cannot ROLLBACK a CREATE TABLE in MySQL or Oracle (PostgreSQL is an exception — DDL is transactional there).</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<p>Basic COMMIT:</p>
+
+<pre><code class="language-sql">BEGIN;
+UPDATE employee_salaries SET salary = salary * 1.10 WHERE department = 'Engineering';
+COMMIT;</code></pre>
+
+<p>Basic ROLLBACK:</p>
+
+<pre><code class="language-sql">BEGIN;
+DELETE FROM orders WHERE order_date &lt; '2023-01-01';
+-- Wait, wrong date range! Undo this.
+ROLLBACK;</code></pre>
+
+<p>COMMIT with error checking in application logic (pseudocode style):</p>
+
+<pre><code class="language-sql">BEGIN;
+
+UPDATE inventory SET stock = stock - 1 WHERE product_id = 501;
+INSERT INTO order_items (order_id, product_id, qty) VALUES (8801, 501, 1);
+
+-- If both succeeded:
+COMMIT;
+
+-- If any error occurred:
+-- ROLLBACK;</code></pre>
+
+<p>Explicit transaction with conditional ROLLBACK in MySQL stored procedure:</p>
+
+<pre><code class="language-sql">DELIMITER //
+CREATE PROCEDURE process_payment(IN uid INT, IN amt DECIMAL(10,2))
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+    UPDATE wallets SET balance = balance - amt WHERE user_id = uid;
+    INSERT INTO payment_log (user_id, amount, created_at) VALUES (uid, amt, NOW());
+    COMMIT;
+END //
+DELIMITER ;</code></pre>
+
+<p>Checking what you are about to change before committing:</p>
+
+<pre><code class="language-sql">BEGIN;
+
+UPDATE products SET price = price * 0.90 WHERE category = 'Electronics';
+
+-- How many rows were affected?
+SELECT ROW_COUNT();
+
+-- If the count looks wrong, rollback:
+-- ROLLBACK;
+
+-- If it looks right, commit:
+COMMIT;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Command</th><th>What It Does</th><th>When to Use It</th></tr></thead>
+<tbody>
+<tr><td><code>BEGIN</code> / <code>START TRANSACTION</code></td><td>Opens a new transaction, starting the staging area for changes</td><td>Before any multi-step SQL operation</td></tr>
+<tr><td><code>COMMIT</code></td><td>Permanently saves all changes made since BEGIN, releases locks</td><td>When all steps have succeeded and data should be permanent</td></tr>
+<tr><td><code>ROLLBACK</code></td><td>Discards all changes made since BEGIN, restores previous state</td><td>When an error occurs or you want to cancel the operation</td></tr>
+<tr><td><code>ROLLBACK TO SAVEPOINT name</code></td><td>Undoes changes back to a specific savepoint within the transaction</td><td>When you want to partially undo a transaction</td></tr>
+<tr><td><code>SAVEPOINT name</code></td><td>Creates a named checkpoint within a transaction</td><td>When a long transaction has stages you might want to revert independently</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p><strong>Sample table:</strong></p>
+
+<table>
+<thead><tr><th>order_id</th><th>customer_name</th><th>amount</th><th>status</th></tr></thead>
+<tbody>
+<tr><td>1001</td><td>Arjun Nair</td><td>1299</td><td>pending</td></tr>
+<tr><td>1002</td><td>Priya Mehta</td><td>2499</td><td>pending</td></tr>
+<tr><td>1003</td><td>Rahul Sharma</td><td>599</td><td>pending</td></tr>
+</tbody></table>
+
+<h3>Example 1: Successful COMMIT</h3>
+<p>Mark all orders as shipped and log the update.</p>
+
+<pre><code class="language-sql">BEGIN;
+
+UPDATE orders SET status = 'shipped' WHERE order_id IN (1001, 1002, 1003);
+INSERT INTO audit_log (action, performed_at) VALUES ('bulk_ship', NOW());
+
+COMMIT;</code></pre>
+
+<p>Both the UPDATE and INSERT are now permanent. The orders show "shipped" and the audit record exists. Checking ROW_COUNT after the UPDATE shows 3, which is correct, so COMMIT is safe.</p>
+
+<h3>Example 2: ROLLBACK after mistake</h3>
+<p>Accidentally delete all orders instead of just one.</p>
+
+<pre><code class="language-sql">BEGIN;
+
+DELETE FROM orders;
+-- Oops. WHERE clause was missing.
+-- SELECT COUNT(*) FROM orders; → shows 0 rows now
+
+ROLLBACK;
+-- All 3 orders are back. Nothing was permanently changed.</code></pre>
+
+<p>Without the transaction, this DELETE would have been permanent. The ROLLBACK brings everything back.</p>
+
+<h3>Example 3: ROLLBACK due to logic error</h3>
+<p>Update amounts with a wrong multiplier.</p>
+
+<pre><code class="language-sql">BEGIN;
+
+UPDATE orders SET amount = amount * 100;  -- Wrong! Should be * 1.10
+
+-- Verify the change
+SELECT * FROM orders;
+-- Arjun now shows 129900, Priya shows 249900 — clearly wrong
+
+ROLLBACK;
+-- Back to original amounts</code></pre>
+
+<p>Checking results before committing is a good habit. Here the check saved the data.</p>
+
+<h3>Example 4: Conditional COMMIT in a real workflow</h3>
+<p>Process a refund — deduct from company balance, add to customer wallet.</p>
+
+<pre><code class="language-sql">BEGIN;
+
+UPDATE company_wallet SET balance = balance - 1299 WHERE wallet_id = 1;
+UPDATE customer_wallet SET balance = balance + 1299 WHERE customer_id = 101;
+
+-- Verify both rows updated correctly
+SELECT ROW_COUNT();
+
+-- If 1 row was affected by last update (correct):
+COMMIT;
+
+-- If 0 rows affected (customer doesn't exist):
+-- ROLLBACK;</code></pre>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Can I ROLLBACK after a COMMIT?</strong></p>
+<p>No. Once you have COMMITted, the transaction is closed and the changes are permanent. You cannot use ROLLBACK to undo a committed transaction. If you need to reverse it, you must write a new transaction that manually undoes the changes.</p>
+
+<p><strong>Does ROLLBACK undo DDL statements like CREATE TABLE or ALTER TABLE?</strong></p>
+<p>In most databases (MySQL, Oracle), no. DDL statements cause an implicit COMMIT. If you do CREATE TABLE inside a transaction and then ROLLBACK, the table still exists. PostgreSQL is the exception — it supports transactional DDL.</p>
+
+<p><strong>What happens to COMMIT and ROLLBACK with autocommit on?</strong></p>
+<p>When autocommit is on (the default in MySQL), every statement is automatically wrapped in its own transaction and immediately committed. To use explicit COMMIT and ROLLBACK, you must either turn off autocommit or explicitly begin a transaction with BEGIN — this temporarily overrides autocommit for that block.</p>
+
+<p><strong>If my application crashes between BEGIN and COMMIT, what happens?</strong></p>
+<p>The database automatically rolls back the transaction when your connection drops. The database detects the broken connection, sees the open transaction, and rolls it back. Your data is safe — no partial changes are left behind.</p>
+
+<p><strong>Is ROLLBACK always instant?</strong></p>
+<p>Not necessarily. A large transaction that made millions of changes can take a significant amount of time to roll back, because the database must undo each change one by one. This is one reason to keep transactions short — not just for performance going forward, but in case you need to roll back.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Running destructive queries (DELETE, UPDATE) without BEGIN first.</strong> If you are not inside an explicit transaction, there is nothing to ROLLBACK. Always start with BEGIN when running anything you might want to undo.</li><li><strong>COMMITting too early.</strong> Committing inside a loop or after each individual step means you lose the protection of atomicity. If the second step fails, the first is already committed.</li><li><strong>Forgetting COMMIT at the end.</strong> Changes look correct in your session but are not saved. Other sessions do not see them and they disappear when you disconnect.</li><li><strong>Assuming ROLLBACK works on DDL.</strong> Writing a migration inside a transaction and rolling back when an ALTER TABLE fails — in MySQL, the ALTER TABLE was already auto-committed.</li><li><strong>Long transactions with user-facing waits.</strong> Opening a transaction, then waiting for a user to confirm something before committing, holds locks for the entire wait time. This blocks other operations and causes bottlenecks.</li><li><strong>Using ROLLBACK as a substitute for testing.</strong> Some developers run destructive queries on production "just to see" and plan to ROLLBACK. This works but is risky — always test on a staging environment first.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Always start with BEGIN before running multi-step DML operations you might want to cancel.</li><li>Verify affected row counts (using SELECT or ROW_COUNT()) before issuing COMMIT in batch operations.</li><li>Write error handlers in application code that issue ROLLBACK on any exception before re-throwing.</li><li>Never leave transactions open while waiting for user input or external API calls.</li><li>For large batch operations, break them into smaller transactions and commit periodically — this limits both lock duration and rollback cost.</li><li>In MySQL, know whether you are in autocommit mode. Use <code>SELECT @@autocommit;</code> to check.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Flipkart's order processing pipeline relies heavily on explicit transactions with COMMIT and ROLLBACK. When a large seller uploads a bulk inventory update — say 10,000 product records — the upload is wrapped in a single transaction. The system validates all rows first. If any row has a data error, the entire batch is rolled back and the seller is shown the error report. No partial updates land in the database.</p>
+
+<p>Paytm's cashback credit system uses transactions where COMMIT is only issued after both the cashback calculation and the wallet credit succeed. If the calculation completes but the wallet update fails (perhaps due to a constraint violation or a locked row), the ROLLBACK ensures no cashback is accidentally granted without a corresponding record in the cashback table.</p>
+
+<p>Swiggy's delivery partner payout system runs nightly batch jobs that process thousands of payment records. Each batch of 100 payouts is wrapped in a transaction. If any payout in the batch fails validation, that batch rolls back and is retried individually. This prevents a single bad record from blocking thousands of legitimate payouts while still maintaining data integrity within each batch.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>BEGIN
+  |
+  v
+[Statement 1] → changes staged in transaction log
+  |
+  v
+[Statement 2] → more changes staged
+  |
+  v
+[Statement 3] → more changes staged
+  |
+  v
+Decision point:
+  |
+  +--------+--------+
+  |                 |
+  v                 v
+COMMIT           ROLLBACK
+  |                 |
+  v                 v
+All changes      All changes
+written to       discarded
+permanent        from log
+storage
+  |                 |
+  v                 v
+Other users      Database
+can now see      is back to
+the changes      pre-BEGIN
+                  state</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>COMMIT permanently saves all changes made within a transaction.</li><li>ROLLBACK discards all changes made within a transaction and restores the previous state.</li><li>Without an explicit BEGIN, most databases auto-commit every statement immediately.</li><li>Once you COMMIT, you cannot undo it with ROLLBACK — you need a new transaction.</li><li>ROLLBACK does not undo DDL statements (CREATE, ALTER, DROP) in MySQL and Oracle.</li><li>Application crashes automatically trigger ROLLBACK for any open transaction.</li><li>Always verify your changes before issuing COMMIT in batch operations.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>Write a transaction that increases salaries by 10% for all employees in the "Sales" department. Include proper COMMIT syntax.</li><li>You run <code>DELETE FROM customers;</code> without a WHERE clause. What must be true in your session for ROLLBACK to save you?</li><li>A stored procedure executes five INSERT statements in sequence. The fourth one fails. What should the procedure do to maintain data integrity?</li><li>Why does <code>SET autocommit = 0</code> matter when working with COMMIT and ROLLBACK in MySQL?</li><li>Write a transaction that inserts a new product record and updates the category count. Show how to handle the case where the second statement fails.</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Arjun's Flipkart incident was painful but it taught him something he never forgot. After that day, he never ran a batch update without wrapping it in a BEGIN/COMMIT block first. He also added a SELECT COUNT check before the final COMMIT to verify the number of affected rows looked right.</p>
+
+<p>COMMIT and ROLLBACK are the two most practical controls in transactional SQL. They are not advanced features — they are basic hygiene for anyone writing SQL against real data. Most SQL developers learn SELECT first, then INSERT and UPDATE, and only encounter transactions after their first production incident. You do not want that to be your learning moment.</p>
+
+<p>The habit to build is simple: before running any destructive or multi-step operation, type BEGIN. Verify your results. Then and only then, type COMMIT. This takes five seconds and has saved countless hours of data recovery work for developers across every industry.</p>
+
+<p>COMMIT when you are sure. ROLLBACK when you are not. And always, always use BEGIN before you start.</p>
+
+  `,
+  'mod14-t4': `
+    <h1>SAVEPOINT</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Simran works at Byju's in Bengaluru on the content operations team. Her job involves migrating course data from old formats to new ones. One evening, she was running a large SQL script that involved three major steps: updating course metadata, migrating student progress records, and fixing broken video links.</p>
+
+<p>The first two steps took 20 minutes to run and completed correctly. The third step — fixing video links — had a bug and failed. Without SAVEPOINT, her options were grim: either ROLLBACK the entire transaction and lose the 20 minutes of correct work, or COMMIT everything including the broken third step.</p>
+
+<p>Her colleague Aman suggested SAVEPOINTs. "Add a savepoint after each step completes," he said. "Then if step three fails, you can roll back just to the savepoint after step two and keep your earlier work."</p>
+
+<p>That one suggestion saved Simran's evening.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>You are running a complex migration inside a single transaction. The transaction has multiple stages and some of them are expensive — they touch millions of rows and take several minutes. One stage fails.</p>
+
+<p>If you have no SAVEPOINTs, you have two bad choices. Roll back everything and lose all the correct work done before the failure. Or commit the mess and deal with inconsistent data.</p>
+
+<p>The problem with long transactions is that "all or nothing" sometimes feels like "all or start over from scratch." When your transaction has distinct stages, you want the ability to undo just the last failing stage while keeping the stages that succeeded. That is exactly what SAVEPOINTs provide.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>SAVEPOINTs have been part of SQL since the SQL-92 standard. The motivation was practical. As application developers started writing more complex multi-step transactions — especially for batch processing and data migrations — the binary COMMIT/ROLLBACK choice was not always enough.</p>
+
+<p>In systems like Oracle and IBM DB2 that were widely used for enterprise applications in the 1980s and 1990s, developers needed to build nested error handling. You might have a long-running job with ten stages. If stage seven fails, you do not want to undo stages one through six. SAVEPOINTs gave transaction logic the ability to have intermediate checkpoints.</p>
+
+<p>The SQL standard formalised this and all major databases now support it — MySQL, PostgreSQL, SQL Server, and Oracle all implement SAVEPOINTs in the same basic way.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think about writing a long essay in a Word document. You finish a good section and press Ctrl+S to save. Then you write the next section. It goes badly — the argument is wrong and the writing is muddled. You want to undo just this section. You use Ctrl+Z to go back to your last save point, not to the beginning of the document.</p>
+
+<p>That last save is your SAVEPOINT. You can keep going back to it until you get the next section right, while preserving everything before it.</p>
+
+<p>A SAVEPOINT in SQL works the same way. You set a checkpoint after a good, clean stage of your transaction. If something goes wrong later, you roll back to that checkpoint — not to the beginning of the entire transaction.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Picture a video game with manual save slots. You complete a difficult level, open the save menu, and save to Slot 1. You continue playing. Two levels later, you make a mistake that is hard to recover from. You load Slot 1 — you lose the two levels you just played but everything before Slot 1 is intact.</p>
+
+<p>You can also save to multiple slots at different points. Slot 1 after level 3, Slot 2 after level 7. If things go wrong after level 9, you might load Slot 2 instead of Slot 1 — you want to keep as much progress as possible.</p>
+
+<p>SAVEPOINTs are exactly this. You create named checkpoints inside your transaction. When something goes wrong, you roll back to the most recent checkpoint that was still clean, keeping all the work done before it.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>When you create a SAVEPOINT, the database marks the current state of the transaction in the transaction log with a name. This does not commit anything. The transaction is still open. It simply records "at this point in time, with these changes staged, mark a checkpoint."</p>
+
+<p>When you ROLLBACK TO SAVEPOINT, the database reads the transaction log backwards from the current state to the savepoint marker. It undoes all changes made after the savepoint was created. Changes before the savepoint are still staged.</p>
+
+<p>You can continue making more changes after rolling back to a savepoint. The transaction is still open. You can even create new savepoints after a partial rollback.</p>
+
+<p>RELEASE SAVEPOINT removes the savepoint marker from the log without undoing anything. It is like deleting a save slot — the game progress is still there, you just cannot load from that point anymore. This frees up resources in long transactions with many savepoints.</p>
+
+<p>When you issue a final COMMIT, everything currently staged (including what was done before any remaining savepoints) is committed. When you issue a full ROLLBACK without specifying a savepoint, the entire transaction from the beginning is undone — all savepoints are discarded.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<p>Creating a savepoint:</p>
+
+<pre><code class="language-sql">BEGIN;
+
+INSERT INTO courses (course_id, title, category) VALUES (301, 'SQL Basics', 'Tech');
+
+SAVEPOINT after_course_insert;
+
+INSERT INTO modules (module_id, course_id, title) VALUES (1001, 301, 'Intro to SQL');
+INSERT INTO modules (module_id, course_id, title) VALUES (1002, 301, 'SELECT Queries');</code></pre>
+
+<p>Rolling back to a savepoint (undoing only the module inserts):</p>
+
+<pre><code class="language-sql">ROLLBACK TO SAVEPOINT after_course_insert;
+-- The course INSERT is still staged
+-- Both module INSERTs are undone</code></pre>
+
+<p>Continuing after a partial rollback:</p>
+
+<pre><code class="language-sql">-- Now fix and redo the module inserts
+INSERT INTO modules (module_id, course_id, title) VALUES (1001, 301, 'SQL Fundamentals');
+INSERT INTO modules (module_id, course_id, title) VALUES (1002, 301, 'Writing SELECT Queries');
+
+COMMIT;
+-- Both the course and the corrected modules are now committed</code></pre>
+
+<p>Multiple savepoints in a long transaction:</p>
+
+<pre><code class="language-sql">BEGIN;
+
+UPDATE student_profiles SET tier = 'premium' WHERE plan_id = 5;
+SAVEPOINT after_profile_update;
+
+UPDATE course_access SET expires_at = '2025-12-31' WHERE plan_id = 5;
+SAVEPOINT after_access_update;
+
+INSERT INTO billing_events (plan_id, event, created_at) VALUES (5, 'renewal', NOW());
+-- This fails due to a constraint violation
+
+ROLLBACK TO SAVEPOINT after_access_update;
+-- Undo only the billing INSERT, keep the profile and access updates
+
+-- Fix and retry
+INSERT INTO billing_events (plan_id, event, amount, created_at) VALUES (5, 'renewal', 1499, NOW());
+COMMIT;</code></pre>
+
+<p>Releasing a savepoint:</p>
+
+<pre><code class="language-sql">BEGIN;
+INSERT INTO categories (name) VALUES ('Data Science');
+SAVEPOINT sp1;
+
+UPDATE courses SET category_id = 5 WHERE category = 'Data Science';
+RELEASE SAVEPOINT sp1;
+-- sp1 no longer exists as a rollback point, but the changes are still staged
+
+COMMIT;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Command</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td><code>SAVEPOINT name</code></td><td>Creates a named checkpoint within the current open transaction</td></tr>
+<tr><td><code>ROLLBACK TO SAVEPOINT name</code></td><td>Undoes all changes made after the specified savepoint, restoring the transaction to that point</td></tr>
+<tr><td><code>ROLLBACK TO name</code></td><td>Shorthand for ROLLBACK TO SAVEPOINT (works in MySQL and PostgreSQL)</td></tr>
+<tr><td><code>RELEASE SAVEPOINT name</code></td><td>Removes the savepoint marker without undoing any changes; frees log resources</td></tr>
+<tr><td><code>ROLLBACK</code> (no savepoint)</td><td>Undoes the entire transaction from the beginning, discarding all savepoints</td></tr>
+<tr><td><code>COMMIT</code></td><td>Saves everything currently staged (all work done, including work done after partial rollbacks to savepoints)</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p><strong>Sample tables:</strong></p>
+
+<p><strong>courses</strong></p>
+<table>
+<thead><tr><th>course_id</th><th>title</th><th>status</th></tr></thead>
+<tbody>
+<tr><td>101</td><td>Python for Beginners</td><td>active</td></tr>
+<tr><td>102</td><td>Data Structures</td><td>active</td></tr>
+</tbody></table>
+
+<p><strong>enrollments</strong></p>
+<table>
+<thead><tr><th>enrollment_id</th><th>student_id</th><th>course_id</th><th>progress</th></tr></thead>
+<tbody>
+<tr><td>5001</td><td>201</td><td>101</td><td>45</td></tr>
+<tr><td>5002</td><td>202</td><td>102</td><td>80</td></tr>
+</tbody></table>
+
+<h3>Example 1: Basic savepoint and partial rollback</h3>
+
+<pre><code class="language-sql">BEGIN;
+
+UPDATE courses SET status = 'archived' WHERE course_id = 101;
+SAVEPOINT after_archive;
+
+DELETE FROM enrollments WHERE course_id = 101;
+-- Hmm, wait — we should move these to an archive table first, not delete
+ROLLBACK TO SAVEPOINT after_archive;
+
+-- Now do it correctly
+INSERT INTO archived_enrollments SELECT * FROM enrollments WHERE course_id = 101;
+DELETE FROM enrollments WHERE course_id = 101;
+
+COMMIT;</code></pre>
+
+<p>The course archival is kept. The incorrect direct delete is undone. The correct archive-then-delete flow is committed.</p>
+
+<h3>Example 2: Multiple savepoints for staged processing</h3>
+
+<pre><code class="language-sql">BEGIN;
+
+-- Stage 1: update course metadata
+UPDATE courses SET title = 'Python for Beginners - Updated' WHERE course_id = 101;
+SAVEPOINT stage1_done;
+
+-- Stage 2: add new module entries
+INSERT INTO modules (course_id, title, seq) VALUES (101, 'New Chapter: OOP', 10);
+SAVEPOINT stage2_done;
+
+-- Stage 3: update student progress (this has a bug, wrong course_id)
+UPDATE enrollments SET progress = 100 WHERE course_id = 999;
+-- ROW_COUNT() returns 0 — no rows updated, wrong ID!
+
+ROLLBACK TO SAVEPOINT stage2_done;
+-- Stage 1 and Stage 2 still intact
+
+-- Fix stage 3
+UPDATE enrollments SET progress = 100 WHERE course_id = 101;
+COMMIT;</code></pre>
+
+<h3>Example 3: RELEASE SAVEPOINT to clean up</h3>
+
+<pre><code class="language-sql">BEGIN;
+
+INSERT INTO courses (course_id, title) VALUES (201, 'SQL Advanced');
+SAVEPOINT sp_course;
+
+-- We are confident the course insert is correct, no need to keep rollback point
+RELEASE SAVEPOINT sp_course;
+
+-- Continue with more work
+INSERT INTO modules (course_id, title) VALUES (201, 'Joins Deep Dive');
+COMMIT;</code></pre>
+
+<p>Releasing the savepoint signals that we are confident in the work done so far. We cannot roll back to sp_course anymore, but that is intentional.</p>
+
+<h3>Example 4: Full ROLLBACK overrides all savepoints</h3>
+
+<pre><code class="language-sql">BEGIN;
+
+UPDATE courses SET status = 'inactive' WHERE course_id = 102;
+SAVEPOINT sp1;
+DELETE FROM enrollments WHERE course_id = 102;
+SAVEPOINT sp2;
+
+-- Something fundamentally wrong — scrap everything
+ROLLBACK;
+-- Both the UPDATE and DELETE are undone. Both savepoints are gone.
+-- Table is back to original state.</code></pre>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Does ROLLBACK TO SAVEPOINT end the transaction?</strong></p>
+<p>No. The transaction stays open after ROLLBACK TO SAVEPOINT. You can continue adding more SQL statements, create new savepoints, and eventually COMMIT or ROLLBACK the whole thing. The savepoint just undoes work done after it was created.</p>
+
+<p><strong>Can I roll back to a savepoint that was created before a previous ROLLBACK TO SAVEPOINT?</strong></p>
+<p>In most databases, no. When you roll back to a savepoint, all savepoints created after it are destroyed. You can only roll back to savepoints that still exist — i.e., those created before the point you rolled back to.</p>
+
+<p><strong>Is SAVEPOINT the same as COMMIT?</strong></p>
+<p>No. A SAVEPOINT does not commit anything. Data at a savepoint is still uncommitted and invisible to other sessions (depending on isolation level). SAVEPOINT is purely a marker within the current transaction for potential partial rollback.</p>
+
+<p><strong>What happens to savepoints when I COMMIT?</strong></p>
+<p>They are all released and destroyed. COMMIT ends the transaction and all its savepoints. There is nothing to roll back to after a COMMIT.</p>
+
+<p><strong>Can I reuse the same savepoint name?</strong></p>
+<p>Yes, and this is useful. If you create a SAVEPOINT with a name that already exists in the transaction, the old savepoint is replaced by the new one. This is handy in loops — you can set SAVEPOINT loop<em>point at the start of each iteration, and ROLLBACK TO loop</em>point if that iteration fails.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Using ROLLBACK instead of ROLLBACK TO SAVEPOINT.</strong> If you want to undo just the last stage, you must use ROLLBACK TO SAVEPOINT. Plain ROLLBACK undoes the entire transaction.</li><li><strong>Not naming savepoints meaningfully.</strong> Using sp1, sp2, sp3 in a complex transaction makes it hard to know which savepoint to roll back to. Use descriptive names like after<em>customer</em>insert or before<em>bulk</em>delete.</li><li><strong>Assuming savepoints persist after COMMIT.</strong> Once you commit, all savepoints are gone. They only exist within the current open transaction.</li><li><strong>Over-using savepoints in simple transactions.</strong> Savepoints are for complex, multi-stage transactions. Adding them to a simple two-step transaction adds unnecessary complexity with no benefit.</li><li><strong>Not releasing savepoints in very long loops.</strong> If you are creating a savepoint in a loop with thousands of iterations and not releasing them, you are accumulating savepoint markers in the log unnecessarily. Release them when you no longer need the rollback option.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Use savepoints when a transaction has clearly distinct stages, each of which is expensive to re-run.</li><li>Name savepoints after the stage they follow — after<em>insert, after</em>update, stage2_complete.</li><li>Use RELEASE SAVEPOINT when you are confident a stage is correct and want to free log resources.</li><li>In batch processing loops, set a savepoint at the start of each iteration and roll back to it on error, then log the failure and continue to the next record.</li><li>Document why each savepoint exists in a comment in your script.</li><li>Test your ROLLBACK TO SAVEPOINT logic explicitly — do not assume it works; verify that the right rows are preserved and the right ones are undone.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Byju's content operations team uses SAVEPOINTs extensively in their data migration scripts. When migrating course content from one schema version to another, they set a savepoint after each topic batch is processed. If a specific topic's migration fails due to malformed data, they roll back to the savepoint before that topic, log the failure, and continue with the next one — without losing the progress on all previous topics.</p>
+
+<p>Naukri.com (Jobs portal) processes large batch updates to job listings — marking positions as filled, updating salary ranges for bulk employer uploads. Each logical group of updates gets a savepoint. If one employer's bulk upload fails validation partway through, that employer's batch is rolled back to the pre-batch savepoint while other employers' updates are unaffected.</p>
+
+<p>IRCTC's backend uses savepoints in their complex booking and waitlist management flow. When a passenger confirms a ticket, the system moves them through multiple state changes: removing from waitlist, assigning a seat, generating a PNR, triggering notifications. A savepoint is placed after seat assignment. If PNR generation fails, the system can roll back to after-seat-assignment, retry PNR generation with different logic, and commit the whole flow once successful — without having to release the seat and restart.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>BEGIN
+  |
+  v
+[Stage 1 SQL] ─── SAVEPOINT stage1
+  |
+  v
+[Stage 2 SQL] ─── SAVEPOINT stage2
+  |
+  v
+[Stage 3 SQL] ─── FAILS
+  |
+  v
+ROLLBACK TO SAVEPOINT stage2
+  |
+  +─ Stage 3 changes: UNDONE
+  +─ Stage 2 changes: KEPT (staged)
+  +─ Stage 1 changes: KEPT (staged)
+  |
+  v
+[Stage 3 SQL - fixed version]
+  |
+  v
+COMMIT
+  |
+  v
+All 3 stages permanently saved
+
+
+Full rollback path:
+BEGIN → [work] → SAVEPOINT → [more work] → ROLLBACK
+                                               |
+                                               v
+                                    Everything from BEGIN
+                                    is undone. All savepoints
+                                    destroyed.</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>SAVEPOINT creates a named checkpoint within an open transaction.</li><li>ROLLBACK TO SAVEPOINT undoes only the work done after the savepoint, keeping earlier work staged.</li><li>After a ROLLBACK TO SAVEPOINT, the transaction is still open — you can keep working and eventually COMMIT.</li><li>RELEASE SAVEPOINT removes the checkpoint marker without undoing changes.</li><li>A full ROLLBACK (without specifying a savepoint) undoes the entire transaction and all its savepoints.</li><li>COMMIT ends the transaction and saves everything staged, releasing all savepoints.</li><li>Savepoints are useful for complex multi-stage transactions where partial retry is needed.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>Write a transaction with two SAVEPOINTs that processes a course update in three stages: update course title, update module count, and insert a changelog record. Show how to roll back only the changelog insert if it fails.</li><li>What is the difference between <code>ROLLBACK</code> and <code>ROLLBACK TO SAVEPOINT sp1</code>?</li><li>You create SAVEPOINT A, do some work, create SAVEPOINT B, do more work, then ROLLBACK TO SAVEPOINT A. What happens to SAVEPOINT B?</li><li>Why might you use RELEASE SAVEPOINT in a loop that processes thousands of records?</li><li>Can you create two savepoints with the same name in the same transaction? What happens if you do?</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Simran's data migration at Byju's was saved by a single idea: not all transaction failures require starting over from scratch. SAVEPOINTs give you the flexibility to recover from partial failures inside a long transaction, which is one of the most practical tools for real-world database work.</p>
+
+<p>Most developers learn SAVEPOINTs late — they are not mentioned in introductory SQL courses and many developers go years without needing them. But when you are working on migrations, batch jobs, or multi-stage workflows with significant compute time per stage, SAVEPOINTs can be the difference between a 2-hour recovery and a 2-minute retry.</p>
+
+<p>The key insight is that SAVEPOINT does not change the ACID guarantees of your transaction. Your data is still atomic at the final COMMIT level. SAVEPOINTs just give you more granular control within the staging area of an open transaction. They are a tool for transaction management, not a replacement for it.</p>
+
+<p>Use SAVEPOINTs when your transaction has clear, named stages, each stage is expensive to redo, and partial failure of one stage should not invalidate the work of earlier stages. In those situations, they are exactly the right tool.</p>
+
+  `,
+  'mod14-t5': `
+    <h1>Isolation Levels</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Priya is a senior engineer at Jio in Mumbai, working on their recharge and subscription billing system. One month, the finance team reported a strange discrepancy — the system was occasionally double-crediting cashback. Two transactions were running simultaneously, both reading the same wallet balance, both calculating cashback on it, and both writing an updated balance back. Each calculation was correct in isolation. Together, they produced wrong results.</p>
+
+<p>Her team investigated and found the problem: the database's default isolation level was READ COMMITTED, which was appropriate for most of Jio's queries but was causing a specific type of concurrency anomaly called a "lost update" in the cashback calculation flow.</p>
+
+<p>Priya's fix was not to rewrite the application logic. It was to understand isolation levels, identify which anomaly was occurring, and choose the right level for that specific transaction. This is what isolation levels are for.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>You have a high-traffic system where many database connections are active at the same time — all reading and writing the same tables. Without any control over how these concurrent transactions see each other's work, strange things start to happen.</p>
+
+<p>One transaction reads a row, another transaction deletes that row, the first transaction reads it again — now the data has vanished mid-read. Or one transaction reads a balance, another updates it and commits, the first transaction reads the balance again and gets a different value within the same read operation. Or two transactions both read that "10 seats are available," both decide to book 5, and now the system shows -0 seats remaining.</p>
+
+<p>Each of these is a real concurrency anomaly. Isolation levels are how databases let you specify exactly how much protection you need against them, because more protection always comes with a performance cost.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Early database systems tried to be fully serializable — every transaction ran completely before the next one started, as if they were in a queue. This was perfectly safe but extremely slow. As database usage scaled, this approach became a bottleneck.</p>
+
+<p>Database researchers, particularly Jim Gray and others at IBM and Tandem in the 1970s and 1980s, studied the specific ways concurrent transactions could interfere with each other. They categorised these interferences into named anomalies: dirty reads, non-repeatable reads, and phantom reads. Then they defined a hierarchy of protection levels that offered varying degrees of isolation.</p>
+
+<p>The SQL-92 standard formalised four isolation levels corresponding to increasing protection against these anomalies. This let application developers choose the right trade-off between safety and performance for each use case.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Imagine four people working on the same shared spreadsheet in a company. They have different levels of access to see in-progress changes.</p>
+
+<p>The most permissive arrangement: you can see everyone's live edits as they type, even before they save. You might read something that gets deleted a second later. The strictest arrangement: you see a frozen snapshot of the spreadsheet at the moment you opened it. No matter what others change, you always see the same version until you close and reopen.</p>
+
+<p>In between, there are moderate arrangements: you see only saved changes (not live typing), or you see the latest saved version each time you look at a cell.</p>
+
+<p>Isolation levels are exactly this spectrum. From "see everyone's uncommitted changes" to "see a perfectly consistent frozen snapshot." The right choice depends on what you are doing with the data.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think about reading a newspaper. A daily newspaper gives you a frozen snapshot of news as of print time. What happens after printing does not affect what you read (fully isolated). A live news website shows you breaking updates every few seconds — highly current but potentially conflicting with what you read two minutes ago (low isolation).</p>
+
+<p>A transaction reading data from a database faces the same choice. Do you want a frozen consistent view of the data as it was when you started? Or do you want to see the latest committed changes as they happen? Each option has genuine use cases. A financial audit wants the frozen view. A dashboard showing live counts wants the current view.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>The four standard isolation levels and the anomalies they protect against:</p>
+
+<p><strong>READ UNCOMMITTED</strong> — the lowest level. A transaction can read data that has been modified by another transaction but not yet committed. This is called a "dirty read." If the other transaction rolls back, you have read data that never officially existed. This level is almost never used in production.</p>
+
+<p><strong>READ COMMITTED</strong> — the default in PostgreSQL, Oracle, and SQL Server. You can only read data that has been committed. No dirty reads. But if you read the same row twice in the same transaction, you might get different values if another transaction committed a change in between. This is called a "non-repeatable read." Most OLTP applications use this level.</p>
+
+<p><strong>REPEATABLE READ</strong> — the default in MySQL InnoDB. Once you read a row, that row will look the same for the rest of your transaction, even if another transaction commits a change to it. Non-repeatable reads are prevented. However, you can still see "phantom rows" — new rows inserted by other transactions that match your query's conditions. A second execution of the same SELECT might return more rows than the first.</p>
+
+<p><strong>SERIALIZABLE</strong> — the strictest level. Transactions appear to run one after another, even if they actually overlap in time. All anomalies — dirty reads, non-repeatable reads, phantom reads — are prevented. The database uses range locks or predicate locks to prevent other transactions from inserting or modifying rows that would affect your query. This is the safest option but has the biggest performance impact.</p>
+
+<p>Most databases implement these using locking or MVCC (Multi-Version Concurrency Control). MVCC creates a snapshot of the database for each transaction, allowing readers to see a consistent state without blocking writers. This is how PostgreSQL and InnoDB achieve high concurrency while still providing good isolation.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<p>Set isolation level for the current session (MySQL):</p>
+
+<pre><code class="language-sql">SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;</code></pre>
+
+<p>Set isolation level for the next transaction only (MySQL):</p>
+
+<pre><code class="language-sql">SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+BEGIN;
+SELECT balance FROM wallets WHERE user_id = 55;
+-- This balance will not change even if another transaction updates it
+SELECT balance FROM wallets WHERE user_id = 55;
+COMMIT;</code></pre>
+
+<p>Set isolation level in PostgreSQL:</p>
+
+<pre><code class="language-sql">BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+SELECT * FROM seat_reservations WHERE train_id = 'EXP22' AND status = 'available';
+UPDATE seat_reservations SET status = 'booked' WHERE seat_id = 401;
+COMMIT;</code></pre>
+
+<p>Check the current isolation level:</p>
+
+<pre><code class="language-sql">-- MySQL
+SELECT @@transaction_isolation;
+
+-- PostgreSQL
+SHOW transaction_isolation;</code></pre>
+
+<p>Example showing phantom read protection at SERIALIZABLE:</p>
+
+<pre><code class="language-sql">-- Session A (SERIALIZABLE):
+BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+SELECT COUNT(*) FROM bookings WHERE event_id = 10;  -- Returns 50
+
+-- Session B commits an INSERT for event_id = 10 here
+
+-- Session A again:
+SELECT COUNT(*) FROM bookings WHERE event_id = 10;  -- Still returns 50 (no phantom)
+COMMIT;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Isolation Level</th><th>Dirty Read</th><th>Non-Repeatable Read</th><th>Phantom Read</th><th>Performance Impact</th></tr></thead>
+<tbody>
+<tr><td>READ UNCOMMITTED</td><td>Possible</td><td>Possible</td><td>Possible</td><td>Lowest (fastest)</td></tr>
+<tr><td>READ COMMITTED</td><td>Prevented</td><td>Possible</td><td>Possible</td><td>Low</td></tr>
+<tr><td>REPEATABLE READ</td><td>Prevented</td><td>Prevented</td><td>Possible (prevented in MySQL InnoDB)</td><td>Medium</td></tr>
+<tr><td>SERIALIZABLE</td><td>Prevented</td><td>Prevented</td><td>Prevented</td><td>Highest (slowest)</td></tr>
+</tbody></table>
+
+<table>
+<thead><tr><th>Anomaly</th><th>What It Means</th></tr></thead>
+<tbody>
+<tr><td>Dirty Read</td><td>Reading uncommitted changes from another transaction that might be rolled back</td></tr>
+<tr><td>Non-Repeatable Read</td><td>Reading the same row twice in one transaction and getting different values</td></tr>
+<tr><td>Phantom Read</td><td>Running the same query twice in one transaction and getting different sets of rows</td></tr>
+<tr><td>Lost Update</td><td>Two transactions both read a value, both update it, and one overwrites the other's change</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p><strong>Sample table:</strong></p>
+
+<table>
+<thead><tr><th>seat_id</th><th>train_id</th><th>class</th><th>status</th><th>booked_by</th></tr></thead>
+<tbody>
+<tr><td>101</td><td>RAJ22</td><td>SL</td><td>available</td><td>NULL</td></tr>
+<tr><td>102</td><td>RAJ22</td><td>SL</td><td>available</td><td>NULL</td></tr>
+<tr><td>103</td><td>RAJ22</td><td>3A</td><td>available</td><td>NULL</td></tr>
+</tbody></table>
+
+<h3>Example 1: Dirty read at READ UNCOMMITTED</h3>
+
+<pre><code class="language-sql">-- Session A:
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+BEGIN;
+
+-- Session B has started a transaction and run:
+-- UPDATE seats SET status = 'booked' WHERE seat_id = 101;
+-- (not yet committed)
+
+SELECT status FROM seats WHERE seat_id = 101;
+-- Returns 'booked' even though Session B hasn't committed!
+
+-- Session B then runs ROLLBACK
+-- The seat is back to 'available' but Session A already read 'booked'
+COMMIT;</code></pre>
+
+<p>This is a dirty read. Session A read data that never officially committed.</p>
+
+<h3>Example 2: Non-repeatable read at READ COMMITTED</h3>
+
+<pre><code class="language-sql">-- Session A:
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+BEGIN;
+
+SELECT status FROM seats WHERE seat_id = 102;
+-- Returns 'available'
+
+-- Session B commits: UPDATE seats SET status = 'booked' WHERE seat_id = 102;
+
+SELECT status FROM seats WHERE seat_id = 102;
+-- Now returns 'booked' — different value within the same transaction!
+
+COMMIT;</code></pre>
+
+<p>This is a non-repeatable read. The same row returned different values in the same transaction.</p>
+
+<h3>Example 3: Phantom read at REPEATABLE READ</h3>
+
+<pre><code class="language-sql">-- Session A (PostgreSQL, REPEATABLE READ):
+BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+
+SELECT COUNT(*) FROM seats WHERE train_id = 'RAJ22' AND status = 'available';
+-- Returns 3
+
+-- Session B commits: INSERT INTO seats VALUES (104, 'RAJ22', 'SL', 'available', NULL);
+
+SELECT COUNT(*) FROM seats WHERE train_id = 'RAJ22' AND status = 'available';
+-- PostgreSQL returns 3 (no phantom), MySQL InnoDB also prevents this
+-- Without protection: would return 4
+
+COMMIT;</code></pre>
+
+<h3>Example 4: SERIALIZABLE preventing concurrent booking conflicts</h3>
+
+<pre><code class="language-sql">-- Session A and Session B both run this simultaneously:
+BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+SELECT * FROM seats WHERE seat_id = 101 AND status = 'available';
+UPDATE seats SET status = 'booked', booked_by = 'UserA' WHERE seat_id = 101;
+COMMIT;</code></pre>
+
+<p>With SERIALIZABLE, one of the sessions will fail with a serialization error and must retry. Only one user books the seat. Without SERIALIZABLE, both might succeed and the last write wins.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>What is the default isolation level in MySQL vs PostgreSQL?</strong></p>
+<p>MySQL InnoDB defaults to REPEATABLE READ. PostgreSQL defaults to READ COMMITTED. SQL Server also defaults to READ COMMITTED. This matters because code that works correctly in MySQL might behave differently if you move to PostgreSQL, and vice versa.</p>
+
+<p><strong>If I use SERIALIZABLE, does it mean only one transaction runs at a time?</strong></p>
+<p>Not literally. Transactions still overlap in time internally. But the database ensures the final outcome is equivalent to some sequential ordering of the transactions. It uses locks or optimistic conflict detection to achieve this. You get the safety of serial execution without the full performance cost.</p>
+
+<p><strong>Why would anyone ever use READ UNCOMMITTED?</strong></p>
+<p>Rarely, but there are cases: approximate analytics queries on very large tables where a dirty read is acceptable and you want maximum read speed. For example, a dashboard showing "approximately how many orders were placed today" does not need to be exact, and running at READ UNCOMMITTED avoids any lock contention with write transactions.</p>
+
+<p><strong>Does changing the isolation level affect performance noticeably?</strong></p>
+<p>Yes, particularly for high-concurrency systems. Higher isolation levels require the database to hold locks longer or use more complex MVCC bookkeeping. For most web applications, READ COMMITTED is the sweet spot. SERIALIZABLE should be reserved for operations where data correctness is absolutely critical — like financial ledger entries or ticket booking.</p>
+
+<p><strong>Does MVCC mean I never need to worry about locking?</strong></p>
+<p>MVCC reduces read-write conflicts significantly — readers do not block writers and writers do not block readers in MVCC-based systems. But write-write conflicts still require locking. If two transactions try to UPDATE the same row, one will wait or fail even with MVCC.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Using the wrong isolation level for financial operations.</strong> READ COMMITTED is fine for most queries but can cause lost updates in cases like wallet balance calculations where read-then-write operations happen concurrently. Use REPEATABLE READ or SERIALIZABLE for those specific flows.</li><li><strong>Applying SERIALIZABLE globally when only a few operations need it.</strong> Set isolation level per transaction for operations that need it, rather than changing the session default to SERIALIZABLE and slowing everything down.</li><li><strong>Assuming MySQL and PostgreSQL behave identically.</strong> They have different defaults and different implementations of REPEATABLE READ. Test your concurrency logic in the actual database you are deploying to.</li><li><strong>Not handling serialization failures in application code.</strong> At SERIALIZABLE, transactions can fail with a serialization error and must be retried. If your application does not handle this, it will surface as an error to the user instead of transparently retrying.</li><li><strong>Conflating isolation with security.</strong> Isolation levels control what data a transaction sees within the database engine. They have nothing to do with user authentication, authorisation, or row-level security policies.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Know the default isolation level of your database and know whether it is appropriate for your most critical operations.</li><li>Set isolation level per transaction for specific sensitive flows rather than changing the global default.</li><li>For financial operations involving read-then-write on the same row (like balance updates), use REPEATABLE READ or SERIALIZABLE, or use SELECT ... FOR UPDATE to acquire an explicit lock.</li><li>Build retry logic in application code for SERIALIZABLE transactions that may fail with serialization errors.</li><li>Profile your most important queries under your chosen isolation level before deploying to production — isolation changes can significantly affect query performance.</li><li>Document why you chose a specific isolation level in code comments for future maintainers.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Jio's billing system uses READ COMMITTED for the vast majority of balance reads and general queries — it provides good performance for high-traffic reads while protecting against dirty reads. For the specific flow of cashback crediting, which involves a read-then-calculate-then-write pattern, the team switched to REPEATABLE READ to prevent the lost-update anomaly Priya's team had encountered. This targeted approach maintained overall system throughput while fixing the correctness issue.</p>
+
+<p>PhonePe uses SERIALIZABLE isolation for its UPI transaction finalization step — the critical moment when money is confirmed as moved. This is a small, short transaction, so the performance cost of SERIALIZABLE is acceptable. For the much higher-frequency balance inquiry operations, READ COMMITTED is used, which scales easily to millions of requests per day.</p>
+
+<p>BookMyShow's seat booking system uses SERIALIZABLE or explicit locking (SELECT FOR UPDATE) during the final seat assignment. When thousands of users simultaneously try to book the last few seats for a concert, SERIALIZABLE isolation ensures only the correct number of seats are actually assigned. All other read operations on the booking system — browsing events, checking availability — run at READ COMMITTED for speed.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>ISOLATION LEVEL SPECTRUM
+
+READ UNCOMMITTED ←────────────────────────────→ SERIALIZABLE
+   (most permissive)                              (most strict)
+   (fastest)                                      (slowest)
+
+Anomalies:
+┌─────────────────────┬─────────────┬──────────────┬──────────────────┐
+│                     │ READ        │ REPEATABLE   │                  │
+│ READ UNCOMMITTED    │ COMMITTED   │ READ         │ SERIALIZABLE     │
+├─────────────────────┼─────────────┼──────────────┼──────────────────┤
+│ Dirty Read: YES     │ NO          │ NO           │ NO               │
+│ Non-repeat: YES     │ YES         │ NO           │ NO               │
+│ Phantom:    YES     │ YES         │ YES*         │ NO               │
+└─────────────────────┴─────────────┴──────────────┴──────────────────┘
+(*MySQL InnoDB prevents phantoms at REPEATABLE READ using gap locks)
+
+Concurrent transaction visibility:
+
+T1: ─────────────[READ]──────[READ again]──────────→
+T2: ──────[UPDATE]────────[COMMIT]──────────────────→
+
+READ COMMITTED:   T1 first READ = old value, T1 second READ = new value
+REPEATABLE READ:  T1 first READ = old value, T1 second READ = same old value
+SERIALIZABLE:     T1 sees consistent snapshot; T2 may be blocked or forced to retry</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>Four isolation levels exist: READ UNCOMMITTED, READ COMMITTED, REPEATABLE READ, SERIALIZABLE.</li><li>Each level protects against progressively more types of concurrency anomalies.</li><li>READ COMMITTED is the default in PostgreSQL and SQL Server; REPEATABLE READ is the default in MySQL InnoDB.</li><li>Dirty reads, non-repeatable reads, and phantom reads are the three main concurrency anomalies.</li><li>Higher isolation levels come with higher performance cost — choose the minimum level that satisfies your correctness requirements.</li><li>SERIALIZABLE requires retry logic in your application for serialization failures.</li><li>Financial and inventory-critical operations often need REPEATABLE READ or SERIALIZABLE.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>What is a non-repeatable read? Give a real example from a banking context where it could cause a problem.</li><li>You are writing a query that books concert seats. Two users try to book the last seat simultaneously. Which isolation level would prevent both from succeeding, and why?</li><li>What is the difference between a phantom read and a non-repeatable read?</li><li>Why might a high-traffic reporting dashboard use READ UNCOMMITTED despite its risks?</li><li>Write a transaction in PostgreSQL that sets SERIALIZABLE isolation level and books a flight seat. Include proper BEGIN and COMMIT syntax.</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Priya's cashback bug at Jio was not caused by bad code or a missing feature. It was caused by using a perfectly reasonable isolation level (READ COMMITTED) in a context that needed slightly stronger guarantees (REPEATABLE READ). Once she understood the specific anomaly — lost update — and traced it to the isolation level mismatch, the fix was straightforward.</p>
+
+<p>Isolation levels are one of those database concepts that feel theoretical until they bite you in production. Then they become very real, very fast. The good news is that the four levels are well-defined, the anomalies they protect against are named and documented, and most production issues can be traced to one specific mismatch.</p>
+
+<p>The practical takeaway is simple: know your default isolation level, understand the three main anomalies, and identify which of your critical transaction flows need stronger protection than the default. You do not need to use SERIALIZABLE everywhere — just where it matters.</p>
+
+<p>Understanding isolation levels puts you in control of the concurrency behaviour of your system. Without that understanding, you are at the mercy of whatever your database's default is, hoping it is strong enough for every operation you run.</p>
+
+  `,
+  'mod14-t6': `
+    <h1>Deadlocks and Locking</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Aman is a backend engineer at Swiggy in Bengaluru. During a particularly busy Friday evening, his team started seeing a spike in transaction failures in the order management system. Errors were appearing in the logs: "Deadlock found when trying to get lock; try restarting transaction."</p>
+
+<p>Orders were failing to update. Delivery partner assignments were stuck. The on-call team was scrambling. What they found after an hour of log analysis was two types of queries running simultaneously — one that locked the <code>orders</code> table and then tried to update <code>delivery<em>partners</code>, and another that locked <code>delivery</em>partners</code> first and then tried to update <code>orders</code>. Each was waiting for the other to release its lock. Neither could proceed. Classic deadlock.</p>
+
+<p>Aman's fix required understanding how the database's locking system works, what causes deadlocks, and how to design queries so they do not end up in a circular waiting pattern. This chapter covers all of that.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>You have a busy e-commerce or fintech application. Multiple users are placing orders, updating wallets, modifying inventory records simultaneously. Occasionally, a query hangs. A user waits. The database eventually kills one of the waiting transactions with an error. Your application logs show "deadlock" or "lock wait timeout."</p>
+
+<p>You restart the failed transaction. It works fine in isolation. But under load, it fails again. The problem is not the SQL itself — it is the ORDER in which your transactions acquire locks and the fact that two concurrent transactions can end up in a situation where each is waiting for the other.</p>
+
+<p>Locking and deadlocks are not edge cases in high-traffic systems. They are routine challenges that every production database engineer must understand and design around.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Locking exists because without it, concurrent transactions would corrupt data. If two transactions read the same balance and both try to update it without knowing about each other, one will overwrite the other's change and money will appear or disappear.</p>
+
+<p>Database engines developed locking mechanisms to serialize access to the same data. When one transaction acquires a lock on a row or table, other transactions that need the same lock must wait. This is how the database prevents two concurrent writes from conflicting.</p>
+
+<p>Deadlocks are an unintended consequence of locking. Once you have a system where transactions acquire multiple locks and must wait for locked resources, you can create circular wait situations. Jim Gray's research at IBM in the 1970s formally characterised deadlocks in database systems and established the detection and resolution strategies that databases still use today.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Two people are trying to cross a narrow one-lane bridge from opposite sides at the same time. Person A is on the bridge from the north side. Person B is on the bridge from the south side. Each is waiting for the other to back off. Neither can move forward. Neither wants to reverse. They are stuck.</p>
+
+<p>This is a deadlock. Each party holds a resource (their position on the bridge) and is waiting for a resource held by the other party. Without external intervention — a traffic cop asking one person to reverse — they stay stuck forever.</p>
+
+<p>Database deadlocks work the same way. Transaction A holds a lock on Row 1 and is waiting for a lock on Row 2. Transaction B holds a lock on Row 2 and is waiting for a lock on Row 1. Each is blocked by the other. The database acts as the traffic cop — it detects this cycle and forces one transaction to back off (ROLLBACK) so the other can proceed.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think about two people sharing a kitchen. Neha needs the chopping board and the knife to prepare vegetables. Rahul needs the knife and the chopping board to cut bread. Neha picks up the chopping board first. Rahul picks up the knife first. Now Neha is waiting for the knife (held by Rahul). Rahul is waiting for the chopping board (held by Neha). Neither can cook. Neither will put their tool down.</p>
+
+<p>A deadlock prevention strategy would be: always pick up tools in the same order. If both people agree to always pick up the knife first and then the chopping board, Neha gets both tools first, finishes, and then Rahul gets both. No deadlock.</p>
+
+<p>This is the most practical advice for preventing database deadlocks: make sure all your transactions acquire locks on tables and rows in the same consistent order. This eliminates circular wait conditions before they can form.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p><strong>Lock Types</strong></p>
+
+<p>Databases use two primary lock types: shared locks (S-locks) and exclusive locks (X-locks).</p>
+
+<p>A shared lock is acquired for reads. Multiple transactions can hold shared locks on the same row simultaneously — reading does not block reading. But a shared lock blocks exclusive locks. If one transaction is reading a row with a shared lock, another cannot modify it until the read is done.</p>
+
+<p>An exclusive lock is acquired for writes (INSERT, UPDATE, DELETE). Only one transaction can hold an exclusive lock on a row. All other transactions — both reads and writes — must wait. This prevents two transactions from modifying the same row at the same time.</p>
+
+<p><strong>Lock Granularity</strong></p>
+
+<p>Locks can be applied at different levels: row-level, page-level, or table-level. Row-level locking (used by MySQL InnoDB and PostgreSQL) allows maximum concurrency — only the specific rows being modified are locked. Table-level locking (used by MySQL MyISAM) blocks the entire table, which is simpler but far more restrictive.</p>
+
+<p><strong>Lock Wait and Timeout</strong></p>
+
+<p>When Transaction A needs a lock held by Transaction B, it waits. The database has a configurable timeout (lock<em>wait</em>timeout in MySQL). If the lock is not released within the timeout period, the waiting transaction is killed with a timeout error.</p>
+
+<p><strong>Deadlock Detection</strong></p>
+
+<p>The database continuously monitors the lock dependency graph — which transaction is waiting for which lock held by which other transaction. When it detects a cycle in this graph (A waits for B, B waits for A — or longer cycles involving C, D etc.), it identifies a deadlock. It then picks one transaction as the "victim" — usually the one that has done less work and is cheapest to roll back — and kills it. The killed transaction receives the deadlock error. The surviving transaction gets its lock and proceeds.</p>
+
+<p><strong>Gap Locks</strong></p>
+
+<p>In MySQL InnoDB at REPEATABLE READ and higher, the database uses gap locks alongside row locks. A gap lock prevents other transactions from inserting rows in a range between two existing rows. This prevents phantom reads but also increases the likelihood of lock conflicts.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<p>Explicit locking with SELECT FOR UPDATE:</p>
+
+<pre><code class="language-sql">BEGIN;
+
+-- Acquire exclusive lock on this row to prevent concurrent updates
+SELECT balance FROM wallets WHERE user_id = 101 FOR UPDATE;
+
+-- Now safely update it — no other transaction can modify this row
+UPDATE wallets SET balance = balance - 500 WHERE user_id = 101;
+
+COMMIT;</code></pre>
+
+<p>Shared lock (allows other reads, blocks writes):</p>
+
+<pre><code class="language-sql">BEGIN;
+
+-- Acquire shared lock — other transactions can read but not modify
+SELECT * FROM inventory WHERE product_id = 55 FOR SHARE;
+-- (PostgreSQL syntax; MySQL uses LOCK IN SHARE MODE)
+
+-- ... do some read-based calculation ...
+
+COMMIT;</code></pre>
+
+<p>Checking for lock wait timeout in MySQL:</p>
+
+<pre><code class="language-sql">-- Check current lock wait timeout setting
+SHOW VARIABLES LIKE 'innodb_lock_wait_timeout';
+
+-- Set a custom timeout for your session (in seconds)
+SET SESSION innodb_lock_wait_timeout = 10;</code></pre>
+
+<p>Viewing current locks in MySQL:</p>
+
+<pre><code class="language-sql">-- See what transactions are currently waiting for locks
+SELECT * FROM information_schema.INNODB_TRX;
+
+-- See lock waits
+SELECT * FROM performance_schema.data_lock_waits;</code></pre>
+
+<p>Deadlock-safe pattern — always lock in consistent order:</p>
+
+<pre><code class="language-sql">-- BAD: locks orders first, then delivery_partners (inconsistent order causes deadlock)
+-- Transaction Type 1:
+BEGIN;
+UPDATE orders SET status = 'assigned' WHERE order_id = 1001;
+UPDATE delivery_partners SET available = 0 WHERE partner_id = 55;
+COMMIT;
+
+-- Transaction Type 2 (different order — DEADLOCK RISK):
+BEGIN;
+UPDATE delivery_partners SET available = 0 WHERE partner_id = 55;
+UPDATE orders SET status = 'assigned' WHERE order_id = 1001;
+COMMIT;
+
+-- GOOD: always lock in the same order
+-- Both transaction types should lock delivery_partners THEN orders consistently</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Term</th><th>What It Means</th></tr></thead>
+<tbody>
+<tr><td>Shared Lock (S-lock)</td><td>Multiple transactions can hold this simultaneously; used for reads; blocks exclusive locks</td></tr>
+<tr><td>Exclusive Lock (X-lock)</td><td>Only one transaction holds this at a time; used for writes; blocks all other locks</td></tr>
+<tr><td>Row-level Lock</td><td>Lock applied to a specific row only; allows maximum concurrency</td></tr>
+<tr><td>Table-level Lock</td><td>Lock applied to an entire table; simpler but blocks all concurrent access</td></tr>
+<tr><td>Lock Wait Timeout</td><td>Maximum time a transaction waits for a lock before the database kills it with an error</td></tr>
+<tr><td>Deadlock</td><td>A circular lock dependency where two or more transactions are each waiting for a lock held by the other</td></tr>
+<tr><td>Deadlock Victim</td><td>The transaction the database chooses to roll back when it detects a deadlock cycle</td></tr>
+<tr><td>Gap Lock</td><td>Lock on a range between rows; prevents phantom reads in MySQL InnoDB</td></tr>
+<tr><td>SELECT FOR UPDATE</td><td>Explicitly acquires an exclusive lock on selected rows within a transaction</td></tr>
+<tr><td>SELECT FOR SHARE</td><td>Explicitly acquires a shared lock on selected rows within a transaction</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p><strong>Sample tables:</strong></p>
+
+<p><strong>orders</strong></p>
+<table>
+<thead><tr><th>order_id</th><th>status</th><th>partner_id</th><th>amount</th></tr></thead>
+<tbody>
+<tr><td>1001</td><td>pending</td><td>NULL</td><td>350</td></tr>
+<tr><td>1002</td><td>pending</td><td>NULL</td><td>820</td></tr>
+</tbody></table>
+
+<p><strong>delivery_partners</strong></p>
+<table>
+<thead><tr><th>partner_id</th><th>name</th><th>available</th></tr></thead>
+<tbody>
+<tr><td>55</td><td>Ravi Kumar</td><td>1</td></tr>
+<tr><td>56</td><td>Mohan Das</td><td>1</td></tr>
+</tbody></table>
+
+<h3>Example 1: Using SELECT FOR UPDATE to prevent lost updates</h3>
+
+<pre><code class="language-sql">BEGIN;
+
+-- Lock this specific row before reading balance
+SELECT available FROM delivery_partners WHERE partner_id = 55 FOR UPDATE;
+
+-- Now safely check and update — no other transaction can sneak in
+UPDATE delivery_partners SET available = 0 WHERE partner_id = 55;
+UPDATE orders SET partner_id = 55, status = 'assigned' WHERE order_id = 1001;
+
+COMMIT;</code></pre>
+
+<p>Without FOR UPDATE, two dispatch systems might both read partner 55 as available and both assign different orders to them.</p>
+
+<h3>Example 2: Deadlock scenario and resolution</h3>
+
+<p>Transaction A (running simultaneously with Transaction B):</p>
+
+<pre><code class="language-sql">-- Transaction A:
+BEGIN;
+UPDATE orders SET status = 'processing' WHERE order_id = 1001;       -- Locks order 1001
+-- ... waits a moment ...
+UPDATE delivery_partners SET available = 0 WHERE partner_id = 55;    -- Waits for lock on partner 55
+COMMIT;</code></pre>
+
+<p>Transaction B running at the same time:</p>
+
+<pre><code class="language-sql">-- Transaction B:
+BEGIN;
+UPDATE delivery_partners SET available = 0 WHERE partner_id = 55;    -- Locks partner 55
+-- ... waits a moment ...
+UPDATE orders SET status = 'processing' WHERE order_id = 1001;       -- Waits for lock on order 1001
+-- DEADLOCK DETECTED — Transaction B gets rolled back automatically
+COMMIT;</code></pre>
+
+<p>Transaction B receives a deadlock error. Transaction A completes. Transaction B must be retried.</p>
+
+<h3>Example 3: Deadlock prevention — consistent lock order</h3>
+
+<p>Always lock in the same order across all transaction types:</p>
+
+<pre><code class="language-sql">-- Both transaction types now lock delivery_partners first, then orders:
+BEGIN;
+SELECT * FROM delivery_partners WHERE partner_id = 55 FOR UPDATE;
+SELECT * FROM orders WHERE order_id = 1001 FOR UPDATE;
+UPDATE delivery_partners SET available = 0 WHERE partner_id = 55;
+UPDATE orders SET partner_id = 55, status = 'assigned' WHERE order_id = 1001;
+COMMIT;</code></pre>
+
+<p>By acquiring locks in the same order (partner first, order second), both transaction types avoid the circular dependency.</p>
+
+<h3>Example 4: Lock wait timeout handling</h3>
+
+<pre><code class="language-sql">SET SESSION innodb_lock_wait_timeout = 5;  -- 5 second timeout
+
+BEGIN;
+-- If this row is locked by another transaction, wait up to 5 seconds
+SELECT * FROM orders WHERE order_id = 1002 FOR UPDATE;
+UPDATE orders SET status = 'cancelled' WHERE order_id = 1002;
+COMMIT;
+-- If lock is not released within 5 seconds, error: Lock wait timeout exceeded</code></pre>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>What is the difference between a deadlock and a lock wait timeout?</strong></p>
+<p>A lock wait timeout happens when one transaction simply waits too long for another transaction to release a lock. There is no circular dependency — just a slow transaction holding a lock too long. A deadlock is specifically a circular dependency where two or more transactions are each waiting for the other. The database detects deadlocks actively and resolves them immediately. Lock wait timeouts are passive — the waiting transaction just gives up after the configured time.</p>
+
+<p><strong>Does the database always detect deadlocks instantly?</strong></p>
+<p>Detection has a small delay because the database runs deadlock detection periodically (typically every second in MySQL InnoDB). During that brief window, transactions may wait. Once the cycle is detected, resolution is fast. In practice, deadlock detection is fast enough that it does not cause noticeable delays in production.</p>
+
+<p><strong>Which transaction does the database choose as the deadlock victim?</strong></p>
+<p>The database generally picks the transaction that is cheapest to roll back — often the one that has modified fewer rows or been running for less time. You can influence this in some databases (MySQL: <code>innodb<em>deadlock</em>detect</code>, SQL Server: <code>SET DEADLOCK_PRIORITY</code>), but usually the database's default choice is reasonable.</p>
+
+<p><strong>Does SELECT FOR UPDATE prevent deadlocks?</strong></p>
+<p>Not by itself. SELECT FOR UPDATE acquires an explicit lock immediately rather than waiting until the UPDATE, which can reduce the window for conflicts. But if two transactions use SELECT FOR UPDATE on different rows and then try to access each other's rows, you still get a deadlock. Consistent lock ordering combined with FOR UPDATE is the reliable prevention strategy.</p>
+
+<p><strong>Are deadlocks always a sign of a bug?</strong></p>
+<p>Not necessarily. In a highly concurrent system, occasional deadlocks are normal and expected. The database handles them correctly by rolling back one transaction. The issue is when deadlocks are frequent, which indicates a design problem — inconsistent lock ordering, overly broad locking, or transactions that hold locks too long. Rare deadlocks handled with retry logic are acceptable.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li><strong>Acquiring locks in inconsistent order across different transaction types.</strong> The most common cause of deadlocks. Audit all your transactions and ensure they access the same tables in the same order.</li><li><strong>Not implementing retry logic for deadlock errors.</strong> If your application just throws an error to the user when a deadlock occurs, that is poor design. Deadlocks are transient — the correct response is to retry the transaction automatically.</li><li><strong>Holding locks too long.</strong> Performing external operations (API calls, file writes, user input waits) while a transaction is open holds locks for the duration. Other transactions wait unnecessarily. Keep transactions short.</li><li><strong>Using table-level locks when row-level locks suffice.</strong> Explicitly locking an entire table (LOCK TABLES) blocks all other operations. Use row-level locking with SELECT FOR UPDATE instead.</li><li><strong>Ignoring deadlock errors in logs.</strong> A few deadlocks per day might be acceptable. A spike in deadlock errors indicates a concurrency problem that will worsen as traffic grows.</li><li><strong>Not understanding your ORM's locking behaviour.</strong> Frameworks like Django ORM, Hibernate, and ActiveRecord generate SQL for you. Check what locking behaviour they use by default and whether you need to explicitly add FOR UPDATE in critical paths.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Always acquire locks on multiple tables in a consistent, alphabetical, or explicitly documented order across all transaction types.</li><li>Implement automatic retry logic in your application for deadlock errors (error code 1213 in MySQL, 40P01 in PostgreSQL).</li><li>Keep transactions short — acquire locks, do the minimum work, release quickly.</li><li>Use SELECT FOR UPDATE explicitly when you need to read-then-write based on the read result.</li><li>Monitor the deadlock log regularly (SHOW ENGINE INNODB STATUS in MySQL; pg_log in PostgreSQL) to catch patterns early.</li><li>During code review, check new database transaction code for lock ordering consistency against existing transactions.</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Swiggy's order dispatch system was redesigned after the Friday evening deadlock incident Aman encountered. The team audited all transaction types that touched both the <code>orders</code> and <code>delivery<em>partners</code> tables and enforced a company-wide convention: always lock <code>delivery</em>partners</code> before <code>orders</code>. They also added automatic retry logic for deadlock errors in the dispatch service. Deadlock frequency dropped by over 90%.</p>
+
+<p>Paytm's wallet service uses SELECT FOR UPDATE as a standard pattern for any read-then-write operation on wallet balances. Before reading a balance that will be used as the basis for an update, the query acquires an exclusive lock. This ensures that between the read and the write, no other transaction can modify the same wallet. It adds a small latency cost but eliminates the lost-update class of concurrency bugs entirely.</p>
+
+<p>IRCTC's booking system has one of the highest lock contention scenarios in India — during Tatkal bookings at 10 AM, tens of thousands of users simultaneously try to book the same limited seats. The system uses row-level locks on seat records with a very short lock<em>wait</em>timeout. If a user's transaction cannot acquire a seat lock within 2 seconds, it returns "seat not available" rather than waiting indefinitely. This keeps the system responsive even under extreme load, at the cost of occasionally telling users to retry.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>LOCKING:
+
+Transaction A                Transaction B
+─────────────────────────────────────────────────────
+LOCK Row 1 (exclusive)       SELECT Row 1 (shared)
+  |                            |
+  |                            WAIT (A holds exclusive)
+  |                            |
+UPDATE Row 1                   |
+  |                            |
+COMMIT                         |
+  |                            |
+Lock released ─────────────→ Lock acquired
+                             SELECT Row 1 succeeds
+                             COMMIT
+
+────────────────────────────────────────────────────
+
+DEADLOCK:
+
+Transaction A                Transaction B
+─────────────────────────────────────────────────────
+LOCK Row 1 ✓                 LOCK Row 2 ✓
+  |                            |
+WAIT for Row 2 ←──────────── (holds Row 2)
+  |  (holds Row 1)              |
+  |                          WAIT for Row 1 ←─────────
+  |                                                   |
+  └──────────────────── CYCLE DETECTED ───────────────┘
+                              |
+                    Database kills Transaction B
+                    (deadlock victim)
+                              |
+                    Transaction A proceeds
+                    Transaction B retries</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>Locks prevent concurrent transactions from corrupting shared data.</li><li>Shared locks allow concurrent reads; exclusive locks block all other access.</li><li>Row-level locking provides more concurrency than table-level locking.</li><li>A deadlock is a circular lock dependency — the database detects and resolves it by rolling back one transaction.</li><li>The most reliable deadlock prevention: always acquire locks in the same order across all transaction types.</li><li>Implement retry logic for deadlock errors in your application — they are transient and retrying usually succeeds.</li><li>Keep transactions short to minimise lock hold time and reduce contention.</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>Transaction A locks Row 1 then waits for Row 2. Transaction B locks Row 2 then waits for Row 1. Explain why this is a deadlock and how the database resolves it.</li><li>What is the difference between a shared lock and an exclusive lock? Give an example of when each is used.</li><li>Write a SQL transaction for a wallet debit operation that uses SELECT FOR UPDATE to prevent lost updates.</li><li>You are reviewing code for two transaction types that both update the <code>accounts</code> and <code>payments</code> tables. Transaction type 1 updates <code>accounts</code> first, then <code>payments</code>. Transaction type 2 updates <code>payments</code> first, then <code>accounts</code>. What problem can this cause and how do you fix it?</li><li>Your application logs show 50 deadlock errors per hour during peak traffic. Is this a critical bug that must be fixed, or is it acceptable? What would you do?</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Aman's Friday night at Swiggy was stressful, but it turned him into one of the most locking-aware engineers on his team. After that incident, every new transaction he wrote was reviewed for lock ordering consistency with existing code. He added a section on locking conventions to the team's database coding guidelines. Deadlocks became rare rather than routine.</p>
+
+<p>Deadlocks and locking are not glamorous topics. They are not the kind of thing you learn about in a SQL tutorial's first ten lessons. But they are the kind of thing that causes production incidents, frustrated users, and 2 AM on-call pages. Understanding them is part of going from "someone who writes SQL" to "someone who runs databases reliably at scale."</p>
+
+<p>The core ideas are not complicated: locks protect shared data, deadlocks happen when locks form a circle, you prevent them by keeping a consistent lock order and keeping transactions short. The implementation details matter when you are debugging a specific incident, but the principles are straightforward.</p>
+
+<p>Every production database engineer eventually has their first deadlock incident. With this knowledge, when yours comes, you will know exactly what to look at, what it means, and how to fix it — probably before the on-call rotation finishes their first cup of chai.</p>
+
+  `,
 
   // ── Module 15 ────────────────────────────────────────────────
   'mod15-t1': `<h1>Entity-Relationship (ER) Model</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
