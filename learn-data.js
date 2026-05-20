@@ -2700,39 +2700,39 @@ WHERE city = 'Delhi';</code></pre>
 
   // ── Module 4 ─────────────────────────────────────────────────
   'mod4-t1': `
-    <h1>SELECT Statement: Your First Conversation with a Database</h1>
+    <h1>SELECT: How You Ask a Database for Data</h1>
     <hr>
-    <h2>1. Curiosity-Driven Introduction</h2>
+    <h2>Let's Start Here</h2>
     <p>It was Arjun's third day at Swiggy's Bengaluru office. He had just settled in with his morning chai when his manager, Priya, walked over and dropped a task on his desk.</p>
     <p>"Arjun, I need a list of all customer names and their cities from our database. Just those two columns, nothing else. Can you do it in the next ten minutes?"</p>
     <p>Arjun opened his laptop, stared at the database tool, and felt the familiar first-week panic. The orders table had millions of rows and dozens of columns. How do you pull out just two specific pieces of information from that mountain of data, quickly, cleanly, and without breaking anything?</p>
     <p>The answer is a single, powerful SQL keyword: SELECT.</p>
     <p>Everything you will ever do in SQL starts with SELECT. It is the very first word in almost every query you will write in your entire career. Understanding it deeply is not optional. It is the foundation everything else is built on.</p>
     <hr>
-    <h2>2. The Real-World Problem</h2>
+    <h2>The Problem You'll Actually Face</h2>
     <p>Think about BookMyShow. Every time someone books a ticket, a row is added to the bookings table. That table might have 30 columns: booking ID, user ID, user name, user phone, user email, movie name, movie ID, theatre name, theatre city, seat number, payment mode, payment amount, booking date, show time, and on and on.</p>
     <p>Now your manager asks: "Show me just the user name and the movie name for all bookings today."</p>
     <p>You do not want all 30 columns. You want two. And you need them fast.</p>
     <p>That is the core problem SELECT solves: letting you choose exactly which columns you want to see, nothing more and nothing less.</p>
     <hr>
-    <h2>3. Why Does This Concept Exist?</h2>
+    <h2>Why Was This Built in the First Place?</h2>
     <p>In the days before databases, records were kept in registers, notebooks, and filing cabinets. If you needed a specific piece of information, you had to look through every page until you found it.</p>
     <p>Databases improved on this by storing everything in structured tables. But storing data is only half the job. The other half is retrieving it.</p>
     <p>If every query returned all columns from all rows, you would be drowning in information every time. A table at Flipkart might have 50 columns and 100 million rows. You cannot work with all of that at once.</p>
     <p>The SELECT statement was designed to solve this precisely. It lets you ask the database for a very specific slice of data. You specify the columns you want, you specify the table they live in, and the database fetches exactly that, instantly.</p>
     <hr>
-    <h2>4. Beginner Intuition</h2>
+    <h2>Think of It This Way</h2>
     <p>Think of the database as a giant filing cabinet with thousands of folders, each folder representing a row of data, and each folder containing dozens of documents representing columns.</p>
     <p>Your job is not to read every document in every folder. Your job is to open the cabinet and pull out just the one document you need from each folder.</p>
     <p>SELECT is your instruction to the filing cabinet: "From every folder in this cabinet, give me only the document labelled 'customer name' and the one labelled 'city'."</p>
     <p>The cabinet does the work. You get exactly what you asked for.</p>
     <hr>
-    <h2>5. Real-World Analogy</h2>
+    <h2>A Simple Way to Picture It</h2>
     <p>Imagine you are placing an order at a canteen. The menu has 40 items. You do not tell the server, "bring me the entire kitchen." You say, "One masala dosa and one chai, please."</p>
     <p>SQL's SELECT works the same way. The table is the kitchen, full of everything. Your SELECT query is your order: you specify exactly what you want, and the database brings it to you.</p>
     <p>If you say SELECT customer_name, city, the database brings you those two things. If you say SELECT *, you are essentially saying "bring me everything," which is sometimes useful but often overwhelming, like asking the server to bring you the entire menu at once.</p>
     <hr>
-    <h2>6. Main Concept Explanation</h2>
+    <h2>How It Actually Works</h2>
     <p>The SELECT statement is how you retrieve data from a database table. It works on a simple principle: you name the columns you want, you name the table they live in, and the database returns every row with only those columns visible.</p>
     <p>There are three main ways to use SELECT:</p>
     <p>First, you can select specific columns by naming them. This is the most common and most professional approach. You get precisely what you need.</p>
@@ -2740,7 +2740,7 @@ WHERE city = 'Delhi';</code></pre>
     <p>Third, you can use SELECT to compute expressions. For example, SELECT 1 + 1 will return 2. SELECT price * quantity will calculate and return the product of two columns. You are not just fetching stored data, you are computing new values on the fly.</p>
     <p>The order in which you list columns in SELECT determines the order they appear in your result. If you write SELECT city, customer_name, the city column appears first in the output even if customer_name comes first in the original table.</p>
     <hr>
-    <h2>7. Syntax Explanation</h2>
+    <h2>Writing It in SQL</h2>
     <p>The basic syntax of a SELECT statement is:</p>
     <pre><code class="language-sql">SELECT column1, column2, column3
 FROM table_name;</code></pre>
@@ -2752,7 +2752,7 @@ FROM table_name;</code></pre>
 FROM orders;</code></pre>
     <p>The semicolon at the end is a statement terminator. Some SQL tools require it, some do not, but including it is always a good habit.</p>
     <hr>
-    <h2>8. Syntax Breakdown Table</h2>
+    <h2>What Each Part Means</h2>
     <table>
       <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
       <tr><td>SELECT</td><td>Keyword that starts every retrieval query</td><td>SELECT</td></tr>
@@ -2764,7 +2764,7 @@ FROM orders;</code></pre>
       <tr><td>;</td><td>Statement terminator, ends the query</td><td>;</td></tr>
     </table>
     <hr>
-    <h2>9. Multiple Practical Examples</h2>
+    <h2>Let's Try It Out</h2>
     <p>Here is a sample table from Swiggy's orders database:</p>
     <table>
       <tr><th>order_id</th><th>customer_name</th><th>city</th><th>amount</th><th>order_date</th><th>payment_mode</th></tr>
@@ -2795,7 +2795,7 @@ FROM orders;</code></pre>
 FROM orders;</code></pre>
     <p>The third column is computed on the fly. It does not exist in the table but is calculated for each row.</p>
     <hr>
-    <h2>10. Beginner Confusion Handling</h2>
+    <h2>Things That Trip People Up</h2>
     <p><strong>"Do I have to type column names exactly as they are in the table?"</strong></p>
     <p>Yes. Column names must match exactly, including capitalisation in some databases. If the column is named customer_name and you type CustomerName, you may get an error. Always check the table schema first.</p>
     <p><strong>"Is SELECT * bad practice?"</strong></p>
@@ -2805,7 +2805,7 @@ FROM orders;</code></pre>
     <p><strong>"Why does SELECT 1+1 work without a FROM clause?"</strong></p>
     <p>Some databases allow simple expressions without a table. You are asking the database to compute something, not retrieve data from a table. This is useful for quick calculations and testing.</p>
     <hr>
-    <h2>11. Common Mistakes</h2>
+    <h2>Common Mistakes</h2>
     <ul>
       <li>Misspelling a column name or table name. SQL will return an error and nothing will run.</li>
       <li>Using SELECT * in reports or dashboards. It is inefficient and hard to maintain when table structures change.</li>
@@ -2814,7 +2814,7 @@ FROM orders;</code></pre>
       <li>Expecting SELECT to filter rows. SELECT only controls which columns are shown. To filter rows, you need WHERE.</li>
     </ul>
     <hr>
-    <h2>12. Best Practices</h2>
+    <h2>Best Practices</h2>
     <ul>
       <li>Always name your columns explicitly in production queries. Avoid SELECT * in real work.</li>
       <li>List columns in a logical, readable order.</li>
@@ -2823,12 +2823,12 @@ FROM orders;</code></pre>
       <li>Always double-check that your column names and table names are spelled correctly before running.</li>
     </ul>
     <hr>
-    <h2>13. Real Industry Usage</h2>
+    <h2>How Companies Use This Every Day</h2>
     <p>Every single data operation at every Indian tech company begins with SELECT. When you open Swiggy and see your past orders, the app runs a SELECT query against the orders table filtered to your user ID. When Flipkart's analytics team builds a sales dashboard, they are writing SELECT queries to pull the right numbers into the right charts.</p>
     <p>IRCTC uses SELECT to display your booking history. Byju's uses it to pull student progress records. PhonePe uses it to fetch transaction logs for your statement.</p>
     <p>There is no SQL without SELECT. It is the starting point for data exploration, reporting, dashboards, and application development.</p>
     <hr>
-    <h2>14. Visual Summary</h2>
+    <h2>The Big Picture</h2>
     <pre><code>DATABASE TABLE: orders
 +----------+--------------+-----------+--------+
 | order_id | customer_name| city      | amount |
@@ -2851,7 +2851,7 @@ RESULT:
 
 Only the columns you asked for. All rows. No filtering.</code></pre>
     <hr>
-    <h2>15. Quick Revision</h2>
+    <h2>Before You Move On</h2>
     <ul>
       <li>SELECT is the keyword that retrieves data from a database table.</li>
       <li>Syntax: SELECT column1, column2 FROM table_name;</li>
@@ -2861,16 +2861,16 @@ Only the columns you asked for. All rows. No filtering.</code></pre>
       <li>SELECT alone does not filter rows. That is the job of WHERE.</li>
     </ul>
     <hr>
-    <h2>16. Practice Questions</h2>
+    <h2>Practice Questions</h2>
     <ol>
       <li>Write a query to show customer_name and phone_number from a table called users.</li>
       <li>Write a query to display all columns from a table called employees.</li>
       <li>From a table called products, select product_name, category, and price in that order.</li>
       <li>Write a SELECT query that computes price multiplied by 1.05 alongside the product_name from a products table.</li>
       <li>From an irctc_bookings table, write a query to show passenger_name, train_name, and journey_date only.</li>
-    </ul>
+    </ol>
     <hr>
-    <h2>17. Final Thoughts</h2>
+    <h2>Final Thoughts</h2>
     <p>SELECT is not just a keyword. It is your opening statement in every conversation you will ever have with a database.</p>
     <p>Every analyst at every company, from a fresher on day three to a lead engineer with ten years of experience, writes SELECT queries every single day. It is the most fundamental act in all of SQL.</p>
     <p>Once this feels natural to you, which it will with practice, every more advanced concept you learn will click faster. You will see GROUP BY, JOIN, and subqueries all building on top of this one simple idea: tell the database what you want, and it will get it for you.</p>
@@ -2878,15 +2878,15 @@ Only the columns you asked for. All rows. No filtering.</code></pre>
     <p>You are already on your way.</p>
   `,
   'mod4-t2': `
-    <h1>WHERE Clause: The Art of Asking the Right Question</h1>
+    <h1>WHERE: How to Filter Out the Data You Don't Need</h1>
     <hr>
-    <h2>1. Curiosity-Driven Introduction</h2>
+    <h2>Let's Start Here</h2>
     <p>Neha had been at Flipkart for exactly one week when her manager, Rahul, stopped by her desk with a request.</p>
     <p>"I need all orders placed from Delhi where the amount is greater than five hundred rupees. Can you pull that for me?"</p>
     <p>Neha smiled and opened her SQL editor. But then she paused. She knew how to write SELECT. She had practiced it the day before. But how do you tell the database to give you only the Delhi orders? And only the ones above five hundred? How do you put conditions on what you want?</p>
     <p>She was about to discover the WHERE clause, the single most important filtering tool in all of SQL.</p>
     <hr>
-    <h2>2. The Real-World Problem</h2>
+    <h2>The Problem You'll Actually Face</h2>
     <p>Here is what Flipkart's orders table might look like on any given day:</p>
     <table>
       <tr><th>order_id</th><th>customer_name</th><th>city</th><th>amount</th><th>order_date</th><th>status</th></tr>
@@ -2900,25 +2900,25 @@ Only the columns you asked for. All rows. No filtering.</code></pre>
     <p>If you run SELECT * FROM orders, you get everything. Every city, every amount, every status. That is not useful when your manager wants a very specific slice of data.</p>
     <p>The problem is: how do you retrieve only the rows that match specific conditions?</p>
     <hr>
-    <h2>3. Why Does This Concept Exist?</h2>
+    <h2>Why Was This Built in the First Place?</h2>
     <p>SELECT tells the database which columns to show. But it does not filter rows. Without some way to filter, every query returns the entire table.</p>
     <p>Imagine working at a bank and asking the system for transaction records. If every query returned all ten crore transactions in the database, you would never find anything useful. You need a way to say: "Only show me the records where the account number is this, and the date is this, and the amount is above this threshold."</p>
     <p>That is exactly what WHERE does. It is the filtering mechanism of SQL. It evaluates a condition for each row in the table. If the condition is true, the row is included in the result. If the condition is false, the row is excluded.</p>
     <p>WHERE was built into SQL from the very beginning because filtering is not a special case in data work. It is the normal case. Most queries need some kind of filter.</p>
     <hr>
-    <h2>4. Beginner Intuition</h2>
+    <h2>Think of It This Way</h2>
     <p>Think of a massive stack of exam papers from every school in India. All subjects, all classes, all states, piled together.</p>
     <p>Someone asks you: "Give me only the papers from Class 10, where the student scored above 80 in Maths."</p>
     <p>You do not flip through all the papers. You have a condition. You apply that condition, and you pull out only the papers that match.</p>
     <p>WHERE works exactly like that. It is your condition. For every row in the table, SQL asks: "Does this row satisfy the condition?" If yes, it goes into your result. If no, it is ignored.</p>
     <hr>
-    <h2>5. Real-World Analogy</h2>
+    <h2>A Simple Way to Picture It</h2>
     <p>Think of WHERE as a security checkpoint at an airport.</p>
     <p>Every passenger comes through. The security guard checks their boarding pass against the condition: "Is this person flying to Mumbai on July 5th?"</p>
     <p>Passengers who match the condition go through. Everyone else is turned away.</p>
     <p>SELECT without WHERE is like letting everyone into the terminal. SELECT with WHERE is like running that checkpoint: only the matching rows get through.</p>
     <hr>
-    <h2>6. Main Concept Explanation</h2>
+    <h2>How It Actually Works</h2>
     <p>The WHERE clause goes after the FROM clause in your SQL query. It takes a condition, which is an expression that evaluates to either true or false for each row.</p>
     <p>Conditions use comparison operators. Here are the ones you will use most often:</p>
     <ul>
@@ -2933,7 +2933,7 @@ Only the columns you asked for. All rows. No filtering.</code></pre>
     <p>Text condition example: WHERE city = 'Delhi' Number condition example: WHERE amount > 500</p>
     <p>This difference matters. If you write WHERE amount = '500' with quotes around a number, some databases will still work but others will give you unexpected results or errors.</p>
     <hr>
-    <h2>7. Syntax Explanation</h2>
+    <h2>Writing It in SQL</h2>
     <p>Here is the full syntax:</p>
     <pre><code class="language-sql">SELECT column1, column2
 FROM table_name
@@ -2949,7 +2949,7 @@ FROM orders
 WHERE amount &gt; 500;</code></pre>
     <p>This returns only the rows where amount is greater than 500.</p>
     <hr>
-    <h2>8. Syntax Breakdown Table</h2>
+    <h2>What Each Part Means</h2>
     <table>
       <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
       <tr><td>SELECT column1, column2</td><td>Chooses which columns to display</td><td>customer_name, amount</td></tr>
@@ -2964,7 +2964,7 @@ WHERE amount &gt; 500;</code></pre>
       <tr><td><=</td><td>Less than or equal to</td><td>amount <= 1000</td></tr>
     </table>
     <hr>
-    <h2>9. Multiple Practical Examples</h2>
+    <h2>Let's Try It Out</h2>
     <p>Using this sample Zomato orders table:</p>
     <table>
       <tr><th>order_id</th><th>customer_name</th><th>city</th><th>amount</th><th>payment_mode</th><th>status</th></tr>
@@ -2999,7 +2999,7 @@ FROM train_bookings
 WHERE fare &lt;= 500;</code></pre>
     <p>This returns all bookings where fare is 500 or below, including exactly 500.</p>
     <hr>
-    <h2>10. Beginner Confusion Handling</h2>
+    <h2>Things That Trip People Up</h2>
     <p><strong>"Why do I need quotes for text but not for numbers?"</strong></p>
     <p>SQL needs to distinguish between a column name and a value. When you write WHERE city = Delhi without quotes, SQL thinks Delhi is a column name, not a value. Single quotes signal to SQL that you are providing a literal text value.</p>
     <p>Numbers do not need quotes because SQL can tell them apart from column names naturally.</p>
@@ -3010,7 +3010,7 @@ WHERE fare &lt;= 500;</code></pre>
     <p><strong>"Is WHERE case-sensitive for text values?"</strong></p>
     <p>It depends on the database. MySQL is generally case-insensitive for string comparisons by default. PostgreSQL is case-sensitive. It is safest to match the case exactly as it is stored in your data.</p>
     <hr>
-    <h2>11. Common Mistakes</h2>
+    <h2>Common Mistakes</h2>
     <ul>
       <li>Writing WHERE city = Delhi without quotes. SQL will think Delhi is a column name and throw an error.</li>
       <li>Putting WHERE before FROM. The correct order is always SELECT, then FROM, then WHERE.</li>
@@ -3019,7 +3019,7 @@ WHERE fare &lt;= 500;</code></pre>
       <li>Forgetting that text comparisons may be case-sensitive depending on the database.</li>
     </ul>
     <hr>
-    <h2>12. Best Practices</h2>
+    <h2>Best Practices</h2>
     <ul>
       <li>Always double-check your condition before running on a large table. Run SELECT * FROM table LIMIT 10 first to understand the data.</li>
       <li>Use specific comparison operators. Do not use > when you mean >=. These return different results.</li>
@@ -3028,14 +3028,14 @@ WHERE fare &lt;= 500;</code></pre>
       <li>Test with simple conditions before combining multiple filters with AND and OR.</li>
     </ul>
     <hr>
-    <h2>13. Real Industry Usage</h2>
+    <h2>How Companies Use This Every Day</h2>
     <p>The WHERE clause is at the heart of every useful query in production systems across India.</p>
     <p>When you open PhonePe and view your transaction history, the app runs a query like SELECT * FROM transactions WHERE user_id = 'your_id'. That WHERE clause is why you see your transactions and not someone else's.</p>
     <p>When Zomato's operations team investigates a delay complaint, they run something like SELECT * FROM orders WHERE status = 'Delayed' AND city = 'Hyderabad'. The WHERE clause narrows millions of rows down to the exact ones they need to investigate.</p>
     <p>IRCTC uses WHERE to pull up your specific booking. Banks use WHERE to flag transactions above a certain threshold. Byju's uses it to find students who have not logged in for seven days.</p>
     <p>Without WHERE, SQL would return everything, and databases would be nearly unusable at scale.</p>
     <hr>
-    <h2>14. Visual Summary</h2>
+    <h2>The Big Picture</h2>
     <pre><code>FULL TABLE (all 5 rows):
 +----------+--------------+-----------+--------+
 | order_id | customer_name| city      | amount |
@@ -3064,7 +3064,7 @@ RESULT:
 | 3003     | Arjun        | Delhi | 1400   |
 +----------+--------------+-------+--------+</code></pre>
     <hr>
-    <h2>15. Quick Revision</h2>
+    <h2>Before You Move On</h2>
     <ul>
       <li>WHERE filters rows based on a condition you specify.</li>
       <li>It comes after FROM in the query: SELECT ... FROM ... WHERE ...</li>
@@ -3074,16 +3074,16 @@ RESULT:
       <li>WHERE is evaluated row by row. Rows where the condition is true are included. Others are excluded.</li>
     </ul>
     <hr>
-    <h2>16. Practice Questions</h2>
+    <h2>Practice Questions</h2>
     <ol>
       <li>Write a query to find all orders from Mumbai in an orders table that has city, amount, and order_date columns.</li>
       <li>From a students table, find all students who scored more than 85 marks.</li>
       <li>Write a query to show all transactions where the payment_mode is 'UPI' from a payments table.</li>
       <li>From an employees table, find all employees who earn less than 50000 per month.</li>
       <li>Write a query to find all bookings where the status is not 'Cancelled' from a bookings table.</li>
-    </ul>
+    </ol>
     <hr>
-    <h2>17. Final Thoughts</h2>
+    <h2>Final Thoughts</h2>
     <p>WHERE is where SQL starts feeling like a real superpower.</p>
     <p>Before WHERE, you were just looking at all the data. After WHERE, you are asking precise, targeted questions. You are not scrolling through spreadsheets anymore. You are getting the exact answer you need.</p>
     <p>Every data analyst, data engineer, and developer who works with databases uses WHERE dozens of times every day. It never goes away. It never becomes less useful. The more complex your work gets, the more important a solid understanding of WHERE becomes.</p>
@@ -3092,42 +3092,42 @@ RESULT:
     <p>That could be you too.</p>
   `,
   'mod4-t3': `
-    <h1>AND, OR, NOT: Combining Conditions Like a Pro</h1>
+    <h1>AND, OR, NOT: When One Condition Is Not Enough</h1>
     <hr>
-    <h2>1. Curiosity-Driven Introduction</h2>
+    <h2>Let's Start Here</h2>
     <p>It was a busy Friday at Swiggy's data team in Bengaluru. Rahul, a junior analyst, had just learned about the WHERE clause the previous week and was feeling confident. Then his manager, Neha, walked in with a new task.</p>
     <p>"Rahul, I need all orders from Mumbai that are above five hundred rupees AND were placed today. Also, exclude anything paid with cash."</p>
     <p>Rahul stared at his screen. He knew how to filter by city. He knew how to filter by amount. But how do you combine all three conditions in one query? Do you run three separate queries and compare the results?</p>
     <p>That sounded painful and error-prone. There had to be a better way.</p>
     <p>There is. It is called logical operators: AND, OR, and NOT.</p>
     <hr>
-    <h2>2. The Real-World Problem</h2>
+    <h2>The Problem You'll Actually Face</h2>
     <p>Real business questions almost never have just one condition. Think about what actually gets asked in Indian companies every day:</p>
     <p>At Swiggy, the ops team might ask: "Show me all orders from Kolkata that were delivered late AND had a value above two hundred rupees."</p>
     <p>At IRCTC, the support team needs: "Find all bookings in the waitlist OR with a booking error."</p>
     <p>At Paytm, the fraud team wants: "Flag all transactions above fifty thousand rupees that are NOT from verified accounts."</p>
     <p>Every one of these requires combining multiple conditions. You could not answer any of them with a single WHERE condition. You need a way to connect multiple conditions together.</p>
     <hr>
-    <h2>3. Why Does This Concept Exist?</h2>
+    <h2>Why Was This Built in the First Place?</h2>
     <p>A single condition in WHERE can answer simple questions. But the moment your question has the words "and also" or "or either" or "but not," you need something more.</p>
     <p>SQL's logical operators were designed to mirror the way humans naturally think about conditions. We combine criteria in our heads all the time. AND, OR, and NOT let you bring that natural logic directly into your queries.</p>
     <p>Without them, you would have to retrieve partial results from multiple queries, combine them manually, and do the filtering yourself outside the database. That is slow, error-prone, and defeats the purpose of having a powerful database engine in the first place.</p>
     <hr>
-    <h2>4. Beginner Intuition</h2>
+    <h2>Think of It This Way</h2>
     <p>Think about how you use conditions in everyday decisions.</p>
     <p>If you are booking a movie ticket on BookMyShow, you might think: "I want a movie that is in Hindi AND rated above 8 stars." Both conditions must be true. If it is in Hindi but rated 5 stars, it does not make the cut. That is AND.</p>
     <p>Or you might think: "I am okay with a Telugu OR Tamil film." Either one works. If at least one condition is true, you are happy. That is OR.</p>
     <p>And maybe you think: "I do NOT want a horror film." You are ruling out anything that matches one condition. That is NOT.</p>
     <p>You already use this logic every day. SQL just gives you the syntax to write it down.</p>
     <hr>
-    <h2>5. Real-World Analogy</h2>
+    <h2>A Simple Way to Picture It</h2>
     <p>Imagine you are helping a caterer filter their guest list for a corporate event.</p>
     <p>AND is like saying: "Only invite people who are from the engineering department AND have confirmed their attendance." Both conditions must be true. Miss either one and they are off the list.</p>
     <p>OR is like saying: "Invite anyone who is from the Delhi office OR the Mumbai office." Being in either city qualifies them. They do not need to be in both.</p>
     <p>NOT is like saying: "Invite everyone who is NOT on the dietary restriction list." You are excluding a specific group and including everyone else.</p>
     <p>These three operators let you build any combination of conditions, just like a caterer can define any set of invite rules.</p>
     <hr>
-    <h2>6. Main Concept Explanation</h2>
+    <h2>How It Actually Works</h2>
     <p>AND, OR, and NOT are logical operators that connect multiple conditions inside a WHERE clause.</p>
     <p>AND requires all conditions to be true for a row to be included. The more conditions you connect with AND, the stricter the filter becomes and the fewer rows come back.</p>
     <p>OR requires at least one condition to be true. The more conditions you connect with OR, the looser the filter becomes and the more rows come back.</p>
@@ -3135,7 +3135,7 @@ RESULT:
     <p>Operator precedence matters. SQL evaluates AND before OR, just like multiplication before addition in arithmetic. This means if you mix AND and OR without brackets, the AND conditions get evaluated first, which can give you unexpected results.</p>
     <p>The solution is always: use brackets to make your intent explicit.</p>
     <hr>
-    <h2>7. Syntax Explanation</h2>
+    <h2>Writing It in SQL</h2>
     <p>Using AND:</p>
     <pre><code class="language-sql">SELECT column1, column2
 FROM table_name
@@ -3153,7 +3153,7 @@ WHERE NOT condition;</code></pre>
 FROM table_name
 WHERE condition1 AND (condition2 OR condition3);</code></pre>
     <hr>
-    <h2>8. Syntax Breakdown Table</h2>
+    <h2>What Each Part Means</h2>
     <table>
       <tr><th>Operator</th><th>How It Works</th><th>Strictness</th><th>Example</th></tr>
       <tr><td>AND</td><td>ALL connected conditions must be true</td><td>Strict: fewer results</td><td>WHERE city = 'Mumbai' AND amount > 500</td></tr>
@@ -3162,7 +3162,7 @@ WHERE condition1 AND (condition2 OR condition3);</code></pre>
       <tr><td>() brackets</td><td>Groups conditions, controls evaluation order</td><td>Essential with mixed operators</td><td>WHERE city = 'Mumbai' AND (mode = 'UPI' OR mode = 'Card')</td></tr>
     </table>
     <hr>
-    <h2>9. Multiple Practical Examples</h2>
+    <h2>Let's Try It Out</h2>
     <p>Here is a sample orders table from Zomato:</p>
     <table>
       <tr><th>order_id</th><th>city</th><th>amount</th><th>payment_mode</th><th>order_date</th><th>status</th></tr>
@@ -3199,7 +3199,7 @@ WHERE city = 'Mumbai' AND amount &gt; 500 AND (payment_mode = 'UPI' OR payment_m
     <p>Without the brackets, SQL would evaluate the AND before the OR due to precedence, which could give wrong results. With brackets, the intent is crystal clear: we want Mumbai orders over 500 where the mode is either UPI or Card.</p>
     <p>Only row 4001 (Mumbai, 650, UPI) matches all conditions.</p>
     <hr>
-    <h2>10. Beginner Confusion Handling</h2>
+    <h2>Things That Trip People Up</h2>
     <p><strong>"AND makes results stricter, OR makes them broader. Is that always true?"</strong></p>
     <p>Yes. AND adds restrictions, so fewer rows qualify. OR loosens restrictions, so more rows qualify. Use AND when you need rows to satisfy multiple criteria simultaneously. Use OR when any one criterion is enough.</p>
     <p><strong>"What happens if I forget to use brackets when mixing AND and OR?"</strong></p>
@@ -3209,7 +3209,7 @@ WHERE city = 'Mumbai' AND amount &gt; 500 AND (payment_mode = 'UPI' OR payment_m
     <p><strong>"Why does WHERE city = 'Delhi' OR 'Mumbai' not work?"</strong></p>
     <p>SQL needs a full condition on each side of OR. You cannot shortcut it like natural English. You must write WHERE city = 'Delhi' OR city = 'Mumbai' with the city column repeated.</p>
     <hr>
-    <h2>11. Common Mistakes</h2>
+    <h2>Common Mistakes</h2>
     <ul>
       <li>Forgetting brackets when mixing AND with OR. This is the most common source of logic bugs in SQL.</li>
       <li>Writing WHERE city = 'Delhi' OR 'Mumbai' instead of WHERE city = 'Delhi' OR city = 'Mumbai'.</li>
@@ -3217,7 +3217,7 @@ WHERE city = 'Mumbai' AND amount &gt; 500 AND (payment_mode = 'UPI' OR payment_m
       <li>Using AND when you meant OR, or vice versa. Read your condition out loud in English to check. "Orders from Delhi AND from Mumbai" is impossible for a single row. You almost certainly meant OR.</li>
     </ul>
     <hr>
-    <h2>12. Best Practices</h2>
+    <h2>Best Practices</h2>
     <ul>
       <li>Always use brackets when combining AND with OR. Do not rely on operator precedence. Make your logic visible.</li>
       <li>Read your WHERE clause out loud in plain English. If it does not make sense in English, it probably does not do what you want in SQL.</li>
@@ -3226,14 +3226,14 @@ WHERE city = 'Mumbai' AND amount &gt; 500 AND (payment_mode = 'UPI' OR payment_m
       <li>Keep complex conditions well-indented for readability.</li>
     </ul>
     <hr>
-    <h2>13. Real Industry Usage</h2>
+    <h2>How Companies Use This Every Day</h2>
     <p>At Flipkart, the analytics team uses AND extensively: "Show all orders placed today, with a delivered status, from tier-2 cities, where the amount is above one thousand." That is four AND conditions in one query.</p>
     <p>At Jio, network operations queries often use OR: "Find all users in Maharashtra OR Gujarat experiencing high latency."</p>
     <p>IRCTC's booking engine uses NOT to filter availability: "Show all trains NOT in the fully booked status."</p>
     <p>Paytm fraud detection uses combinations of all three: "Flag transactions above twenty thousand rupees that are NOT from usual locations AND occurred between midnight and 5 AM."</p>
     <p>These are real-world patterns that show up in almost every industry in India.</p>
     <hr>
-    <h2>14. Visual Summary</h2>
+    <h2>The Big Picture</h2>
     <pre><code>AND: Both conditions must be true
 ------------------------------------
 Condition A: city = 'Mumbai'   TRUE/FALSE
@@ -3261,7 +3261,7 @@ NOT: Reverses a condition
   TRUE            FALSE
   FALSE           TRUE</code></pre>
     <hr>
-    <h2>15. Quick Revision</h2>
+    <h2>Before You Move On</h2>
     <ul>
       <li>AND requires all conditions to be true. Stricter filter, fewer results.</li>
       <li>OR requires at least one condition to be true. Looser filter, more results.</li>
@@ -3270,7 +3270,7 @@ NOT: Reverses a condition
       <li>Read your condition in plain English before running it to catch logical mistakes.</li>
     </ul>
     <hr>
-    <h2>16. Practice Questions</h2>
+    <h2>Practice Questions</h2>
     <p>Use a students table with columns: name, city, marks, gender, subject.</p>
     <ol>
       <li>Find all students from Bengaluru who scored above 90 marks.</li>
@@ -3278,18 +3278,18 @@ NOT: Reverses a condition
       <li>List all students who are NOT from Chennai.</li>
       <li>Find all female students from Delhi who scored above 80 marks.</li>
       <li>Show all students who are from Hyderabad AND scored more than 75, OR are from Mumbai AND scored more than 85.</li>
-    </ul>
+    </ol>
     <hr>
-    <h2>17. Final Thoughts</h2>
+    <h2>Final Thoughts</h2>
     <p>AND, OR, NOT are where SQL starts to feel like actual thinking rather than just data retrieval. They let you express complex, nuanced questions to your database in a precise, unambiguous way.</p>
     <p>The most important thing to remember is to use brackets. Every experienced SQL developer has at some point been burned by a query that returned wrong results because they forgot brackets when mixing AND and OR. Learn from their mistakes and bracket everything explicitly.</p>
     <p>Once you are comfortable combining these operators, you will find that almost any filter you can describe in plain English, you can translate directly into SQL. That is a powerful skill.</p>
     <p>Rahul finished that Swiggy query in under two minutes. His manager was impressed. You will get there too.</p>
   `,
   'mod4-t4': `
-    <h1>IN and NOT IN: Filtering Multiple Values the Clean Way</h1>
+    <h1>IN and NOT IN: A Shorter Way to Filter Multiple Values</h1>
     <hr>
-    <h2>1. Curiosity-Driven Introduction</h2>
+    <h2>Let's Start Here</h2>
     <p>Priya had just finished her first month as a data analyst at Swiggy. She was comfortable with SELECT, WHERE, and even AND and OR. Then one afternoon her manager, Vikram, gave her a task that made her pause.</p>
     <p>"Pull me all orders from Hyderabad, Bengaluru, Mumbai, Chennai, and Pune from last week. We need it for the regional ops report."</p>
     <p>Priya started typing:</p>
@@ -3298,7 +3298,7 @@ NOT: Reverses a condition
     <p>She remembered something she had read briefly: the IN operator. She decided to look it up properly.</p>
     <p>One minute later, her query was clean, professional, and completely readable. That is what IN does.</p>
     <hr>
-    <h2>2. The Real-World Problem</h2>
+    <h2>The Problem You'll Actually Face</h2>
     <p>Here is the situation: you have a column in your table and you want to filter rows where that column matches any one of several specific values.</p>
     <p>Consider this Swiggy orders table:</p>
     <table>
@@ -3313,7 +3313,7 @@ NOT: Reverses a condition
     </table>
     <p>You want rows for five specific cities. Using OR works but it gets ugly fast. The IN operator solves this elegantly.</p>
     <hr>
-    <h2>3. Why Does This Concept Exist?</h2>
+    <h2>Why Was This Built in the First Place?</h2>
     <p>Before IN, the only way to check if a column matched one of several values was to chain multiple OR conditions:</p>
     <pre><code class="language-sql">SELECT * FROM orders
 WHERE city = 'Hyderabad' OR city = 'Bengaluru' OR city = 'Mumbai'
@@ -3322,25 +3322,25 @@ WHERE city = 'Hyderabad' OR city = 'Bengaluru' OR city = 'Mumbai'
     <p>The IN operator was added to SQL specifically to handle this pattern. It lets you express "match any value from this list" in a single, clean statement. The database understands it and optimises it correctly.</p>
     <p>There is also an important NULL gotcha with NOT IN that many experienced developers have been surprised by. We will cover that carefully.</p>
     <hr>
-    <h2>4. Beginner Intuition</h2>
+    <h2>Think of It This Way</h2>
     <p>Think about how you text your friends before ordering food. You message the group and ask: "Is anyone coming for lunch? Priya, Aman, or Neha?"</p>
     <p>You are asking if the person is any of those three names. That is IN: "Is this value one of these options?"</p>
     <p>NOT IN is the opposite: "Give me everyone who is NOT in this list." It is like saying: "I want everyone except Priya, Aman, and Neha."</p>
     <p>This is a natural way of thinking about filtering. IN and NOT IN simply let you express this directly in SQL.</p>
     <hr>
-    <h2>5. Real-World Analogy</h2>
+    <h2>A Simple Way to Picture It</h2>
     <p>Imagine a bouncer at a club who has an approved guest list: Rahul, Priya, Arjun, Neha.</p>
     <p>When someone comes to the door, the bouncer checks: "Is your name in the list?"</p>
     <p>If yes, you are in (IN operator). If no, you are turned away (NOT IN operator).</p>
     <p>SQL's IN does exactly this for your data: it checks if a column's value appears in a list you provide. Matching rows get included in the result. Non-matching rows are filtered out.</p>
     <hr>
-    <h2>6. Main Concept Explanation</h2>
+    <h2>How It Actually Works</h2>
     <p>IN checks if a column's value matches any value in a list you specify. If it matches, the row is included in the result. This is functionally equivalent to writing multiple OR conditions, but much cleaner and easier to read.</p>
     <p>NOT IN does the opposite. It excludes any row where the column's value matches any value in the list. Only rows where the value is NOT in the list come through.</p>
     <p>Both operators work with text values and numeric values.</p>
     <p>There is one critical gotcha with NOT IN: if your list contains a NULL value, NOT IN will return zero rows. This happens because SQL cannot confirm that a value is "not equal" to NULL (since NULL means unknown). When a NULL is in the list, SQL cannot be certain whether the column's value equals NULL or not, so it excludes every row to be safe. Always make sure your NOT IN list does not contain NULL.</p>
     <hr>
-    <h2>7. Syntax Explanation</h2>
+    <h2>Writing It in SQL</h2>
     <p>Using IN:</p>
     <pre><code class="language-sql">SELECT column1, column2
 FROM table_name
@@ -3353,7 +3353,7 @@ WHERE column_name NOT IN ('value1', 'value2', 'value3');</code></pre>
     <pre><code class="language-sql">SELECT * FROM orders
 WHERE amount IN (100, 200, 500, 1000);</code></pre>
     <hr>
-    <h2>8. Syntax Breakdown Table</h2>
+    <h2>What Each Part Means</h2>
     <table>
       <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
       <tr><td>WHERE column_name</td><td>The column you are checking</td><td>WHERE city</td></tr>
@@ -3364,7 +3364,7 @@ WHERE amount IN (100, 200, 500, 1000);</code></pre>
       <tr><td>NULL in list</td><td>Critical gotcha: NOT IN with a NULL in the list returns zero rows</td><td>Avoid NULL in NOT IN lists</td></tr>
     </table>
     <hr>
-    <h2>9. Multiple Practical Examples</h2>
+    <h2>Let's Try It Out</h2>
     <p>Using the same Swiggy orders table from above.</p>
     <h3>Example 1: IN with Text Values</h3>
     <p>Find all orders from Hyderabad, Bengaluru, and Mumbai.</p>
@@ -3395,7 +3395,7 @@ WHERE city = 'Hyderabad' OR city = 'Bengaluru' OR city = 'Mumbai'
 WHERE city IN ('Hyderabad', 'Bengaluru', 'Mumbai', 'Chennai', 'Pune');</code></pre>
     <p>As the list grows, the IN version scales gracefully. The OR version becomes unreadable.</p>
     <hr>
-    <h2>10. Beginner Confusion Handling</h2>
+    <h2>Things That Trip People Up</h2>
     <p><strong>"Can I use IN with both numbers and text in the same list?"</strong></p>
     <p>No. Keep your list values consistent in type. If the column stores numbers, use numbers in the list. If it stores text, use quoted strings. Mixing types can cause unexpected behaviour or errors.</p>
     <p><strong>"What if my IN list has hundreds of values?"</strong></p>
@@ -3405,7 +3405,7 @@ WHERE city IN ('Hyderabad', 'Bengaluru', 'Mumbai', 'Chennai', 'Pune');</code></p
     <p><strong>"Is IN case-sensitive for text?"</strong></p>
     <p>It depends on the database. MySQL is generally case-insensitive by default. PostgreSQL is case-sensitive. Match the case as it is stored in your database.</p>
     <hr>
-    <h2>11. Common Mistakes</h2>
+    <h2>Common Mistakes</h2>
     <ul>
       <li>Forgetting single quotes for text values. WHERE city IN (Delhi, Mumbai) will fail because SQL treats Delhi and Mumbai as column names, not values.</li>
       <li>Mixing data types in the IN list. Do not write IN ('500', 1000). Keep it consistent.</li>
@@ -3414,7 +3414,7 @@ WHERE city IN ('Hyderabad', 'Bengaluru', 'Mumbai', 'Chennai', 'Pune');</code></p
       <li>Forgetting commas between values in the list.</li>
     </ul>
     <hr>
-    <h2>12. Best Practices</h2>
+    <h2>Best Practices</h2>
     <ul>
       <li>Use IN for short to medium lists of specific values, typically up to 50 or 100 items.</li>
       <li>For very large lists, use a subquery or a JOIN with another table.</li>
@@ -3423,13 +3423,13 @@ WHERE city IN ('Hyderabad', 'Bengaluru', 'Mumbai', 'Chennai', 'Pune');</code></p
       <li>When your IN list might change over time, consider whether the values should be stored in a lookup table instead.</li>
     </ul>
     <hr>
-    <h2>13. Real Industry Usage</h2>
+    <h2>How Companies Use This Every Day</h2>
     <p>Flipkart uses IN to filter products by multiple categories in search results: "Show electronics, books, and home appliances." One IN query instead of three OR conditions.</p>
     <p>IRCTC uses IN to show trains that run on specific days: "Show trains that run on Monday, Wednesday, or Friday."</p>
     <p>Banks use NOT IN to find customers who have not completed specific verification steps: "Show customers who are NOT in the verified_kyc or pending_kyc lists."</p>
     <p>Swiggy uses IN to pull orders from specific delivery zones during a festive sale to calculate surge pricing needs.</p>
     <hr>
-    <h2>14. Visual Summary</h2>
+    <h2>The Big Picture</h2>
     <pre><code>IN: Does the value appear in the list?
 ---------------------------------------
 city column   IN ('Delhi','Mumbai')   Include?
@@ -3452,7 +3452,7 @@ NULL GOTCHA with NOT IN:
 If your list contains NULL, NOT IN returns ZERO rows.
 Always check: WHERE city NOT IN ('Delhi', NULL) --&gt; 0 rows!</code></pre>
     <hr>
-    <h2>15. Quick Revision</h2>
+    <h2>Before You Move On</h2>
     <ul>
       <li>IN checks if a column value matches any value in a provided list.</li>
       <li>NOT IN excludes rows where the column matches any value in the list.</li>
@@ -3462,32 +3462,32 @@ Always check: WHERE city NOT IN ('Delhi', NULL) --&gt; 0 rows!</code></pre>
       <li>For very large value lists, consider a JOIN with a lookup table instead.</li>
     </ul>
     <hr>
-    <h2>16. Practice Questions</h2>
+    <h2>Practice Questions</h2>
     <ol>
       <li>Write a query to show all orders from Pune, Jaipur, and Lucknow from an orders table.</li>
       <li>Find all students who did NOT score 60, 70, or 80 marks in Science from a student_scores table.</li>
       <li>From a products table, list all products in the categories Electronics, Books, or Clothing.</li>
       <li>Show all employees whose department is NOT HR, Finance, or Legal from an employees table.</li>
       <li>From a movie_bookings table, show all bookings for movies in the languages Hindi, Telugu, and Tamil.</li>
-    </ul>
+    </ol>
     <hr>
-    <h2>17. Final Thoughts</h2>
+    <h2>Final Thoughts</h2>
     <p>IN and NOT IN are small in syntax but large in impact. They clean up your queries, make them more readable, and make them easier to maintain as requirements change.</p>
     <p>Whenever you find yourself writing the same column name with OR conditions multiple times, stop and think: this is probably a job for IN.</p>
     <p>And always remember that NOT IN with a NULL in the list is one of SQL's quiet traps. It returns nothing and does not error, so you might not even notice. Keep that in mind and you will save yourself a lot of debugging time.</p>
     <p>Priya's query was done in ten seconds. Vikram added three more cities to the list an hour later, and Priya updated the query in thirty seconds. That is the power of writing clean SQL from the start.</p>
   `,
   'mod4-t5': `
-    <h1>BETWEEN: Filtering Ranges the Right Way</h1>
+    <h1>BETWEEN: Pick a Range Without Writing Two Conditions</h1>
     <hr>
-    <h2>1. Curiosity-Driven Introduction</h2>
+    <h2>Let's Start Here</h2>
     <p>Arjun was on his second month at Flipkart when his team lead, Sneha, gave him what sounded like a straightforward task during the evening standup.</p>
     <p>"Arjun, can you pull all orders placed between the 1st and the 15th of this month, where the order value is between one thousand and five thousand rupees? We need it for the monthly settlement report."</p>
     <p>Arjun nodded and opened his SQL editor. He thought about how to write this. He knew about WHERE and comparison operators. He could probably write something like WHERE amount >= 1000 AND amount <= 5000. That would work. But it felt slightly clunky, especially when combined with the date range too.</p>
     <p>Sneha noticed him thinking and said: "Have you tried BETWEEN yet?"</p>
     <p>Arjun had not. But ten minutes later, after looking it up and trying it, he understood why she asked. It was cleaner, more readable, and expressed his intent more directly.</p>
     <hr>
-    <h2>2. The Real-World Problem</h2>
+    <h2>The Problem You'll Actually Face</h2>
     <p>Range-based filtering is everywhere in data work. Consider these common requests at Indian companies:</p>
     <p>At IRCTC, the ops team wants all train bookings made between the 1st and 15th of August, the busiest travel period of the year.</p>
     <p>At a bank, the compliance team needs all UPI transactions between five hundred and two thousand rupees for an audit.</p>
@@ -3495,24 +3495,24 @@ Always check: WHERE city NOT IN ('Delhi', NULL) --&gt; 0 rows!</code></pre>
     <p>At Zomato, the growth team filters restaurants with ratings between 4.0 and 4.5 for a curated "hidden gems" campaign.</p>
     <p>All of these require selecting rows where a value falls within a specific range. Both the lower boundary and the upper boundary matter. BETWEEN is designed exactly for this.</p>
     <hr>
-    <h2>3. Why Does This Concept Exist?</h2>
+    <h2>Why Was This Built in the First Place?</h2>
     <p>Before BETWEEN, you would write range conditions using two comparison operators connected with AND:</p>
     <pre><code class="language-sql">WHERE amount &gt;= 1000 AND amount &lt;= 5000</code></pre>
     <p>This works perfectly. The problem is not correctness, it is readability and expressiveness. When you have multiple range conditions in a single query, the compound comparisons pile up quickly and become harder to read.</p>
     <p>SQL developers recognised that range filtering was an extremely common pattern. They created BETWEEN as a cleaner, more expressive way to write the same thing. It also communicates intent more clearly: "I want values in this range" is more direct than "I want values that are greater than or equal to this AND less than or equal to that."</p>
     <p>Both approaches are valid. BETWEEN is simply cleaner for straightforward ranges.</p>
     <hr>
-    <h2>4. Beginner Intuition</h2>
+    <h2>Think of It This Way</h2>
     <p>Think of BETWEEN as a range checkpoint on a highway. Cars are allowed through only if their registration year is between 2018 and 2024. If you are from 2017, turn back. If you are from 2025, also turn back. You must be within the boundary on both sides.</p>
     <p>Crucially, both the lower boundary and the upper boundary are inclusive. A car registered in 2018 is allowed. A car registered in 2024 is allowed. The boundary values themselves are part of the qualifying range.</p>
     <p>This inclusive behaviour on both ends is one of the most important things to remember about BETWEEN.</p>
     <hr>
-    <h2>5. Real-World Analogy</h2>
+    <h2>A Simple Way to Picture It</h2>
     <p>Imagine you are a cricket commentator and you want to analyse matches where Virat Kohli scored between 50 and 100 runs. Not below 50 (too small), not above 100 (a century deserves special treatment). Exactly in that range, inclusive of 50 and 100 themselves.</p>
     <p>BETWEEN is like that filter: you define two endpoints, and the database includes every row where the value falls at or between those points.</p>
     <p>Or think about train seat classes. You want to show passengers in coach numbers between 3 and 7. That includes coaches 3, 4, 5, 6, and 7. Both end coaches are included.</p>
     <hr>
-    <h2>6. Main Concept Explanation</h2>
+    <h2>How It Actually Works</h2>
     <p>BETWEEN filters rows where a column's value falls within a specified range. The range includes both the lower value and the upper value. This is called a closed interval.</p>
     <p>BETWEEN works with three types of data:</p>
     <p>Numbers: WHERE amount BETWEEN 1000 AND 5000 includes 1000, 2500, and 5000.</p>
@@ -3521,7 +3521,7 @@ Always check: WHERE city NOT IN ('Delhi', NULL) --&gt; 0 rows!</code></pre>
     <p>You can also use NOT BETWEEN to exclude a range. NOT BETWEEN returns rows where the value is below the lower boundary or above the upper boundary.</p>
     <p>The lower value must always come first. If you write BETWEEN 5000 AND 1000, you will get zero results because SQL does not automatically swap them. Always put the smaller value first.</p>
     <hr>
-    <h2>7. Syntax Explanation</h2>
+    <h2>Writing It in SQL</h2>
     <p>Basic BETWEEN:</p>
     <pre><code class="language-sql">SELECT column1, column2
 FROM table_name
@@ -3535,7 +3535,7 @@ WHERE date_column BETWEEN '2024-01-01' AND '2024-03-31';</code></pre>
 FROM table_name
 WHERE column_name NOT BETWEEN lower_value AND upper_value;</code></pre>
     <hr>
-    <h2>8. Syntax Breakdown Table</h2>
+    <h2>What Each Part Means</h2>
     <table>
       <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
       <tr><td>WHERE column_name</td><td>The column whose values you are range-filtering</td><td>WHERE amount</td></tr>
@@ -3547,7 +3547,7 @@ WHERE column_name NOT BETWEEN lower_value AND upper_value;</code></pre>
       <tr><td>Inclusivity</td><td>Both lower and upper values are included in results</td><td>BETWEEN 100 AND 500 includes 100 and 500</td></tr>
     </table>
     <hr>
-    <h2>9. Multiple Practical Examples</h2>
+    <h2>Let's Try It Out</h2>
     <p>Using a Flipkart orders table:</p>
     <table>
       <tr><th>order_id</th><th>customer_name</th><th>city</th><th>amount</th><th>order_date</th><th>rating</th></tr>
@@ -3582,7 +3582,7 @@ FROM orders
 WHERE order_date BETWEEN '2024-04-01' AND '2024-06-30';</code></pre>
     <p>All orders from the full three-month period are included, with both April 1st and June 30th being included in the results.</p>
     <hr>
-    <h2>10. Beginner Confusion Handling</h2>
+    <h2>Things That Trip People Up</h2>
     <p><strong>"Is BETWEEN inclusive or exclusive at the boundaries?"</strong></p>
     <p>BETWEEN is always inclusive at both boundaries. BETWEEN 1000 AND 5000 includes both 1000 and 5000 in the results. If you want to exclude the boundaries, you must use > and < instead of BETWEEN.</p>
     <p><strong>"What if I accidentally write the larger value first?"</strong></p>
@@ -3592,7 +3592,7 @@ WHERE order_date BETWEEN '2024-04-01' AND '2024-06-30';</code></pre>
     <p><strong>"Is BETWEEN the same as >= AND <=?"</strong></p>
     <p>Yes, functionally identical. BETWEEN 1000 AND 5000 produces the same results as >= 1000 AND <= 5000. BETWEEN is simply a more readable way to express the same thing.</p>
     <hr>
-    <h2>11. Common Mistakes</h2>
+    <h2>Common Mistakes</h2>
     <ul>
       <li>Reversing the range values: BETWEEN 5000 AND 1000 returns nothing. Always lower value first, then higher value.</li>
       <li>Forgetting that BETWEEN is inclusive: if you want to exclude the boundary values, use strict comparison operators (> and <) instead.</li>
@@ -3600,7 +3600,7 @@ WHERE order_date BETWEEN '2024-04-01' AND '2024-06-30';</code></pre>
       <li>Using BETWEEN for approximate matches on text when LIKE would be more appropriate.</li>
     </ul>
     <hr>
-    <h2>12. Best Practices</h2>
+    <h2>Best Practices</h2>
     <ul>
       <li>Use BETWEEN instead of >= AND <= for clarity. It communicates range intent more directly.</li>
       <li>Always put the lower value first and higher value second.</li>
@@ -3609,13 +3609,13 @@ WHERE order_date BETWEEN '2024-04-01' AND '2024-06-30';</code></pre>
       <li>Combine BETWEEN with other conditions using AND when filtering on multiple criteria simultaneously.</li>
     </ul>
     <hr>
-    <h2>13. Real Industry Usage</h2>
+    <h2>How Companies Use This Every Day</h2>
     <p>At every Indian company that deals with financial data, BETWEEN is used constantly for period-based reporting. A bank analyst runs: "Show all transactions between January 1st and March 31st" every quarter for financial reports.</p>
     <p>Zomato's data team uses BETWEEN to segment orders by price range for their promotional campaigns: which orders fall in the affordable range, mid-range, or premium range.</p>
     <p>IRCTC uses BETWEEN to calculate seat occupancy for specific journey date ranges during holiday seasons like Diwali and Eid.</p>
     <p>HR departments use BETWEEN to filter employees by joining year ranges for tenure-based analysis: "Show all employees who joined between 2020 and 2022."</p>
     <hr>
-    <h2>14. Visual Summary</h2>
+    <h2>The Big Picture</h2>
     <pre><code>Number line for: WHERE amount BETWEEN 1000 AND 5000
 
     |-------|===============================|-------|
@@ -3638,7 +3638,7 @@ NOT BETWEEN (opposite):
     Below 1000                           Above 5000
     These rows come through. Middle is excluded.</code></pre>
     <hr>
-    <h2>15. Quick Revision</h2>
+    <h2>Before You Move On</h2>
     <ul>
       <li>BETWEEN filters rows where a column's value falls within a range.</li>
       <li>Both the lower boundary and upper boundary are inclusive.</li>
@@ -3649,32 +3649,32 @@ NOT BETWEEN (opposite):
       <li>BETWEEN is equivalent to >= AND <= but more readable.</li>
     </ul>
     <hr>
-    <h2>16. Practice Questions</h2>
+    <h2>Practice Questions</h2>
     <ol>
       <li>From a students table, write a query to show all students who scored between 70 and 90 marks.</li>
       <li>From a transactions table, find all transactions made between '2024-01-01' and '2024-01-31'.</li>
       <li>From a products table, show all products priced between 200 and 1500 rupees.</li>
       <li>From an employees table, find employees who joined between 2019 and 2022.</li>
       <li>From a movie_bookings table, show bookings NOT in the price range between 100 and 500 rupees.</li>
-    </ul>
+    </ol>
     <hr>
-    <h2>17. Final Thoughts</h2>
+    <h2>Final Thoughts</h2>
     <p>BETWEEN is one of those SQL features that, once you know it, you will reach for it naturally every time you need a range filter.</p>
     <p>It is not just a shortcut. It is a more expressive way to write range conditions that makes your intent immediately clear to anyone reading your query. Clean, readable SQL is not just about aesthetics. It reduces bugs, speeds up reviews, and makes your work easier to maintain.</p>
     <p>Arjun finished Sneha's report in under five minutes. The query was clean enough that she reviewed it in thirty seconds and said it looked good. That is what writing clear SQL gets you.</p>
     <p>When you write BETWEEN, you are not just filtering data. You are communicating your intent clearly to the database and to every colleague who reads your code.</p>
   `,
   'mod4-t6': `
-    <h1>LIKE and Wildcards: Finding Patterns in Your Data</h1>
+    <h1>LIKE and Wildcards: Search When You Don't Know the Exact Value</h1>
     <hr>
-    <h2>1. Curiosity-Driven Introduction</h2>
+    <h2>Let's Start Here</h2>
     <p>It was Priya's first month at Zomato and she had settled into the routine of writing WHERE clauses with confidence. Then one day her manager, Kiran, came to her with a request that stopped her in her tracks.</p>
     <p>"Priya, can you pull a list of all our restaurant partners whose names contain the word 'Biryani'? Also, we need all customer email addresses that end with gmail.com. Oh, and separately, all phone numbers that start with 99."</p>
     <p>Priya tried to think how to write this. She knew WHERE and = for exact matches. But "contains the word Biryani" was not an exact match. "Ends with gmail.com" was not an exact match either. The restaurant might be called Hyderabadi Biryani House, or Paradise Biryani, or Biryani Bros. They all contain the word but they are all different.</p>
     <p>How do you search for a pattern rather than an exact value?</p>
     <p>That is exactly what LIKE and wildcards are for.</p>
     <hr>
-    <h2>2. The Real-World Problem</h2>
+    <h2>The Problem You'll Actually Face</h2>
     <p>Data in the real world is messy, inconsistent, and partial. In Indian databases especially, you encounter variations in spelling, naming, and format constantly.</p>
     <p>Consider these situations:</p>
     <p>A telecom company like Jio wants to find all customers whose names contain "Kumar" anywhere, which is an extremely common middle or last name.</p>
@@ -3683,21 +3683,21 @@ NOT BETWEEN (opposite):
     <p>IRCTC wants to find all station names that start with "New" to create a list of stations with that prefix.</p>
     <p>In all these cases, you are not looking for an exact value. You are looking for a pattern. LIKE, combined with wildcard characters, lets you express these pattern-based searches directly in SQL.</p>
     <hr>
-    <h2>3. Why Does This Concept Exist?</h2>
+    <h2>Why Was This Built in the First Place?</h2>
     <p>The = operator only checks for exact equality. It is like looking for someone whose name is exactly and precisely "Rahul Kumar Sharma". If their name is stored as "Rahul K. Sharma" or "R. K. Sharma", the = operator will not find them.</p>
     <p>Real-world searches need flexibility. You want to find things that look like what you are searching for, not just things that match exactly character for character.</p>
     <p>LIKE was built into SQL to enable pattern matching. It lets you use wildcard characters to represent unknown or variable parts of a string, giving you a powerful and flexible tool for searching text data.</p>
     <hr>
-    <h2>4. Beginner Intuition</h2>
+    <h2>Think of It This Way</h2>
     <p>Think about searching your own phone's contact list. When you type "Rah" in the search bar, your phone shows Rahul Verma, Rahesh Jain, Priyanka Rahane, and so on. Your phone is not looking for an exact match to "Rah". It is looking for contacts where "Rah" appears anywhere in the name.</p>
     <p>SQL's LIKE does the same thing for database queries. You tell SQL: "Find me all rows where this column contains this pattern." The wildcards are how you tell SQL which parts of the pattern are fixed and which parts can vary.</p>
     <hr>
-    <h2>5. Real-World Analogy</h2>
+    <h2>A Simple Way to Picture It</h2>
     <p>Imagine you are searching for an old friend in a wedding guest register. You vaguely remember her name starts with "Neha" but you cannot recall the surname.</p>
     <p>You do not check every single name on every page. You scan for anything that begins with "Neha": Neha Gupta, Neha Verma, Neha S., Neha Agarwal. You use a pattern to guide your search.</p>
     <p>LIKE with wildcards lets you do exactly this in SQL. The % wildcard says "anything can go here," and the _ wildcard says "exactly one character goes here." Together they let you define flexible patterns that match many different values at once.</p>
     <hr>
-    <h2>6. Main Concept Explanation</h2>
+    <h2>How It Actually Works</h2>
     <p>LIKE is a comparison operator used in WHERE clauses that matches values based on patterns rather than exact strings.</p>
     <p>It uses two wildcard characters:</p>
     <p>The % (percent) wildcard matches zero or more characters. It can represent nothing, one letter, or a hundred letters. It is the "I do not care what is here" symbol.</p>
@@ -3711,13 +3711,13 @@ NOT BETWEEN (opposite):
     </ul>
     <p>Case sensitivity depends on the database. MySQL is generally case-insensitive by default for LIKE. PostgreSQL is case-sensitive. Check your specific database's behaviour.</p>
     <hr>
-    <h2>7. Syntax Explanation</h2>
+    <h2>Writing It in SQL</h2>
     <pre><code class="language-sql">SELECT column1, column2
 FROM table_name
 WHERE column_name LIKE 'pattern';</code></pre>
     <p>The pattern must always be in single quotes. Inside the quotes, you use % and _ where you want flexibility.</p>
     <hr>
-    <h2>8. Syntax Breakdown Table</h2>
+    <h2>What Each Part Means</h2>
     <table>
       <tr><th>Pattern</th><th>What It Matches</th><th>Example Matches</th><th>Does Not Match</th></tr>
       <tr><td>'Rahul%'</td><td>Starts with Rahul</td><td>Rahul Sharma, Rahul K., Rahul</td><td>Singh Rahul</td></tr>
@@ -3729,7 +3729,7 @@ WHERE column_name LIKE 'pattern';</code></pre>
       <tr><td>'%@gmail.com'</td><td>Ends with @gmail.com</td><td>user@gmail.com, priya@gmail.com</td><td>user@yahoo.com</td></tr>
     </table>
     <hr>
-    <h2>9. Multiple Practical Examples</h2>
+    <h2>Let's Try It Out</h2>
     <p>Using a Zomato customers table:</p>
     <table>
       <tr><th>customer_id</th><th>name</th><th>email</th><th>phone</th><th>city</th></tr>
@@ -3764,7 +3764,7 @@ FROM customers
 WHERE name LIKE '%Singh%';</code></pre>
     <p>Result: row 7002 (Priya Singh). Singh appears at the end of the name.</p>
     <hr>
-    <h2>10. Beginner Confusion Handling</h2>
+    <h2>Things That Trip People Up</h2>
     <p><strong>"Why does 'Rahul%' match 'Priyanka' if she has no Rahul in her name?"</strong></p>
     <p>It does not. 'Rahul%' only matches strings that start with the letters R-a-h-u-l. Priyanka does not start with Rahul, so it does not match. The % after Rahul means "after these letters, anything can follow," but the starting letters must be exactly Rahul.</p>
     <p><strong>"What is the difference between % and _?"</strong></p>
@@ -3774,7 +3774,7 @@ WHERE name LIKE '%Singh%';</code></pre>
     <p><strong>"Is LIKE case-sensitive?"</strong></p>
     <p>It depends on the database. In MySQL with default settings, LIKE is case-insensitive, meaning 'rahul%' and 'Rahul%' return the same results. In PostgreSQL, LIKE is case-sensitive, but you can use ILIKE for case-insensitive matching. Always test your specific database.</p>
     <hr>
-    <h2>11. Common Mistakes</h2>
+    <h2>Common Mistakes</h2>
     <ul>
       <li>Forgetting single quotes around the pattern. WHERE name LIKE Rahul% will cause an error.</li>
       <li>Using = instead of LIKE for pattern matching. WHERE name = 'Rahul%' will literally look for a customer named "Rahul%" with the percent sign as part of the name, which is almost certainly wrong.</li>
@@ -3783,7 +3783,7 @@ WHERE name LIKE '%Singh%';</code></pre>
       <li>Assuming LIKE is always case-insensitive. It is not in all databases.</li>
     </ul>
     <hr>
-    <h2>12. Best Practices</h2>
+    <h2>Best Practices</h2>
     <ul>
       <li>Be as specific as possible with your pattern. Use %pattern% only when you genuinely need to match the value anywhere in the string.</li>
       <li>If you need case-insensitive matching on a case-sensitive database, wrap the column in LOWER() and use a lowercase pattern: WHERE LOWER(name) LIKE 'rahul%'.</li>
@@ -3791,13 +3791,13 @@ WHERE name LIKE '%Singh%';</code></pre>
       <li>Test your patterns on a small sample before running on the full table to make sure you are matching what you expect.</li>
     </ul>
     <hr>
-    <h2>13. Real Industry Usage</h2>
+    <h2>How Companies Use This Every Day</h2>
     <p>Zomato uses LIKE to search restaurant names: when you type "biryani" in the search bar, the backend runs a query with LIKE '%biryani%' against the restaurant name column.</p>
     <p>IRCTC uses LIKE to search train station names. Typing "New" shows all stations starting with New Delhi, New Jalpaiguri, New Cooch Behar, and so on.</p>
     <p>Flipkart's product search system uses pattern matching to surface products whose names contain the typed keywords.</p>
     <p>Banks use LIKE to search customer names when the full name is not known: a customer service agent might search for all customers with 'Kumar' in their name to find a specific account.</p>
     <hr>
-    <h2>14. Visual Summary</h2>
+    <h2>The Big Picture</h2>
     <pre><code>WILDCARD QUICK REFERENCE:
 
 % = any number of characters (including zero)
@@ -3821,7 +3821,7 @@ HOW TO CHOOSE YOUR PATTERN:
 "exactly N chars"--&gt;  '____' (N underscores)
 "X then 1 char then Y" --&gt; 'X_Y'</code></pre>
     <hr>
-    <h2>15. Quick Revision</h2>
+    <h2>Before You Move On</h2>
     <ul>
       <li>LIKE is used in WHERE clauses to match text values based on patterns.</li>
       <li>% matches any number of characters, including zero characters.</li>
@@ -3831,16 +3831,16 @@ HOW TO CHOOSE YOUR PATTERN:
       <li>Case sensitivity depends on your database. MySQL is case-insensitive by default; PostgreSQL is case-sensitive.</li>
     </ul>
     <hr>
-    <h2>16. Practice Questions</h2>
+    <h2>Practice Questions</h2>
     <ol>
       <li>Find all customers from a customers table whose name ends with the letter 'a'.</li>
       <li>From a products table, find all products whose product_code starts with 'IND'.</li>
       <li>From a users table, find all email addresses containing 'flipkart'.</li>
       <li>From an employees table, find all employees whose name is exactly four characters long.</li>
       <li>From a contacts table, find all phone numbers where the third digit is 9 (for example: 98 9XXXXXXX pattern, so the pattern would be '98_9%').</li>
-    </ul>
+    </ol>
     <hr>
-    <h2>17. Final Thoughts</h2>
+    <h2>Final Thoughts</h2>
     <p>LIKE and wildcards unlock a whole new dimension of SQL querying. Before this, you could only search for exact values. Now you can search for patterns, which is how real data searches work in real products.</p>
     <p>Every time you use a search bar on an Indian app, whether it is looking for a restaurant name on Zomato, a train station on IRCTC, or a product on Flipkart, there is a LIKE query running somewhere in the backend to find matching results.</p>
     <p>Understanding this puts you closer to how production systems actually work. And when you write LIKE queries yourself, remember: be specific enough to get useful results, but flexible enough to match the variations in real-world data.</p>
@@ -3848,9 +3848,9 @@ HOW TO CHOOSE YOUR PATTERN:
     <p>That is exactly how good SQL skills develop: one well-timed query at a time.</p>
   `,
   'mod4-t7': `
-    <h1>IS NULL and IS NOT NULL: Finding the Missing Pieces</h1>
+    <h1>IS NULL and IS NOT NULL: How to Find the Data That Is Missing</h1>
     <hr>
-    <h2>1. Curiosity-Driven Introduction</h2>
+    <h2>Let's Start Here</h2>
     <p>Neha had been at Zomato for three weeks when her manager, Suresh, gave her what seemed like a simple task.</p>
     <p>"Neha, can you find all customers who have not provided a phone number? We need to send them a reminder to update their profile."</p>
     <p>Neha opened the customers table and looked at it. She could see that some rows had phone numbers and some had empty-looking cells in the phone column. She started typing WHERE phone = '' thinking that would catch the blank ones.</p>
@@ -3858,37 +3858,37 @@ HOW TO CHOOSE YOUR PATTERN:
     <p>Suresh came back and glanced at her screen. "Are you using IS NULL? You need IS NULL for truly missing values. A blank string and a NULL are very different things."</p>
     <p>That conversation taught Neha one of the most important distinctions in SQL.</p>
     <hr>
-    <h2>2. The Real-World Problem</h2>
+    <h2>The Problem You'll Actually Face</h2>
     <p>Think about any user profile on any Indian app: Swiggy, IRCTC, Flipkart, or PhonePe. When you sign up, you fill in some fields and skip others. Maybe you skipped your alternate phone number. Maybe you never added a middle name. Maybe you left the address line 2 blank.</p>
     <p>In the database, these unfilled fields are not stored as empty strings or zeros. They are stored as NULL.</p>
     <p>NULL is SQL's way of representing the concept "this value is unknown" or "this value was never provided." It is different from zero (which is a real number), different from an empty string (which is a real string of length zero), and different from a space (which is also a real string).</p>
     <p>The problem is: how do you find these truly missing values? If you try WHERE phone = NULL, you get zero results. SQL does not behave the way you would expect. That is what this article is about.</p>
     <hr>
-    <h2>3. Why Does This Concept Exist?</h2>
+    <h2>Why Was This Built in the First Place?</h2>
     <p>Databases needed a way to represent the absence of data. Not zero, not blank, but genuinely absent, unknown, or not applicable.</p>
     <p>Consider: if a customer has not added a date of birth to their Flipkart account, is their date of birth zero? No. Is it an empty string? No. The concept of a birthdate simply does not exist for that customer in the database. That is NULL.</p>
     <p>The challenge is that NULL does not obey normal comparison rules. In SQL, any comparison involving NULL returns neither true nor false. It returns a special state called unknown. This means WHERE phone = NULL evaluates to unknown for every row, and unknown is treated the same as false, so no rows are returned.</p>
     <p>IS NULL and IS NOT NULL were created specifically to detect NULL values correctly. They are the only reliable way to check for the presence or absence of NULL.</p>
     <hr>
-    <h2>4. Beginner Intuition</h2>
+    <h2>Think of It This Way</h2>
     <p>Think of NULL as a blank form field that was never filled in. Not zero, not empty, just never touched.</p>
     <p>Now imagine you have a stack of registration forms. Some forms have a phone number written in the phone field. Some have the field completely empty, as if the pen never touched it.</p>
     <p>If you look for forms where phone = "nothing", you are looking for forms where someone wrote the word "nothing." That is different from forms where the field was simply never filled in.</p>
     <p>IS NULL finds the forms where the field was never filled in at all. It looks for true absence, not a specific value.</p>
     <hr>
-    <h2>5. Real-World Analogy</h2>
+    <h2>A Simple Way to Picture It</h2>
     <p>Imagine a teacher asking students to write their blood group on a form before a sports event. Some students write A+, B+, O-, and so on. Some students leave that field blank because they genuinely do not know their blood group.</p>
     <p>The blank is not zero. It is not "unknown" as text. It is just the absence of a value.</p>
     <p>When the school nurse needs to find which students did not fill in their blood group, she looks for the truly blank fields. IS NULL does exactly this in SQL: it finds the rows where a value was never provided, not rows where the value is zero or an empty string.</p>
     <hr>
-    <h2>6. Main Concept Explanation</h2>
+    <h2>How It Actually Works</h2>
     <p>NULL in SQL means the absence of a value. It is not zero, not an empty string, and not any specific value at all.</p>
     <p>IS NULL is the correct way to check if a column contains NULL. It returns true for rows where the column has no value.</p>
     <p>IS NOT NULL is the correct way to check if a column has any value at all. It returns true for rows where the column is not NULL, meaning the column contains something.</p>
     <p>The critical rule: never use = NULL or != NULL. These comparisons always return unknown in SQL because NULL cannot be compared to anything, including itself. NULL = NULL is unknown, not true.</p>
     <p>Think of it this way: if someone says "my height is unknown," you cannot meaningfully ask "is your unknown height equal to five feet eight inches?" The question does not make sense. You can only ask "do you have a known height?" (IS NOT NULL) or "is your height unknown?" (IS NULL).</p>
     <hr>
-    <h2>7. Syntax Explanation</h2>
+    <h2>Writing It in SQL</h2>
     <p>Finding rows with NULL in a column:</p>
     <pre><code class="language-sql">SELECT column1, column2
 FROM table_name
@@ -3904,7 +3904,7 @@ SELECT * FROM customers WHERE phone = NULL;
 -- Use this instead
 SELECT * FROM customers WHERE phone IS NULL;</code></pre>
     <hr>
-    <h2>8. Syntax Breakdown Table</h2>
+    <h2>What Each Part Means</h2>
     <table>
       <tr><th>Part</th><th>What It Does</th><th>Notes</th></tr>
       <tr><td>IS NULL</td><td>Checks if a column has no value (is absent)</td><td>Returns rows where the column contains NULL</td></tr>
@@ -3915,7 +3915,7 @@ SELECT * FROM customers WHERE phone IS NULL;</code></pre>
       <tr><td>NULL vs 0</td><td>These are different things</td><td>0 is a real number; NULL means no number was provided</td></tr>
     </table>
     <hr>
-    <h2>9. Multiple Practical Examples</h2>
+    <h2>Let's Try It Out</h2>
     <p>Here is a Swiggy customers table with some missing data:</p>
     <table>
       <tr><th>customer_id</th><th>name</th><th>phone</th><th>email</th><th>alternate_phone</th></tr>
@@ -3950,7 +3950,7 @@ FROM customers
 WHERE phone IS NOT NULL AND email IS NOT NULL;</code></pre>
     <p>Result: rows 8001 (Rahul) and 8004 (Neha). Both have both phone and email filled in.</p>
     <hr>
-    <h2>10. Beginner Confusion Handling</h2>
+    <h2>Things That Trip People Up</h2>
     <p><strong>"Why does WHERE phone = NULL not work?"</strong></p>
     <p>Because NULL is not a value. NULL means "we do not know what the value is." SQL cannot compare something to "we do not know." The result of any comparison with NULL is unknown, which is treated like false, so no rows are returned. Always use IS NULL.</p>
     <p><strong>"Is NULL the same as an empty string ''?"</strong></p>
@@ -3960,7 +3960,7 @@ WHERE phone IS NOT NULL AND email IS NOT NULL;</code></pre>
     <p><strong>"If I filter WHERE amount != 500, will rows with NULL amount be included?"</strong></p>
     <p>No. When the amount is NULL, the comparison NULL != 500 evaluates to unknown, not true. NULL rows are excluded from the results. If you want to include NULL rows when filtering, you must explicitly add OR amount IS NULL.</p>
     <hr>
-    <h2>11. Common Mistakes</h2>
+    <h2>Common Mistakes</h2>
     <ul>
       <li>Using = NULL instead of IS NULL. This is the most common mistake with NULLs in SQL and it returns nothing.</li>
       <li>Assuming that WHERE column != 'something' will include NULL rows. It does not. NULL rows are excluded from all comparisons.</li>
@@ -3969,7 +3969,7 @@ WHERE phone IS NOT NULL AND email IS NOT NULL;</code></pre>
       <li>Using COUNT(<em>) vs COUNT(column). COUNT(</em>) counts all rows including those with NULL. COUNT(column) counts only rows where the column is not NULL.</li>
     </ul>
     <hr>
-    <h2>12. Best Practices</h2>
+    <h2>Best Practices</h2>
     <ul>
       <li>Always use IS NULL and IS NOT NULL for NULL comparisons. Never use = NULL.</li>
       <li>When filtering with WHERE column != 'value', remember that NULL rows are silently excluded. Add OR column IS NULL if you want them included.</li>
@@ -3977,14 +3977,14 @@ WHERE phone IS NOT NULL AND email IS NOT NULL;</code></pre>
       <li>Be explicit about NULL handling in reports. If a column can contain NULL, mention it in documentation so downstream users know to expect it.</li>
     </ul>
     <hr>
-    <h2>13. Real Industry Usage</h2>
+    <h2>How Companies Use This Every Day</h2>
     <p>At banks across India, IS NULL is used to find customers whose PAN card or Aadhaar number is missing for KYC compliance checks.</p>
     <p>Flipkart uses IS NOT NULL to verify that product listings have mandatory fields like price and category before publishing them to the website.</p>
     <p>IRCTC uses IS NULL to identify bookings where the seat number has not yet been assigned, which can happen for waitlisted tickets.</p>
     <p>PhonePe uses IS NULL to find transactions where the beneficiary bank details were not captured correctly, flagging them for manual review.</p>
     <p>HR systems at companies like Infosys use IS NULL to find employees who have not filled in their emergency contact information.</p>
     <hr>
-    <h2>14. Visual Summary</h2>
+    <h2>The Big Picture</h2>
     <pre><code>CUSTOMERS TABLE:
 +------+--------+-------------+
 | id   | name   | phone       |
@@ -4011,7 +4011,7 @@ THE TRAP - NEVER DO THIS:
 WHERE phone = NULL  --&gt; returns 0 rows (NULL cannot equal anything)
 WHERE phone != NULL --&gt; returns 0 rows (NULL cannot be compared)</code></pre>
     <hr>
-    <h2>15. Quick Revision</h2>
+    <h2>Before You Move On</h2>
     <ul>
       <li>NULL means a value is absent, unknown, or was never provided. It is not zero and not an empty string.</li>
       <li>Use IS NULL to find rows where a column has no value.</li>
@@ -4020,16 +4020,16 @@ WHERE phone != NULL --&gt; returns 0 rows (NULL cannot be compared)</code></pre>
       <li>NULL rows are excluded from standard comparison operations. Account for this in your WHERE clauses.</li>
     </ul>
     <hr>
-    <h2>16. Practice Questions</h2>
+    <h2>Practice Questions</h2>
     <ol>
       <li>From a customers table, find all customers who have not provided an email address.</li>
       <li>From a students table, list all students who have not filled in their blood group.</li>
       <li>From a products table at Flipkart, find all products where the price is missing (NULL).</li>
       <li>From a bank_accounts table, show all accounts that DO have a registered mobile number.</li>
       <li>From a train_bookings table, find all bookings where the seat number has not yet been assigned.</li>
-    </ul>
+    </ol>
     <hr>
-    <h2>17. Final Thoughts</h2>
+    <h2>Final Thoughts</h2>
     <p>NULL handling is one of those SQL topics that trips up beginners and even experienced developers who have not thought carefully about it.</p>
     <p>The key insight is this: NULL is not a value. It is the absence of a value. Because of that, it cannot be compared with normal equality operators. You need the special IS NULL and IS NOT NULL syntax that SQL provides specifically for this purpose.</p>
     <p>Once this clicks, you will start seeing NULL handling opportunities everywhere in your queries. Whenever you write a WHERE clause that filters on a column that might have missing values, you will remember to ask: "Am I handling NULL correctly here?"</p>
@@ -4037,16 +4037,16 @@ WHERE phone != NULL --&gt; returns 0 rows (NULL cannot be compared)</code></pre>
     <p>Neha went back, rewrote her query with IS NULL, and found significantly more customers with missing phone numbers than her first attempt had shown. Suresh was impressed that she caught the discrepancy and fixed it. That kind of data accuracy matters at every company.</p>
   `,
   'mod4-t8': `
-    <h1>ORDER BY: Taking Control of How Your Results Are Arranged</h1>
+    <h1>ORDER BY: Sort Your Results Any Way You Want</h1>
     <hr>
-    <h2>1. Curiosity-Driven Introduction</h2>
+    <h2>Let's Start Here</h2>
     <p>Simran had just started as a data analyst at Zomato. She had learned SELECT and WHERE, and she was feeling confident about her SQL. Then her manager, Deepak, gave her a request that seemed simple but had a catch.</p>
     <p>"Simran, I need a list of all restaurants in Mumbai. Sort them by rating, highest rated first. And if two restaurants have the same rating, sort those alphabetically by name."</p>
     <p>Simran wrote her SELECT query quickly. The results came back. Mumbai restaurants were there. But they were in no particular order, random-looking, impossible to read at a glance. The top-rated restaurant was buried somewhere in the middle.</p>
     <p>"Add ORDER BY," Deepak said, glancing at her screen. "Without it, SQL does not guarantee any particular order."</p>
     <p>That was the moment Simran understood why ORDER BY exists.</p>
     <hr>
-    <h2>2. The Real-World Problem</h2>
+    <h2>The Problem You'll Actually Face</h2>
     <p>Raw data without ordering is like a stack of exam papers that have been shuffled after marking. All the information is there, but finding the top scorers requires scanning every single paper.</p>
     <p>Consider these real situations:</p>
     <p>Flipkart wants to show cheapest products first when a customer sorts by price.</p>
@@ -4055,23 +4055,23 @@ WHERE phone != NULL --&gt; returns 0 rows (NULL cannot be compared)</code></pre>
     <p>Byju's wants to see students ranked by their test scores to identify top performers for a scholarship program.</p>
     <p>In all these cases, the data exists in the database but is not in a useful order. ORDER BY is what puts it in the order that makes it actionable.</p>
     <hr>
-    <h2>3. Why Does This Concept Exist?</h2>
+    <h2>Why Was This Built in the First Place?</h2>
     <p>SQL tables do not store data in any guaranteed order. When you run a query without ORDER BY, the database can return rows in any order it finds convenient: the order rows were inserted, the order they are stored on disk, the order a particular query plan retrieves them. This order can vary between runs of the same query.</p>
     <p>This is a fundamental property of relational databases. Tables are sets of rows, and sets are inherently unordered.</p>
     <p>For any practical use, though, you almost always care about order. Reports need to be sorted. Rankings need to reflect actual rankings. Historical data needs to be in chronological sequence.</p>
     <p>ORDER BY was designed to let you specify exactly what order you want your results in. The database sorts the results before returning them to you.</p>
     <hr>
-    <h2>4. Beginner Intuition</h2>
+    <h2>Think of It This Way</h2>
     <p>Think about getting a list of your class's marks back from your teacher. If the teacher hands them out in the order they were corrected, the list is meaningless for understanding performance. But if the teacher sorts them from highest to lowest, you can immediately see who the top performers are and where everyone else stands.</p>
     <p>ORDER BY is your instruction to the database to sort results before delivering them. You choose the column to sort by and the direction: ascending (lowest to highest) or descending (highest to lowest).</p>
     <p>Without ORDER BY, you have all the data but no useful arrangement. With ORDER BY, your results are organised exactly as you need.</p>
     <hr>
-    <h2>5. Real-World Analogy</h2>
+    <h2>A Simple Way to Picture It</h2>
     <p>Think of a wedding catering team organising the seating arrangement. They have a list of all guests, but the list needs to be organised. The event manager says: "Arrange all guests by table number, and within each table, alphabetically by name."</p>
     <p>That is ORDER BY with multiple columns. Sort by table number first (primary sort), then by name within each table (secondary sort).</p>
     <p>SQL's ORDER BY works exactly like this event manager's instruction: sort by this column primarily, and when there are ties, use this other column as the tiebreaker.</p>
     <hr>
-    <h2>6. Main Concept Explanation</h2>
+    <h2>How It Actually Works</h2>
     <p>ORDER BY sorts the result set of a query. It always comes at the end of the query, after WHERE if there is one.</p>
     <p>ASC stands for ascending order: A to Z for text, smallest to largest for numbers, earliest to latest for dates. This is the default order if you do not specify anything.</p>
     <p>DESC stands for descending order: Z to A for text, largest to smallest for numbers, latest to earliest for dates.</p>
@@ -4079,7 +4079,7 @@ WHERE phone != NULL --&gt; returns 0 rows (NULL cannot be compared)</code></pre>
     <p>You can also sort by column position number instead of column name. ORDER BY 2 means sort by whatever the second column in your SELECT list is. This is a shortcut but less readable.</p>
     <p>NULL values in ORDER BY: most databases sort NULL values at the end when ascending, and at the beginning when descending. The exact behaviour depends on your database.</p>
     <hr>
-    <h2>7. Syntax Explanation</h2>
+    <h2>Writing It in SQL</h2>
     <p>Basic ORDER BY:</p>
     <pre><code class="language-sql">SELECT column1, column2
 FROM table_name
@@ -4102,7 +4102,7 @@ ORDER BY column_name DESC;</code></pre>
 FROM restaurants
 ORDER BY 2 DESC;</code></pre>
     <hr>
-    <h2>8. Syntax Breakdown Table</h2>
+    <h2>What Each Part Means</h2>
     <table>
       <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
       <tr><td>ORDER BY</td><td>Keyword that starts the sort specification</td><td>ORDER BY</td></tr>
@@ -4114,7 +4114,7 @@ ORDER BY 2 DESC;</code></pre>
       <tr><td>Default</td><td>If you omit ASC or DESC, SQL uses ASC</td><td>ORDER BY name means ORDER BY name ASC</td></tr>
     </table>
     <hr>
-    <h2>9. Multiple Practical Examples</h2>
+    <h2>Let's Try It Out</h2>
     <p>Here is a sample Zomato restaurants table:</p>
     <table>
       <tr><th>rest_id</th><th>name</th><th>city</th><th>rating</th><th>avg_price</th></tr>
@@ -4151,7 +4151,7 @@ FROM train_bookings
 ORDER BY booking_date DESC;</code></pre>
     <p>The most recently made booking appears first, which is what customers expect when they view their booking history.</p>
     <hr>
-    <h2>10. Beginner Confusion Handling</h2>
+    <h2>Things That Trip People Up</h2>
     <p><strong>"If I do not use ORDER BY, will SQL always return data in the same order?"</strong></p>
     <p>No, and this is very important to understand. SQL makes no guarantee about the order of results unless you use ORDER BY. The order might look consistent during testing but change as the table grows, as the database optimises queries differently, or as records are updated and deleted. Never rely on default order.</p>
     <p><strong>"What happens when two rows have the same value in my ORDER BY column?"</strong></p>
@@ -4161,7 +4161,7 @@ ORDER BY booking_date DESC;</code></pre>
     <p><strong>"Does ASC or DESC apply to the whole ORDER BY, or just one column?"</strong></p>
     <p>It applies per column. ORDER BY city ASC, amount DESC means sort city ascending AND sort amount descending within ties. Each column has its own direction.</p>
     <hr>
-    <h2>11. Common Mistakes</h2>
+    <h2>Common Mistakes</h2>
     <ul>
       <li>Not using ORDER BY and then being confused why results appear in random order.</li>
       <li>Forgetting that ASC is the default. ORDER BY column and ORDER BY column ASC are identical.</li>
@@ -4170,7 +4170,7 @@ ORDER BY booking_date DESC;</code></pre>
       <li>Confusing ASC and DESC. If you wanted the highest first but got lowest first, you used ASC when you meant DESC.</li>
     </ul>
     <hr>
-    <h2>12. Best Practices</h2>
+    <h2>Best Practices</h2>
     <ul>
       <li>Always use ORDER BY when the order of results matters for your report or application. Never assume a default order.</li>
       <li>Be explicit: always write ASC or DESC even though ASC is the default. It makes your intent clear to anyone reading the query.</li>
@@ -4179,13 +4179,13 @@ ORDER BY booking_date DESC;</code></pre>
       <li>Keep your primary sort column as the most important dimension. Secondary and tertiary columns are tiebreakers.</li>
     </ul>
     <hr>
-    <h2>13. Real Industry Usage</h2>
+    <h2>How Companies Use This Every Day</h2>
     <p>Swiggy sorts restaurants by a combination of rating, distance, and delivery time depending on user preferences. When you select "sort by rating" in the app, the backend runs an ORDER BY rating DESC query.</p>
     <p>Flipkart's search results use ORDER BY to implement "sort by price: low to high" and "sort by relevance" options that customers see on every search page.</p>
     <p>IRCTC displays train schedules using ORDER BY departure_time ASC so travellers see the earliest trains first.</p>
     <p>Banks display statement history with ORDER BY transaction_date DESC so the most recent transactions appear at the top, which is what customers expect.</p>
     <hr>
-    <h2>14. Visual Summary</h2>
+    <h2>The Big Picture</h2>
     <pre><code>UNSORTED DATA:
 +------------------+---------+--------+
 | name             | city    | rating |
@@ -4215,7 +4215,7 @@ ORDER BY rating ASC (lowest first):
 Multiple columns: ORDER BY city ASC, rating DESC
 (Sort by city alphabetically, then by rating within each city)</code></pre>
     <hr>
-    <h2>15. Quick Revision</h2>
+    <h2>Before You Move On</h2>
     <ul>
       <li>ORDER BY sorts the query results before returning them.</li>
       <li>ASC: ascending order (A-Z, 0-9, oldest-newest). This is the default.</li>
@@ -4225,25 +4225,25 @@ Multiple columns: ORDER BY city ASC, rating DESC
       <li>ORDER BY comes at the end of the query, after WHERE.</li>
     </ul>
     <hr>
-    <h2>16. Practice Questions</h2>
+    <h2>Practice Questions</h2>
     <ol>
       <li>From a students table, write a query to list all students sorted by marks from highest to lowest.</li>
       <li>From a train_schedules table, show all trains sorted by departure_time earliest first.</li>
       <li>From a products table, list Flipkart products sorted by price ascending, then by product_name alphabetically.</li>
       <li>From a bank_transactions table, show all transactions for account number '1234567890' sorted by transaction_date descending (most recent first).</li>
       <li>From a restaurant table, show restaurants in Delhi sorted by rating descending, and where ratings are equal, sorted by avg_delivery_time ascending.</li>
-    </ul>
+    </ol>
     <hr>
-    <h2>17. Final Thoughts</h2>
+    <h2>Final Thoughts</h2>
     <p>ORDER BY might seem like a simple finishing touch, but it is one of the most important parts of writing queries that produce genuinely useful output.</p>
     <p>Data without order is difficult to interpret. A ranked list, a chronological history, a price comparison: all of these need ORDER BY to be meaningful. And because SQL makes no guarantees about order without it, the lesson is simple: if order matters to you, always specify ORDER BY.</p>
     <p>Deepak added one more insight when Simran submitted her final query: "A query that gives you the right data in the right order is always more valuable than one that just gives you the right data."</p>
     <p>She never forgot that.</p>
   `,
   'mod4-t9': `
-    <h1>LIMIT and TOP: Getting Exactly the Rows You Need</h1>
+    <h1>LIMIT and TOP: Stop SQL From Returning Thousands of Rows at Once</h1>
     <hr>
-    <h2>1. Curiosity-Driven Introduction</h2>
+    <h2>Let's Start Here</h2>
     <p>Arjun had just joined Flipkart as a data analyst. On his fourth day, his team lead, Ananya, gave him what sounded like the simplest possible task.</p>
     <p>"Get me the five most recent orders from Bengaluru. Just five. We need to do a spot check."</p>
     <p>Arjun wrote his SELECT query. He added a WHERE clause to filter for Bengaluru. He added an ORDER BY clause to sort by date descending. And then he pressed Run.</p>
@@ -4252,34 +4252,34 @@ Multiple columns: ORDER BY city ASC, rating DESC
     <p>Arjun stared at the query. He had not. He did not know what LIMIT was.</p>
     <p>Sixty seconds later, after adding LIMIT 5, his query returned five rows in under a second. That was the moment he understood why LIMIT exists.</p>
     <hr>
-    <h2>2. The Real-World Problem</h2>
+    <h2>The Problem You'll Actually Face</h2>
     <p>Databases at Indian companies are enormous. Flipkart processes millions of orders a month. Swiggy has tens of millions of users. IRCTC handles hundreds of thousands of bookings daily.</p>
     <p>When you query these systems, you almost never need all the data. You need a slice of it. You need the most recent ten transactions. You need the top five customers by order value. You need the first page of search results.</p>
     <p>If every query returned all matching rows regardless of how many there are, the following problems occur: the query is slow, the result is too large to scroll through meaningfully, it consumes unnecessary memory and network bandwidth, and the application or dashboard that displays the data becomes sluggish.</p>
     <p>LIMIT (and its SQL Server equivalent, TOP) solves all of these by letting you specify the maximum number of rows you want returned.</p>
     <hr>
-    <h2>3. Why Does This Concept Exist?</h2>
+    <h2>Why Was This Built in the First Place?</h2>
     <p>SQL's default behaviour is to return all rows that match your conditions. This is logically correct but practically overwhelming when you are working with large datasets.</p>
     <p>The need for row-count limiting comes up in three common scenarios. First, you want the "top N" something: top 10 customers, top 5 products, top 3 cities. Second, you are building a paginated interface where you show results ten or twenty at a time. Third, you are sampling or testing a query and want to see a few rows without waiting for millions.</p>
     <p>Different databases implemented this feature with slightly different syntax. MySQL, PostgreSQL, and SQLite use LIMIT, which comes at the end of the query. SQL Server uses TOP, which comes right after SELECT. Both accomplish the same goal.</p>
     <hr>
-    <h2>4. Beginner Intuition</h2>
+    <h2>Think of It This Way</h2>
     <p>Imagine you ask a waiter at a restaurant for "the menu." If he brings you every single item ever available including seasonal specials and discontinued items, you would be overwhelmed. You just wanted today's top dishes.</p>
     <p>LIMIT is your instruction to the waiter: "Bring me the top five items, not the whole archive."</p>
     <p>It does not change the menu. It does not delete any dishes. It simply restricts how much is served to you right now.</p>
     <hr>
-    <h2>5. Real-World Analogy</h2>
+    <h2>A Simple Way to Picture It</h2>
     <p>Think about how Instagram works. When you open the app, you do not see every single post from every account you follow since the beginning of time. You see the most recent 20 posts. When you scroll to the bottom, it loads 20 more.</p>
     <p>That is LIMIT with OFFSET in action. The app asks for 20 posts (LIMIT 20), then the next 20 (LIMIT 20 OFFSET 20), then the next (LIMIT 20 OFFSET 40), and so on. This is called pagination, and it is how every large-scale application handles large datasets.</p>
     <hr>
-    <h2>6. Main Concept Explanation</h2>
+    <h2>How It Actually Works</h2>
     <p>LIMIT restricts the number of rows returned by a query. You specify a number, and the database returns at most that many rows.</p>
     <p>TOP does the same thing in SQL Server, but the syntax places it differently: after SELECT and before the column list, instead of at the end of the query.</p>
     <p>LIMIT with OFFSET is a powerful extension for pagination. OFFSET tells the database how many rows to skip before starting to count. LIMIT 10 OFFSET 20 means: skip the first 20 rows, then give me the next 10. This gives you rows 21 through 30, which would be "page 3" if you were paginating with 10 rows per page.</p>
     <p>LIMIT only controls how many rows you get back. It does not change the table. It does not delete rows. The data is all still there.</p>
     <p>An important detail: LIMIT alone, without ORDER BY, returns an unpredictable set of rows. If you want the "top 5" by any meaningful measure, you must combine LIMIT with ORDER BY.</p>
     <hr>
-    <h2>7. Syntax Explanation</h2>
+    <h2>Writing It in SQL</h2>
     <p>MySQL, PostgreSQL, SQLite (LIMIT at the end):</p>
     <pre><code class="language-sql">SELECT column1, column2
 FROM table_name
@@ -4298,7 +4298,7 @@ ORDER BY column_name
 LIMIT 10 OFFSET 20;</code></pre>
     <p>This skips 20 rows and returns the next 10.</p>
     <hr>
-    <h2>8. Syntax Breakdown Table</h2>
+    <h2>What Each Part Means</h2>
     <table>
       <tr><th>Database</th><th>Keyword</th><th>Placement</th><th>Example</th></tr>
       <tr><td>MySQL</td><td>LIMIT n</td><td>End of query, after ORDER BY</td><td>SELECT * FROM orders LIMIT 5;</td></tr>
@@ -4309,7 +4309,7 @@ LIMIT 10 OFFSET 20;</code></pre>
       <tr><td>SQL Server OFFSET</td><td>OFFSET m ROWS FETCH NEXT n ROWS ONLY</td><td>After ORDER BY</td><td>ORDER BY id OFFSET 20 ROWS FETCH NEXT 10 ROWS ONLY</td></tr>
     </table>
     <hr>
-    <h2>9. Multiple Practical Examples</h2>
+    <h2>Let's Try It Out</h2>
     <p>Using a Flipkart orders table:</p>
     <table>
       <tr><th>order_id</th><th>customer_name</th><th>city</th><th>amount</th><th>order_date</th></tr>
@@ -4349,7 +4349,7 @@ ORDER BY product_name ASC
 LIMIT 10 OFFSET 20;</code></pre>
     <p>OFFSET 20 skips the first 20 rows (pages 1 and 2). LIMIT 10 then returns the next 10 (page 3). To get page 4, change OFFSET to 30. This is how every paginated app loads data.</p>
     <hr>
-    <h2>10. Beginner Confusion Handling</h2>
+    <h2>Things That Trip People Up</h2>
     <p><strong>"Does LIMIT delete data from the table?"</strong></p>
     <p>No. LIMIT only affects the result set that is returned to you. The full table with all its rows remains completely unchanged. You are just asking for a preview.</p>
     <p><strong>"What does LIMIT without ORDER BY do?"</strong></p>
@@ -4359,7 +4359,7 @@ LIMIT 10 OFFSET 20;</code></pre>
     <p><strong>"What is OFFSET used for?"</strong></p>
     <p>OFFSET skips a specified number of rows before starting to return results. It is the mechanism behind pagination. LIMIT 10 OFFSET 0 is the first page, LIMIT 10 OFFSET 10 is the second page, and so on.</p>
     <hr>
-    <h2>11. Common Mistakes</h2>
+    <h2>Common Mistakes</h2>
     <ul>
       <li>Using LIMIT without ORDER BY when you want "top" results. Without ORDER BY, LIMIT returns unpredictable rows.</li>
       <li>Using LIMIT in SQL Server where TOP is required.</li>
@@ -4368,7 +4368,7 @@ LIMIT 10 OFFSET 20;</code></pre>
       <li>Assuming LIMIT changes the data permanently. It never does.</li>
     </ul>
     <hr>
-    <h2>12. Best Practices</h2>
+    <h2>Best Practices</h2>
     <ul>
       <li>Always pair LIMIT or TOP with ORDER BY when you want the "top" or "most recent" results. The combination gives you meaningful, deterministic results.</li>
       <li>Use LIMIT when exploring new tables. Running SELECT * FROM large_table LIMIT 10 lets you preview the data without loading millions of rows.</li>
@@ -4376,14 +4376,14 @@ LIMIT 10 OFFSET 20;</code></pre>
       <li>In production dashboards, always use LIMIT to prevent slow queries from loading too much data at once.</li>
     </ul>
     <hr>
-    <h2>13. Real Industry Usage</h2>
+    <h2>How Companies Use This Every Day</h2>
     <p>Flipkart uses LIMIT extensively in its product search: every search result page loads a specific number of products, not the entire catalogue.</p>
     <p>Swiggy's restaurant listing uses LIMIT with ORDER BY to show the top nearby restaurants sorted by rating and distance.</p>
     <p>Bank mobile apps use LIMIT to show the last 10 transactions in the statement view. Loading all transactions since the account was opened would be impractical.</p>
     <p>Byju's uses LIMIT to display the top 5 recommended courses on a student's home screen based on their learning history.</p>
     <p>IRCTC uses LIMIT to show the first 10 available trains on any route search, with options to show more if needed.</p>
     <hr>
-    <h2>14. Visual Summary</h2>
+    <h2>The Big Picture</h2>
     <pre><code>WITHOUT LIMIT:
 Query: SELECT * FROM orders WHERE city = 'Bengaluru'
 Result: 1,30,000 rows --&gt; overwhelmed, slow, unusable
@@ -4406,7 +4406,7 @@ SQL SERVER:
 SELECT TOP 5 * FROM orders ORDER BY amount DESC;
          ^^^^^ right after SELECT</code></pre>
     <hr>
-    <h2>15. Quick Revision</h2>
+    <h2>Before You Move On</h2>
     <ul>
       <li>LIMIT restricts the number of rows returned. It does not change the table.</li>
       <li>LIMIT n goes at the end of the query in MySQL, PostgreSQL, and SQLite.</li>
@@ -4416,25 +4416,25 @@ SELECT TOP 5 * FROM orders ORDER BY amount DESC;
       <li>LIMIT is excellent for exploring large tables with a quick preview.</li>
     </ul>
     <hr>
-    <h2>16. Practice Questions</h2>
+    <h2>Practice Questions</h2>
     <ol>
       <li>Write a query to get the 10 most recently registered users from a users table.</li>
       <li>From a products table, show the 5 cheapest products by price.</li>
       <li>In SQL Server syntax, show the top 3 highest-value transactions from a transactions table.</li>
       <li>Write a pagination query to get the third page of results from an orders table, showing 15 orders per page, sorted by order_date ascending.</li>
       <li>From a students table, find the top 5 students by marks, then write the query again to get the next 5 (ranks 6 through 10).</li>
-    </ul>
+    </ol>
     <hr>
-    <h2>17. Final Thoughts</h2>
+    <h2>Final Thoughts</h2>
     <p>LIMIT and TOP are small additions to your SQL toolkit that have an outsized impact on query performance and usability.</p>
     <p>Every well-built application that works with a database uses limiting to control how much data is fetched at once. Infinite scrolling, paginated search results, "top 10" lists, recent activity feeds: all of these are powered by LIMIT with ORDER BY under the hood.</p>
     <p>When you start applying this in your own queries, you will immediately notice that queries run faster, results are easier to read, and your colleagues will notice that your queries are thoughtfully written. That matters more than beginners usually realise.</p>
     <p>Arjun's five-row query ran in under a second. Ananya spotted the four rows she needed for the spot check and sent him a message: "Good work." That is what focused, efficient SQL looks like.</p>
   `,
   'mod4-t10': `
-    <h1>DISTINCT: Getting Unique Values Without the Noise</h1>
+    <h1>DISTINCT: Remove Duplicates and Get Only Unique Values</h1>
     <hr>
-    <h2>1. Curiosity-Driven Introduction</h2>
+    <h2>Let's Start Here</h2>
     <p>Priya had been at Swiggy for six weeks when her manager, Aditya, called her over for a quick data request.</p>
     <p>"Priya, I need a simple list of all the cities we delivered to last week. Just the city names, one per city, no repeats."</p>
     <p>Priya wrote a SELECT query for the orders table. She added a WHERE clause for last week's dates. She ran it. The result came back with 87,000 rows. Cities repeating endlessly: Mumbai, Mumbai, Delhi, Mumbai, Bengaluru, Chennai, Delhi, Mumbai...</p>
@@ -4442,7 +4442,7 @@ SELECT TOP 5 * FROM orders ORDER BY amount DESC;
     <p>Aditya nodded. "Add DISTINCT."</p>
     <p>Two seconds later, Priya had a clean list of 23 city names. That was it.</p>
     <hr>
-    <h2>2. The Real-World Problem</h2>
+    <h2>The Problem You'll Actually Face</h2>
     <p>In relational databases, repetition is normal. Every order from Mumbai adds another Mumbai to the city column. Every UPI payment adds another UPI to the payment_mode column. This is by design: each row records a real event, and many events share the same attribute values.</p>
     <p>But when you need to understand the scope of your data, repetition becomes noise. You do not want to know "how many orders had Mumbai" when you are just trying to build a list of all cities you serve. You want the unique values.</p>
     <p>Consider these practical needs:</p>
@@ -4452,30 +4452,30 @@ SELECT TOP 5 * FROM orders ORDER BY amount DESC;
     <p>PhonePe needs all unique bank names used for UPI transactions to audit partner coverage.</p>
     <p>In every case, duplicates are noise. DISTINCT removes them.</p>
     <hr>
-    <h2>3. Why Does This Concept Exist?</h2>
+    <h2>Why Was This Built in the First Place?</h2>
     <p>SELECT retrieves data row by row. If ten thousand orders came from Mumbai, SELECT city FROM orders returns "Mumbai" ten thousand times.</p>
     <p>You could use GROUP BY to collapse duplicates, but that is for aggregation (counting, summing, averaging). When you just want the unique values themselves without any calculations, that is overkill.</p>
     <p>DISTINCT was added to SQL as a clean, simple way to say: "return each unique value only once." No aggregation needed. No GROUP BY needed. Just deduplicate the output.</p>
     <hr>
-    <h2>4. Beginner Intuition</h2>
+    <h2>Think of It This Way</h2>
     <p>Imagine you have a bag filled with coloured marbles. Some colours appear many times: ten red, five blue, three green, eight yellow, two red again.</p>
     <p>Your friend asks: "What colours do you have?"</p>
     <p>You do not count them out one by one. You just look through the bag and say: "Red, blue, green, yellow." Four colours, listed once each.</p>
     <p>DISTINCT does exactly this for your query results. It looks through all the rows, finds each unique value, and returns each value exactly once.</p>
     <hr>
-    <h2>5. Real-World Analogy</h2>
+    <h2>A Simple Way to Picture It</h2>
     <p>Think about a cricket broadcast showing all the players who batted in a match. If a player batted in multiple innings or had multiple balls recorded, their name appears many times in the raw data.</p>
     <p>But the broadcast just wants to show which players participated. Not how many times each entry appears, just who the unique players were.</p>
     <p>DISTINCT is like the scoreboard operator who goes through the full ball-by-ball record and pulls out one entry per player.</p>
     <hr>
-    <h2>6. Main Concept Explanation</h2>
+    <h2>How It Actually Works</h2>
     <p>DISTINCT removes duplicate rows from query results. It goes right after the SELECT keyword, before the column list.</p>
     <p>When you use DISTINCT on a single column, it returns each unique value in that column exactly once.</p>
     <p>When you use DISTINCT on multiple columns, it returns each unique combination of those columns exactly once. "Delhi, UPI" and "Delhi, Card" are two different combinations and will both appear even if each occurs thousands of times. But if "Delhi, UPI" occurs five thousand times, it will appear just once.</p>
     <p>DISTINCT is not the same as GROUP BY. GROUP BY is used when you want to perform aggregation (counting rows, summing amounts, etc.) within groups. DISTINCT is used when you just want the unique values themselves with no aggregation.</p>
     <p>COUNT(DISTINCT column) is a special usage that counts how many unique values exist in a column. For example: "How many distinct cities placed orders this month?"</p>
     <hr>
-    <h2>7. Syntax Explanation</h2>
+    <h2>Writing It in SQL</h2>
     <p>Single column DISTINCT:</p>
     <pre><code class="language-sql">SELECT DISTINCT column_name
 FROM table_name;</code></pre>
@@ -4490,7 +4490,7 @@ WHERE order_date &gt;= '2024-07-01';</code></pre>
     <pre><code class="language-sql">SELECT COUNT(DISTINCT city)
 FROM orders;</code></pre>
     <hr>
-    <h2>8. Syntax Breakdown Table</h2>
+    <h2>What Each Part Means</h2>
     <table>
       <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
       <tr><td>SELECT DISTINCT</td><td>Keyword pair that deduplicates results</td><td>SELECT DISTINCT</td></tr>
@@ -4501,7 +4501,7 @@ FROM orders;</code></pre>
       <tr><td>DISTINCT vs GROUP BY</td><td>DISTINCT: just unique rows. GROUP BY: unique groups for aggregation.</td><td>Use DISTINCT when no aggregation needed</td></tr>
     </table>
     <hr>
-    <h2>9. Multiple Practical Examples</h2>
+    <h2>Let's Try It Out</h2>
     <p>Here is a sample Swiggy orders table:</p>
     <table>
       <tr><th>order_id</th><th>customer_name</th><th>city</th><th>payment_mode</th><th>cuisine</th></tr>
@@ -4533,7 +4533,7 @@ FROM orders;</code></pre>
 FROM orders;</code></pre>
     <p>Result: 3. This tells you there are 3 distinct cities in the table without listing them.</p>
     <hr>
-    <h2>10. Beginner Confusion Handling</h2>
+    <h2>Things That Trip People Up</h2>
     <p><strong>"I used DISTINCT on two columns but I am still seeing what looks like duplicates."</strong></p>
     <p>When DISTINCT is applied to multiple columns, uniqueness is based on the combination of all listed columns. "Mumbai, UPI" and "Mumbai, Cash" are different combinations and both appear. They are not duplicates from SQL's perspective.</p>
     <p><strong>"Is DISTINCT the same as GROUP BY?"</strong></p>
@@ -4543,7 +4543,7 @@ FROM orders;</code></pre>
     <p><strong>"Will DISTINCT handle NULL values?"</strong></p>
     <p>Yes. If multiple rows have NULL in the column, DISTINCT treats all NULLs as the same value and includes NULL only once in the results.</p>
     <hr>
-    <h2>11. Common Mistakes</h2>
+    <h2>Common Mistakes</h2>
     <ul>
       <li>Using DISTINCT when GROUP BY with aggregation is what you actually need. If you want to count how many orders per city, use GROUP BY, not DISTINCT.</li>
       <li>Expecting DISTINCT on two columns to mean "distinct for each column independently." It means distinct combinations.</li>
@@ -4551,7 +4551,7 @@ FROM orders;</code></pre>
       <li>Using SELECT DISTINCT * when the table has a unique ID column. Every row will already be distinct because of the ID column, making DISTINCT pointless.</li>
     </ul>
     <hr>
-    <h2>12. Best Practices</h2>
+    <h2>Best Practices</h2>
     <ul>
       <li>Use DISTINCT only when you genuinely need to remove duplicates from your result. It adds processing overhead on large tables.</li>
       <li>If performance is a concern on very large tables, be aware that DISTINCT requires the database to sort or hash the results to find duplicates. For very large datasets, this can be slow.</li>
@@ -4559,14 +4559,14 @@ FROM orders;</code></pre>
       <li>Do not confuse DISTINCT with a data quality fix. If duplicates exist in your source data when they should not, the real fix is cleaning the source, not just querying with DISTINCT.</li>
     </ul>
     <hr>
-    <h2>13. Real Industry Usage</h2>
+    <h2>How Companies Use This Every Day</h2>
     <p>Ola uses DISTINCT to determine which unique pickup locations have been used in the past month to plan driver deployment.</p>
     <p>Flipkart uses COUNT(DISTINCT customer_id) to measure unique customers who made purchases during a sale event, not just the number of orders.</p>
     <p>IRCTC uses DISTINCT on route combinations to build their master list of available routes for the route search feature.</p>
     <p>Banks use DISTINCT on beneficiary accounts to understand how many unique payees a customer has added, which is relevant for fraud detection.</p>
     <p>Byju's uses DISTINCT on course IDs to find how many unique courses a student has accessed, giving a measure of learning breadth.</p>
     <hr>
-    <h2>14. Visual Summary</h2>
+    <h2>The Big Picture</h2>
     <pre><code>ORIGINAL CITY COLUMN (87,000 rows example):
 Mumbai
 Delhi
@@ -4597,7 +4597,7 @@ Mumbai      UPI            same as first --&gt; removed by DISTINCT
 
 COUNT(DISTINCT city) = 4 (just the count, not the list)</code></pre>
     <hr>
-    <h2>15. Quick Revision</h2>
+    <h2>Before You Move On</h2>
     <ul>
       <li>DISTINCT removes duplicate rows from query results.</li>
       <li>Use SELECT DISTINCT column FROM table to get unique values in one column.</li>
@@ -4607,25 +4607,25 @@ COUNT(DISTINCT city) = 4 (just the count, not the list)</code></pre>
       <li>NULL values: DISTINCT treats all NULLs as the same and shows NULL only once.</li>
     </ul>
     <hr>
-    <h2>16. Practice Questions</h2>
+    <h2>Practice Questions</h2>
     <ol>
       <li>From a students table, find all unique branch names (CSE, ECE, MBA, etc.).</li>
       <li>From a transactions table, list all distinct payment modes used by customers.</li>
       <li>From a movie_bookings table, find all unique languages of movies booked in 2024.</li>
       <li>From a food_orders table, find all unique city-cuisine combinations ordered in July.</li>
       <li>From a sales table, use COUNT(DISTINCT customer_id) to find how many unique customers made a purchase this quarter.</li>
-    </ul>
+    </ol>
     <hr>
-    <h2>17. Final Thoughts</h2>
+    <h2>Final Thoughts</h2>
     <p>DISTINCT is one of those tools that you will reach for constantly in data work. It is not glamorous, but it is incredibly practical. Whenever your manager asks "how many different X are there?" or "give me a list of all X without repeats," DISTINCT is your go-to answer.</p>
     <p>One thing to remember: DISTINCT is for removing duplicates in your output. It is not for fixing duplicates in your source data. If you notice that DISTINCT is required just to get correct-looking results from a table that should not have duplicates, that is a data quality issue worth investigating separately.</p>
     <p>For Priya, those 23 unique city names were exactly what Aditya needed. The regional ops team had their data in thirty seconds. The week's report was built on time.</p>
     <p>That is what clean, well-chosen SQL looks like.</p>
   `,
   'mod4-t11': `
-    <h1>Column Aliases (AS): Giving Your Results a Human-Friendly Name</h1>
+    <h1>Column Aliases (AS): Rename Columns to Something That Actually Makes Sense</h1>
     <hr>
-    <h2>1. Curiosity-Driven Introduction</h2>
+    <h2>Let's Start Here</h2>
     <p>Neha had been at Zomato for two months and was finally feeling comfortable with SQL. Then came her first task that required presenting results to a non-technical manager.</p>
     <p>She ran her query to pull order data for a weekly performance review. The results came back perfectly. The right rows, the right calculations, exactly what the manager asked for. She pasted it into a message and sent it.</p>
     <p>Her manager called her back almost immediately. "Neha, what is txn_amt? And what is rest_id? And what is ord_cnt? I cannot read any of this."</p>
@@ -4633,28 +4633,28 @@ COUNT(DISTINCT city) = 4 (just the count, not the list)</code></pre>
     <p>Her technical query had produced technically correct output, but the labels were unreadable to anyone outside the engineering team.</p>
     <p>That was the day she learned about column aliases.</p>
     <hr>
-    <h2>2. The Real-World Problem</h2>
+    <h2>The Problem You'll Actually Face</h2>
     <p>Databases are designed to be efficient for storage and processing. Column names like txn_amt, cust_id, or rest_nm are short and machine-friendly. But they are terrible for human communication.</p>
     <p>When you write a report, build a dashboard, or share query results with a manager or client, the column headers need to be readable. "Transaction Amount" means something. "txn_amt" means very little to someone outside the data team.</p>
     <p>There is also a second problem: computed columns have no name at all by default. If you write SELECT price <em> quantity FROM orders, the result column is labelled something like price </em> quantity or even just col1, depending on the database. That is meaningless in a report.</p>
     <p>Column aliases solve both problems: they let you rename any column in your output to whatever label you want, without touching the underlying table at all.</p>
     <hr>
-    <h2>3. Why Does This Concept Exist?</h2>
+    <h2>Why Was This Built in the First Place?</h2>
     <p>Data has two audiences: machines and humans. Databases are optimised for machines. Reports and dashboards are consumed by humans.</p>
     <p>The gap between these two audiences is often the column name. The database stores it as cust_id because that is efficient and consistent. The report needs to show it as "Customer ID" because that is what humans understand at a glance.</p>
     <p>Column aliases were added to SQL to bridge this gap. They are temporary labels that exist only in your query's output. They do not change the table, they do not affect other queries, and they have zero impact on the database itself. They purely serve the purpose of making your output readable.</p>
     <hr>
-    <h2>4. Beginner Intuition</h2>
+    <h2>Think of It This Way</h2>
     <p>Think about your name. On government documents, you might be listed as "SHARMA, RAHUL KUMAR" in all caps with the surname first. On your WhatsApp profile, you are just "Rahul". At work, your email might show "Rahul S.".</p>
     <p>Your identity is the same in all cases. The representation changes based on the context and the audience.</p>
     <p>Column aliases are exactly like this. The underlying data is the same. The alias just changes how the column is labelled in your specific query's output.</p>
     <hr>
-    <h2>5. Real-World Analogy</h2>
+    <h2>A Simple Way to Picture It</h2>
     <p>Think about a price tag in a shop. The item in the storeroom database might be catalogued as SKU-4721-BLK-XL. But the price tag on the shelf says "Black T-Shirt, Size XL, Rs 799."</p>
     <p>Same item, different presentation for different audiences. The catalogue code serves the inventory system. The price tag serves the customer.</p>
     <p>Column aliases serve the reader of your SQL output the same way a price tag serves a shopper.</p>
     <hr>
-    <h2>6. Main Concept Explanation</h2>
+    <h2>How It Actually Works</h2>
     <p>A column alias is a temporary name you assign to a column in your SELECT statement. You write it using the AS keyword after the column name.</p>
     <p>The alias appears in the output as the column header. The underlying table is completely unaffected.</p>
     <p>You can use aliases on regular columns to rename them. You can use them on calculated expressions to give the result a meaningful name. And you can use them on aggregate functions like SUM or COUNT to label the result clearly.</p>
@@ -4663,7 +4663,7 @@ COUNT(DISTINCT city) = 4 (just the count, not the list)</code></pre>
     <p>Table aliases work the same way: you can give a table a short alias in the FROM clause to make your query shorter, especially in queries with multiple tables.</p>
     <p>One important limitation: you cannot use a column alias in the WHERE clause of the same query. This is because WHERE is evaluated before SELECT in SQL's logical processing order, so the aliases do not exist yet when WHERE runs. You can use aliases in ORDER BY, because ORDER BY is evaluated after SELECT.</p>
     <hr>
-    <h2>7. Syntax Explanation</h2>
+    <h2>Writing It in SQL</h2>
     <p>Renaming a column:</p>
     <pre><code class="language-sql">SELECT column_name AS alias_name
 FROM table_name;</code></pre>
@@ -4680,7 +4680,7 @@ FROM table_name;</code></pre>
     <pre><code class="language-sql">SELECT o.order_id, o.amount
 FROM orders AS o;</code></pre>
     <hr>
-    <h2>8. Syntax Breakdown Table</h2>
+    <h2>What Each Part Means</h2>
     <table>
       <tr><th>Usage</th><th>Syntax</th><th>Example</th><th>Notes</th></tr>
       <tr><td>Rename a column</td><td>col AS new_name</td><td>txn_amt AS 'Transaction Amount'</td><td>AS is optional but recommended</td></tr>
@@ -4692,7 +4692,7 @@ FROM orders AS o;</code></pre>
       <tr><td>Alias in WHERE</td><td>WHERE alias = x</td><td>WHERE total_amount > 100</td><td>NOT ALLOWED: WHERE runs before SELECT</td></tr>
     </table>
     <hr>
-    <h2>9. Multiple Practical Examples</h2>
+    <h2>Let's Try It Out</h2>
     <p>Using a Flipkart orders table with technical column names:</p>
     <table>
       <tr><th>ord_id</th><th>cust_nm</th><th>rest_nm</th><th>txn_amt</th><th>qty</th><th>ord_dt</th></tr>
@@ -4739,7 +4739,7 @@ FROM orders
 WHERE txn_amt * qty &gt; 500;</code></pre>
     <p>WHERE runs before SELECT, so the alias total_value does not exist when WHERE is evaluated. Always use the original expression or column name in WHERE.</p>
     <hr>
-    <h2>10. Beginner Confusion Handling</h2>
+    <h2>Things That Trip People Up</h2>
     <p><strong>"Does an alias change the column name in the database permanently?"</strong></p>
     <p>No. Aliases exist only in the output of your specific query. The table structure and column names remain completely unchanged. Run the same SELECT * FROM table and you will see the original column names.</p>
     <p><strong>"Can I use the alias in the WHERE clause?"</strong></p>
@@ -4749,7 +4749,7 @@ WHERE txn_amt * qty &gt; 500;</code></pre>
     <p><strong>"Is AS mandatory?"</strong></p>
     <p>No. You can write SELECT txn_amt total_value and it creates an alias "total_value" without AS. But using AS makes your intent unambiguous and the code much easier to read.</p>
     <hr>
-    <h2>11. Common Mistakes</h2>
+    <h2>Common Mistakes</h2>
     <ul>
       <li>Using multi-word aliases without quotes. SELECT amount Order Total will fail. Use SELECT amount AS 'Order Total'.</li>
       <li>Trying to use a column alias in WHERE. This is a very common beginner mistake. Use the original column name in WHERE.</li>
@@ -4758,7 +4758,7 @@ WHERE txn_amt * qty &gt; 500;</code></pre>
       <li>Using reserved SQL words as aliases without quoting them. Words like "value", "date", "order" can cause issues. When in doubt, use descriptive non-reserved words.</li>
     </ul>
     <hr>
-    <h2>12. Best Practices</h2>
+    <h2>Best Practices</h2>
     <ul>
       <li>Always use AS for clarity. Even though it is optional, it makes queries much more readable.</li>
       <li>Use descriptive, human-friendly aliases. Think about who will read the output. "Total Revenue" is better than "tot_rev".</li>
@@ -4767,13 +4767,13 @@ WHERE txn_amt * qty &gt; 500;</code></pre>
       <li>Reserve single-word unquoted aliases for simple cases. For anything with spaces or special characters, use quotes.</li>
     </ul>
     <hr>
-    <h2>13. Real Industry Usage</h2>
+    <h2>How Companies Use This Every Day</h2>
     <p>At Zomato, every report shared with the business team uses aliases to translate technical column names into readable labels. "restaurant_id" becomes "Restaurant", "avg_order_value" becomes "Average Order Value".</p>
     <p>Flipkart's dashboards use aliases heavily for calculated KPIs: "total_revenue", "conversion_rate", "return_percentage" are all aliased calculated expressions.</p>
     <p>IRCTC's passenger reports use aliases to make booking data readable for operations staff who are not technical.</p>
     <p>PhonePe uses aliases when building financial reports for auditors who need clear, self-explanatory column headers in every exported spreadsheet.</p>
     <hr>
-    <h2>14. Visual Summary</h2>
+    <h2>The Big Picture</h2>
     <pre><code>DATABASE TABLE:            YOUR QUERY OUTPUT (with aliases):
 +--------+---------+      +------------------+------------------+
 | cust_nm| txn_amt |      | Customer Name    | Transaction Amount|
@@ -4796,7 +4796,7 @@ ALIAS IN WHERE: NOT OK
 SELECT amount AS total FROM orders WHERE total &gt; 500; -- FAILS
 Use: WHERE amount &gt; 500 instead</code></pre>
     <hr>
-    <h2>15. Quick Revision</h2>
+    <h2>Before You Move On</h2>
     <ul>
       <li>Column aliases give your result columns readable names using AS.</li>
       <li>Syntax: SELECT column AS 'Alias Name' FROM table</li>
@@ -4807,16 +4807,16 @@ Use: WHERE amount &gt; 500 instead</code></pre>
       <li>Calculated expressions should always have an alias so the output is readable.</li>
     </ul>
     <hr>
-    <h2>16. Practice Questions</h2>
+    <h2>Practice Questions</h2>
     <ol>
       <li>From a students table with columns roll_no, full_name, and marks, write a query that shows "Roll Number", "Student Name", and "Marks Scored" as the column headers.</li>
       <li>From an orders table with price and qty columns, write a query showing "Product Price", "Quantity", and "Total Value" (as price multiplied by qty).</li>
       <li>From a bank_transactions table, rename acc_id as "Account Number", amount as "Amount", and txn_type as "Transaction Type".</li>
       <li>Write a query that selects txn_amt multiplied by 0.18 as "GST Amount" from an orders table, and sorts the results by the alias descending.</li>
       <li>Explain why this query would fail and rewrite it correctly: SELECT txn_amt * qty AS total FROM orders WHERE total > 1000;</li>
-    </ul>
+    </ol>
     <hr>
-    <h2>17. Final Thoughts</h2>
+    <h2>Final Thoughts</h2>
     <p>Column aliases might seem like a minor cosmetic feature, but they are one of the most important habits you can develop as a SQL writer.</p>
     <p>Every time you produce output that someone else will read, you are communicating. The clarity of your column headers is part of that communication. Technical abbreviations tell a story to machines. Human-friendly aliases tell a story to people.</p>
     <p>The most valued analysts at companies like Zomato, Flipkart, and Paytm are not just the ones who get the right numbers. They are the ones whose outputs are immediately understandable to anyone who reads them.</p>
@@ -4824,16 +4824,16 @@ Use: WHERE amount &gt; 500 instead</code></pre>
     <p>That is the power of communicating clearly through your SQL.</p>
   `,
   'mod4-t12': `
-    <h1>CASE Expression: Adding Intelligence to Your SQL Queries</h1>
+    <h1>CASE: Write If-Else Logic Directly Inside Your SQL Query</h1>
     <hr>
-    <h2>1. Curiosity-Driven Introduction</h2>
+    <h2>Let's Start Here</h2>
     <p>Rahul had been at Flipkart for three months and was handling data requests with growing confidence. Then his manager, Divya, gave him a task that pushed him into new territory.</p>
     <p>"Rahul, I need the orders table with a new column added. Call it 'customer_tier'. If the order amount is above two thousand, it is 'Premium'. Between five hundred and two thousand, it is 'Standard'. Below five hundred, it is 'Basic'. The marketing team needs to segment customers for the upcoming sale."</p>
     <p>Rahul stared at his screen. He knew how to SELECT. He knew WHERE, ORDER BY, DISTINCT. But "add a new column that categorises each row based on its values"? That was something different. He had never done conditional logic inside SQL before.</p>
     <p>Divya saw him thinking. "It is a CASE expression. You will love it."</p>
     <p>Ten minutes later, Rahul had a query that added exactly the column Divya described, computed on the fly for every row, without touching the database at all.</p>
     <hr>
-    <h2>2. The Real-World Problem</h2>
+    <h2>The Problem You'll Actually Face</h2>
     <p>Raw data rarely tells a complete story by itself. Numbers need to be interpreted. Categories help humans understand patterns at a glance.</p>
     <p>Consider these common real-world needs at Indian companies:</p>
     <p>Zomato wants to classify restaurants as "Budget", "Mid-range", or "Fine Dining" based on average order value for a curated collection feature.</p>
@@ -4842,23 +4842,23 @@ Use: WHERE amount &gt; 500 instead</code></pre>
     <p>Paytm's fraud team wants to flag transactions as "High Risk", "Medium Risk", or "Low Risk" based on amount and frequency.</p>
     <p>All of these require adding interpretive labels to raw data, dynamically, within a query. That is what CASE does.</p>
     <hr>
-    <h2>3. Why Does This Concept Exist?</h2>
+    <h2>Why Was This Built in the First Place?</h2>
     <p>Databases store raw facts: numbers, dates, codes, identifiers. They do not store interpretations, categories, or labels because those often change based on business rules.</p>
     <p>Before CASE, the only way to categorise data was to retrieve it and do the categorisation in application code or Excel. That means extra steps, extra tools, and the possibility that different people apply different rules.</p>
     <p>CASE expression was created to bring this kind of conditional logic directly into SQL. You can express "if this then that, otherwise this other thing" right inside your SELECT statement. The result is a new column in your output, computed dynamically based on your conditions, without any changes to the underlying table.</p>
     <hr>
-    <h2>4. Beginner Intuition</h2>
+    <h2>Think of It This Way</h2>
     <p>Think about the way marks translate to grades in a school exam. The teacher has a raw number for each student: 84, 61, 73, 45, 92.</p>
     <p>To produce grade cards, the teacher applies rules: 90 and above is A+, 80 to 89 is A, 70 to 79 is B, and so on.</p>
     <p>The teacher is doing conditional logic: "if the mark falls in this range, assign this grade."</p>
     <p>SQL's CASE expression lets you do exactly this kind of if-then-else categorisation inside a query. You define the conditions, you define the labels, and the database applies them to every single row instantly.</p>
     <hr>
-    <h2>5. Real-World Analogy</h2>
+    <h2>A Simple Way to Picture It</h2>
     <p>Think of a ticket checker on a Mumbai local train who categorises passengers. He looks at each passenger and applies a rule: "If this person has a first-class pass, mark 'First Class'. If they have a second-class pass, mark 'Second Class'. Otherwise, mark 'No Valid Pass'."</p>
     <p>He does not rewrite anyone's ID card. He just applies a classification based on what he sees, and writes a label.</p>
     <p>SQL's CASE expression does this for your data: it looks at each row, evaluates your conditions against the row's values, and assigns a label based on whichever condition is true.</p>
     <hr>
-    <h2>6. Main Concept Explanation</h2>
+    <h2>How It Actually Works</h2>
     <p>There are two forms of CASE expression in SQL.</p>
     <p>The searched CASE (most common) evaluates each WHEN condition independently. Each WHEN contains a full logical condition. SQL goes through them in order, and when it finds the first one that is true for a row, it returns the corresponding THEN value. If none match, ELSE provides the default value.</p>
     <p>The simple CASE compares a single column or expression against a list of specific values. CASE status WHEN 'CNF' THEN 'Confirmed' WHEN 'WL' THEN 'Waitlisted'. This is useful when you are matching exact values rather than ranges.</p>
@@ -4866,7 +4866,7 @@ Use: WHERE amount &gt; 500 instead</code></pre>
     <p>Every CASE expression must end with END. The new column it creates should be given an alias using AS to make it readable.</p>
     <p>CASE can be nested: you can put a CASE inside another CASE, though this should be done sparingly for readability.</p>
     <hr>
-    <h2>7. Syntax Explanation</h2>
+    <h2>Writing It in SQL</h2>
     <p>Searched CASE (conditions with ranges or expressions):</p>
     <pre><code class="language-sql">SELECT column1,
     CASE
@@ -4885,7 +4885,7 @@ FROM table_name;</code></pre>
     END AS alias_name
 FROM table_name;</code></pre>
     <hr>
-    <h2>8. Syntax Breakdown Table</h2>
+    <h2>What Each Part Means</h2>
     <table>
       <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
       <tr><td>CASE</td><td>Opens the conditional block</td><td>CASE</td></tr>
@@ -4898,7 +4898,7 @@ FROM table_name;</code></pre>
       <tr><td>NULL without ELSE</td><td>If no condition matches and no ELSE, result is NULL</td><td>Omit ELSE only intentionally</td></tr>
     </table>
     <hr>
-    <h2>9. Multiple Practical Examples</h2>
+    <h2>Let's Try It Out</h2>
     <p>Using a Flipkart orders table:</p>
     <table>
       <tr><th>order_id</th><th>customer_name</th><th>amount</th><th>status</th><th>city</th></tr>
@@ -4970,7 +4970,7 @@ FROM student_results;</code></pre>
 FROM transactions
 ORDER BY risk_level, amount DESC;</code></pre>
     <hr>
-    <h2>10. Beginner Confusion Handling</h2>
+    <h2>Things That Trip People Up</h2>
     <p><strong>"Do the conditions in CASE need to be mutually exclusive?"</strong></p>
     <p>No, but order matters. SQL evaluates WHEN conditions from top to bottom and stops at the first match. If amount >= 90 comes before amount >= 75, a student with 92 marks matches the first condition and gets "Distinction". They would also match amount >= 75, but SQL never reaches that WHEN because it already matched. Order your conditions from most specific to least specific (highest values first for greater-than conditions).</p>
     <p><strong>"What if I forget ELSE and a row does not match any WHEN?"</strong></p>
@@ -4980,7 +4980,7 @@ ORDER BY risk_level, amount DESC;</code></pre>
     <p><strong>"Can CASE be used in WHERE or ORDER BY?"</strong></p>
     <p>Yes. CASE can be used in ORDER BY for custom sorting logic. For example, you can sort by a classification rather than a raw number. Using CASE in WHERE is technically possible but unusual. The most common use is in SELECT.</p>
     <hr>
-    <h2>11. Common Mistakes</h2>
+    <h2>Common Mistakes</h2>
     <ul>
       <li>Forgetting END at the close of the CASE expression. This always causes a syntax error.</li>
       <li>Omitting ELSE and being surprised by NULL values in unmatched rows.</li>
@@ -4989,7 +4989,7 @@ ORDER BY risk_level, amount DESC;</code></pre>
       <li>Using simple CASE when you need searched CASE. Simple CASE only checks equality. For ranges (>, <, BETWEEN), you need searched CASE with full conditions in each WHEN.</li>
     </ul>
     <hr>
-    <h2>12. Best Practices</h2>
+    <h2>Best Practices</h2>
     <ul>
       <li>Always include an ELSE clause. Even if it is ELSE 'Unknown' or ELSE NULL explicitly, it documents your intent.</li>
       <li>Always give your CASE expression an alias using AS. Make the alias descriptive: AS customer_tier, AS risk_level, AS grade_label.</li>
@@ -4998,14 +4998,14 @@ ORDER BY risk_level, amount DESC;</code></pre>
       <li>If you have more than 6-7 conditions, consider whether a lookup table with a JOIN might be cleaner and more maintainable.</li>
     </ul>
     <hr>
-    <h2>13. Real Industry Usage</h2>
+    <h2>How Companies Use This Every Day</h2>
     <p>Flipkart uses CASE to classify orders in their fulfilment system: same-day delivery orders get one category, next-day another, and standard a third, allowing the operations team to prioritise packing.</p>
     <p>Zomato uses CASE to create "value for money" tiers in restaurant listings: "Budget (under 200)", "Mid-range (200-600)", "Premium (600+)" which you see when browsing restaurants.</p>
     <p>IRCTC uses CASE to convert internal train status codes (CNF, RAC, WL) into the readable labels displayed in the ticket booking interface.</p>
     <p>Byju's uses CASE in their learning analytics to classify students into intervention groups based on engagement scores, directing resources to students who need the most support.</p>
     <p>Banks across India use CASE in transaction monitoring to apply risk scores to transactions before routing them for review.</p>
     <hr>
-    <h2>14. Visual Summary</h2>
+    <h2>The Big Picture</h2>
     <pre><code>RAW DATA:
 +----------+--------+
 | order_id | amount |
@@ -5037,7 +5037,7 @@ RESULT:
 | 13004    | 4800   | Premium       |
 +----------+--------+---------------+</code></pre>
     <hr>
-    <h2>15. Quick Revision</h2>
+    <h2>Before You Move On</h2>
     <ul>
       <li>CASE adds conditional if-then-else logic inside a SELECT statement.</li>
       <li>Searched CASE: CASE WHEN condition THEN result ... END</li>
@@ -5049,16 +5049,16 @@ RESULT:
       <li>Conditions are evaluated in order: the first matching WHEN wins.</li>
     </ul>
     <hr>
-    <h2>16. Practice Questions</h2>
+    <h2>Practice Questions</h2>
     <ol>
       <li>From an orders table, write a CASE expression that labels each order as "Large" if amount > 10000, "Medium" if amount between 2000 and 10000, and "Small" otherwise.</li>
       <li>From a student_results table, write a query that shows student names, marks, and a grade column using CASE: Distinction (90+), Merit (75-89), Pass (50-74), Fail (below 50).</li>
       <li>From a train_bookings table with a status column containing values 'CNF', 'WL', 'RAC', and 'CANCEL', write a simple CASE to show "Confirmed", "Waitlisted", "RAC", and "Cancelled" as readable labels.</li>
       <li>From a transactions table, use CASE to create a column called payment_size: "Micro" for amounts below 100, "Small" for 100-999, "Medium" for 1000-9999, "Large" for 10000 and above.</li>
       <li>Write a CASE query that sorts students by a custom order: show students with grade A first, then B, then C, then others, using CASE inside ORDER BY.</li>
-    </ul>
+    </ol>
     <hr>
-    <h2>17. Final Thoughts</h2>
+    <h2>Final Thoughts</h2>
     <p>The CASE expression is the moment SQL stops being a data retrieval tool and becomes a data transformation tool. It lets you bring business logic into your queries: the rules that decide what raw numbers actually mean.</p>
     <p>Every analyst who has presented a data report to a business stakeholder knows the value of this. Raw numbers on their own require explanation. Categorised, labelled data tells a story immediately. "Premium, Standard, Basic" communicates in a second what a column of numbers requires context to understand.</p>
     <p>Learn CASE well, use it with clean formatting and good aliases, and you will produce outputs that are not just correct but immediately useful to anyone who reads them.</p>
