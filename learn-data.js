@@ -9722,13 +9722,1534 @@ Before running on large tables:
   `,
 
   // ── Module 8 ─────────────────────────────────────────────────
-  'mod8-t1': `<h1>What is a Subquery?</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod8-t2': `<h1>Subquery in WHERE</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod8-t3': `<h1>Subquery in FROM (Derived Tables)</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod8-t4': `<h1>Scalar Subquery in SELECT</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod8-t5': `<h1>Correlated Subqueries</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod8-t6': `<h1>EXISTS / NOT EXISTS</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod8-t7': `<h1>IN vs EXISTS</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod8-t1': `
+    <h1>Subqueries: A Query Inside Another Query</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Arjun joined Swiggy's data team three months ago. One morning, his manager Priya drops by and says, "Hey, I need a list of all orders where the amount is higher than our average order value. Can you pull that?"</p>
+    <p>Arjun opens his laptop. He knows he can find the average order value with one query. He also knows he can filter orders with another. But Priya needs one clean result, not two steps. He starts thinking: what if he could put the first query inside the second?</p>
+    <p>That is exactly what a subquery lets you do.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>You will often run into situations where the answer to your question depends on another question. You cannot just write a single WHERE clause because the filter value itself needs to be calculated from the data.</p>
+    <p>Examples you will face at work:</p>
+    <ul>
+      <li>Find all orders above the average order value</li>
+      <li>List customers who have placed more orders than the typical customer</li>
+      <li>Show products priced higher than every product in a specific category</li>
+    </ul>
+    <p>In each case, the filter is not a fixed number. It is a number you need to compute first. Subqueries handle exactly this.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Before subqueries, analysts had to run one query, note the result, and manually plug that number into a second query. That is slow, error-prone, and falls apart when the data changes.</p>
+    <p>SQL designers wanted a way to make queries self-contained. Instead of: "run query A, get 450, now run query B with 450 hardcoded," you should be able to say: "run query B where the filter is whatever query A returns." Subqueries made SQL much more powerful and flexible.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you ask your junior colleague, "What is the average order value this month?" She checks and says, "It is 480 rupees." You then ask your manager, "Show me all orders above 480 rupees."</p>
+    <p>Now imagine your colleague is sitting inside your brain. You ask your manager, "Show me all orders above whatever my colleague tells me," and your colleague whispers the number before your manager answers. That is a subquery. The inner query runs first, produces a result, and the outer query uses that result.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>Outer Query
+  |
+  |--- WHERE amount &gt; ( Inner Query )
+                             |
+                             |--- calculates AVG(amount) = 480
+                             |--- returns: 480
+  |
+  |--- WHERE amount &gt; 480
+  |--- returns matching rows</code></pre>
+    <p>The database runs the inner query first. It gets a value (or a set of values). Then it runs the outer query using that value.</p>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>A subquery is a SELECT statement written inside parentheses, placed within another SQL statement. The database engine executes the inner query first, takes its result, and feeds it to the outer query.</p>
+    <p>Key rules:</p>
+    <ul>
+      <li>A subquery must always be enclosed in parentheses</li>
+      <li>It must always contain a SELECT statement</li>
+      <li>It can appear in the WHERE clause, the FROM clause, or the SELECT clause</li>
+      <li>The outer query treats the subquery result like any other value or table</li>
+    </ul>
+    <p>The inner query does not know about the outer query (in most cases). It just runs, returns a result, and hands it over.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>Here is the basic structure:</p>
+    <pre><code class="language-sql">SELECT column1, column2
+FROM table_name
+WHERE column1 OPERATOR (
+    SELECT some_value
+    FROM another_table
+    WHERE condition
+);</code></pre>
+    <p>The subquery is the part inside the inner parentheses. It runs first. The outer query runs second.</p>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td>Outer query</td><td>The main query that uses the subquery result</td><td><code>SELECT * FROM orders</code></td></tr>
+      <tr><td>Parentheses</td><td>Wrap the subquery so SQL knows where it starts and ends</td><td><code>(SELECT AVG(amount) FROM orders)</code></td></tr>
+      <tr><td>Inner SELECT</td><td>Produces the value or values the outer query needs</td><td><code>SELECT MAX(amount) FROM orders</code></td></tr>
+      <tr><td>OPERATOR</td><td>Compares the outer column to the subquery result</td><td><code>=</code>, <code>></code>, <code>IN</code>, <code><</code></td></tr>
+      <tr><td>Alias (in FROM)</td><td>Required when subquery is used as a table</td><td><code>AS city_summary</code></td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample Tables at Swiggy</strong></p>
+    <p><code>orders</code> table:</p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>city</th><th>amount</th></tr>
+      <tr><td>101</td><td>1</td><td>Mumbai</td><td>350</td></tr>
+      <tr><td>102</td><td>2</td><td>Delhi</td><td>620</td></tr>
+      <tr><td>103</td><td>1</td><td>Mumbai</td><td>480</td></tr>
+      <tr><td>104</td><td>3</td><td>Bengaluru</td><td>290</td></tr>
+      <tr><td>105</td><td>4</td><td>Delhi</td><td>750</td></tr>
+      <tr><td>106</td><td>2</td><td>Bengaluru</td><td>410</td></tr>
+    </table>
+    <p><code>customers</code> table:</p>
+    <table>
+      <tr><th>customer_id</th><th>name</th><th>city</th></tr>
+      <tr><td>1</td><td>Rohan</td><td>Mumbai</td></tr>
+      <tr><td>2</td><td>Sneha</td><td>Delhi</td></tr>
+      <tr><td>3</td><td>Vikram</td><td>Bengaluru</td></tr>
+      <tr><td>4</td><td>Anjali</td><td>Delhi</td></tr>
+    </table>
+    <hr>
+    <h3>Example 1: Find orders above average order value</h3>
+    <p>Business question: Which orders are above the average order amount?</p>
+    <pre><code class="language-sql">SELECT order_id, customer_id, amount
+FROM orders
+WHERE amount &gt; (SELECT AVG(amount) FROM orders);</code></pre>
+    <p>The inner query calculates <code>AVG(amount)</code> which comes out to 483. The outer query then returns all orders where amount is greater than 483. You get order_id 102 (620) and 105 (750).</p>
+    <hr>
+    <h3>Example 2: Find customers who have placed any order in Delhi</h3>
+    <p>Business question: List all customers who have at least one order from Delhi.</p>
+    <pre><code class="language-sql">SELECT name
+FROM customers
+WHERE customer_id IN (
+    SELECT customer_id
+    FROM orders
+    WHERE city = 'Delhi'
+);</code></pre>
+    <p>The inner query returns customer_ids 2 and 4 (both have Delhi orders). The outer query finds names for those customer_ids: Sneha and Anjali.</p>
+    <hr>
+    <h3>Example 3: Find the order with the highest amount</h3>
+    <p>Business question: Show the single largest order.</p>
+    <pre><code class="language-sql">SELECT order_id, customer_id, amount
+FROM orders
+WHERE amount = (SELECT MAX(amount) FROM orders);</code></pre>
+    <p>The inner query returns 750. The outer query finds order_id 105 with that amount.</p>
+    <hr>
+    <h3>Example 4: Show each customer's name alongside their city from orders</h3>
+    <p>Business question: Get distinct cities where orders have been placed, then find customer names from those cities.</p>
+    <pre><code class="language-sql">SELECT name, city
+FROM customers
+WHERE city IN (
+    SELECT DISTINCT city
+    FROM orders
+);</code></pre>
+    <p>The inner query returns Mumbai, Delhi, Bengaluru. The outer query returns all customers from those cities, which in this case is everyone.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p><strong>Forgetting parentheses.</strong> The subquery must be inside parentheses. Without them, SQL cannot parse the query and will throw an error.</p>
+    <p><strong>Using a multi-row subquery with =.</strong> If your subquery returns more than one value and you use <code>=</code>, SQL will error. Use <code>IN</code> for multiple values, <code>=</code> only when you are sure the subquery returns exactly one row.</p>
+    <p><strong>Expecting the subquery to see outer query columns.</strong> In a regular (non-correlated) subquery, the inner query is completely independent. It does not have access to the outer query's rows. We cover correlated subqueries separately.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <ul>
+      <li>Writing <code>WHERE amount = (SELECT amount FROM orders)</code> when the subquery returns multiple rows</li>
+      <li>Forgetting to alias a subquery in the FROM clause (SQL requires this)</li>
+      <li>Writing complex subqueries when a simple JOIN would work better and be easier to read</li>
+      <li>Nesting subqueries five levels deep and then wondering why nobody can read the code</li>
+    </ul>
+    <hr>
+    <h2>Best Practices</h2>
+    <ul>
+      <li>Keep subqueries simple. If it is getting complex, consider a CTE (Common Table Expression) or a JOIN instead.</li>
+      <li>Always alias subqueries used in the FROM clause.</li>
+      <li>When a subquery returns one value, use <code>=</code>. When it returns multiple values, use <code>IN</code>.</li>
+      <li>Test your inner query independently first to confirm it returns what you expect.</li>
+      <li>Add comments when subqueries are non-obvious so teammates can follow the logic.</li>
+    </ul>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Swiggy, analysts use subqueries to find restaurants performing above the platform average. At Flipkart, they pull products priced above a category average. At IRCTC, subqueries help identify routes where cancellation rates exceed the overall average. At Paytm, they find transactions that are statistical outliers by comparing each to an inner query that computes the threshold.</p>
+    <p>Subqueries are everywhere in production SQL because real-world questions almost always have a "compared to what?" element baked in.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Types of Subqueries:
+
+1. Scalar Subquery        -- returns ONE value (one row, one column)
+   Used in: WHERE, SELECT
+   Example: WHERE amount &gt; (SELECT AVG(amount) FROM orders)
+
+2. Row Subquery           -- returns ONE row (multiple columns)
+   Less common, used in row-level comparisons
+
+3. Table Subquery         -- returns MULTIPLE rows
+   Used in: WHERE ... IN (...), FROM (...)
+   Example: WHERE id IN (SELECT id FROM vip_customers)
+
+4. Correlated Subquery    -- references outer query's columns
+   Runs once per outer row -- covered separately
+   Example: WHERE amount &gt; (SELECT AVG(amount) FROM orders o2
+                             WHERE o2.city = o1.city)</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these questions before going further:</p>
+    <ul>
+      <li>What is a subquery and where can it appear in a SQL statement?</li>
+      <li>Which part of a subquery runs first, inner or outer?</li>
+      <li>What happens if you use <code>=</code> with a subquery that returns multiple rows?</li>
+      <li>What is the difference between a scalar subquery and a table subquery?</li>
+      <li>Why must a subquery in the FROM clause have an alias?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query to find all orders from the <code>orders</code> table where the amount is greater than the average amount of all orders in Mumbai.</li>
+    </ol>
+    <ol>
+      <li>Write a query to list all customers whose <code>customer_id</code> appears in the <code>orders</code> table (use a subquery, not a JOIN).</li>
+    </ol>
+    <ol>
+      <li>Write a query to find the order with the minimum amount using a subquery in the WHERE clause.</li>
+    </ol>
+    <ol>
+      <li>Write a query to find all orders placed by customers from Delhi. Use a subquery to first get customer_ids from the <code>customers</code> table where city is Delhi.</li>
+    </ol>
+    <ol>
+      <li>Write a query using a subquery in the FROM clause that calculates the average order amount per city, then shows only cities where that average is above 400.</li>
+    </ol>
+    <ol>
+      <li>What error would you get if you wrote <code>WHERE customer_id = (SELECT customer_id FROM orders)</code> and the <code>orders</code> table had multiple rows? How would you fix it?</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>Subqueries are one of those concepts that feel tricky until you use them a few times, and then they feel completely natural. The key insight is simple: a subquery is just a query inside a query. The inner one runs first, hands off its result, and the outer one does its job.</p>
+    <p>Once you are comfortable with basic subqueries, correlated subqueries and EXISTS conditions will make much more sense. We will get there step by step.</p>
+  `,
+  'mod8-t2': `
+    <h1>Subquery in WHERE: Filter Rows Based on Another Query's Result</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Divya is a data analyst at Flipkart. Her manager asks her to pull a report: "Show me all orders where the amount is equal to the highest order we have ever received."</p>
+    <p>Divya knows the highest order value is somewhere in the data, but she does not know it off the top of her head. She could run one query to find MAX(amount), see it is 9,800, then write a second query hardcoding 9,800 in the WHERE clause. But that breaks the next time the data changes.</p>
+    <p>Instead, she writes a single query where the WHERE clause itself finds the maximum. That is a subquery in WHERE, and it is the most commonly used form of subquery in day-to-day SQL work.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Most of the time when you filter data, you know the condition: "where city = 'Mumbai'" or "where amount > 500." But sometimes the threshold or value you want to filter by is not fixed. It depends on the data itself.</p>
+    <ul>
+      <li>"Show orders above the average" -- the average changes as data changes</li>
+      <li>"Show customers in the same tier as our top spender" -- you do not know that tier upfront</li>
+      <li>"Show all orders from premium customers" -- you need to look up who the premium customers are</li>
+    </ul>
+    <p>These situations call for a subquery in the WHERE clause.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>SQL was designed to answer questions in a single statement whenever possible. Hardcoding intermediate results creates brittle queries that break when data updates. The ability to put a SELECT statement inside WHERE means your filter can be dynamic, deriving its value directly from the current state of the data. This makes reports accurate and queries reusable.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you work at a Flipkart warehouse. Your manager says, "Flag every order that costs more than what our most expensive order cost." You call your colleague and ask, "What is our highest order amount?" She checks and says 9,800. You now go through orders and flag anything above 9,800.</p>
+    <p>The subquery is your colleague. You do not hard-code the 9,800. You let SQL figure it out at query time.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>SELECT * FROM orders
+WHERE amount &gt; (SELECT MAX(amount) FROM orders WHERE city = 'Delhi')
+
+Step 1: Inner query runs
+        SELECT MAX(amount) FROM orders WHERE city = 'Delhi'
+        Result: 8500
+
+Step 2: Outer query runs with that result
+        SELECT * FROM orders WHERE amount &gt; 8500
+        Returns rows where amount exceeds 8500</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>When SQL encounters a subquery in the WHERE clause, it evaluates the inner query first and produces a result. That result can be:</p>
+    <ul>
+      <li>A single value (scalar): used with <code>=</code>, <code>></code>, <code><</code>, <code>>=</code>, <code><=</code></li>
+      <li>A list of values: used with <code>IN</code> or <code>NOT IN</code></li>
+    </ul>
+    <p>The outer WHERE clause then uses that result as if you had typed it directly. The whole thing runs in one statement, which means the result is always current.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>Single-value subquery with <code>=</code>:</p>
+    <pre><code class="language-sql">SELECT order_id, customer_id, amount
+FROM orders
+WHERE amount = (SELECT MAX(amount) FROM orders);</code></pre>
+    <p>Single-value subquery with <code>></code>:</p>
+    <pre><code class="language-sql">SELECT order_id, customer_id, amount
+FROM orders
+WHERE amount &gt; (SELECT AVG(amount) FROM orders);</code></pre>
+    <p>Multi-value subquery with <code>IN</code>:</p>
+    <pre><code class="language-sql">SELECT order_id, customer_id, amount
+FROM orders
+WHERE customer_id IN (SELECT customer_id FROM customers WHERE tier = 'Gold');</code></pre>
+    <p>Using <code>NOT IN</code>:</p>
+    <pre><code class="language-sql">SELECT order_id, customer_id, amount
+FROM orders
+WHERE customer_id NOT IN (SELECT customer_id FROM customers WHERE tier = 'Gold');</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>WHERE amount =</code></td><td>Outer filter condition waiting for a value</td><td><code>WHERE amount = ...</code></td></tr>
+      <tr><td><code>(SELECT MAX(amount) FROM orders)</code></td><td>Inner query that computes the value</td><td>Returns a single number like 9800</td></tr>
+      <tr><td><code>IN (SELECT ...)</code></td><td>Checks if outer column is in a list from inner query</td><td><code>WHERE customer_id IN (SELECT ...)</code></td></tr>
+      <tr><td><code>NOT IN (SELECT ...)</code></td><td>Excludes rows matching the inner query list</td><td><code>WHERE city NOT IN (SELECT city FROM ...)</code></td></tr>
+      <tr><td><code>> (SELECT AVG(...))</code></td><td>Comparison using a computed threshold</td><td><code>WHERE amount > (SELECT AVG(amount) ...)</code></td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample Tables at Flipkart</strong></p>
+    <p><code>orders</code> table:</p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>city</th><th>amount</th><th>order_date</th></tr>
+      <tr><td>201</td><td>10</td><td>Mumbai</td><td>1200</td><td>2024-01-05</td></tr>
+      <tr><td>202</td><td>11</td><td>Delhi</td><td>9800</td><td>2024-01-07</td></tr>
+      <tr><td>203</td><td>12</td><td>Bengaluru</td><td>450</td><td>2024-01-09</td></tr>
+      <tr><td>204</td><td>10</td><td>Delhi</td><td>3200</td><td>2024-01-10</td></tr>
+      <tr><td>205</td><td>13</td><td>Mumbai</td><td>750</td><td>2024-01-12</td></tr>
+      <tr><td>206</td><td>14</td><td>Bengaluru</td><td>6100</td><td>2024-01-13</td></tr>
+    </table>
+    <p><code>customers</code> table:</p>
+    <table>
+      <tr><th>customer_id</th><th>name</th><th>city</th><th>tier</th></tr>
+      <tr><td>10</td><td>Rahul</td><td>Mumbai</td><td>Gold</td></tr>
+      <tr><td>11</td><td>Meera</td><td>Delhi</td><td>Platinum</td></tr>
+      <tr><td>12</td><td>Sameer</td><td>Bengaluru</td><td>Silver</td></tr>
+      <tr><td>13</td><td>Pooja</td><td>Mumbai</td><td>Gold</td></tr>
+      <tr><td>14</td><td>Karan</td><td>Bengaluru</td><td>Platinum</td></tr>
+    </table>
+    <hr>
+    <h3>Example 1: Find the single highest-value order</h3>
+    <p>Business question: Which order has the maximum amount placed on Flipkart?</p>
+    <pre><code class="language-sql">SELECT order_id, customer_id, amount
+FROM orders
+WHERE amount = (SELECT MAX(amount) FROM orders);</code></pre>
+    <p>The inner query finds MAX(amount) = 9800. The outer query returns order_id 202 placed by customer 11 for 9800. This is guaranteed to stay correct even if new data comes in.</p>
+    <hr>
+    <h3>Example 2: Find orders above average amount</h3>
+    <p>Business question: Which orders are performing above the platform average?</p>
+    <pre><code class="language-sql">SELECT order_id, customer_id, city, amount
+FROM orders
+WHERE amount &gt; (SELECT AVG(amount) FROM orders);</code></pre>
+    <p>The inner query calculates the average, which is (1200 + 9800 + 450 + 3200 + 750 + 6100) / 6 = 3583. The outer query returns orders 202 (9800), 204 (3200 is not above 3583), and 206 (6100). Orders with amount above 3583 are returned.</p>
+    <hr>
+    <h3>Example 3: Find orders by Gold or Platinum customers using IN</h3>
+    <p>Business question: Pull all orders placed by Gold or Platinum tier customers.</p>
+    <pre><code class="language-sql">SELECT o.order_id, o.customer_id, o.amount
+FROM orders o
+WHERE o.customer_id IN (
+    SELECT customer_id
+    FROM customers
+    WHERE tier IN ('Gold', 'Platinum')
+);</code></pre>
+    <p>The inner query returns customer_ids 10, 11, 13, 14. The outer query returns all orders placed by those customers: orders 201, 202, 204, 205, 206.</p>
+    <hr>
+    <h3>Example 4: Find orders from non-premium customers using NOT IN</h3>
+    <p>Business question: Which orders were placed by Silver tier customers?</p>
+    <pre><code class="language-sql">SELECT order_id, customer_id, amount
+FROM orders
+WHERE customer_id NOT IN (
+    SELECT customer_id
+    FROM customers
+    WHERE tier IN ('Gold', 'Platinum')
+);</code></pre>
+    <p>The inner query returns 10, 11, 13, 14. NOT IN excludes those, so only customer_id 12 remains. Order 203 (customer 12, Bengaluru, 450) is returned.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p><strong>Using <code>=</code> when the subquery returns multiple rows.</strong> If you write <code>WHERE customer_id = (SELECT customer_id FROM customers WHERE tier = 'Gold')</code> and there are multiple Gold customers, SQL throws an error. Use <code>IN</code> for multiple values.</p>
+    <p><strong>NOT IN with NULL values in the subquery result.</strong> This is a critical gotcha. If the subquery inside <code>NOT IN</code> returns even one NULL value, the entire NOT IN condition evaluates to UNKNOWN for every row, and your query returns zero rows. This happens because SQL cannot confirm "X is not equal to NULL" since NULL comparisons are undefined. If any NULLs might be present in the subquery result, use NOT EXISTS instead.</p>
+    <p><strong>Comparing across different data types.</strong> If customer_id is INT in one table and VARCHAR in another, the comparison may behave unexpectedly depending on the database.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <ul>
+      <li>Writing <code>WHERE amount = (SELECT amount FROM orders)</code> when there are multiple rows in the result</li>
+      <li>Using <code>NOT IN</code> with a subquery that might return NULLs and wondering why no rows come back</li>
+      <li>Forgetting that <code>IN</code> is case-sensitive for string values in some databases</li>
+      <li>Using a correlated reference inside a WHERE subquery when you intended a regular subquery (the inner query should not reference the outer table unless you specifically want a correlated subquery)</li>
+    </ul>
+    <hr>
+    <h2>Best Practices</h2>
+    <ul>
+      <li>Test your inner query alone before embedding it. Verify what it returns.</li>
+      <li>Use <code>=</code> only when you are certain the subquery returns exactly one row.</li>
+      <li>Avoid <code>NOT IN</code> if the subquery can ever produce NULL. Use <code>NOT EXISTS</code> instead.</li>
+      <li>If the subquery is complex, break it out into a CTE for readability.</li>
+      <li>Add the table alias in the outer query if there is any ambiguity about which table the columns belong to.</li>
+    </ul>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Flipkart, this pattern is used to flag orders above the daily average for fraud review. At Zomato, analysts pull restaurants with ratings below the platform average for quality checks. At BookMyShow, subqueries in WHERE help find events with ticket sales below projections by comparing against a computed baseline. At IRCTC, they pull trains with delays greater than the average delay on a given route.</p>
+    <p>The subquery-in-WHERE pattern shows up wherever the filter condition is a number that must be computed from the data itself.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Subquery in WHERE: Three Main Patterns
+
+Pattern 1: Single Value (scalar)
+  WHERE amount = (SELECT MAX(amount) FROM orders)
+  WHERE amount &gt; (SELECT AVG(amount) FROM orders)
+  Works with: =  &gt;  &lt;  &gt;=  &lt;=  &lt;&gt;
+
+Pattern 2: Multiple Values (list)
+  WHERE customer_id IN (SELECT customer_id FROM vip_customers)
+  WHERE city NOT IN (SELECT city FROM blacklisted_cities)
+  Works with: IN, NOT IN
+
+Pattern 3: NULL Gotcha with NOT IN
+  If subquery returns: (10, 11, NULL)
+  NOT IN (10, 11, NULL) = UNKNOWN for every row
+  Result: 0 rows returned
+  Fix: Use NOT EXISTS instead</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Answer these before continuing:</p>
+    <ul>
+      <li>When should you use <code>=</code> vs <code>IN</code> with a subquery in WHERE?</li>
+      <li>What happens when a NOT IN subquery contains a NULL value?</li>
+      <li>How do you verify that your subquery is returning the right result before embedding it?</li>
+      <li>What is the difference between <code>WHERE amount > (SELECT AVG(amount) FROM orders)</code> and <code>WHERE amount > 500</code>?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query to find all orders at Flipkart where the amount is greater than the average order amount in Bengaluru specifically.</li>
+    </ol>
+    <ol>
+      <li>Write a query to find all customers whose city appears in the list of cities in the <code>orders</code> table (use a subquery in WHERE with IN).</li>
+    </ol>
+    <ol>
+      <li>Write a query to find orders placed by customers who are NOT Silver tier. Use <code>NOT IN</code> with a subquery.</li>
+    </ol>
+    <ol>
+      <li>Write a query to find the most recent order date in the <code>orders</code> table, then return all orders placed on that date using a subquery in WHERE.</li>
+    </ol>
+    <ol>
+      <li>Write a query that finds all orders where the amount is between the minimum and maximum amounts of orders placed in Delhi. Use two subqueries in the WHERE clause.</li>
+    </ol>
+    <ol>
+      <li>Explain in plain words why <code>NOT IN</code> breaks when the subquery returns a NULL. What would you use instead?</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>The subquery in WHERE is the workhorse of SQL analysis. It is the first place most people use subqueries, and it solves a very real problem: your filter value is not a fixed number, it is something the data itself tells you. Once you understand when to use <code>=</code> vs <code>IN</code>, and you remember the NULL gotcha with NOT IN, you will be writing these confidently in no time.</p>
+  `,
+  'mod8-t3': `
+    <h1>Subquery in FROM: Creating a Temporary Table Inside Your Query</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Neha is an analyst at Swiggy. Her manager wants to know which cities have an average order value above 500 rupees. Simple enough, she thinks. She starts typing a GROUP BY query with a HAVING clause. But then her manager adds: "And for those cities, also show me how many orders they have."</p>
+    <p>Neha realizes she needs to first compute the average per city, then filter those results, and then also show the count. One WHERE clause cannot do this because the filter (average above 500) is itself the result of an aggregation. You cannot filter on aggregated results with WHERE, and HAVING works but does not always compose cleanly with additional calculations layered on top.</p>
+    <p>She needs to treat the grouped result as if it were its own table. That is where a subquery in FROM comes in.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Sometimes you need to do two levels of computation:</p>
+    <ol>
+      <li>First: aggregate or transform data (compute averages, counts, sums per group)</li>
+      <li>Then: filter or further aggregate that result</li>
+    </ol>
+    <p>SQL's WHERE clause runs before GROUP BY, so you cannot use WHERE to filter on aggregated values. HAVING handles some cases, but when you need to aggregate an aggregate, or join a summary result with another table, you need to wrap the first step in a subquery and treat it as a table inside FROM.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>A table in SQL is just a set of rows and columns. There is nothing stopping you from creating a temporary set of rows and columns on the fly inside a query. That is all a subquery in FROM does. It creates what is often called a derived table or inline view: a named, temporary result that lives only for the duration of the query. No permanent storage, no schema changes, just a clean way to build multi-step logic into one statement.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you are running a small report manually. You first summarize data on a scratch pad: city name, average order value, order count. Then you look at that scratch pad and circle only the rows where the average is above 500.</p>
+    <p>The scratch pad is your subquery in FROM. You create it, give it a name, and then query it as if it were a real table.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>SELECT city, avg_amount, total_orders
+FROM (
+    SELECT city, AVG(amount) AS avg_amount, COUNT(*) AS total_orders
+    FROM orders
+    GROUP BY city
+) AS city_summary
+WHERE avg_amount &gt; 500;
+
+Step 1: Inner query runs and produces:
+        city        | avg_amount | total_orders
+        ------------|------------|-------------
+        Mumbai      | 415        | 2
+        Delhi       | 685        | 3
+        Bengaluru   | 350        | 2
+
+Step 2: Outer query filters that result:
+        city        | avg_amount | total_orders
+        ------------|------------|-------------
+        Delhi       | 685        | 3</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>When SQL sees a subquery in the FROM clause, it runs that subquery first and materializes the result as a temporary table in memory. That temporary table is then available to the rest of the query exactly like any other table. You can SELECT from it, JOIN it with other tables, filter it with WHERE, and group it further.</p>
+    <p>The only requirement is that the subquery in FROM must be given an alias. Without an alias, SQL cannot refer to the temporary result, and the query fails.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>Basic structure:</p>
+    <pre><code class="language-sql">SELECT outer_column, outer_column2
+FROM (
+    SELECT column1, AGG_FUNCTION(column2) AS alias
+    FROM original_table
+    GROUP BY column1
+) AS temp_name
+WHERE outer_column &gt; some_value;</code></pre>
+    <p>The subquery goes where a table name would normally go, wrapped in parentheses, followed by AS and an alias name.</p>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>FROM (SELECT ...)</code></td><td>Treats the subquery result as a temporary table</td><td><code>FROM (SELECT city, AVG(amount) AS avg_amt FROM orders GROUP BY city)</code></td></tr>
+      <tr><td><code>AS city_summary</code></td><td>Gives the derived table a name the outer query can reference</td><td><code>AS city_summary</code></td></tr>
+      <tr><td>Outer <code>SELECT</code></td><td>Picks columns from the derived table</td><td><code>SELECT city, avg_amt</code></td></tr>
+      <tr><td>Outer <code>WHERE</code></td><td>Filters the derived table rows</td><td><code>WHERE avg_amt > 500</code></td></tr>
+      <tr><td><code>GROUP BY</code> inside</td><td>Aggregates data before the outer query sees it</td><td><code>GROUP BY city</code></td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample Table at Swiggy</strong></p>
+    <p><code>orders</code> table:</p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>city</th><th>cuisine</th><th>amount</th></tr>
+      <tr><td>301</td><td>1</td><td>Mumbai</td><td>North Indian</td><td>380</td></tr>
+      <tr><td>302</td><td>2</td><td>Delhi</td><td>Chinese</td><td>720</td></tr>
+      <tr><td>303</td><td>3</td><td>Bengaluru</td><td>South Indian</td><td>310</td></tr>
+      <tr><td>304</td><td>1</td><td>Delhi</td><td>Pizza</td><td>550</td></tr>
+      <tr><td>305</td><td>4</td><td>Mumbai</td><td>Biryani</td><td>890</td></tr>
+      <tr><td>306</td><td>2</td><td>Delhi</td><td>Burgers</td><td>780</td></tr>
+      <tr><td>307</td><td>3</td><td>Bengaluru</td><td>Chinese</td><td>420</td></tr>
+      <tr><td>308</td><td>5</td><td>Mumbai</td><td>Pizza</td><td>460</td></tr>
+    </table>
+    <hr>
+    <h3>Example 1: Find cities where average order value exceeds 500</h3>
+    <p>Business question: Which cities are performing strongly in terms of average order value?</p>
+    <pre><code class="language-sql">SELECT city, avg_amount
+FROM (
+    SELECT city, AVG(amount) AS avg_amount
+    FROM orders
+    GROUP BY city
+) AS city_summary
+WHERE avg_amount &gt; 500;</code></pre>
+    <p>The inner query groups orders by city and computes AVG(amount): Mumbai = 576.67, Delhi = 683.33, Bengaluru = 365. The outer query filters to show only cities where avg_amount exceeds 500. Result: Mumbai and Delhi are returned.</p>
+    <hr>
+    <h3>Example 2: Find the city with the highest average order value</h3>
+    <p>Business question: Which single city has the best average order performance?</p>
+    <pre><code class="language-sql">SELECT city, avg_amount
+FROM (
+    SELECT city, AVG(amount) AS avg_amount
+    FROM orders
+    GROUP BY city
+) AS city_summary
+ORDER BY avg_amount DESC
+LIMIT 1;</code></pre>
+    <p>The derived table provides averaged data per city. The outer query sorts it and picks the top one. Delhi (683.33) comes out on top.</p>
+    <hr>
+    <h3>Example 3: Find cuisine types with more than one order</h3>
+    <p>Business question: Which cuisines have been ordered more than once across all cities?</p>
+    <pre><code class="language-sql">SELECT cuisine, order_count
+FROM (
+    SELECT cuisine, COUNT(*) AS order_count
+    FROM orders
+    GROUP BY cuisine
+) AS cuisine_stats
+WHERE order_count &gt; 1;</code></pre>
+    <p>The inner query counts orders per cuisine: Chinese = 2, Pizza = 2, others = 1. The outer query filters to show only cuisines with more than 1 order. Chinese and Pizza appear in the result.</p>
+    <hr>
+    <h3>Example 4: Find the average of city averages (aggregating an aggregate)</h3>
+    <p>Business question: What is the average order value averaged across all cities (not the overall average, but the average of each city's average)?</p>
+    <pre><code class="language-sql">SELECT AVG(avg_amount) AS avg_of_city_averages
+FROM (
+    SELECT city, AVG(amount) AS avg_amount
+    FROM orders
+    GROUP BY city
+) AS city_summary;</code></pre>
+    <p>You cannot do <code>AVG(AVG(amount))</code> directly in SQL. But you can wrap the first AVG in a derived table, and then compute AVG on top of it in the outer query. This is the canonical example of why derived tables exist.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p><strong>Forgetting the alias.</strong> Every subquery in FROM must have an alias. Writing <code>FROM (SELECT ...) WHERE ...</code> without <code>AS something</code> will throw a syntax error in most databases. Even if you never reference the alias name, you still must provide it.</p>
+    <p><strong>Trying to use columns from the derived table that were not selected.</strong> The outer query can only see columns that the inner SELECT explicitly includes. If you forgot to include <code>city</code> in the derived table, you cannot reference <code>city</code> in the outer WHERE.</p>
+    <p><strong>Thinking derived tables persist.</strong> They exist only for the duration of that single query execution. Nothing is stored permanently.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <ul>
+      <li>Omitting the alias after the closing parenthesis of the subquery</li>
+      <li>Selecting a column in the outer query that was not included in the inner query</li>
+      <li>Writing the WHERE clause inside the subquery when the filter needs to go in the outer query (or vice versa)</li>
+      <li>Creating deeply nested derived tables (three or four levels deep) when a CTE would be far more readable</li>
+    </ul>
+    <hr>
+    <h2>Best Practices</h2>
+    <ul>
+      <li>Always give derived tables a meaningful alias that describes what they represent, like <code>city_summary</code> or <code>monthly_totals</code>.</li>
+      <li>If you find yourself nesting two or more derived tables inside each other, switch to a CTE. The logic becomes much easier to follow.</li>
+      <li>Include only the columns you need in the inner SELECT. There is no point dragging in extra columns you will not use.</li>
+      <li>Test the inner query independently to confirm it produces the right grouped result before adding the outer layer.</li>
+    </ul>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Swiggy, derived tables are used to first compute revenue per restaurant per day, then filter for restaurants above a threshold in the outer query. At Myntra, analysts compute category-level average prices in an inner query and then join that derived table with the products table to tag each product with its category rank. At Ola, trip summary data is aggregated at the driver level in a derived table, then filtered for drivers with specific performance metrics. The pattern is: aggregate first, then use the result as a clean input for further filtering or joining.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Derived Table Flow:
+
+Original Table (orders)
+        |
+        v
+[ Inner Query: GROUP BY city, AVG(amount) ]
+        |
+        v
+Derived Table (city_summary):
+  city      | avg_amount
+  ----------|----------
+  Mumbai    | 576.67
+  Delhi     | 683.33
+  Bengaluru | 365.00
+        |
+        v
+[ Outer Query: WHERE avg_amount &gt; 500 ]
+        |
+        v
+Final Result:
+  city    | avg_amount
+  --------|----------
+  Mumbai  | 576.67
+  Delhi   | 683.33
+
+Note: The derived table exists only in memory during query execution.
+      It is never written to disk as a permanent table.</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Make sure you can answer these:</p>
+    <ul>
+      <li>Why can you not use WHERE to filter on an aggregated column directly?</li>
+      <li>What is a derived table and how does it differ from a real table?</li>
+      <li>Why does a subquery in FROM require an alias?</li>
+      <li>When would you use a derived table vs a HAVING clause?</li>
+      <li>What is the main reason to switch from nested derived tables to a CTE?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query using a subquery in FROM to find all cities at Swiggy where the total order amount (SUM) exceeds 1500.</li>
+    </ol>
+    <ol>
+      <li>Write a query to find which cuisine type has the highest average order amount. Use a derived table and ORDER BY with LIMIT.</li>
+    </ol>
+    <ol>
+      <li>Write a query that finds customers who have placed more than one order. Use a derived table that counts orders per customer, then filter in the outer query.</li>
+    </ol>
+    <ol>
+      <li>Write a query that computes average amount per city in an inner query, then joins that derived table to the original <code>orders</code> table to show each order alongside its city average.</li>
+    </ol>
+    <ol>
+      <li>Write a query that finds the top 2 cities by total order volume (number of orders). Use a derived table, ORDER BY, and LIMIT.</li>
+    </ol>
+    <ol>
+      <li>Explain why you cannot write: <code>SELECT city, AVG(amount) AS avg_amt FROM orders GROUP BY city WHERE avg_amt > 500</code>. What is the correct way to achieve the same result?</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>Subqueries in FROM look unusual the first time you see them. Putting a whole SELECT statement where a table name should go feels strange. But once you understand that a derived table is just the result of a query treated as a temporary table, it starts to feel natural. Think of it as: compute first, then query that computation. That mental model will serve you well.</p>
+  `,
+  'mod8-t4': `
+    <h1>Scalar Subquery in SELECT: Adding a Calculated Value to Every Row</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Kabir works at Zomato and his manager asks him to produce a report: "For every order, show the order details along with how many total orders that customer has placed with us."</p>
+    <p>Kabir thinks about this. He has an <code>orders</code> table. For each row, he needs to count how many rows exist in that same table for the same customer_id. The count is different for each customer. It is not a single global number. He needs a value calculated per row, driven by data in that row.</p>
+    <p>He could do this with a JOIN and GROUP BY. But there is a more direct way: place a SELECT statement inside the SELECT list itself. For each row the outer query produces, the inner SELECT runs and computes the customer's order count. That is a scalar subquery in SELECT.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Sometimes you want to add a computed column to your result set, where the computation depends on data related to each row. Common examples at work:</p>
+    <ul>
+      <li>Each order alongside the total order count for that customer</li>
+      <li>Each product alongside the average price in its category</li>
+      <li>Each employee alongside the headcount of their department</li>
+      <li>Each transaction alongside the total spend of that user this month</li>
+    </ul>
+    <p>These are "compare this row to something related to it" questions. A scalar subquery in SELECT is one clean way to answer them.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>SQL was built around the idea that a SELECT list can contain not just column references but also expressions. A subquery is just a more complex expression. Allowing a subquery in the SELECT list lets you compute derived values row by row without requiring a separate aggregation step or a complex JOIN. It is a natural extension of SQL's design.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you are printing order reports at Zomato. For each order slip, you want to stamp it with the customer's total order history. You cannot compute one global total and print the same number everywhere. Each slip needs a different number depending on which customer placed that order.</p>
+    <p>A scalar subquery in SELECT does exactly this: it runs a mini-query for each row in the outer result, computing a fresh value based on data from that row.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>SELECT
+    order_id,
+    customer_id,
+    amount,
+    (SELECT COUNT(*) FROM orders o2 WHERE o2.customer_id = o1.customer_id) AS total_orders
+FROM orders o1;
+
+For each row in o1:
+  Row 1: customer_id = 1  --&gt;  inner query counts orders for customer 1  --&gt;  2
+  Row 2: customer_id = 2  --&gt;  inner query counts orders for customer 2  --&gt;  3
+  Row 3: customer_id = 1  --&gt;  inner query counts orders for customer 1  --&gt;  2
+  ...and so on, one execution per outer row</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>A scalar subquery must return exactly one row and one column. If it returns more than one row, SQL throws a runtime error. If it returns no rows, SQL returns NULL for that column in that row.</p>
+    <p>Because the subquery runs once for every row in the outer query, it is technically a type of correlated subquery. It references a column from the outer query (like <code>o1.customer_id</code>) to tailor its computation to each row.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>Basic syntax:</p>
+    <pre><code class="language-sql">SELECT
+    column1,
+    column2,
+    (SELECT aggregate_function(col) FROM another_table WHERE condition) AS computed_column
+FROM main_table;</code></pre>
+    <p>The subquery is placed inside the SELECT list, wrapped in parentheses, and given an alias with AS.</p>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>(SELECT COUNT(*) ...)</code></td><td>Inner query computing a single value</td><td>Counts orders for a specific customer</td></tr>
+      <tr><td><code>WHERE o2.customer_id = o1.customer_id</code></td><td>Ties the inner query to the current outer row</td><td>Matches the current row's customer</td></tr>
+      <tr><td><code>AS total_orders</code></td><td>Names the computed column in the output</td><td>Shows as a column named <code>total_orders</code></td></tr>
+      <tr><td>Alias <code>o1</code>, <code>o2</code></td><td>Distinguishes the outer and inner references to the same table</td><td><code>o1</code> is outer, <code>o2</code> is inner</td></tr>
+      <tr><td>Returns NULL</td><td>What happens when inner query finds no matching rows</td><td>Customer with no orders returns NULL</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample Tables</strong></p>
+    <p><code>orders</code> table at Zomato:</p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>city</th><th>amount</th></tr>
+      <tr><td>401</td><td>5</td><td>Mumbai</td><td>480</td></tr>
+      <tr><td>402</td><td>6</td><td>Delhi</td><td>920</td></tr>
+      <tr><td>403</td><td>5</td><td>Mumbai</td><td>360</td></tr>
+      <tr><td>404</td><td>7</td><td>Bengaluru</td><td>710</td></tr>
+      <tr><td>405</td><td>6</td><td>Delhi</td><td>1100</td></tr>
+      <tr><td>406</td><td>5</td><td>Mumbai</td><td>590</td></tr>
+    </table>
+    <p><code>products</code> table at Flipkart:</p>
+    <table>
+      <tr><th>product_id</th><th>name</th><th>category</th><th>price</th></tr>
+      <tr><td>1</td><td>Phone A</td><td>Electronics</td><td>15000</td></tr>
+      <tr><td>2</td><td>Phone B</td><td>Electronics</td><td>22000</td></tr>
+      <tr><td>3</td><td>T-Shirt X</td><td>Clothing</td><td>499</td></tr>
+      <tr><td>4</td><td>Jeans Y</td><td>Clothing</td><td>1299</td></tr>
+      <tr><td>5</td><td>Laptop Z</td><td>Electronics</td><td>55000</td></tr>
+      <tr><td>6</td><td>Kurta W</td><td>Clothing</td><td>799</td></tr>
+    </table>
+    <hr>
+    <h3>Example 1: Show each order with the customer's total order count</h3>
+    <p>Business question: For every order placed, how many total orders has that customer made?</p>
+    <pre><code class="language-sql">SELECT
+    o1.order_id,
+    o1.customer_id,
+    o1.amount,
+    (SELECT COUNT(*) FROM orders o2 WHERE o2.customer_id = o1.customer_id) AS total_orders_by_customer
+FROM orders o1;</code></pre>
+    <p>For order 401 (customer 5), the inner query counts 3 orders for customer 5. For order 402 (customer 6), the inner query counts 2 orders for customer 6. For order 404 (customer 7), the inner query counts 1 order for customer 7. Each row now shows the customer's lifetime order count alongside the order details.</p>
+    <hr>
+    <h3>Example 2: Show each order with the customer's total spending</h3>
+    <p>Business question: For every order, how much has that customer spent in total across all their orders?</p>
+    <pre><code class="language-sql">SELECT
+    o1.order_id,
+    o1.customer_id,
+    o1.amount,
+    (SELECT SUM(o2.amount) FROM orders o2 WHERE o2.customer_id = o1.customer_id) AS customer_total_spend
+FROM orders o1;</code></pre>
+    <p>Customer 5 appears in three rows. Each time, the inner query sums 480 + 360 + 590 = 1430 and returns 1430 for all three of customer 5's rows. This is a useful pattern for loyalty analysis reports.</p>
+    <hr>
+    <h3>Example 3: Show each product with the average price in its category</h3>
+    <p>Business question: For each product at Flipkart, what is the average price of all products in the same category?</p>
+    <pre><code class="language-sql">SELECT
+    p1.product_id,
+    p1.name,
+    p1.category,
+    p1.price,
+    (SELECT AVG(p2.price) FROM products p2 WHERE p2.category = p1.category) AS category_avg_price
+FROM products p1;</code></pre>
+    <p>For Phone A (Electronics), the inner query averages prices of all Electronics: (15000 + 22000 + 55000) / 3 = 30666.67. For T-Shirt X (Clothing), the inner query averages Clothing: (499 + 1299 + 799) / 3 = 865.67. Each product now shows its own price alongside the category average, which makes it easy to see which products are above or below average.</p>
+    <hr>
+    <h3>Example 4: What happens when the inner query returns more than one row</h3>
+    <p>Business question: This example shows the error case.</p>
+    <pre><code class="language-sql">-- This will throw an error because the subquery returns multiple rows
+SELECT
+    order_id,
+    (SELECT amount FROM orders WHERE city = 'Mumbai') AS mumbai_amount
+FROM orders;</code></pre>
+    <p>There are three Mumbai orders (401, 403, 406). The subquery returns three rows, but a scalar subquery is only allowed to return one. SQL will throw: "Subquery returns more than 1 row." The fix is to aggregate: <code>(SELECT AVG(amount) FROM orders WHERE city = 'Mumbai')</code>.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p><strong>The subquery returns more than one row.</strong> This is the most common error. If your subquery has any chance of returning multiple rows, you must add an aggregation (COUNT, SUM, AVG, MAX, MIN) or a LIMIT 1 to ensure exactly one row comes back.</p>
+    <p><strong>Performance with large tables.</strong> A scalar subquery in SELECT runs once per output row. If your outer query returns 100,000 rows, the inner query runs 100,000 times. This is often fine for small datasets, but on large tables it can be significantly slower than rewriting the query with a JOIN or a window function. Always check query performance in production.</p>
+    <p><strong>NULL values.</strong> If the inner query finds no matching rows, it returns NULL. Make sure your reporting handles NULLs appropriately, especially if you plan to do arithmetic with the computed column.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <ul>
+      <li>Writing a subquery in SELECT that returns a list of values instead of one value</li>
+      <li>Forgetting to alias the tables (o1, o2) when the subquery references the same table as the outer query, causing ambiguous column references</li>
+      <li>Using scalar subqueries on large tables without realizing they run once per row, causing slow reports</li>
+      <li>Not giving the computed column an alias, which results in a confusing column name in the output</li>
+    </ul>
+    <hr>
+    <h2>Best Practices</h2>
+    <ul>
+      <li>Always alias your scalar subquery column with a descriptive name using AS.</li>
+      <li>When the outer and inner queries reference the same table, always use table aliases to distinguish them.</li>
+      <li>For large tables, consider rewriting scalar subqueries as JOINs with GROUP BY or as window functions. They are faster.</li>
+      <li>Test the inner query independently with a hardcoded value before embedding it. Confirm it returns exactly one row.</li>
+    </ul>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Zomato, scalar subqueries in SELECT are used to annotate each order with the customer's lifetime order count for churn analysis dashboards. At Amazon India, product listing pages are built from queries that show each item alongside the count of reviews, computed as a scalar subquery. At Byju's, course performance reports show each student's quiz score alongside the class average for that quiz, computed per row using a scalar subquery. At PhonePe, transaction logs show each entry alongside the user's total transaction count for fraud pattern detection.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Scalar Subquery in SELECT: How It Flows
+
+Outer Query produces Row 1: order_id=401, customer_id=5
+    |
+    +--&gt; Scalar Subquery runs: SELECT COUNT(*) FROM orders WHERE customer_id=5
+    |    Returns: 3
+    |
+Output Row 1: 401 | 5 | 480 | 3
+
+Outer Query produces Row 2: order_id=402, customer_id=6
+    |
+    +--&gt; Scalar Subquery runs: SELECT COUNT(*) FROM orders WHERE customer_id=6
+    |    Returns: 2
+    |
+Output Row 2: 402 | 6 | 920 | 2
+
+... repeats for every row in the outer query
+
+Key constraint: inner query MUST return exactly 1 row and 1 column.
+               More than 1 row = runtime error.
+               0 rows = NULL in that column.</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Check that you can answer these:</p>
+    <ul>
+      <li>What makes a subquery "scalar"?</li>
+      <li>What error do you get if the scalar subquery returns more than one row?</li>
+      <li>Why can scalar subqueries be slow on large tables, and what are the alternatives?</li>
+      <li>What value does SQL return in the output column if the scalar subquery finds no matching rows?</li>
+      <li>Why do you need table aliases (o1, o2) when the subquery and outer query reference the same table?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query that shows each order from the <code>orders</code> table along with the maximum amount ever ordered by that same customer.</li>
+    </ol>
+    <ol>
+      <li>Write a query that shows each product from the <code>products</code> table along with the total number of products in the same category.</li>
+    </ol>
+    <ol>
+      <li>Write a query that shows each order from the <code>orders</code> table along with the city-level average amount for that order's city.</li>
+    </ol>
+    <ol>
+      <li>A scalar subquery returns NULL for some rows. Write a query that replaces those NULLs with 0 using COALESCE.</li>
+    </ol>
+    <ol>
+      <li>Write a query that shows each customer_id from the <code>orders</code> table along with the total amount they have spent. Use a scalar subquery in SELECT, not a GROUP BY.</li>
+    </ol>
+    <ol>
+      <li>Explain why the following query would fail and how to fix it: <code>SELECT order_id, (SELECT city FROM orders) AS city FROM orders</code>.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>Scalar subqueries in SELECT are one of the more elegant SQL patterns. They let you annotate every row with a computed value that relates specifically to that row. The constraint is simple: one row, one column. Respect that constraint, watch out for performance on large tables, and this tool will be a clean addition to your query writing toolkit.</p>
+  `,
+  'mod8-t5': `
+    <h1>Correlated Subqueries: When the Inner Query Depends on the Outer Query</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Rohit is a data analyst at Swiggy. His manager asks him: "For each customer, find their most recent order." Not the most recent order overall, but the most recent one for each individual customer.</p>
+    <p>Rohit stares at the problem. He cannot just write <code>WHERE order_date = MAX(order_date)</code> because that would give him the most recent order across all customers, not per customer. He cannot use a simple subquery that runs once, because the answer is different for every customer.</p>
+    <p>He needs a subquery that, for each customer row in the outer query, goes back into the orders table and finds the maximum date specifically for that customer. The inner query needs to know which customer the outer query is currently looking at. That is a correlated subquery, and it is one of the most powerful patterns in SQL.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Some questions in data work require comparing each row against a subset of data that is specific to that row:</p>
+    <ul>
+      <li>Find each customer's most recent order</li>
+      <li>Find each employee's salary relative to their own department's average</li>
+      <li>Find orders that are the largest order for their respective city</li>
+      <li>Find products that are priced above the average for their own category</li>
+    </ul>
+    <p>In all these cases, the comparison value is not global. It changes based on which row you are currently processing. A regular subquery runs once and gives you a global value. A correlated subquery runs once per row and gives you a row-specific value.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>Regular subqueries are independent. They run, produce a result, and that result is reused for every row in the outer query. But some problems require a fresh computation for each row. SQL designers allowed inner queries to reference columns from the outer query to make this possible. This small extension, letting the inner query see the current outer row, unlocks a whole class of row-by-row analysis that would otherwise require complex joins or application-level loops.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you are reviewing employee salary files. For each employee, you want to know if they earn more than the average salary in their department. You cannot just compute the company-wide average once. You need the average for their specific department.</p>
+    <p>So for each employee, you step back, look up all salaries in their department, compute the average for just that department, and compare. Then you move to the next employee and repeat. A correlated subquery does exactly this: for each row in the outer query, it runs the inner query with that row's values as inputs.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>Regular Subquery: runs ONCE
+  SELECT * FROM orders
+  WHERE amount &gt; (SELECT AVG(amount) FROM orders)
+  --&gt; Inner query runs once, returns 600
+  --&gt; Outer query uses 600 for every row check
+
+Correlated Subquery: runs ONCE PER OUTER ROW
+  SELECT * FROM orders o1
+  WHERE amount &gt; (SELECT AVG(amount) FROM orders o2 WHERE o2.city = o1.city)
+  --&gt; Row 1: o1.city = 'Mumbai'  --&gt; inner runs, returns avg for Mumbai
+  --&gt; Row 2: o1.city = 'Delhi'   --&gt; inner runs, returns avg for Delhi
+  --&gt; Row 3: o1.city = 'Mumbai'  --&gt; inner runs, returns avg for Mumbai again</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>A correlated subquery contains a reference to a column from the outer query. Because of this reference, the inner query cannot be evaluated independently. It must be re-evaluated for every row the outer query processes.</p>
+    <p>The execution order is:</p>
+    <ol>
+      <li>Outer query fetches a row</li>
+      <li>Inner query runs using values from that row</li>
+      <li>Inner query returns a result</li>
+      <li>Outer query uses that result to evaluate the condition for this row</li>
+      <li>Outer query moves to the next row and repeats</li>
+    </ol>
+    <p>This is powerful but slower than a regular subquery. If the outer query has 50,000 rows and the inner query scans a table with 50,000 rows, the total work is 50,000 x 50,000 operations. Always check performance with EXPLAIN.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>Classic example: find each customer's most recent order.</p>
+    <pre><code class="language-sql">SELECT o1.order_id, o1.customer_id, o1.order_date, o1.amount
+FROM orders o1
+WHERE o1.order_date = (
+    SELECT MAX(o2.order_date)
+    FROM orders o2
+    WHERE o2.customer_id = o1.customer_id
+);</code></pre>
+    <p>Here <code>o2.customer_id = o1.customer_id</code> is the correlation. The inner query references <code>o1.customer_id</code> from the outer query. Without that reference, the inner query would just return the global maximum date for everyone.</p>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>o1</code></td><td>Alias for the outer query's table</td><td><code>FROM orders o1</code></td></tr>
+      <tr><td><code>o2</code></td><td>Alias for the inner query's table (same physical table)</td><td><code>FROM orders o2</code></td></tr>
+      <tr><td><code>o2.customer_id = o1.customer_id</code></td><td>Correlation: ties inner query to current outer row</td><td>Filters inner query to the current customer</td></tr>
+      <tr><td><code>SELECT MAX(o2.order_date)</code></td><td>Computes the value specific to the current row</td><td>Returns most recent date for that customer</td></tr>
+      <tr><td>Runs once per row</td><td>The inner query executes fresh for each outer row</td><td>Produces different results for different customers</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample Tables at Swiggy</strong></p>
+    <p><code>orders</code> table:</p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>amount</th><th>order_date</th></tr>
+      <tr><td>501</td><td>20</td><td>450</td><td>2024-01-03</td></tr>
+      <tr><td>502</td><td>21</td><td>800</td><td>2024-01-05</td></tr>
+      <tr><td>503</td><td>20</td><td>620</td><td>2024-01-08</td></tr>
+      <tr><td>504</td><td>22</td><td>310</td><td>2024-01-10</td></tr>
+      <tr><td>505</td><td>21</td><td>950</td><td>2024-01-12</td></tr>
+      <tr><td>506</td><td>20</td><td>280</td><td>2024-01-15</td></tr>
+    </table>
+    <p><code>employees</code> table (generic company):</p>
+    <table>
+      <tr><th>employee_id</th><th>name</th><th>department</th><th>salary</th></tr>
+      <tr><td>1</td><td>Aditya</td><td>Engineering</td><td>85000</td></tr>
+      <tr><td>2</td><td>Shreya</td><td>Engineering</td><td>92000</td></tr>
+      <tr><td>3</td><td>Manoj</td><td>Marketing</td><td>60000</td></tr>
+      <tr><td>4</td><td>Priya</td><td>Marketing</td><td>72000</td></tr>
+      <tr><td>5</td><td>Tarun</td><td>Engineering</td><td>78000</td></tr>
+      <tr><td>6</td><td>Kavita</td><td>Marketing</td><td>65000</td></tr>
+    </table>
+    <hr>
+    <h3>Example 1: Find each customer's most recent order</h3>
+    <p>Business question: For each customer, which is their latest order on the platform?</p>
+    <pre><code class="language-sql">SELECT o1.order_id, o1.customer_id, o1.order_date, o1.amount
+FROM orders o1
+WHERE o1.order_date = (
+    SELECT MAX(o2.order_date)
+    FROM orders o2
+    WHERE o2.customer_id = o1.customer_id
+);</code></pre>
+    <p>For customer 20, the inner query finds MAX(order_date) = 2024-01-15, so order 506 is returned. For customer 21, MAX is 2024-01-12, so order 505 is returned. For customer 22, MAX is 2024-01-10, so order 504 is returned. Result has three rows, one per customer.</p>
+    <hr>
+    <h3>Example 2: Find employees earning more than their department's average</h3>
+    <p>Business question: Which employees are paid above the average salary in their own department?</p>
+    <pre><code class="language-sql">SELECT e1.name, e1.department, e1.salary
+FROM employees e1
+WHERE e1.salary &gt; (
+    SELECT AVG(e2.salary)
+    FROM employees e2
+    WHERE e2.department = e1.department
+);</code></pre>
+    <p>For Engineering, the department average is (85000 + 92000 + 78000) / 3 = 85000. Shreya (92000) is above average. Aditya (85000) is equal, not above. Tarun (78000) is below. For Marketing, the average is (60000 + 72000 + 65000) / 3 = 65666.67. Priya (72000) is above. Result: Shreya and Priya.</p>
+    <hr>
+    <h3>Example 3: Find orders where the customer spent more than their own average</h3>
+    <p>Business question: Which specific orders are above that customer's personal average order value?</p>
+    <pre><code class="language-sql">SELECT o1.order_id, o1.customer_id, o1.amount
+FROM orders o1
+WHERE o1.amount &gt; (
+    SELECT AVG(o2.amount)
+    FROM orders o2
+    WHERE o2.customer_id = o1.customer_id
+);</code></pre>
+    <p>Customer 20 has orders 450, 620, 280. Their average is 450. Orders above 450: order 503 (620). Customer 21 has 800 and 950. Average is 875. Order 505 (950) is above. Result includes those qualifying orders.</p>
+    <hr>
+    <h3>Example 4: Find customers who have placed more than 2 orders (using correlated approach)</h3>
+    <p>Business question: Which customers are active with more than 2 orders?</p>
+    <pre><code class="language-sql">SELECT DISTINCT o1.customer_id
+FROM orders o1
+WHERE (
+    SELECT COUNT(*)
+    FROM orders o2
+    WHERE o2.customer_id = o1.customer_id
+) &gt; 2;</code></pre>
+    <p>For customer 20, the inner query counts 3 orders. 3 > 2 is true, so customer 20 is included. For customers 21 and 22, counts are 2 and 1. They do not qualify. Result: customer 20.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p><strong>Performance on large tables.</strong> Correlated subqueries run once per outer row. On a table with millions of rows, this means millions of inner query executions. This is the most important thing to watch for. In production, always run EXPLAIN to see the query execution plan.</p>
+    <p><strong>Confusing correlated and regular subqueries.</strong> If your inner query does not reference anything from the outer query, it is a regular subquery. If it does, it is correlated. The presence of an outer table alias reference inside the inner WHERE is the tell.</p>
+    <p><strong>Getting the aliases wrong.</strong> When the inner and outer query reference the same table, you must use different aliases. Without aliases, SQL cannot distinguish which instance of the table you mean.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <ul>
+      <li>Forgetting to add different table aliases when the inner and outer query use the same table</li>
+      <li>Writing a correlated subquery when a regular subquery would do, adding unnecessary per-row computation</li>
+      <li>Not indexing the columns used in the correlation condition, which makes performance much worse</li>
+      <li>Using correlated subqueries in SELECT on large result sets without considering window functions as a faster alternative</li>
+    </ul>
+    <hr>
+    <h2>Best Practices</h2>
+    <ul>
+      <li>Use correlated subqueries when the logic is clearest expressed this way, but always benchmark against the JOIN equivalent on real data.</li>
+      <li>Ensure that the columns referenced in the correlation condition are indexed. This is the single biggest performance lever.</li>
+      <li>Consider rewriting as a window function (RANK, MAX OVER PARTITION BY) for large datasets where per-row performance matters.</li>
+      <li>Document why you used a correlated subquery in a comment, especially in team code where other analysts may not immediately recognize the pattern.</li>
+    </ul>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Swiggy, correlated subqueries are used to find each restaurant's best-performing day by comparing daily revenue to each restaurant's own average. At Flipkart, they identify each product's most recent price update. At IRCTC, they find which booking is the most recent per user for session analysis. At Paytm, they detect whether a transaction amount exceeds a user's personal average, which is useful for fraud flagging. The pattern is used wherever "compare this to its own group's statistic" is the question being asked.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>Correlated vs Regular Subquery: Execution Model
+
+Regular Subquery:
+  Outer Query (N rows)
+       |
+       +-- Inner Query runs ONCE
+       |   Returns: 600
+       |
+       +-- All N rows compared against 600
+
+Correlated Subquery:
+  Outer Query Row 1  --&gt;  Inner Query runs (for customer 20)  --&gt;  Returns 450
+  Outer Query Row 2  --&gt;  Inner Query runs (for customer 21)  --&gt;  Returns 875
+  Outer Query Row 3  --&gt;  Inner Query runs (for customer 20)  --&gt;  Returns 450
+  ...
+  Outer Query Row N  --&gt;  Inner Query runs (for this row)     --&gt;  Returns X
+
+  Total inner query executions = N (one per outer row)
+  On large tables, this can be millions of executions.
+  Window functions are often faster for these use cases.</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Answer these before moving on:</p>
+    <ul>
+      <li>What makes a subquery "correlated" rather than regular?</li>
+      <li>How many times does a correlated subquery execute relative to the outer query?</li>
+      <li>What is the performance risk of correlated subqueries on large tables?</li>
+      <li>How do you rewrite a correlated subquery for finding the max-per-group as a window function (conceptually)?</li>
+      <li>Why do you need two different aliases when the inner and outer query use the same table?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a correlated subquery to find each department's highest-paid employee from the <code>employees</code> table.</li>
+    </ol>
+    <ol>
+      <li>Write a correlated subquery to find all orders where the amount is greater than the average amount for that order's city.</li>
+    </ol>
+    <ol>
+      <li>Write a correlated subquery to find customers who have placed at least 2 orders in the <code>orders</code> table.</li>
+    </ol>
+    <ol>
+      <li>Write a correlated subquery to find each employee who earns less than the average salary in their department.</li>
+    </ol>
+    <ol>
+      <li>Write a correlated subquery to find the second most recent order for each customer. (Hint: find orders where there is exactly one order newer than it for that customer.)</li>
+    </ol>
+    <ol>
+      <li>Explain the performance difference between: <code>WHERE amount > (SELECT AVG(amount) FROM orders)</code> and <code>WHERE amount > (SELECT AVG(o2.amount) FROM orders o2 WHERE o2.customer_id = o1.customer_id)</code>. Which one runs the inner query more times and why?</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>Correlated subqueries are the point where SQL starts feeling genuinely powerful. The ability to ask "compared to the rest of its own group" questions is crucial for real analytics work. Just remember: with power comes responsibility. Always check performance before deploying correlated subqueries on large production tables.</p>
+  `,
+  'mod8-t6': `
+    <h1>EXISTS and NOT EXISTS: Check Whether a Subquery Returns Any Rows</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Priyanka is an analyst at Flipkart. Her manager says: "Get me a list of all customers who have placed at least one order in the last 30 days."</p>
+    <p>Priyanka could use a JOIN. She could use IN with a subquery. But her manager then adds: "The orders table has 80 million rows. The last query someone wrote was timing out."</p>
+    <p>A teammate suggests EXISTS. Priyanka has seen the keyword before but has not really used it. Her teammate explains: EXISTS does not pull any data from the subquery. It just checks whether any rows match. As soon as it finds the first match, it stops and returns TRUE. It never reads the whole table. That makes it efficient for exactly this kind of "does a matching row exist?" question.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>A common class of questions in analytics is not "what is the value?" but "does this thing exist?":</p>
+    <ul>
+      <li>Has this customer placed any order?</li>
+      <li>Does this restaurant have any active listings?</li>
+      <li>Is there at least one complaint logged for this user?</li>
+      <li>Has this product been purchased at all this quarter?</li>
+    </ul>
+    <p>You do not need to retrieve data from the subquery. You just need a yes/no answer. EXISTS is built for this.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>IN with a subquery retrieves all matching values and checks membership against that list. For large tables, this means pulling potentially millions of values into memory before doing any comparison. EXISTS is fundamentally different: it runs the subquery and stops at the first row that satisfies the condition. No full scan, no list-building. SQL designers added EXISTS specifically to give analysts an efficient way to do existence checks without materializing the entire subquery result.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p>Imagine you want to know if any Flipkart orders exist for a specific customer. You could read the entire orders file, extract all customer IDs, and check if the customer's ID is in that list. That is IN.</p>
+    <p>Or you could flip through the orders file until you find one order for that customer, then stop. You do not care about the rest. You just needed confirmation that at least one exists. That is EXISTS.</p>
+    <p>For a file with 80 million rows, the difference between "read all of it" and "stop at the first match" is enormous.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>EXISTS:
+  For each customer in outer query:
+    Run subquery looking for any order with this customer_id
+    First match found? --&gt; TRUE, include this customer, STOP scanning orders
+    No match found? ----&gt; FALSE, exclude this customer
+
+NOT EXISTS:
+  For each customer in outer query:
+    Run subquery looking for any order with this customer_id
+    No match found? ----&gt; TRUE, include this customer (they have no orders)
+    Any match found? --&gt; FALSE, exclude this customer (they have at least one order)</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p>EXISTS is used in a WHERE clause. It takes a subquery as its argument. The subquery is a correlated subquery that references the outer query's current row. EXISTS evaluates to TRUE if the subquery returns at least one row, and FALSE if it returns zero rows.</p>
+    <p>The subquery inside EXISTS does not return data to the outer query. It is only evaluated for whether it produces any rows. Because of this, it is common practice to write <code>SELECT 1</code> inside the EXISTS subquery rather than selecting actual column data. The 1 is just a placeholder. The column list does not matter at all.</p>
+    <p>NOT EXISTS is the inverse. It returns TRUE when the subquery returns zero rows, meaning no match was found.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>Basic EXISTS syntax:</p>
+    <pre><code class="language-sql">SELECT c.customer_id, c.name
+FROM customers c
+WHERE EXISTS (
+    SELECT 1
+    FROM orders o
+    WHERE o.customer_id = c.customer_id
+);</code></pre>
+    <p>NOT EXISTS syntax:</p>
+    <pre><code class="language-sql">SELECT c.customer_id, c.name
+FROM customers c
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM orders o
+    WHERE o.customer_id = c.customer_id
+);</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>EXISTS (...)</code></td><td>Returns TRUE if subquery returns at least one row</td><td>Checks if customer has any orders</td></tr>
+      <tr><td><code>NOT EXISTS (...)</code></td><td>Returns TRUE if subquery returns zero rows</td><td>Checks if customer has placed NO orders</td></tr>
+      <tr><td><code>SELECT 1</code></td><td>Placeholder inside EXISTS subquery</td><td>The 1 has no significance; any value works</td></tr>
+      <tr><td>Correlation condition</td><td>Ties the inner query to the current outer row</td><td><code>WHERE o.customer_id = c.customer_id</code></td></tr>
+      <tr><td>Stops at first match</td><td>EXISTS short-circuits when the first row is found</td><td>Does not read the entire orders table per row</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample Tables at Flipkart</strong></p>
+    <p><code>customers</code> table:</p>
+    <table>
+      <tr><th>customer_id</th><th>name</th><th>city</th></tr>
+      <tr><td>1</td><td>Rohit</td><td>Mumbai</td></tr>
+      <tr><td>2</td><td>Ananya</td><td>Delhi</td></tr>
+      <tr><td>3</td><td>Vijay</td><td>Bengaluru</td></tr>
+      <tr><td>4</td><td>Deepa</td><td>Hyderabad</td></tr>
+    </table>
+    <p><code>orders</code> table:</p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>amount</th></tr>
+      <tr><td>601</td><td>1</td><td>850</td></tr>
+      <tr><td>602</td><td>2</td><td>1200</td></tr>
+      <tr><td>603</td><td>1</td><td>460</td></tr>
+      <tr><td>604</td><td>3</td><td>790</td></tr>
+    </table>
+    <hr>
+    <h3>Example 1: Find customers who have placed at least one order</h3>
+    <p>Business question: Which registered customers are active buyers?</p>
+    <pre><code class="language-sql">SELECT c.customer_id, c.name
+FROM customers c
+WHERE EXISTS (
+    SELECT 1
+    FROM orders o
+    WHERE o.customer_id = c.customer_id
+);</code></pre>
+    <p>The subquery checks for each customer whether any order exists with their customer_id. Rohit (1) has orders 601 and 603, EXISTS is TRUE. Ananya (2) has order 602, TRUE. Vijay (3) has order 604, TRUE. Deepa (4) has no orders, EXISTS is FALSE, she is excluded. Result: Rohit, Ananya, Vijay.</p>
+    <hr>
+    <h3>Example 2: Find customers who have never placed an order</h3>
+    <p>Business question: Which customers have registered but never bought anything?</p>
+    <pre><code class="language-sql">SELECT c.customer_id, c.name
+FROM customers c
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM orders o
+    WHERE o.customer_id = c.customer_id
+);</code></pre>
+    <p>For Rohit, Ananya, and Vijay, the subquery returns rows, so NOT EXISTS is FALSE and they are excluded. For Deepa, the subquery returns no rows, NOT EXISTS is TRUE, and she is included. Result: Deepa. This kind of query is essential for re-engagement campaigns.</p>
+    <hr>
+    <h3>Example 3: Find customers who placed a high-value order</h3>
+    <p>Business question: Which customers have placed at least one order above 1000?</p>
+    <pre><code class="language-sql">SELECT c.customer_id, c.name
+FROM customers c
+WHERE EXISTS (
+    SELECT 1
+    FROM orders o
+    WHERE o.customer_id = c.customer_id
+    AND o.amount &gt; 1000
+);</code></pre>
+    <p>The subquery looks for orders where the customer_id matches AND the amount is above 1000. Only Ananya (order 602, 1200) qualifies. Rohit's orders are 850 and 460, neither above 1000. Result: Ananya.</p>
+    <hr>
+    <h3>Example 4: NOT EXISTS with NULLs -- why it is safer than NOT IN</h3>
+    <p>Business question: This example contrasts EXISTS vs IN behavior with NULLs.</p>
+    <p>Suppose the <code>orders</code> table has a row with a NULL customer_id:</p>
+    <pre><code class="language-sql">-- If orders contains a row with customer_id = NULL:
+
+-- NOT IN breaks -- returns 0 rows even if there are non-matching customers
+SELECT name FROM customers
+WHERE customer_id NOT IN (SELECT customer_id FROM orders);
+-- Returns 0 rows because NOT IN (1, 2, 3, NULL) is UNKNOWN for every value
+
+-- NOT EXISTS works correctly
+SELECT c.name FROM customers c
+WHERE NOT EXISTS (
+    SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id
+);
+-- Returns Deepa correctly, because the NULL row does not affect the EXISTS check</code></pre>
+    <p>The EXISTS/NOT EXISTS approach checks each pair individually. A NULL in the orders table does not poison the result for every other row the way it does with NOT IN.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p><strong>Writing SELECT <em> inside EXISTS.</strong> Many people write <code>SELECT </em> FROM orders WHERE ...</code> inside EXISTS. This works, but it is misleading because EXISTS does not use the column data at all. The convention is <code>SELECT 1</code> to make it clear that only row existence matters.</p>
+    <p><strong>Forgetting the correlation condition.</strong> If you write <code>WHERE EXISTS (SELECT 1 FROM orders)</code> without correlating to the outer query, the subquery returns rows for every execution and EXISTS is always TRUE. Every customer would be returned regardless of whether they have orders. Always include the correlation.</p>
+    <p><strong>Using EXISTS when you need the actual values.</strong> EXISTS only tells you whether rows exist. If you need the data from the related rows, you need a JOIN or IN.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <ul>
+      <li>Omitting the correlation condition, which makes EXISTS always TRUE or always FALSE</li>
+      <li>Confusing NOT EXISTS with NOT IN and not understanding why their NULL behavior differs</li>
+      <li>Using <code>SELECT column_name</code> inside EXISTS instead of <code>SELECT 1</code>, which works but signals a misunderstanding of how EXISTS works</li>
+      <li>Applying EXISTS where a simple JOIN would be more readable and equally performant</li>
+    </ul>
+    <hr>
+    <h2>Best Practices</h2>
+    <ul>
+      <li>Use <code>SELECT 1</code> inside EXISTS subqueries as a convention that signals intent.</li>
+      <li>Always include a proper correlation condition.</li>
+      <li>Prefer NOT EXISTS over NOT IN when there is any chance the subquery could return NULLs.</li>
+      <li>Index the columns used in the correlation condition. EXISTS can scan very efficiently with proper indexes.</li>
+      <li>Use EXISTS when you only need to know if a relationship exists, not when you need data from the related table.</li>
+    </ul>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Flipkart, NOT EXISTS is used to find customers in the CRM who have registered but never converted to buyers, targeting them for first-purchase offers. At Ola, EXISTS checks whether a driver has any completed trips before including them in performance reports. At BookMyShow, NOT EXISTS helps find events with no ticket sales, which are then flagged for promotional action. At Paytm, EXISTS is used to verify whether a UPI handle has any linked transactions before processing certain account operations. Existence checks are one of the most common real-world query patterns.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>EXISTS vs NOT EXISTS: Two Sides of the Same Pattern
+
+customers table:       orders table:
+customer_id  name      order_id  customer_id  amount
+1            Rohit     601       1            850
+2            Ananya    602       2            1200
+3            Vijay     603       1            460
+4            Deepa     604       3            790
+
+EXISTS (has orders?):
+  Rohit   --&gt; finds order 601 --&gt; stops --&gt; TRUE  --&gt; included
+  Ananya  --&gt; finds order 602 --&gt; stops --&gt; TRUE  --&gt; included
+  Vijay   --&gt; finds order 604 --&gt; stops --&gt; TRUE  --&gt; included
+  Deepa   --&gt; no match found  --&gt;        FALSE --&gt; excluded
+  Result: Rohit, Ananya, Vijay
+
+NOT EXISTS (has NO orders?):
+  Rohit   --&gt; finds order 601 --&gt; stops --&gt; FALSE --&gt; excluded
+  Ananya  --&gt; finds order 602 --&gt; stops --&gt; FALSE --&gt; excluded
+  Vijay   --&gt; finds order 604 --&gt; stops --&gt; FALSE --&gt; excluded
+  Deepa   --&gt; no match found  --&gt;        TRUE  --&gt; included
+  Result: Deepa
+
+NULL Safety:
+  NOT IN: one NULL in subquery result --&gt; 0 rows returned
+  NOT EXISTS: NULLs in subquery do not affect the outer result</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Check that you can answer these:</p>
+    <ul>
+      <li>What does EXISTS return when the subquery finds at least one row?</li>
+      <li>Why is <code>SELECT 1</code> written inside EXISTS subqueries?</li>
+      <li>What happens if you forget the correlation condition in an EXISTS subquery?</li>
+      <li>Why is NOT EXISTS safer than NOT IN when NULLs might be present?</li>
+      <li>When would you use EXISTS and when would you use a JOIN instead?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write a query using EXISTS to find all customers who have placed at least one order above 500 rupees.</li>
+    </ol>
+    <ol>
+      <li>Write a query using NOT EXISTS to find all customers who have no orders in the <code>orders</code> table at all.</li>
+    </ol>
+    <ol>
+      <li>Write a query using NOT EXISTS to find all customers who have never placed an order in Mumbai.</li>
+    </ol>
+    <ol>
+      <li>Explain in plain words what happens when you write <code>WHERE EXISTS (SELECT 1 FROM orders)</code> without a correlation condition. What does the query return?</li>
+    </ol>
+    <ol>
+      <li>Write a query using EXISTS to find customers who have placed more than one order. (Hint: within the EXISTS subquery, use a GROUP BY or a self-join approach.)</li>
+    </ol>
+    <ol>
+      <li>Compare the output of these two queries when the <code>orders</code> table has a row with customer_id = NULL: one using NOT IN and one using NOT EXISTS. Explain the difference in results.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>EXISTS and NOT EXISTS are clean, efficient, and NULL-safe tools for existence checks. Once you have seen the NULL problem with NOT IN, you will naturally reach for NOT EXISTS in situations where the subquery might contain NULLs. Remember: EXISTS does not care what the subquery returns. It only cares whether the subquery returns anything at all.</p>
+  `,
+  'mod8-t7': `
+    <h1>IN vs EXISTS: Which One Should You Use and When?</h1>
+    <hr>
+    <h2>Let's Start Here</h2>
+    <p>Siddharth is a senior analyst at Swiggy and is mentoring Isha, a fresher who just learned subqueries. Isha asks: "I want to find all customers who have placed at least one order. I can write this with IN or with EXISTS. They both seem to give the same result. Does it matter which one I use?"</p>
+    <p>Siddharth pulls up a chair. "It depends," he says. "They look similar, but they work very differently under the hood. And there is one case where NOT IN will silently give you wrong results while NOT EXISTS works perfectly. That one gotcha alone is worth understanding."</p>
+    <p>He opens a query window and starts walking her through it.</p>
+    <hr>
+    <h2>The Problem You'll Actually Face</h2>
+    <p>Both IN and EXISTS can answer "which rows in table A have a match in table B?" But they do it differently, and the difference matters in three situations:</p>
+    <ul>
+      <li>When the subquery table is very large (performance matters)</li>
+      <li>When the result set from the subquery is very small (performance matters the other way)</li>
+      <li>When the subquery can return NULL values (correctness matters)</li>
+    </ul>
+    <p>Knowing which to use avoids both slow queries and incorrect results.</p>
+    <hr>
+    <h2>Why Was This Built in the First Place?</h2>
+    <p>IN was designed for membership checks: is a value in a list? The list could be hardcoded or come from a subquery. EXISTS was designed specifically for existence checks: does any related row exist? The two serve slightly different conceptual purposes. Understanding those purposes tells you which to reach for.</p>
+    <hr>
+    <h2>Think of It This Way</h2>
+    <p><strong>IN is like a guest list check.</strong> The bouncer prints the entire guest list first, then checks if your name is on it. If the list is short, it is fast. If the list has 10 million names, printing it takes a while.</p>
+    <p><strong>EXISTS is like a doorbell check.</strong> The bouncer rings the apartment and asks, "Is there anyone here for this guest?" The moment someone answers, the check is done. The bouncer does not need to know how many people are inside. As soon as one person answers, the result is YES.</p>
+    <p>For large inner tables, the doorbell approach is faster. For small inner tables, both are roughly equivalent.</p>
+    <hr>
+    <h2>A Simple Way to Picture It</h2>
+    <pre><code>IN:
+  SELECT name FROM customers
+  WHERE customer_id IN (SELECT customer_id FROM orders);
+
+  Step 1: Execute full subquery --&gt; collect all customer_ids from orders
+          Result list: [1, 2, 1, 3, 2, 1, 3, ...]  (could be millions)
+  Step 2: For each customer, check if their id is in that list
+
+EXISTS:
+  SELECT name FROM customers c
+  WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id);
+
+  For each customer:
+    Run subquery looking for first matching order
+    Found? --&gt; TRUE, include customer, stop inner scan
+    Not found? --&gt; FALSE, exclude customer</code></pre>
+    <hr>
+    <h2>How It Actually Works</h2>
+    <p><strong>IN mechanism:</strong> SQL executes the subquery completely and builds a result set (a list). It then checks each row of the outer query against that list. If the subquery returns 5 million order rows, SQL builds a set of 5 million values. The outer query then does a lookup for each customer in that set.</p>
+    <p><strong>EXISTS mechanism:</strong> SQL runs the subquery as a correlated subquery for each outer row. As soon as the subquery finds one row that satisfies the condition, it returns TRUE and stops. It never fully materializes the subquery result.</p>
+    <p><strong>The performance crossover:</strong> For small subquery results (a few hundred or thousand rows), IN is often faster because the list lookup is very efficient. For large subquery tables (millions of rows), EXISTS is typically faster because it short-circuits at the first match.</p>
+    <hr>
+    <h2>Writing It in SQL</h2>
+    <p>Using IN:</p>
+    <pre><code class="language-sql">SELECT name
+FROM customers
+WHERE customer_id IN (SELECT customer_id FROM orders);</code></pre>
+    <p>Using EXISTS (equivalent):</p>
+    <pre><code class="language-sql">SELECT c.name
+FROM customers c
+WHERE EXISTS (
+    SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id
+);</code></pre>
+    <p>NOT IN:</p>
+    <pre><code class="language-sql">SELECT name
+FROM customers
+WHERE customer_id NOT IN (SELECT customer_id FROM orders);</code></pre>
+    <p>NOT EXISTS (equivalent):</p>
+    <pre><code class="language-sql">SELECT c.name
+FROM customers c
+WHERE NOT EXISTS (
+    SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id
+);</code></pre>
+    <hr>
+    <h2>What Each Part Means</h2>
+    <table>
+      <tr><th>Part</th><th>What It Does</th><th>Example</th></tr>
+      <tr><td><code>IN (subquery)</code></td><td>Checks if value is in the full result set</td><td><code>WHERE customer_id IN (SELECT customer_id FROM orders)</code></td></tr>
+      <tr><td><code>EXISTS (subquery)</code></td><td>Checks if at least one row matches the condition</td><td><code>WHERE EXISTS (SELECT 1 FROM orders o WHERE ...)</code></td></tr>
+      <tr><td>Subquery result with IN</td><td>Full list built and stored in memory</td><td>All customer_ids from orders collected</td></tr>
+      <tr><td>Subquery result with EXISTS</td><td>Not materialized, only checked row by row</td><td>Stops at first match per outer row</td></tr>
+      <tr><td>NOT IN + NULL</td><td>UNKNOWN for every comparison</td><td>Returns 0 rows silently</td></tr>
+      <tr><td>NOT EXISTS + NULL</td><td>Unaffected by NULLs in related table</td><td>Returns correct rows</td></tr>
+    </table>
+    <hr>
+    <h2>Let's Try It Out</h2>
+    <p><strong>Sample Tables at Swiggy</strong></p>
+    <p><code>customers</code> table:</p>
+    <table>
+      <tr><th>customer_id</th><th>name</th><th>city</th></tr>
+      <tr><td>1</td><td>Aryan</td><td>Mumbai</td></tr>
+      <tr><td>2</td><td>Divya</td><td>Delhi</td></tr>
+      <tr><td>3</td><td>Suresh</td><td>Bengaluru</td></tr>
+      <tr><td>4</td><td>Nisha</td><td>Hyderabad</td></tr>
+    </table>
+    <p><code>orders</code> table:</p>
+    <table>
+      <tr><th>order_id</th><th>customer_id</th><th>amount</th></tr>
+      <tr><td>701</td><td>1</td><td>650</td></tr>
+      <tr><td>702</td><td>2</td><td>890</td></tr>
+      <tr><td>703</td><td>1</td><td>420</td></tr>
+      <tr><td>704</td><td>3</td><td>310</td></tr>
+    </table>
+    <hr>
+    <h3>Example 1: Customers with orders -- IN vs EXISTS comparison</h3>
+    <p>Business question: Find all customers who have placed at least one order.</p>
+    <p>Using IN:</p>
+    <pre><code class="language-sql">SELECT name
+FROM customers
+WHERE customer_id IN (SELECT customer_id FROM orders);</code></pre>
+    <p>Using EXISTS:</p>
+    <pre><code class="language-sql">SELECT c.name
+FROM customers c
+WHERE EXISTS (
+    SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id
+);</code></pre>
+    <p>Both return Aryan, Divya, Suresh. Nisha has no orders and is excluded in both cases. The results are identical. The difference is in how they work internally.</p>
+    <hr>
+    <h3>Example 2: Customers with no orders -- NOT IN vs NOT EXISTS</h3>
+    <p>Business question: Find all customers who have never placed an order.</p>
+    <p>Using NOT IN:</p>
+    <pre><code class="language-sql">SELECT name
+FROM customers
+WHERE customer_id NOT IN (SELECT customer_id FROM orders);</code></pre>
+    <p>Using NOT EXISTS:</p>
+    <pre><code class="language-sql">SELECT c.name
+FROM customers c
+WHERE NOT EXISTS (
+    SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id
+);</code></pre>
+    <p>Both return Nisha. Results match here because there are no NULLs in the data.</p>
+    <hr>
+    <h3>Example 3: The NULL problem with NOT IN</h3>
+    <p>Business question: This example demonstrates when NOT IN silently returns wrong results.</p>
+    <p>Suppose we insert a row with a NULL customer_id into orders:</p>
+    <pre><code class="language-sql">-- Imagine orders table has an extra row: (705, NULL, 500)
+
+-- NOT IN now returns 0 rows:
+SELECT name
+FROM customers
+WHERE customer_id NOT IN (SELECT customer_id FROM orders);
+-- Returns: (empty result set)
+
+-- NOT EXISTS still returns Nisha correctly:
+SELECT c.name
+FROM customers c
+WHERE NOT EXISTS (
+    SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id
+);
+-- Returns: Nisha</code></pre>
+    <p>Why does NOT IN fail? The subquery returns (1, 2, 1, 3, NULL). SQL evaluates <code>customer_id NOT IN (1, 2, 1, 3, NULL)</code>. For any value X, <code>X != NULL</code> is UNKNOWN in SQL's three-valued logic. Since NOT IN requires the value to be "not equal to every item in the list," and one item is NULL (meaning the comparison is UNKNOWN), the entire expression evaluates to UNKNOWN for every customer. UNKNOWN is not TRUE, so no rows pass the filter. Zero rows returned.</p>
+    <p>NOT EXISTS avoids this because it does not compare values directly against NULL. It checks per-row whether the correlated subquery returns any rows, and a NULL customer_id in orders does not create a matching row for any specific customer.</p>
+    <hr>
+    <h3>Example 4: Performance example -- large inner table</h3>
+    <p>Business question: Show which pattern to prefer when inner table is large.</p>
+    <p>For a conceptual understanding:</p>
+    <pre><code class="language-sql">-- When orders has 50 million rows:
+
+-- IN: reads all 50 million rows, builds list, then checks each customer
+SELECT name FROM customers
+WHERE customer_id IN (SELECT customer_id FROM orders);
+
+-- EXISTS: for each of the 4 customers, scans orders until first match found
+-- With an index on orders.customer_id, this finds the first match almost instantly
+SELECT c.name FROM customers c
+WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id);
+
+-- EXISTS with an index is significantly faster for large inner tables</code></pre>
+    <p>With a proper index on <code>orders.customer_id</code>, EXISTS does a near-instant index lookup for each customer instead of reading the full 50-million-row table.</p>
+    <hr>
+    <h2>Things That Trip People Up</h2>
+    <p><strong>Assuming IN and NOT IN are always interchangeable with EXISTS and NOT EXISTS.</strong> They are equivalent when no NULLs exist. The moment NULLs appear in the subquery result, NOT IN behaves unexpectedly.</p>
+    <p><strong>Not realizing this is a silent failure.</strong> NOT IN with a NULL subquery does not throw an error. It just returns zero rows. If your analyst instinct says "this should return some rows" and the result is empty, check for NULLs in the subquery.</p>
+    <p><strong>Over-optimizing prematurely.</strong> On small tables, use whichever is clearer to read. Performance optimization matters for large production tables. Do not rewrite working readable code for a theoretical performance gain on a table with 500 rows.</p>
+    <hr>
+    <h2>Common Mistakes</h2>
+    <ul>
+      <li>Using NOT IN on a subquery that joins to a table with nullable foreign keys</li>
+      <li>Assuming that IN is always faster than EXISTS or vice versa (it depends on table sizes)</li>
+      <li>Writing EXISTS without the correlation condition (makes EXISTS always TRUE or always FALSE)</li>
+      <li>Choosing NOT IN for "does not exist" queries without checking if NULLs are possible</li>
+    </ul>
+    <hr>
+    <h2>Best Practices</h2>
+    <ul>
+      <li>Use IN for small, known value lists where NULLs are not a concern.</li>
+      <li>Use EXISTS when checking for the presence of related rows in large tables.</li>
+      <li>Always use NOT EXISTS instead of NOT IN when the subquery involves a nullable column.</li>
+      <li>When in doubt, run both versions with EXPLAIN and compare the execution plans.</li>
+      <li>Add a comment when you deliberately chose one over the other for performance or NULL-safety reasons.</li>
+    </ul>
+    <hr>
+    <h2>How Companies Use This Every Day</h2>
+    <p>At Swiggy, EXISTS is the standard for checking whether a restaurant has any active menu items before including it in search results. At Amazon India, NOT EXISTS is used to find products with no inventory entries rather than NOT IN, specifically because the inventory table has nullable SKU columns. At Paytm, IN is used for small fixed-category lookups (like checking transaction types against a short list), while EXISTS handles large-scale user activity checks. At Myntra, analysts were bitten by the NOT IN NULL bug early on and now have a team guideline: use NOT EXISTS for any "find records with no matching entry" query.</p>
+    <hr>
+    <h2>The Big Picture</h2>
+    <pre><code>IN vs EXISTS: Side-by-Side Comparison
+
+Feature               | IN                          | EXISTS
+----------------------|-----------------------------|-------------------------------
+How it works          | Builds full list, checks membership | Checks row by row, stops at first match
+Subquery materialized | Yes, full result built        | No, evaluates until first match
+Better for small inner| Yes, list lookup is fast      | Similar performance
+Better for large inner| Slower (builds big list)      | Faster (stops early)
+NULL handling (positive)| Works correctly             | Works correctly
+NOT IN with NULL      | Silent failure (0 rows)       | NOT EXISTS works correctly
+Correlation needed    | No                           | Yes (typically correlated)
+SELECT list           | The column values matter      | SELECT 1 (values ignored)
+Readability           | Natural for simple lookups    | Clearer for "existence" semantics
+
+When to use IN:
+  - Checking against a small fixed list: WHERE city IN ('Mumbai', 'Delhi')
+  - Subquery returns a small result set
+  - No NULLs in the subquery column
+
+When to use EXISTS:
+  - Large inner table (benefits from early exit)
+  - Checking for the presence of related rows
+  - Any NOT scenario where NULLs might be present
+  - When you need NULL-safe behavior</code></pre>
+    <hr>
+    <h2>Before You Move On</h2>
+    <p>Answer these before continuing:</p>
+    <ul>
+      <li>What is the fundamental difference in how IN and EXISTS work internally?</li>
+      <li>When does NOT IN return zero rows even though you expect results?</li>
+      <li>In what scenario is EXISTS likely to outperform IN on large tables?</li>
+      <li>Why does NOT EXISTS handle NULLs correctly but NOT IN does not?</li>
+      <li>When is IN perfectly fine to use and the EXISTS performance argument does not apply?</li>
+    </ul>
+    <hr>
+    <h2>Practice Questions</h2>
+    <ol>
+      <li>Write both an IN version and an EXISTS version of a query that finds all customers at Swiggy who have placed at least one order over 700 rupees. Verify they return the same result.</li>
+    </ol>
+    <ol>
+      <li>Write a NOT IN query to find customers with no orders. Then add a NULL row to the orders table conceptually. Explain what the NOT IN query now returns and why.</li>
+    </ol>
+    <ol>
+      <li>Write a NOT EXISTS version of the same query from question 2 and explain why it still returns the correct result.</li>
+    </ol>
+    <ol>
+      <li>Your colleague wrote: <code>WHERE product_id NOT IN (SELECT product_id FROM order_items)</code>. The <code>order_items</code> table has a nullable <code>product_id</code> column. What is the risk here? How would you rewrite it?</li>
+    </ol>
+    <ol>
+      <li>You have a <code>customers</code> table with 1,000 rows and an <code>orders</code> table with 50 million rows. You want to find customers who have placed at least one order. Would you use IN or EXISTS and why?</li>
+    </ol>
+    <ol>
+      <li>Write a query using IN that finds customers from the <code>customers</code> table who live in cities where at least one order has been placed. Then rewrite it using EXISTS.</li>
+    </ol>
+    <hr>
+    <h2>Final Thoughts</h2>
+    <p>IN and EXISTS are two ways to ask the same type of question, but with different internal behavior and one critical difference in NULL handling. For day-to-day work, the NULL safety of NOT EXISTS is reason enough to make it your default for "find rows with no match" queries. For performance-sensitive code on large tables, EXISTS with a properly indexed correlation condition is usually the better choice. Know both tools and know when each one fits.</p>
+  `,
 
   // ── Module 9 ─────────────────────────────────────────────────
   'mod9-t1': `<h1>Common Table Expressions (CTEs)</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
