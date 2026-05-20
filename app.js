@@ -3835,6 +3835,61 @@ let currentUser       = null;
 let userProfile       = null;
 let profileQFilter    = 'all';
 let prevPage          = 'landing';
+let _initialPath      = window.location.pathname;
+
+// ── ROUTING UTILITIES ─────────────────────────────────────────────
+
+// Convert any string to a URL-safe slug
+// "ROW_NUMBER()" → "row-number"  |  "CTEs & Advanced Queries" → "ctes-advanced-queries"
+function toSlug(str) {
+  return str
+    .toLowerCase()
+    .replace(/[()]/g, '')
+    .replace(/[^a-z0-9\s_-]/g, ' ')
+    .replace(/[\s_]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+// Build canonical URL for a question: /problems/14/customer-order-frequency
+function questionUrl(q) {
+  return '/problems/' + q.num + '/' + toSlug(q.title);
+}
+
+// Build canonical URL for a learn topic: /learn/window-functions/row-number
+function learnUrl(topicId) {
+  var url = '/learn';
+  LEARN_DATA.forEach(function(mod) {
+    mod.topics.forEach(function(t) {
+      if (t.id === topicId) {
+        url = '/learn/' + toSlug(mod.title) + '/' + toSlug(t.title);
+      }
+    });
+  });
+  return url;
+}
+
+// Find a question by its num string ("01", "14", etc.)
+function getQuestionByNum(num) {
+  var padded = String(parseInt(num, 10) || 0).padStart(2, '0');
+  return QUESTIONS.find(function(q) { return q.num === padded; }) || null;
+}
+
+// Find a learn topic by module slug + topic slug
+function findLearnTopicBySlug(modSlug, topicSlug) {
+  for (var i = 0; i < LEARN_DATA.length; i++) {
+    var mod = LEARN_DATA[i];
+    if (toSlug(mod.title) === modSlug) {
+      for (var j = 0; j < mod.topics.length; j++) {
+        var t = mod.topics[j];
+        if (toSlug(t.title) === topicSlug) {
+          return { mod: mod, topic: t };
+        }
+      }
+    }
+  }
+  return null;
+}
 
 // ── INIT ─────────────────────────────────────────────────────────
 async function init() {
@@ -3875,6 +3930,12 @@ async function init() {
         await loadUserProfile(currentUser.id);
         trackUserActivity(currentUser);
         updateAuthUI(currentUser);
+        // If the user landed directly on a protected page (/profile or /admin)
+        // but was bounced to /home because auth hadn't loaded yet — re-route them now.
+        if ((_initialPath === '/profile' || _initialPath === '/admin') &&
+            window.location.pathname !== _initialPath) {
+          handleRoute(_initialPath);
+        }
       }
     }).catch(function(e) { console.warn('Auth session check failed:', e.message); });
 
@@ -3894,7 +3955,7 @@ async function init() {
     buildLandingCards();
     updateHeroCount();
     initTestimonials();
-    showLanding();
+    handleRoute(_initialPath);   // route to wherever the user actually landed
     initEditor();
 
   } catch(e) {
@@ -3971,7 +4032,7 @@ function startDailyChallenge() {
   const start = new Date(new Date().getFullYear(), 0, 0);
   const dayOfYear = Math.floor((Date.now() - start) / 864e5);
   const q = QUESTIONS[dayOfYear % QUESTIONS.length];
-  const idx = filteredQuestions.findIndex(fq => fq.id === q.id);
+  const idx = QUESTIONS.findIndex(fq => fq.id === q.id);
   showApp(idx >= 0 ? idx : 0);
 }
 
@@ -4075,7 +4136,11 @@ function buildPills() {
     btn.className = 'q-pill';
     btn.id = `pill-${i}`;
     btn.textContent = `${q.num}  ${q.title}`;
-    btn.onclick = () => renderQuestion(i);
+    btn.onclick = () => {
+      currentQ = i;
+      history.pushState({}, '', questionUrl(q));
+      renderQuestion(i);
+    };
     wrap.appendChild(btn);
   });
 }
@@ -4412,24 +4477,195 @@ function renderProfileQList(filter) {
   }).join('');
 }
 
+// ── NAVIGATION ────────────────────────────────────────────────────
+
+function _hideAllPages() {
+  ['landing-page','app-page','learn-page','profile-page'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+}
+
+// ── Internal renders (pure UI swap — no URL change) ───────────────
+function _renderLanding() {
+  _hideAllPages();
+  document.getElementById('landing-page').classList.add('active');
+  updateDailyChallenge();
+  updateLandingPersonalization();
+}
+
+function _renderApp() {
+  _hideAllPages();
+  document.getElementById('app-page').classList.add('active');
+  renderQuestion(currentQ);
+}
+
+function _renderProfile() {
+  _hideAllPages();
+  document.getElementById('profile-page').classList.add('active');
+  renderProfilePage();
+}
+
+// ── Central router ────────────────────────────────────────────────
+// Called on initial page load, popstate (back/forward), and direct URL entry.
+// Does NOT push to history — callers do that where needed.
+function handleRoute(path) {
+  var clean = (path || '/home').split('?')[0].split('#')[0];
+
+  // Root → redirect to /home
+  if (clean === '/' || clean === '' || clean === '/index.html') {
+    history.replaceState({}, '', '/home');
+    _renderLanding();
+    return;
+  }
+
+  // /home
+  if (clean === '/home') {
+    _renderLanding();
+    return;
+  }
+
+  // /problems  (no question — show currentQ)
+  if (clean === '/problems') {
+    var fallbackQ = QUESTIONS[currentQ];
+    if (fallbackQ) history.replaceState({}, '', questionUrl(fallbackQ));
+    _renderApp();
+    return;
+  }
+
+  // /problems/:num/:slug  →  /problems/14/customer-order-frequency
+  if (clean.startsWith('/problems/')) {
+    var parts = clean.split('/');          // ['','problems','14','slug']
+    var num   = parts[2] || '';
+    var found = getQuestionByNum(num);
+    if (found) {
+      var idx = QUESTIONS.findIndex(function(x) { return x.num === found.num; });
+      if (idx !== -1) {
+        filteredQuestions = QUESTIONS;
+        activeTag = 'ALL';
+        currentQ  = idx;
+        history.replaceState({}, '', questionUrl(found)); // normalise slug in URL bar
+        _renderApp();
+        return;
+      }
+    }
+    // Question not found → fall back to /problems
+    history.replaceState({}, '', '/problems');
+    _renderApp();
+    return;
+  }
+
+  // /learn  (module index)
+  if (clean === '/learn') {
+    _renderLearn(null);   // _renderLearn is defined in learn.js
+    return;
+  }
+
+  // /learn/:modSlug/:topicSlug  →  /learn/window-functions/row-number
+  if (clean.startsWith('/learn/')) {
+    var lParts  = clean.split('/');        // ['','learn','modSlug','topicSlug']
+    var modSlug = lParts[2] || '';
+    var topSlug = lParts[3] || '';
+    if (modSlug && topSlug) {
+      var match = findLearnTopicBySlug(modSlug, topSlug);
+      if (match) {
+        _renderLearn(match.topic.id);
+        return;
+      }
+    } else if (modSlug) {
+      // /learn/:modSlug only — open first topic of that module
+      var modOnly = LEARN_DATA.find(function(m) { return toSlug(m.title) === modSlug; });
+      if (modOnly) {
+        _renderLearn(modOnly.topics[0].id);
+        return;
+      }
+    }
+    // Not found → learn index
+    history.replaceState({}, '', '/learn');
+    _renderLearn(null);
+    return;
+  }
+
+  // /profile
+  if (clean === '/profile') {
+    if (!currentUser) {
+      history.replaceState({}, '', '/home');
+      _renderLanding();
+      openAuthModal('login');
+      return;
+    }
+    _renderProfile();
+    return;
+  }
+
+  // /admin  (protected — is_admin only)
+  if (clean === '/admin') {
+    if (currentUser && userProfile && userProfile.is_admin) {
+      window.location.href = '/admin-panel.html';
+      return;
+    }
+    history.replaceState({}, '', '/home');
+    _renderLanding();
+    return;
+  }
+
+  // Unknown route → home
+  history.replaceState({}, '', '/home');
+  _renderLanding();
+}
+
+// Back / forward button
+window.addEventListener('popstate', function() {
+  handleRoute(window.location.pathname);
+});
+
+// ── Public navigation (update URL + render) ───────────────────────
+function showLanding() {
+  history.pushState({}, '', '/home');
+  _renderLanding();
+}
+
+function showApp(qIdx) {
+  if (qIdx !== undefined) {
+    filteredQuestions = QUESTIONS;
+    activeTag = 'ALL';
+    currentQ  = qIdx;
+  }
+  var q = QUESTIONS[currentQ];
+  history.pushState({}, '', q ? questionUrl(q) : '/problems');
+  _renderApp();
+}
+
+function showProfile() {
+  if (!currentUser) { openAuthModal('login'); return; }
+  prevPage = document.getElementById('landing-page').classList.contains('active') ? 'landing' : 'app';
+  history.pushState({}, '', '/profile');
+  _renderProfile();
+}
+
+function goBackFromProfile() {
+  if (prevPage === 'app') {
+    var q = QUESTIONS[currentQ];
+    history.pushState({}, '', q ? questionUrl(q) : '/problems');
+    _renderApp();
+  } else {
+    history.pushState({}, '', '/home');
+    _renderLanding();
+  }
+}
+
 function goToProblem(questionId) {
   const idx = QUESTIONS.findIndex(q => q.id === questionId);
   if (idx === -1) return;
   filteredQuestions = QUESTIONS;
   activeTag = 'ALL';
   currentQ  = idx;
+  const q = QUESTIONS[idx];
+  history.pushState({}, '', questionUrl(q));
   _hideAllPages();
   document.getElementById('app-page').classList.add('active');
   buildPills();
   renderQuestion(idx);
-}
-
-// ── NAVIGATION ────────────────────────────────────────────────────
-function _hideAllPages() {
-  ['landing-page','app-page','learn-page','profile-page'].forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.classList.remove('active');
-  });
 }
 
 function initTestimonials() {
@@ -4438,38 +4674,6 @@ function initTestimonials() {
   // Duplicate cards for seamless infinite loop
   const clone = track.innerHTML;
   track.innerHTML = clone + clone;
-}
-
-function showLanding() {
-  _hideAllPages();
-  document.getElementById('landing-page').classList.add('active');
-  updateDailyChallenge();
-  updateLandingPersonalization();
-}
-
-function showApp(qIdx) {
-  if (qIdx !== undefined) currentQ = qIdx;
-  _hideAllPages();
-  document.getElementById('app-page').classList.add('active');
-  renderQuestion(currentQ);
-}
-
-function showProfile() {
-  if (!currentUser) { openAuthModal('login'); return; }
-  const landingActive = document.getElementById('landing-page').classList.contains('active');
-  prevPage = landingActive ? 'landing' : 'app';
-  _hideAllPages();
-  document.getElementById('profile-page').classList.add('active');
-  renderProfilePage();
-}
-
-function goBackFromProfile() {
-  _hideAllPages();
-  if (prevPage === 'app') {
-    document.getElementById('app-page').classList.add('active');
-  } else {
-    document.getElementById('landing-page').classList.add('active');
-  }
 }
 
 // ── ACTIVITY TRACKING ─────────────────────────────────────────────

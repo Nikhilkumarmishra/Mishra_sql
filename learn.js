@@ -6,31 +6,40 @@
 var learnCurrentTopicId = null;
 var learnOpenModules    = {};   // { modId: true/false }
 
-// ── PUBLIC: called from nav/app ──────────────────────────────────
+// ── INTERNAL RENDER (no URL change — called by handleRoute in app.js) ──
 
-function showLearn() {
-  document.getElementById('landing-page').classList.remove('active');
-  document.getElementById('app-page').classList.remove('active');
-  if (document.getElementById('profile-page'))
-    document.getElementById('profile-page').classList.remove('active');
-  document.getElementById('learn-page').classList.add('active');
-
-  if (!learnCurrentTopicId) {
-    // Open first module by default, select first topic
-    var firstMod   = LEARN_DATA[0];
-    var firstTopic = firstMod.topics[0];
+function _renderLearn(topicId) {
+  if (topicId) {
+    learnCurrentTopicId = topicId;
+    var modId = topicId.split('-')[0];     // 'mod4' from 'mod4-t1'
+    learnOpenModules[modId] = true;
+  } else if (!learnCurrentTopicId) {
+    var firstMod = LEARN_DATA[0];
     learnOpenModules[firstMod.id] = true;
-    learnCurrentTopicId = firstTopic.id;
+    learnCurrentTopicId = firstMod.topics[0].id;
   }
-
+  _hideAllPages();
+  document.getElementById('learn-page').classList.add('active');
   buildLearnSidebar();
   renderLearnTopic(learnCurrentTopicId);
   window.scrollTo(0, 0);
 }
 
+// ── PUBLIC: called from nav/app ───────────────────────────────────
+
+function showLearn() {
+  if (!learnCurrentTopicId) {
+    var firstMod = LEARN_DATA[0];
+    learnOpenModules[firstMod.id] = true;
+    learnCurrentTopicId = firstMod.topics[0].id;
+  }
+  history.pushState({}, '', learnUrl(learnCurrentTopicId));
+  _renderLearn(learnCurrentTopicId);
+}
+
 function goBackFromLearn() {
-  document.getElementById('learn-page').classList.remove('active');
-  document.getElementById('landing-page').classList.add('active');
+  history.pushState({}, '', '/home');
+  _renderLanding();
   window.scrollTo(0, 0);
 }
 
@@ -79,6 +88,7 @@ function toggleLearnModule(modId) {
 
 function selectLearnTopic(topicId) {
   learnCurrentTopicId = topicId;
+  history.pushState({}, '', learnUrl(topicId));   // update URL bar
 
   // Auto-open the parent module
   LEARN_DATA.forEach(function(mod) {
