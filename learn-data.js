@@ -22179,18 +22179,4165 @@ WAIT for Row 2 ←──────────── (holds Row 2)
   `,
 
   // ── Module 15 ────────────────────────────────────────────────
-  'mod15-t1': `<h1>Entity-Relationship (ER) Model</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod15-t2': `<h1>Normalization (1NF, 2NF, 3NF)</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod15-t3': `<h1>Denormalization</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod15-t4': `<h1>Primary and Foreign Keys</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod15-t5': `<h1>One-to-Many & Many-to-Many Relationships</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod15-t6': `<h1>Database Design Best Practices</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod15-t1': `
+    <h1>Entity-Relationship (ER) Model: Mapping Out Your Database Before You Build It</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Priya joined a fast-growing startup in Bengaluru called QuickKart — think of it as a smaller version of Flipkart, focused on electronics. Her first task was to build the database for the new order management system. She opened a blank SQL file and started creating tables. <code>customers</code>, <code>orders</code>, <code>products</code>, <code>payments</code> — she typed them out one by one, adding columns as they came to mind.</p>
+
+<p>Three weeks into development, the backend engineers came back with a problem. The <code>orders</code> table had no clean way to link to multiple products. The <code>payments</code> table had customer details duplicated in every row. And nobody had thought about how <code>vendors</code> would connect to <code>products</code>. The whole thing had to be reworked.</p>
+
+<p>Her tech lead, Arjun, sat her down and said: "Before you write a single CREATE TABLE, you draw the map." That map is the ER Model.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>When you're building a database for something real — a restaurant app, a hospital system, a college portal — there are dozens of things that need to be stored. And those things talk to each other. A student enrolls in courses. A doctor treats patients. A customer places orders. If you don't figure out these relationships before you start building, you end up with tables that don't fit together cleanly.</p>
+
+<p>This is exactly what happened at QuickKart. Priya's tables worked in isolation but not together. Joining them produced wrong results or required messy workarounds. The data started duplicating in strange places.</p>
+
+<p>The ER Model forces you to think about your data as a system — what are the "things" you're storing, what properties do those things have, and how do those things relate to each other? Answering those three questions before writing any SQL saves you weeks of painful refactoring later.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>The Entity-Relationship model was introduced by Dr. Peter Chen in 1976 in a paper titled "The Entity-Relationship Model — Toward a Unified View of Data." At the time, databases were being built in many different styles and there was no standard way to think about data before designing it. Each system had its own quirky way of modeling things.</p>
+
+<p>Chen wanted a visual, intuitive language that anyone — not just programmers — could use to describe a database's structure. Managers, analysts, and developers could all look at an ER diagram and understand what the system was storing and how things connected.</p>
+
+<p>Over the decades, ER modeling became the standard first step in any serious database design project. Before cloud, before NoSQL, before microservices — when you needed to design a database, you drew an ER diagram first. That practice hasn't changed much.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think about planning a wedding. You have several key "things" involved: guests, tables, dishes, and vendors. Each guest has a name, phone number, and dietary preference. Each table has a number and a seating capacity. Each dish has a name and an ingredient list. Each vendor has a company name and a contract amount.</p>
+
+<p>Now think about how these connect: a guest is assigned to a table. A table can have many guests. A vendor supplies certain dishes. A dish can come from one or more vendors.</p>
+
+<p>You wouldn't start booking venues and printing menus without first mapping out how all of these pieces connect. You'd draw a rough chart on paper — who goes where, what connects to what. That chart, in database terms, is your ER diagram.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Imagine you're organizing a school library. You have three main things: books, students, and librarians. Each book has a title and an ISBN. Each student has a name and a roll number. Each librarian manages a section.</p>
+
+<p>Now, students borrow books. One student can borrow many books over time. A book can be borrowed by many students over time (just not at the same time). This is a relationship — and it has its own detail, like the borrow date and due date.</p>
+
+<p>In an ER diagram, you'd draw a box for <code>STUDENT</code>, a box for <code>BOOK</code>, and a diamond shape between them labeled <code>BORROWS</code>. The borrow date and due date would live on that diamond — because they belong to the relationship, not to the student or book alone. This is the core insight of ER modeling: some data belongs to the relationship itself.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>An ER model has three main building blocks: <strong>entities</strong>, <strong>attributes</strong>, and <strong>relationships</strong>.</p>
+
+<p>An <strong>entity</strong> is any real-world thing you want to store data about. In a hospital system, entities might be <code>Patient</code>, <code>Doctor</code>, <code>Ward</code>, and <code>Medicine</code>. In an e-commerce system, they might be <code>Customer</code>, <code>Product</code>, <code>Order</code>, and <code>Vendor</code>. Each entity becomes a table in your final database.</p>
+
+<p>An <strong>attribute</strong> is a property of an entity. A <code>Customer</code> might have attributes like <code>customer_id</code>, <code>name</code>, <code>email</code>, and <code>city</code>. One attribute is usually chosen as the <strong>primary key</strong> — the unique identifier for each record. Attributes that can hold multiple values (like a customer having multiple phone numbers) are called <strong>multivalued attributes</strong> and need special handling.</p>
+
+<p>A <strong>relationship</strong> describes how two entities connect. The most important thing to figure out is the <strong>cardinality</strong> — how many of one thing connects to how many of the other. A customer can place many orders, but each order belongs to one customer: that's a <strong>one-to-many</strong> relationship. A student can enroll in many courses, and a course can have many students: that's a <strong>many-to-many</strong> relationship. Getting cardinality right is the most critical step in ER modeling.</p>
+
+<p>When you translate an ER diagram into actual tables, the rules are straightforward. Each entity becomes a table. Each attribute becomes a column. One-to-many relationships are handled by putting the primary key of the "one" side as a foreign key in the "many" side. Many-to-many relationships require a separate junction table.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<p>Once the ER diagram is ready, translating it to SQL is mechanical. Here are examples based on a delivery app like Swiggy.</p>
+
+<pre><code class="language-sql">-- Entity: Customer
+CREATE TABLE customers (
+    customer_id   INT PRIMARY KEY AUTO_INCREMENT,
+    full_name     VARCHAR(100) NOT NULL,
+    email         VARCHAR(150) UNIQUE NOT NULL,
+    phone         VARCHAR(15),
+    city          VARCHAR(50)
+);</code></pre>
+
+<pre><code class="language-sql">-- Entity: Restaurant
+CREATE TABLE restaurants (
+    restaurant_id   INT PRIMARY KEY AUTO_INCREMENT,
+    name            VARCHAR(150) NOT NULL,
+    city            VARCHAR(50),
+    cuisine_type    VARCHAR(50),
+    rating          DECIMAL(3,1)
+);</code></pre>
+
+<pre><code class="language-sql">-- Entity: Order (relationship between Customer and Restaurant)
+CREATE TABLE orders (
+    order_id        INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id     INT NOT NULL,
+    restaurant_id   INT NOT NULL,
+    order_date      DATETIME DEFAULT CURRENT_TIMESTAMP,
+    total_amount    DECIMAL(10,2),
+    status          VARCHAR(20),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
+    FOREIGN KEY (restaurant_id) REFERENCES restaurants(restaurant_id)
+);</code></pre>
+
+<pre><code class="language-sql">-- Entity: Menu Item
+CREATE TABLE menu_items (
+    item_id         INT PRIMARY KEY AUTO_INCREMENT,
+    restaurant_id   INT NOT NULL,
+    item_name       VARCHAR(100) NOT NULL,
+    price           DECIMAL(8,2),
+    is_vegetarian   BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (restaurant_id) REFERENCES restaurants(restaurant_id)
+);</code></pre>
+
+<pre><code class="language-sql">-- Junction table for many-to-many: Order contains many Items
+CREATE TABLE order_items (
+    order_id    INT NOT NULL,
+    item_id     INT NOT NULL,
+    quantity    INT DEFAULT 1,
+    unit_price  DECIMAL(8,2),
+    PRIMARY KEY (order_id, item_id),
+    FOREIGN KEY (order_id) REFERENCES orders(order_id),
+    FOREIGN KEY (item_id) REFERENCES menu_items(item_id)
+);</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>ER Concept</th><th>What It Means</th><th>Example</th><th>SQL Equivalent</th></tr></thead>
+<tbody>
+<tr><td>Entity</td><td>A real-world thing you store data about</td><td>Customer, Product, Doctor</td><td>A table</td></tr>
+<tr><td>Attribute</td><td>A property of an entity</td><td>customer_name, price, dob</td><td>A column in a table</td></tr>
+<tr><td>Primary Key</td><td>The unique identifier for an entity</td><td>customer<em>id, order</em>id</td><td>PRIMARY KEY constraint</td></tr>
+<tr><td>Relationship</td><td>How two entities connect</td><td>Customer places Order</td><td>Foreign key or junction table</td></tr>
+<tr><td>Cardinality</td><td>How many of one connects to how many of the other</td><td>One-to-many, Many-to-many</td><td>FK placement or junction table</td></tr>
+<tr><td>Weak Entity</td><td>An entity that can't exist without another</td><td>Order Item (needs Order)</td><td>Table with composite FK</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<h3>Example 1: College Management System</h3>
+
+<p>Entities: <code>Student</code>, <code>Course</code>, <code>Professor</code></p>
+<p>Relationships: Student enrolls in Course (many-to-many), Professor teaches Course (one-to-many)</p>
+
+<pre><code class="language-sql">CREATE TABLE students (
+    student_id   INT PRIMARY KEY AUTO_INCREMENT,
+    name         VARCHAR(100),
+    roll_no      VARCHAR(20) UNIQUE,
+    department   VARCHAR(50)
+);
+
+CREATE TABLE professors (
+    professor_id INT PRIMARY KEY AUTO_INCREMENT,
+    name         VARCHAR(100),
+    department   VARCHAR(50)
+);
+
+CREATE TABLE courses (
+    course_id    INT PRIMARY KEY AUTO_INCREMENT,
+    course_name  VARCHAR(100),
+    professor_id INT,
+    credits      INT,
+    FOREIGN KEY (professor_id) REFERENCES professors(professor_id)
+);
+
+CREATE TABLE enrollments (
+    student_id   INT,
+    course_id    INT,
+    enrolled_on  DATE,
+    grade        VARCHAR(5),
+    PRIMARY KEY (student_id, course_id),
+    FOREIGN KEY (student_id) REFERENCES students(student_id),
+    FOREIGN KEY (course_id) REFERENCES courses(course_id)
+);</code></pre>
+
+<h3>Example 2: Hospital System</h3>
+
+<p>Entities: <code>Patient</code>, <code>Doctor</code>, <code>Appointment</code></p>
+
+<pre><code class="language-sql">CREATE TABLE patients (
+    patient_id   INT PRIMARY KEY AUTO_INCREMENT,
+    name         VARCHAR(100),
+    age          INT,
+    blood_group  VARCHAR(5)
+);
+
+CREATE TABLE doctors (
+    doctor_id    INT PRIMARY KEY AUTO_INCREMENT,
+    name         VARCHAR(100),
+    speciality   VARCHAR(80)
+);
+
+CREATE TABLE appointments (
+    appointment_id  INT PRIMARY KEY AUTO_INCREMENT,
+    patient_id      INT,
+    doctor_id       INT,
+    appointment_dt  DATETIME,
+    notes           TEXT,
+    FOREIGN KEY (patient_id) REFERENCES patients(patient_id),
+    FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id)
+);</code></pre>
+
+<h3>Example 3: Paytm Wallet Transactions</h3>
+
+<p>Entities: <code>User</code>, <code>Wallet</code>, <code>Transaction</code></p>
+
+<pre><code class="language-sql">CREATE TABLE users (
+    user_id      INT PRIMARY KEY AUTO_INCREMENT,
+    mobile       VARCHAR(15) UNIQUE,
+    full_name    VARCHAR(100)
+);
+
+CREATE TABLE wallets (
+    wallet_id    INT PRIMARY KEY AUTO_INCREMENT,
+    user_id      INT UNIQUE,
+    balance      DECIMAL(12,2) DEFAULT 0.00,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE transactions (
+    txn_id       INT PRIMARY KEY AUTO_INCREMENT,
+    sender_id    INT,
+    receiver_id  INT,
+    amount       DECIMAL(10,2),
+    txn_date     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES wallets(wallet_id),
+    FOREIGN KEY (receiver_id) REFERENCES wallets(wallet_id)
+);</code></pre>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>What's the difference between an entity and an attribute?</strong></p>
+<p>If something has properties of its own, it's usually an entity. "City" with just a name can be an attribute of Customer. But if you also want to store the city's PIN code, state, and region, then City deserves its own table — it's become an entity.</p>
+
+<p><strong>When does a relationship need its own table?</strong></p>
+<p>Always for many-to-many. Sometimes for one-to-many when the relationship itself has extra data. If a student just enrolls in a course, a foreign key is enough. But if you want to store the enrollment date and grade, you need a junction table.</p>
+
+<p><strong>Can an entity have no primary key?</strong></p>
+<p>In ER theory, yes — these are called weak entities. They depend on another entity for identification. An order line item, for instance, only makes sense in the context of an order. In SQL, you handle this with a composite primary key.</p>
+
+<p><strong>What does cardinality actually mean in practice?</strong></p>
+<p>It means: for one row in Table A, how many rows in Table B can link to it? One-to-one: each customer has exactly one loyalty account. One-to-many: one customer has many orders. Many-to-many: many students in many courses.</p>
+
+<p><strong>Should I always draw the ER diagram first?</strong></p>
+<p>For anything beyond 3-4 tables, yes. It takes 30 minutes upfront and saves hours of refactoring. Tools like draw.io, Lucidchart, or even pen and paper work fine.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li>Skipping the ER diagram and going straight to SQL, then discovering missing relationships</li><li>Putting attributes that belong to a relationship inside one of the entities instead</li><li>Forgetting to identify the cardinality of each relationship before creating tables</li><li>Creating a many-to-many relationship with just two foreign keys in one table (stacking multiple IDs in a column)</li><li>Treating every noun as an entity — some things are just attributes</li><li>Not deciding which attribute is the primary key before moving to SQL</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Always finalize your ER diagram before writing CREATE TABLE statements</li><li>Name entities as singular nouns (<code>Customer</code>, not <code>Customers</code>)</li><li>Every entity must have a clear primary key — don't rely on combinations of non-key fields</li><li>For many-to-many, create a named junction table that reflects the relationship (<code>enrollments</code>, <code>order_items</code>)</li><li>Get stakeholder sign-off on the ER diagram — non-technical people can usually read it</li><li>Keep your ER diagram updated as the schema evolves</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>At Flipkart, the entire product catalog, order system, and logistics network starts as an ER model. Product designers and data engineers sit together to map out entities like <code>Seller</code>, <code>Product</code>, <code>Listing</code>, <code>Order</code>, <code>Shipment</code>, and <code>Return</code> before any table is created. These sessions prevent expensive schema migrations later.</p>
+
+<p>IRCTC manages one of the most complex booking databases in the world. Entities like <code>Passenger</code>, <code>Train</code>, <code>Route</code>, <code>Seat</code>, <code>Booking</code>, and <code>Payment</code> are carefully modeled with their cardinalities. A train has many routes. A route has many stations. A booking links a passenger to specific seats on a specific train on a specific date. Getting this right requires careful ER modeling.</p>
+
+<p>At Byju's, the learning platform has entities like <code>Student</code>, <code>Course</code>, <code>Lesson</code>, <code>Progress</code>, <code>Quiz</code>, and <code>Subscription</code>. The relationships between these determine how student progress is tracked and how recommendations work. The ER diagram is also documentation — new engineers use it to understand the system quickly.</p>
+
+<p>Even small companies benefit from this. A 5-table database designed with an ER model first is cleaner and easier to extend than a 5-table database designed on the fly.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>ER DIAGRAM — QuickKart Order System
+====================================
+
+[CUSTOMER]            [RESTAURANT]
+ customer_id (PK)      restaurant_id (PK)
+ full_name              name
+ email                  city
+ phone                  rating
+    |                      |
+    |     places            |  belongs to
+    |                      |
+    +------[ORDER]----------+
+            order_id (PK)
+            customer_id (FK) -----&gt; CUSTOMER
+            restaurant_id (FK) ---&gt; RESTAURANT
+            order_date
+            total_amount
+                |
+                | contains
+                |
+          [ORDER_ITEM]
+           order_id (FK)  -----&gt; ORDER
+           item_id (FK)   -----&gt; MENU_ITEM
+           quantity
+           unit_price
+
+[MENU_ITEM]
+ item_id (PK)
+ restaurant_id (FK) -----&gt; RESTAURANT
+ item_name
+ price</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>An ER model is a blueprint for your database — draw it before you build anything</li><li>Three components: entities (things), attributes (properties), relationships (connections)</li><li>Cardinality tells you whether a relationship is one-to-one, one-to-many, or many-to-many</li><li>Many-to-many relationships always need a junction table in SQL</li><li>Weak entities depend on another entity for identity and use composite keys</li><li>Primary keys uniquely identify each row in an entity's table</li><li>The ER diagram becomes living documentation for your entire team</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>A hospital wants to store data about doctors, patients, and prescriptions. Each prescription is written by one doctor for one patient. Draw the entities, their attributes, and the relationships. What is the cardinality of each relationship?</li></ol>
+
+<ol><li>A university has students, courses, and professors. A student can enroll in many courses. A professor teaches many courses. Write the SQL to create these tables including the enrollment junction table.</li></ol>
+
+<ol><li>In an ER diagram for a Swiggy-like app, should "delivery address" be an entity or an attribute of Customer? What changes if a customer can save multiple delivery addresses?</li></ol>
+
+<ol><li>You are designing a database for a movie streaming app like Hotstar. List at least 5 entities, 3 attributes per entity, and describe 4 relationships between them.</li></ol>
+
+<ol><li>A <code>sale</code> entity connects a <code>salesperson</code> and a <code>customer</code>. The sale itself has a date and total amount. Should <code>sale</code> be modeled as an entity or a relationship? How would you represent this in SQL?</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Priya's mistake at QuickKart was common — jumping into SQL without thinking the system through first. It wasn't laziness; it was just nobody had taught her that there's a step before writing code. The ER model is that step.</p>
+
+<p>What makes the ER model powerful isn't the notation or the boxes and diamonds. It's the discipline it forces: you have to be specific about what you're storing and explicit about how things connect. That clarity shapes everything that follows — the SQL you write, the queries you can run, the application code that sits on top.</p>
+
+<p>Once you start drawing ER diagrams, you'll find yourself thinking differently about data. You'll notice when two things are being confused for one, or when a relationship is missing its own attributes. That mental habit — thinking in entities and relationships — is what separates engineers who design databases that last from those who are constantly patching ones that don't.</p>
+
+<p>Go back to that library analogy. Books, students, borrow date. Three things, one relationship, one piece of data on the relationship. Simple, clean, correct. That's what good ER modeling gets you — and it's a skill worth building before you write another CREATE TABLE.</p>
+
+  `,
+  'mod15-t2': `
+    <h1>Normalization: Cleaning Up Your Tables So They Don't Turn Into a Mess</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Aman joined the data team at Meesho, the social commerce platform, about six months into his career. His senior asked him to look into why the inventory reports were showing wrong stock numbers. Aman pulled up the main <code>products</code> table and stared at it for a few minutes.</p>
+
+<p>One column was called <code>category</code> and had values like <code>"Sarees, Kurtis, Women"</code> — three categories crammed into one field separated by commas. Another column called <code>supplier<em>name</code> had the full supplier address repeated in every single row for that supplier. And there was a <code>discount</em>percent</code> column that seemed to be calculated from two other columns but was stored separately, often out of sync.</p>
+
+<p>His senior looked over his shoulder and said, "This table has never been normalized. That's your problem." Aman had heard the word before but never really understood what it meant until he spent the next few days untangling that table. What he learned is one of the most important things in database design.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>Unnormalized tables create three types of pain, and if you've worked with real databases you've felt all of them.</p>
+
+<p>The first is <strong>update anomalies</strong>. If a supplier changes their phone number, you have to update every single row that mentions that supplier. Miss even one and your data is inconsistent. At Meesho, when a supplier changed their bank details, the finance team would update some rows but not others and then spend days reconciling mismatches.</p>
+
+<p>The second is <strong>insertion anomalies</strong>. You can't add a new supplier to the database without also having a product to link it to. The data about the supplier is trapped inside the product table. You can't store facts about one thing without making up facts about another.</p>
+
+<p>The third is <strong>deletion anomalies</strong>. If you delete the last product from a supplier, you lose all the supplier's information too. The supplier data was never stored independently — it was just riding along on the product rows.</p>
+
+<p>Normalization is the systematic process of fixing all three of these problems by organizing your tables according to a set of rules.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Edgar F. Codd, the same person who invented the relational database model, introduced the concept of normalization in the early 1970s. His goal was simple: data should be stored in one place, and one place only. Every piece of information should live exactly where it belongs, with no duplication and no hidden dependencies.</p>
+
+<p>Codd defined a series of <strong>normal forms</strong> — levels of table cleanliness, if you like. First Normal Form (1NF), Second Normal Form (2NF), and Third Normal Form (3NF) are the three most important ones in practice. Each level builds on the previous one.</p>
+
+<p>The insight behind normalization is that data redundancy is not just wasteful storage — it's a reliability problem. When the same fact is stored in multiple places, those places can disagree. And when databases disagree with reality, businesses make bad decisions.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think about how a good office stores files. A poorly organized office puts employee information — name, department, salary, manager's name, manager's phone — on every document that mentions that employee. If the manager changes, someone has to update every single document. Things get missed. Documents disagree.</p>
+
+<p>A well-organized office stores employee information once, in a personnel file, with a unique employee ID. Every other document just references that ID. When the manager changes, you update one file and every document that references it automatically reflects the change.</p>
+
+<p>That's normalization. Stop storing the same fact in multiple places. Store it once, reference it everywhere.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Imagine a notebook where you're tracking orders for a small bakery. You write: "Order 1 — Rahul, Mumbai, Chocolate Cake x2, Butterscotch Cake x1." Then: "Order 2 — Rahul, Mumbai, Vanilla Cupcake x3." Rahul's city is written twice. If Rahul moves to Pune, you need to find every row with his name and update the city.</p>
+
+<p>Now imagine two notebooks. Notebook A: "Rahul — customer<em>id: 101 — city: Mumbai." Notebook B: "Order 1 — customer</em>id: 101 — items..." Now Rahul's city is in one place. Update it once, done.</p>
+
+<p>That separation — moving Rahul's city out of the orders notebook and into a customers notebook — is exactly what normalization does to database tables.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p><strong>First Normal Form (1NF)</strong> has one rule: every column must hold atomic values — one value per cell, no lists, no comma-separated strings. Also, each row must be uniquely identifiable, meaning there needs to be a primary key.</p>
+
+<p>If your <code>category</code> column has <code>"Sarees, Kurtis, Women"</code> in one cell, it violates 1NF. You can't filter for just "Kurtis" without parsing strings. You can't index it properly. The fix is to move categories to their own table with a relationship back to the product.</p>
+
+<p><strong>Second Normal Form (2NF)</strong> requires that you're already in 1NF, and additionally that every non-key column depends on the <strong>entire</strong> primary key. This matters when you have a composite primary key (a key made of multiple columns). If a column only depends on part of the key, it doesn't belong in that table.</p>
+
+<p>For example: imagine an <code>order<em>items</code> table with columns <code>(order</em>id, product<em>id, quantity, product</em>name, product<em>price)</code>. The primary key is <code>(order</em>id, product<em>id)</code>. But <code>product</em>name</code> and <code>product<em>price</code> only depend on <code>product</em>id</code>, not on <code>order<em>id</code>. They have a <strong>partial dependency</strong>. Move them to a <code>products</code> table. The <code>order</em>items</code> table should only have <code>order<em>id</code>, <code>product</em>id</code>, <code>quantity</code>, and <code>unit_price</code> (the price at the time of ordering).</p>
+
+<p><strong>Third Normal Form (3NF)</strong> requires that you're in 2NF, and additionally that no non-key column depends on another non-key column. These are called <strong>transitive dependencies</strong>. If you store both <code>zip<em>code</code> and <code>city</code> in a customers table, and <code>city</code> is determined by <code>zip</em>code</code> (not by <code>customer<em>id</code>), that's a transitive dependency. City depends on zip</em>code which depends on customer<em>id — the chain is one step too long. The fix is to create a <code>zip</em>codes</code> table.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<h3>Before Normalization — a messy orders table</h3>
+
+<pre><code class="language-sql">-- BAD: This table violates multiple normal forms
+CREATE TABLE orders_messy (
+    order_id        INT,
+    customer_name   VARCHAR(100),
+    customer_city   VARCHAR(50),
+    customer_email  VARCHAR(150),
+    products        VARCHAR(500),   -- "Kurti,Saree,Dress" -- violates 1NF
+    supplier_name   VARCHAR(100),   -- repeated for each order
+    supplier_phone  VARCHAR(15),    -- partial dependency
+    total_price     DECIMAL(10,2)
+);</code></pre>
+
+<h3>Step 1: Apply 1NF — atomic values, proper key</h3>
+
+<pre><code class="language-sql">-- Split products out; ensure each row is atomic
+CREATE TABLE orders_1nf (
+    order_id        INT,
+    product_id      INT,
+    customer_name   VARCHAR(100),
+    customer_city   VARCHAR(50),
+    quantity        INT,
+    supplier_name   VARCHAR(100),
+    supplier_phone  VARCHAR(15),
+    PRIMARY KEY (order_id, product_id)
+);</code></pre>
+
+<h3>Step 2: Apply 2NF — remove partial dependencies</h3>
+
+<pre><code class="language-sql">-- Separate tables: orders, products, and the junction
+CREATE TABLE customers (
+    customer_id   INT PRIMARY KEY AUTO_INCREMENT,
+    name          VARCHAR(100),
+    city          VARCHAR(50),
+    email         VARCHAR(150)
+);
+
+CREATE TABLE products (
+    product_id    INT PRIMARY KEY AUTO_INCREMENT,
+    product_name  VARCHAR(100),
+    supplier_id   INT
+);
+
+CREATE TABLE orders (
+    order_id      INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id   INT,
+    order_date    DATE,
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
+
+CREATE TABLE order_items (
+    order_id    INT,
+    product_id  INT,
+    quantity    INT,
+    unit_price  DECIMAL(8,2),
+    PRIMARY KEY (order_id, product_id),
+    FOREIGN KEY (order_id) REFERENCES orders(order_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
+);</code></pre>
+
+<h3>Step 3: Apply 3NF — remove transitive dependencies</h3>
+
+<pre><code class="language-sql">-- Supplier info depends on supplier_id, not product_id
+CREATE TABLE suppliers (
+    supplier_id   INT PRIMARY KEY AUTO_INCREMENT,
+    supplier_name VARCHAR(100),
+    phone         VARCHAR(15),
+    city          VARCHAR(50)
+);
+
+-- Now products just references supplier_id
+ALTER TABLE products
+    ADD FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id);</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Normal Form</th><th>Rule</th><th>Problem It Fixes</th><th>Key Term</th></tr></thead>
+<tbody>
+<tr><td>1NF</td><td>Atomic values, single-valued columns, has a primary key</td><td>Multi-valued columns, repeating groups</td><td>Atomic values</td></tr>
+<tr><td>2NF</td><td>In 1NF + no partial dependencies</td><td>Non-key columns depending on part of composite key</td><td>Partial dependency</td></tr>
+<tr><td>3NF</td><td>In 2NF + no transitive dependencies</td><td>Non-key columns depending on other non-key columns</td><td>Transitive dependency</td></tr>
+<tr><td>Unnormalized</td><td>No rules applied</td><td>All three anomaly types</td><td>Redundancy</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<h3>Example 1: Fixing a 1NF Violation at a Boutique</h3>
+
+<pre><code class="language-sql">-- Violation: multiple phone numbers in one column
+-- BAD
+-- customer_id | name  | phones
+-- 1           | Neha  | "9876543210, 9123456789"
+
+-- Fix: separate phone table
+CREATE TABLE customer_phones (
+    phone_id     INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id  INT,
+    phone_number VARCHAR(15),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
+
+INSERT INTO customer_phones (customer_id, phone_number) VALUES
+(1, '9876543210'),
+(1, '9123456789');</code></pre>
+
+<h3>Example 2: Fixing a 2NF Violation in an Exam Results Table</h3>
+
+<pre><code class="language-sql">-- Composite PK: (student_id, subject_id)
+-- student_name depends only on student_id -&gt; partial dependency
+
+-- BAD table
+-- student_id | subject_id | student_name | subject_name | marks
+
+-- Fix:
+CREATE TABLE students (
+    student_id   INT PRIMARY KEY,
+    student_name VARCHAR(100)
+);
+
+CREATE TABLE subjects (
+    subject_id   INT PRIMARY KEY,
+    subject_name VARCHAR(100)
+);
+
+CREATE TABLE results (
+    student_id  INT,
+    subject_id  INT,
+    marks       INT,
+    PRIMARY KEY (student_id, subject_id),
+    FOREIGN KEY (student_id) REFERENCES students(student_id),
+    FOREIGN KEY (subject_id) REFERENCES subjects(subject_id)
+);</code></pre>
+
+<h3>Example 3: Fixing a 3NF Violation in an Employee Table</h3>
+
+<pre><code class="language-sql">-- emp_id -&gt; dept_id -&gt; dept_name (transitive: dept_name depends on dept_id, not emp_id)
+
+-- BAD
+-- emp_id | emp_name | dept_id | dept_name
+
+-- Fix:
+CREATE TABLE departments (
+    dept_id   INT PRIMARY KEY,
+    dept_name VARCHAR(100)
+);
+
+CREATE TABLE employees (
+    emp_id    INT PRIMARY KEY,
+    emp_name  VARCHAR(100),
+    dept_id   INT,
+    FOREIGN KEY (dept_id) REFERENCES departments(dept_id)
+);</code></pre>
+
+<h3>Example 4: IRCTC Booking Table</h3>
+
+<pre><code class="language-sql">-- Original bad design
+-- booking_id | passenger_name | train_id | train_name | route | class | fare
+
+-- After 3NF:
+CREATE TABLE trains (
+    train_id    INT PRIMARY KEY,
+    train_name  VARCHAR(100),
+    route       VARCHAR(200)
+);
+
+CREATE TABLE fare_classes (
+    class_id    INT PRIMARY KEY,
+    class_name  VARCHAR(20),   -- Sleeper, 3AC, 2AC
+    base_fare   DECIMAL(8,2)
+);
+
+CREATE TABLE bookings (
+    booking_id       INT PRIMARY KEY AUTO_INCREMENT,
+    passenger_name   VARCHAR(100),
+    train_id         INT,
+    class_id         INT,
+    journey_date     DATE,
+    FOREIGN KEY (train_id) REFERENCES trains(train_id),
+    FOREIGN KEY (class_id) REFERENCES fare_classes(class_id)
+);</code></pre>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Does every table need to be in 3NF?</strong></p>
+<p>In most transactional systems, yes. But there are cases — reporting tables, analytics tables, data warehouses — where deliberately breaking normalization rules makes queries faster. That's called denormalization and it's a conscious trade-off, not laziness.</p>
+
+<p><strong>What's the difference between 2NF and 3NF?</strong></p>
+<p>2NF is about partial dependencies — non-key columns depending on only part of a composite key. 3NF is about transitive dependencies — non-key columns depending on other non-key columns. If your table has a single-column primary key, 2NF violations can't happen, but 3NF violations still can.</p>
+
+<p><strong>How do I know if a column has a partial dependency?</strong></p>
+<p>Ask: does this column's value change if only part of the primary key changes? If yes, it's a partial dependency. In a table keyed by <code>(order<em>id, product</em>id)</code>, does <code>product<em>name</code> change when <code>order</em>id</code> changes? No — it only changes when <code>product_id</code> changes. So it depends only on part of the key.</p>
+
+<p><strong>Is it always bad to have repeated data?</strong></p>
+<p>Repeated data is a symptom of poor design, not always an intentional choice. When it's a conscious choice made for performance reasons, it's called denormalization. When it happens by accident, it's a normalization problem waiting to cause bugs.</p>
+
+<p><strong>What about BCNF and 4NF?</strong></p>
+<p>Boyce-Codd Normal Form (BCNF) is a stricter version of 3NF. 4NF and 5NF handle even more obscure dependency cases. For most real-world applications, reaching 3NF is sufficient and is the standard target.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li>Storing comma-separated lists in a single column instead of using a related table</li><li>Keeping calculated columns (like <code>total<em>price = quantity * unit</em>price</code>) stored and updated separately instead of computing them in queries</li><li>Repeating supplier, vendor, or category details across every product row instead of creating separate tables</li><li>Forgetting to update all copies of repeated data after a change, leading to inconsistent records</li><li>Confusing 2NF with 3NF — both involve "depends on the key" but target different types of dependencies</li><li>Over-normalizing tables to the point where every simple query needs 6 joins</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Start with your ER model — if the entities and relationships are correct, normalization flows naturally</li><li>Every non-key column should describe the entity identified by the primary key, nothing else</li><li>When you see repeated values across many rows, ask whether those values belong in their own table</li><li>Store facts once — let other tables reference them by ID</li><li>Use 3NF as your default target for transactional databases</li><li>Document any intentional denormalization decisions and the reason for them</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>At Razorpay, which processes millions of payment transactions daily, normalization is critical for data integrity. A payment involves a merchant, a customer, a payment method, and a gateway. Each of these is a separate normalized table. If a merchant updates their settlement account, one row changes — and all historical transactions automatically reflect the correct merchant, because they reference by ID.</p>
+
+<p>Nykaa's product catalog is heavily normalized. Brand information, ingredient lists, skin type categories — all live in their own tables. When a brand changes its name or a category is restructured, the change happens in one place. Without normalization, a brand name change across 10,000 products would be a data disaster.</p>
+
+<p>Zomato's restaurant database keeps restaurant details, menu details, and pricing in separate normalized tables. This is why when a restaurant updates a dish price, all active listings reflect it instantly. The price lives in one row in the menu table, not copied across thousands of order history rows.</p>
+
+<p>For any system that handles money, inventory, or compliance data, normalization isn't optional — it's a safety requirement.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>NORMALIZATION JOURNEY
+======================
+
+UNNORMALIZED TABLE
++------------------------------------------+
+| order_id | customer | products       | city   |
+|----------|----------|----------------|--------|
+| 1        | Rahul    | Kurti, Saree   | Mumbai |
+| 2        | Rahul    | Dupatta        | Mumbai |  &lt;- city repeated!
++------------------------------------------+
+
+AFTER 1NF (atomic values, one product per row)
++------------------------------------------+
+| order_id | product_id | customer | city   |
+|----------|------------|----------|--------|
+| 1        | 101        | Rahul    | Mumbai |
+| 1        | 102        | Rahul    | Mumbai |  &lt;- still redundant
+| 2        | 103        | Rahul    | Mumbai |
++------------------------------------------+
+
+AFTER 2NF (split composite key dependencies)
+orders: order_id, customer_id
+products: product_id, product_name
+order_items: order_id, product_id, quantity
+
+AFTER 3NF (no transitive dependencies)
+customers: customer_id, name, city_id
+cities: city_id, city_name
+orders: order_id, customer_id, date
+order_items: order_id, product_id, quantity</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>1NF: atomic values, no repeating groups, must have a primary key</li><li>2NF: 1NF + no partial dependencies (only matters with composite keys)</li><li>3NF: 2NF + no transitive dependencies (non-key column depending on another non-key column)</li><li>Normalization prevents update, insert, and delete anomalies</li><li>The goal is: every non-key column describes only the entity identified by the primary key</li><li>For most transactional databases, 3NF is the practical target</li><li>Deliberate exceptions to normalization (for performance) are called denormalization</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>This table stores exam results: <code>(student<em>id, student</em>name, subject<em>id, subject</em>name, marks, teacher<em>name)</code>. The primary key is <code>(student</em>id, subject_id)</code>. Identify all normalization violations and rewrite the schema in 3NF.</li></ol>
+
+<ol><li>An <code>employees</code> table has columns: <code>emp<em>id</code>, <code>emp</em>name</code>, <code>dept<em>id</code>, <code>dept</em>name</code>, <code>manager<em>id</code>, <code>manager</em>name</code>. Which normal form is violated? How do you fix it?</li></ol>
+
+<ol><li>You have a product table: <code>(product<em>id, product</em>name, category, sub<em>category, brand, brand</em>country)</code>. Analyze which columns have transitive dependencies and normalize accordingly.</li></ol>
+
+<ol><li>Why can a table with a single-column primary key never have a 2NF violation? Explain with an example.</li></ol>
+
+<ol><li>Design a 3NF schema for a school report card system. Students have names and roll numbers. Subjects have names and codes. Each student gets a grade in each subject each term.</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Aman at Meesho didn't fix the entire database in a day. He started by identifying the worst violations — the comma-separated categories, the repeated supplier information — and tackled them one at a time. Each fix made the data cleaner, the queries simpler, and the reports more reliable.</p>
+
+<p>Normalization isn't about following academic rules. It's about respecting data. When you store a fact in one place, that fact stays true. When you store it in ten places, you're betting on staying organized forever — and that bet usually doesn't pay off.</p>
+
+<p>The three normal forms are a progression. Get to 1NF first, then 2NF, then 3NF. You don't have to memorize the formal definitions to apply the principles. Just keep asking: "Is this column really about this table's primary key, or is it sneaking in from somewhere else?"</p>
+
+<p>When a database is well-normalized, changes are safe, queries are predictable, and bugs don't hide in data inconsistencies. It's the difference between a system that works reliably for years and one that slowly fills with contradictions until no one trusts the numbers anymore.</p>
+
+  `,
+  'mod15-t3': `
+    <h1>Denormalization: When Breaking the Rules Is the Right Call</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Simran was a data engineer at Flipkart working on the product search team. The normalized product database was beautifully designed — seven related tables, all in 3NF, no redundancy anywhere. Every product's details, brand information, category hierarchy, seller info, pricing, and ratings lived in their proper separate tables.</p>
+
+<p>Then the product search feature launched to users and the team's phones started ringing. Page load times were 4 to 6 seconds. Users were bouncing. A single search query was hitting seven tables with six joins and returning millions of rows. The database server was working twice as hard as anticipated.</p>
+
+<p>Simran's manager pulled up the query plan and said, "We need to denormalize the search table." Simran had been taught that normalization was the right way to design databases. She was confused. Her manager explained: normalization is right for storing data. Denormalization is right for reading it at scale.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>When your application grows, certain queries start becoming genuinely slow. Reports that aggregate data across multiple tables. Search features that need to look at many fields at once. Dashboards that run every time a manager opens a page. Analytics queries that summarize months of transaction history.</p>
+
+<p>Each JOIN in a query has a cost. When you normalize data, you split it into many tables. Getting it back together requires joining those tables every single time you query. For a low-traffic internal app, this is fine. For a system serving 10 million users, those joins start to hurt.</p>
+
+<p>The pain shows up in specific ways: slow API responses, database CPU spiking during peak hours, query timeouts on reports, search features that feel sluggish. And often, the root cause is that you're making the database reassemble data that you split up during normalization — over and over, millions of times a day.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Denormalization isn't a new invention — it's as old as normalization itself. Codd and Date defined the normal forms in the 1970s, but even then, practitioners recognized that the tradeoff between write consistency and read performance was real.</p>
+
+<p>Data warehousing, which became popular in the 1980s and 1990s, built its entire architecture on denormalization. The Star Schema and Snowflake Schema used in analytics databases are deliberately denormalized designs. The goal was never to store data efficiently — it was to make queries fast for reporting and analysis.</p>
+
+<p>As web applications scaled in the 2000s and 2010s, the same pattern emerged in transactional systems. Companies like Amazon, Google, and later Indian unicorns like Flipkart and Paytm discovered that serving high-traffic read workloads required accepting some redundancy in exchange for speed. Denormalization became a recognized, documented architectural pattern — not a mistake, but a tool.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think about a library that's perfectly organized: every book is in exactly the right section, catalogued by author, subject, and publisher in a master index. To find any book, you consult the index, go to the section, find the shelf, find the book. Perfect — no redundancy.</p>
+
+<p>Now imagine the library also puts up a "Top 50 Most Borrowed This Month" display at the entrance with the book covers, titles, author names, and shelf locations all visible at once. That information is technically available in the main catalogue. But the display puts it all in one place so visitors can see what they want in seconds without navigating the full system.</p>
+
+<p>That display is denormalization. The data is duplicated — it exists both in the master catalogue and in the display. But the display exists because access speed matters more than storage efficiency for that specific use case.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think about a restaurant menu. In a perfectly normalized world, the menu would reference a separate "ingredients table" and a separate "chef specialties table" and a separate "pricing history table." Technically correct. But when you're hungry and staring at a menu, you want one page with the dish name, description, price, and vegetarian status all together.</p>
+
+<p>The printed menu is denormalized. It copies some information (the chef's specialties, ingredient highlights) from other sources into a single easy-to-read format. The kitchen still maintains accurate detailed records. But the menu is designed for fast consumption, not for storage correctness.</p>
+
+<p>Denormalized tables in a database are like that menu — they're read-optimized copies of data that's stored in a normalized form somewhere else in the system.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>Denormalization typically takes one of several forms.</p>
+
+<p><strong>Adding redundant columns</strong> is the simplest approach. Instead of joining <code>orders</code> to <code>customers</code> every time you need the customer's city, you copy <code>customer_city</code> directly into the <code>orders</code> table. Reads are faster; writes need to update the city in two places.</p>
+
+<p><strong>Storing computed/aggregated values</strong> is another common pattern. Instead of running <code>SUM(order<em>amount)</code> across thousands of rows every time a dashboard loads, you maintain a <code>total</em>revenue</code> column in a <code>seller_summary</code> table and update it when orders come in. You accept that it might lag by a few seconds.</p>
+
+<p><strong>Creating summary tables</strong> means maintaining a completely separate table that holds pre-aggregated data. A <code>daily<em>sales</em>summary</code> table with one row per day per restaurant, updated by a nightly job, is much faster to query than aggregating the full <code>order_items</code> table at runtime.</p>
+
+<p><strong>Flattening nested structures</strong> means taking a hierarchy — like a category tree with five levels — and storing the full path in a single column so you don't need recursive joins to get a product's full category path.</p>
+
+<p>The key thing to understand is that denormalization is always a trade-off. You're making reads faster at the cost of more complex writes, more storage, and the risk of data becoming inconsistent if the redundant copies aren't kept in sync.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<h3>Technique 1: Adding a Redundant Column</h3>
+
+<pre><code class="language-sql">-- Normalized: need to JOIN customers every time to get city
+SELECT o.order_id, o.total_amount, c.city
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id;
+
+-- Denormalized: city is stored in orders directly
+ALTER TABLE orders ADD COLUMN customer_city VARCHAR(50);
+
+-- Now you can query without the join:
+SELECT order_id, total_amount, customer_city FROM orders;</code></pre>
+
+<h3>Technique 2: Pre-computed Aggregate Column</h3>
+
+<pre><code class="language-sql">-- Expensive query: calculate average rating on every request
+SELECT r.restaurant_id, r.name, AVG(rv.rating) as avg_rating
+FROM restaurants r
+JOIN reviews rv ON r.restaurant_id = rv.restaurant_id
+GROUP BY r.restaurant_id, r.name;
+
+-- Denormalized: store avg_rating in restaurants table
+ALTER TABLE restaurants ADD COLUMN avg_rating DECIMAL(3,2);
+
+-- Update it when a new review comes in (via app logic or trigger)
+UPDATE restaurants r
+SET avg_rating = (
+    SELECT AVG(rating) FROM reviews WHERE restaurant_id = r.restaurant_id
+)
+WHERE restaurant_id = 42;
+
+-- Fast read:
+SELECT restaurant_id, name, avg_rating FROM restaurants WHERE city = 'Pune';</code></pre>
+
+<h3>Technique 3: Summary Table for Reporting</h3>
+
+<pre><code class="language-sql">-- Create a daily summary table (denormalized, pre-aggregated)
+CREATE TABLE daily_order_summary (
+    summary_date    DATE,
+    city            VARCHAR(50),
+    total_orders    INT,
+    total_revenue   DECIMAL(12,2),
+    avg_order_value DECIMAL(8,2),
+    PRIMARY KEY (summary_date, city)
+);
+
+-- Populate it nightly with a batch job
+INSERT INTO daily_order_summary (summary_date, city, total_orders, total_revenue, avg_order_value)
+SELECT
+    DATE(order_date),
+    customer_city,
+    COUNT(*),
+    SUM(total_amount),
+    AVG(total_amount)
+FROM orders
+WHERE DATE(order_date) = CURDATE() - INTERVAL 1 DAY
+GROUP BY DATE(order_date), customer_city
+ON DUPLICATE KEY UPDATE
+    total_orders = VALUES(total_orders),
+    total_revenue = VALUES(total_revenue),
+    avg_order_value = VALUES(avg_order_value);</code></pre>
+
+<h3>Technique 4: Flattened Category Path</h3>
+
+<pre><code class="language-sql">-- Instead of recursive joins across 5 category levels:
+-- products -&gt; subcategory -&gt; category -&gt; super_category -&gt; department
+
+-- Add a flattened path column
+ALTER TABLE products ADD COLUMN category_path VARCHAR(300);
+
+-- Store the full hierarchy as a string
+UPDATE products p
+SET category_path = 'Electronics &gt; Mobiles &gt; Smartphones &gt; Android'
+WHERE product_id = 1001;
+
+-- Now search by category hierarchy without recursive joins
+SELECT product_id, product_name, category_path
+FROM products
+WHERE category_path LIKE 'Electronics &gt; Mobiles%';</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Technique</th><th>What You Do</th><th>Benefit</th><th>Risk</th></tr></thead>
+<tbody>
+<tr><td>Redundant column</td><td>Copy a column from another table</td><td>Eliminates a JOIN on every read</td><td>Updates must keep both copies in sync</td></tr>
+<tr><td>Stored aggregate</td><td>Pre-calculate SUM, AVG, COUNT</td><td>Dashboard queries run instantly</td><td>Slightly out of date unless updated carefully</td></tr>
+<tr><td>Summary table</td><td>Separate table with aggregated rows</td><td>Fast analytics without touching raw data</td><td>Needs a batch job or trigger to stay current</td></tr>
+<tr><td>Flattened hierarchy</td><td>Store full path as a string</td><td>No recursive queries needed</td><td>Refactoring the hierarchy means updating strings</td></tr>
+<tr><td>Materialized view</td><td>DB-managed pre-computed query</td><td>Automatic refresh, transparent to queries</td><td>Not supported in all databases</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<h3>Example 1: Seller Dashboard at Meesho</h3>
+
+<pre><code class="language-sql">-- Normalized query (slow at scale):
+SELECT
+    s.seller_id, s.seller_name,
+    COUNT(o.order_id) AS total_orders,
+    SUM(oi.quantity * oi.unit_price) AS total_revenue
+FROM sellers s
+JOIN products p ON p.seller_id = s.seller_id
+JOIN order_items oi ON oi.product_id = p.product_id
+JOIN orders o ON o.order_id = oi.order_id
+WHERE o.order_date &gt;= '2024-01-01'
+GROUP BY s.seller_id, s.seller_name;
+
+-- Denormalized approach: maintain a seller_stats table
+CREATE TABLE seller_stats (
+    seller_id       INT PRIMARY KEY,
+    total_orders    INT DEFAULT 0,
+    total_revenue   DECIMAL(14,2) DEFAULT 0.00,
+    last_updated    TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (seller_id) REFERENCES sellers(seller_id)
+);
+
+-- Dashboard query is now instant:
+SELECT s.seller_name, ss.total_orders, ss.total_revenue
+FROM sellers s
+JOIN seller_stats ss ON s.seller_id = ss.seller_id
+ORDER BY ss.total_revenue DESC;</code></pre>
+
+<h3>Example 2: Zomato Restaurant Search</h3>
+
+<pre><code class="language-sql">-- Add search-friendly columns directly to restaurants
+ALTER TABLE restaurants
+    ADD COLUMN total_reviews INT DEFAULT 0,
+    ADD COLUMN avg_delivery_time INT,      -- in minutes
+    ADD COLUMN top_dish VARCHAR(100);      -- most ordered dish
+
+-- Search query is now clean and fast:
+SELECT restaurant_id, name, avg_rating, total_reviews, avg_delivery_time, top_dish
+FROM restaurants
+WHERE city = 'Hyderabad'
+  AND avg_rating &gt;= 4.0
+  AND avg_delivery_time &lt;= 30
+ORDER BY avg_rating DESC
+LIMIT 20;</code></pre>
+
+<h3>Example 3: PhonePe Transaction History Page</h3>
+
+<pre><code class="language-sql">-- Instead of joining users, wallets, and transactions every time:
+CREATE TABLE transaction_feed (
+    txn_id            INT PRIMARY KEY,
+    user_id           INT,
+    counterparty_name VARCHAR(100),   -- denormalized from users table
+    counterparty_upi  VARCHAR(100),
+    amount            DECIMAL(10,2),
+    direction         ENUM('DEBIT', 'CREDIT'),
+    txn_date          DATETIME,
+    description       VARCHAR(200)
+);
+
+-- User's transaction history page loads instantly:
+SELECT * FROM transaction_feed
+WHERE user_id = 5001
+ORDER BY txn_date DESC
+LIMIT 20;</code></pre>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Doesn't denormalization cause the same problems as unnormalized databases?</strong></p>
+<p>Only if it's done carelessly. Intentional denormalization means you're aware of the redundancy, you have a plan to keep copies in sync (via triggers, batch jobs, or application logic), and you've documented the trade-off. Accidental redundancy from poor design is different — there's no sync plan and data drifts out of sync.</p>
+
+<p><strong>When should I denormalize vs. add an index?</strong></p>
+<p>Add an index first. Indexes often solve slow query problems without touching the schema. Denormalize only when indexes aren't enough — when the bottleneck is the JOIN itself or when you're aggregating huge volumes of data repeatedly.</p>
+
+<p><strong>How do I keep the redundant copies in sync?</strong></p>
+<p>Three main approaches: (1) Application logic — every write operation updates all copies. (2) Database triggers — a trigger fires on INSERT/UPDATE and updates the redundant columns automatically. (3) Batch jobs — a scheduled job periodically refreshes summary tables. The right choice depends on how fresh the data needs to be.</p>
+
+<p><strong>Does denormalization mean I throw away my normalized tables?</strong></p>
+<p>Not usually. The normalized tables stay as the source of truth. Denormalized tables or columns are additions built on top. Think of it as having a main storage room (normalized) and a front counter with the most-requested items already laid out (denormalized).</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li>Denormalizing prematurely before measuring whether a performance problem actually exists</li><li>Forgetting to update all redundant copies when the source data changes, causing silent inconsistencies</li><li>Denormalizing write-heavy tables — the extra write cost usually makes things worse, not better</li><li>Using denormalization as a substitute for proper indexing, which often solves the same problem with less complexity</li><li>Not documenting which columns are denormalized and how they're kept in sync</li><li>Letting the denormalized tables drift out of sync with no reconciliation process</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Profile first: use EXPLAIN or EXPLAIN ANALYZE to confirm that JOINs are actually your bottleneck</li><li>Try indexes before denormalizing — they solve many slow query problems with no data redundancy</li><li>When you do denormalize, document clearly which columns are copies and what keeps them in sync</li><li>For analytics and reporting, use a dedicated summary table updated by a scheduled job</li><li>Prefer triggers or batch jobs over relying on application code to keep redundant copies consistent</li><li>Consider materialized views (supported in PostgreSQL and Oracle) for a managed denormalization approach</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Flipkart's product search works on a denormalized search index. Every product has its category names, brand name, seller rating, and pricing all stored in a single searchable record. The normalized source tables still exist for transactional writes. But the search service reads from a pre-built, denormalized view that's refreshed every few minutes.</p>
+
+<p>IRCTC's seat availability display uses denormalized summary counts. Rather than counting available seats by joining bookings to trains to seat maps in real time — which would be catastrophically slow during Tatkal booking rushes — IRCTC maintains a pre-counted availability table. When a booking is confirmed, that count decrements immediately.</p>
+
+<p>Jio's billing system uses summary tables. Your monthly bill is computed once at billing time and stored in a <code>bill_summary</code> table. When you check your bill on the MyJio app, it reads from that summary — not by recalculating every call record and data usage log in real time.</p>
+
+<p>The pattern is consistent: normalized tables handle writes correctly, denormalized structures handle reads efficiently. The two approaches work together.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>NORMALIZATION VS DENORMALIZATION
+==================================
+
+      WRITE PATH (Normalization wins)
+      ================================
+      New Order Placed
+           |
+     +-----+------+
+     |             |
+  orders table   order_items table
+  (normalized)   (normalized)
+     |
+  customer_id -&gt; customers table
+  seller_id   -&gt; sellers table
+
+      READ PATH (Denormalization helps)
+      ===================================
+      Dashboard Request
+           |
+    seller_stats table          &lt;- pre-aggregated
+    (total_orders, revenue)      &lt;- updated by trigger or batch
+
+      Search Request
+           |
+    product_search_index        &lt;- flattened, denormalized
+    (name, brand, category,     &lt;- refreshed every N minutes
+     price, rating, city)
+
+      RULE:
+      Normalize for writes (accuracy, consistency)
+      Denormalize for reads (speed, simplicity)</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>Denormalization is intentional redundancy added to improve read performance</li><li>It trades write complexity and risk of inconsistency for faster queries</li><li>Always measure the problem first — indexes often solve the same issues without redundancy</li><li>Common techniques: redundant columns, stored aggregates, summary tables, flattened hierarchies</li><li>Redundant copies must be kept in sync via triggers, batch jobs, or application logic</li><li>Normalized tables remain the source of truth; denormalized structures are read-optimized additions</li><li>Denormalization is a pattern in data warehousing (Star Schema) as well as high-traffic transactional apps</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>A Swiggy-like app has separate tables for <code>restaurants</code>, <code>menu_items</code>, <code>reviews</code>, and <code>orders</code>. The home screen needs to show restaurant name, cuisine, average rating, and estimated delivery time in one query. How would you denormalize this to avoid four-table joins on every home screen load?</li></ol>
+
+<ol><li>You have a Paytm-style <code>transactions</code> table with 200 million rows. The finance team runs a monthly report that sums all transactions by merchant city. It currently takes 8 minutes. Propose a denormalization strategy to make this under 5 seconds.</li></ol>
+
+<ol><li>What are the risks of storing a pre-calculated <code>avg_rating</code> column in a <code>restaurants</code> table? How would you ensure it stays accurate?</li></ol>
+
+<ol><li>When would you use a database trigger to maintain a denormalized column versus a scheduled batch job? Give an example of each scenario.</li></ol>
+
+<ol><li>An e-commerce site has a category hierarchy five levels deep (<code>Department > Category > Sub-Category > Type > Product</code>). Describe two ways to denormalize this for fast product listing queries.</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Simran's moment of confusion at Flipkart is common. You spend time learning to normalize correctly, and then someone tells you to do the opposite. But it's not really the opposite — it's the next step. First you learn to organize data correctly. Then you learn to make it read quickly. They're two different problems, and the solutions don't cancel each other out.</p>
+
+<p>Normalization and denormalization are tools for different jobs, like a filing cabinet and a whiteboard. The filing cabinet stores everything accurately, once, in the right place. The whiteboard has the things you need to refer to every five minutes. Both are useful. You don't replace one with the other.</p>
+
+<p>The key discipline is being deliberate. When you denormalize, you need to know what you're doing and why, what keeps the copies in sync, and what the acceptable lag is. Accidental redundancy is a bug. Deliberate redundancy with a maintenance plan is engineering.</p>
+
+<p>Simran's search table at Flipkart ended up loading in under 200 milliseconds — down from 6 seconds. The normalized source tables still handled all the writes. The denormalized search table handled all the reads. Both parts of the system did their job correctly. That balance is what good database design looks like at scale.</p>
+
+  `,
+  'mod15-t4': `
+    <h1>Primary and Foreign Keys: The Glue That Holds Your Database Together</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Rahul was a backend developer at a logistics startup in Pune. The company had just signed a big contract with a clothing brand and needed to track thousands of shipments per day. Rahul set up two tables: <code>shipments</code> and <code>customers</code>. He added a <code>customer_id</code> column to shipments so they'd know which customer each shipment belonged to.</p>
+
+<p>A month after launch, the support team flagged a problem. Some shipments in the system had <code>customer<em>id</code> values like 9999, 0, and even NULL — but none of those customer IDs existed in the <code>customers</code> table. The delivery team was showing up at addresses they couldn't find. Orders were getting lost. The problem? Rahul had created the column but never told the database that <code>customer</em>id</code> in <code>shipments</code> was supposed to refer to a real customer in <code>customers</code>.</p>
+
+<p>He'd stored the relationship in his head, not in the database. What he needed was a foreign key.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>In any real system, tables don't exist in isolation. Orders belong to customers. Products belong to categories. Employees belong to departments. The connections between tables are what make the data useful.</p>
+
+<p>But databases don't automatically know about these connections unless you tell them. If you just put a <code>customer_id</code> column in the <code>orders</code> table without defining it as a foreign key, the database will happily accept any value you put there — including values that point to customers who don't exist, or NULL values that point to nothing.</p>
+
+<p>The result is <strong>orphaned records</strong> — data that refers to something that doesn't exist. Orphaned orders, orphaned invoices, orphaned shipments. These create bugs that are frustratingly hard to diagnose because the data looks fine on the surface, but the references are broken underneath.</p>
+
+<p>Primary and foreign keys are the mechanism databases provide to prevent this. They enforce the rule that relationships must be valid at all times.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>The concept of primary keys goes back to the relational model itself. Edgar Codd's 1970 paper defined that every relation (table) must have a set of attributes that uniquely identify each tuple (row). This was called the primary key. Without it, you can't reliably refer to a specific row, and you can't define relationships between tables.</p>
+
+<p>Foreign keys came as the natural next step. If a primary key uniquely identifies rows in one table, then a foreign key is what allows another table to reference those rows reliably. The database enforces that every foreign key value must match an existing primary key value — this is called <strong>referential integrity</strong>.</p>
+
+<p>Before relational databases formalized these constraints, applications had to enforce these rules in code. That meant every developer who wrote queries or inserts had to remember the rules — and they didn't, always. Moving this logic into the database meant the rules couldn't be bypassed by any application, no matter who wrote it.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think about how passports work. Every Indian citizen who has a passport has a unique passport number. That number appears in exactly one passport, belonging to exactly one person. No two people share a passport number. That's a primary key — a unique, non-null identifier.</p>
+
+<p>Now think about visa stickers in that passport. A UK visa stamp in your passport references the British Home Office's records. The stamp is valid only if the corresponding entry exists in their records. If the Home Office has no record of issuing that visa, the stamp is meaningless. That's a foreign key — a reference in one record that must match a valid entry in another system.</p>
+
+<p>Your passport number is the primary key of "you" in the government's database. The visa stamp is a foreign key that links your record to another government's records.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think of a school. Every student has a unique admission number. The principal's office keeps a master register — one row per student, each with a unique admission number. Nothing else in the school can have a student row without an admission number. That's a primary key.</p>
+
+<p>Now the attendance register. Every entry in the attendance register mentions an admission number. The school rule is: you can only mark attendance for a real, enrolled student. If you try to mark attendance for admission number 9999 and that number isn't in the master register, the attendance register should reject it.</p>
+
+<p>That enforcement — "you can only reference something that actually exists" — is exactly what a foreign key does. The attendance register's <code>admission<em>number</code> column is a foreign key referencing the master register's <code>admission</em>number</code> primary key.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>A <strong>primary key</strong> is one or more columns in a table whose values uniquely identify each row. Rules: the value must be unique (no two rows can have the same primary key value), and it cannot be NULL. Every table should have one. Usually, a single auto-incrementing integer (<code>id</code>) is used for simplicity.</p>
+
+<p>There are two types of primary keys in practice. A <strong>surrogate key</strong> is an artificial ID (like an auto-increment integer) that has no meaning outside the database. A <strong>natural key</strong> is something that naturally exists and is unique — like a PAN number, Aadhaar number, or email address. Surrogate keys are preferred in most designs because natural keys can change (someone changes their name or email), while surrogate keys never do.</p>
+
+<p>A <strong>foreign key</strong> is a column (or set of columns) in one table that references the primary key of another table. The table containing the foreign key is called the <strong>child table</strong>. The table being referenced is called the <strong>parent table</strong>. The database enforces that every value in the foreign key column must exist as a primary key in the parent table — this is referential integrity.</p>
+
+<p>When you try to INSERT a row into the child table with a foreign key value that doesn't exist in the parent table, the database rejects it with an error. When you try to DELETE a row from the parent table that is still referenced by a child table, the database can either reject it, cascade the delete to child rows, or set the child's foreign key to NULL — this behavior is controlled by <code>ON DELETE</code> rules.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<h3>Defining a Primary Key</h3>
+
+<pre><code class="language-sql">-- Option 1: Single column primary key (most common)
+CREATE TABLE customers (
+    customer_id  INT PRIMARY KEY AUTO_INCREMENT,
+    full_name    VARCHAR(100) NOT NULL,
+    email        VARCHAR(150) UNIQUE NOT NULL,
+    phone        VARCHAR(15)
+);
+
+-- Option 2: Composite primary key
+CREATE TABLE order_items (
+    order_id    INT NOT NULL,
+    product_id  INT NOT NULL,
+    quantity    INT,
+    unit_price  DECIMAL(8,2),
+    PRIMARY KEY (order_id, product_id)
+);</code></pre>
+
+<h3>Defining a Foreign Key</h3>
+
+<pre><code class="language-sql">-- Foreign key in the orders table referencing customers
+CREATE TABLE orders (
+    order_id     INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id  INT NOT NULL,
+    order_date   DATE,
+    total_amount DECIMAL(10,2),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);</code></pre>
+
+<h3>Foreign Key with ON DELETE and ON UPDATE Rules</h3>
+
+<pre><code class="language-sql">CREATE TABLE shipments (
+    shipment_id  INT PRIMARY KEY AUTO_INCREMENT,
+    order_id     INT NOT NULL,
+    status       VARCHAR(30),
+    shipped_on   DATE,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id)
+        ON DELETE CASCADE        -- if order deleted, delete shipment too
+        ON UPDATE CASCADE        -- if order_id changes, update shipment too
+);</code></pre>
+
+<h3>Adding a Foreign Key to an Existing Table</h3>
+
+<pre><code class="language-sql">-- Add FK after table creation
+ALTER TABLE orders
+    ADD CONSTRAINT fk_orders_customer
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE;</code></pre>
+
+<h3>Viewing Foreign Key Constraints</h3>
+
+<pre><code class="language-sql">-- In MySQL/MariaDB
+SELECT
+    TABLE_NAME,
+    CONSTRAINT_NAME,
+    COLUMN_NAME,
+    REFERENCED_TABLE_NAME,
+    REFERENCED_COLUMN_NAME
+FROM information_schema.KEY_COLUMN_USAGE
+WHERE TABLE_SCHEMA = 'your_database_name'
+  AND REFERENCED_TABLE_NAME IS NOT NULL;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Concept</th><th>Definition</th><th>Example</th><th>What Happens Without It</th></tr></thead>
+<tbody>
+<tr><td>Primary Key</td><td>Uniquely identifies each row; NOT NULL</td><td>customer_id in customers</td><td>Duplicate or unidentifiable rows</td></tr>
+<tr><td>Foreign Key</td><td>References a primary key in another table</td><td>customer_id in orders</td><td>Orphaned records with invalid references</td></tr>
+<tr><td>Referential Integrity</td><td>Rule that FK must always point to an existing PK</td><td>order's customer_id must exist in customers</td><td>Data inconsistency</td></tr>
+<tr><td>ON DELETE CASCADE</td><td>Deletes child rows when parent row is deleted</td><td>Delete customer -> delete their orders</td><td>Child rows left orphaned</td></tr>
+<tr><td>ON DELETE RESTRICT</td><td>Prevents deleting parent if children exist</td><td>Can't delete customer with active orders</td><td>Default in most databases</td></tr>
+<tr><td>ON DELETE SET NULL</td><td>Sets FK to NULL when parent is deleted</td><td>Order's customer_id becomes NULL</td><td>FK becomes NULL, orphaned logically</td></tr>
+<tr><td>Surrogate Key</td><td>Artificial auto-increment ID with no real-world meaning</td><td>customer_id = 1, 2, 3...</td><td>Need to use natural keys which can change</td></tr>
+<tr><td>Natural Key</td><td>Real-world unique identifier</td><td>email, PAN number, phone</td><td>Might change; longer to use as FK</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<h3>Example 1: Swiggy Order System</h3>
+
+<pre><code class="language-sql">CREATE TABLE restaurants (
+    restaurant_id  INT PRIMARY KEY AUTO_INCREMENT,
+    name           VARCHAR(150) NOT NULL,
+    city           VARCHAR(50)
+);
+
+CREATE TABLE customers (
+    customer_id   INT PRIMARY KEY AUTO_INCREMENT,
+    name          VARCHAR(100) NOT NULL,
+    phone         VARCHAR(15) UNIQUE
+);
+
+CREATE TABLE orders (
+    order_id       INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id    INT NOT NULL,
+    restaurant_id  INT NOT NULL,
+    order_dt       DATETIME DEFAULT CURRENT_TIMESTAMP,
+    amount         DECIMAL(10,2),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE RESTRICT,
+    FOREIGN KEY (restaurant_id) REFERENCES restaurants(restaurant_id) ON DELETE RESTRICT
+);
+
+-- This will succeed:
+INSERT INTO customers (name, phone) VALUES ('Rahul Sharma', '9876543210');
+INSERT INTO restaurants (name, city) VALUES ('Pizza Corner', 'Mumbai');
+INSERT INTO orders (customer_id, restaurant_id, amount) VALUES (1, 1, 450.00);
+
+-- This will FAIL with FK violation (customer_id 999 doesn't exist):
+INSERT INTO orders (customer_id, restaurant_id, amount) VALUES (999, 1, 300.00);</code></pre>
+
+<h3>Example 2: Nykaa Product Catalog</h3>
+
+<pre><code class="language-sql">CREATE TABLE brands (
+    brand_id    INT PRIMARY KEY AUTO_INCREMENT,
+    brand_name  VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE categories (
+    category_id   INT PRIMARY KEY AUTO_INCREMENT,
+    category_name VARCHAR(80) NOT NULL
+);
+
+CREATE TABLE products (
+    product_id   INT PRIMARY KEY AUTO_INCREMENT,
+    product_name VARCHAR(200) NOT NULL,
+    brand_id     INT NOT NULL,
+    category_id  INT NOT NULL,
+    price        DECIMAL(8,2),
+    FOREIGN KEY (brand_id) REFERENCES brands(brand_id),
+    FOREIGN KEY (category_id) REFERENCES categories(category_id)
+);</code></pre>
+
+<h3>Example 3: Razorpay Payment with Cascade</h3>
+
+<pre><code class="language-sql">CREATE TABLE merchants (
+    merchant_id  INT PRIMARY KEY AUTO_INCREMENT,
+    business_name VARCHAR(150)
+);
+
+CREATE TABLE payment_orders (
+    pay_order_id  INT PRIMARY KEY AUTO_INCREMENT,
+    merchant_id   INT NOT NULL,
+    amount        DECIMAL(10,2),
+    currency      VARCHAR(5) DEFAULT 'INR',
+    status        VARCHAR(20),
+    FOREIGN KEY (merchant_id) REFERENCES merchants(merchant_id)
+        ON DELETE CASCADE
+);
+
+-- Deleting a merchant also removes all their payment orders:
+DELETE FROM merchants WHERE merchant_id = 3;
+-- All rows in payment_orders with merchant_id = 3 are automatically deleted.</code></pre>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Why not just use an application-level check instead of a foreign key?</strong></p>
+<p>Application-level checks only work when data goes through your application. If someone inserts data directly via a database tool, migration script, or another service, the check is bypassed. The database constraint enforces the rule for every path data can take — there's no way around it.</p>
+
+<p><strong>Can a foreign key reference a non-primary key column?</strong></p>
+<p>It can reference any column that has a UNIQUE constraint — it doesn't have to be the primary key specifically. But in practice, foreign keys almost always reference primary keys.</p>
+
+<p><strong>What's the difference between ON DELETE RESTRICT and ON DELETE NO ACTION?</strong></p>
+<p>In most databases, they behave the same way: both prevent deletion of a parent row if child rows exist. The technical difference is when the check happens (immediate vs. end of transaction), which only matters in specific edge cases with deferred constraints.</p>
+
+<p><strong>Should I always use AUTO_INCREMENT for primary keys?</strong></p>
+<p>For most tables, yes. It's simple, fast to index, and never conflicts. Exceptions: junction tables (where the composite of two FKs is the PK), or when a natural key is truly stable and meaningful (like a product SKU that will never change).</p>
+
+<p><strong>Does a foreign key automatically create an index?</strong></p>
+<p>In MySQL/InnoDB, yes — a foreign key automatically creates an index on the FK column if one doesn't exist. In PostgreSQL, it does not create one automatically. Since FKs are often used in JOINs, you usually want an index on them.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li>Creating <code>customer_id</code> columns without defining them as foreign keys, then wondering why orphaned records accumulate</li><li>Forgetting to index foreign key columns in databases that don't auto-create indexes (like PostgreSQL)</li><li>Using ON DELETE CASCADE carelessly and accidentally wiping out large amounts of child data when a parent row is deleted</li><li>Using NULL for a foreign key column that should always have a value — use NOT NULL to enforce required relationships</li><li>Choosing natural keys (like email) as primary keys and then having to update all foreign key references when the email changes</li><li>Referencing composite primary keys with only one of the columns in a foreign key</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Define foreign key constraints in the database, not just in application code</li><li>Use AUTO_INCREMENT surrogate keys for most primary keys — they're simple and never change</li><li>Add NOT NULL to foreign key columns when the relationship is mandatory (every order must have a customer)</li><li>Index all foreign key columns — they're used in JOINs constantly</li><li>Choose ON DELETE RESTRICT for most relationships — it forces you to handle deletions consciously</li><li>Reserve ON DELETE CASCADE for truly dependent records like <code>order_items</code> (if an order is deleted, its items should go too)</li><li>Name your constraints meaningfully: <code>fk<em>orders</em>customer<em>id</code> is much easier to debug than <code>FK</em>1</code></li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>At Paytm, the payments database has strict foreign key relationships between users, wallets, transactions, and merchants. Every transaction row must reference a valid wallet, and every wallet must reference a valid user. These constraints prevent phantom transactions — charges that can't be linked to any real user or merchant. In a regulated financial system, this is non-negotiable.</p>
+
+<p>Byju's student learning platform links student progress records to courses, lessons, and students via foreign keys. When a course is updated or replaced, the foreign key constraints force the engineering team to properly migrate student progress records before they can remove the old course data. Without those constraints, someone would have deleted courses while active progress records pointed to them.</p>
+
+<p>Zomato's menu management uses foreign key cascades carefully. When a restaurant removes a dish from their menu, the FK constraint prevents deletion if that dish has pending orders. Only after all orders for that dish are completed can it be removed. This prevents the nightmare of active orders pointing to deleted menu items.</p>
+
+<p>At IRCTC, seat reservations reference trains, journeys, and passengers through a chain of foreign keys. Every booking must reference a valid train and a valid scheduled journey. The database enforces these rules automatically, which is critical when millions of bookings are created during Tatkal windows.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>PRIMARY AND FOREIGN KEY RELATIONSHIPS
+=======================================
+
+PARENT TABLE                    CHILD TABLE
+============                    ===========
+customers                       orders
++-------------+                 +------------+
+| customer_id | &lt;-----FK------- | customer_id|
+| (PK)        |                 | order_id   |
+| name        |                 | (PK)        |
+| email       |                 | amount     |
++-------------+                 +------------+
+      |                                |
+      |                                | FK references
+      |                                v
+      |                         order_items
+      |                         +------------+
+      |                         | order_id   | (PK part 1)
+      |                         | product_id | (PK part 2)
+      |                         | quantity   |
+      |                         +------------+
+      |                                |
+      |                         FK references
+      |                                v
+      |                          products
+      |                         +------------+
+      |                         | product_id | (PK)
+      |                         | name       |
+      |                         | price      |
+      |                         +------------+
+
+RULES:
+  PK: unique, not null, one per table
+  FK: must match a PK value in parent (or be NULL if allowed)
+  Referential Integrity: database enforces these rules automatically</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>Primary keys uniquely identify every row in a table — they must be unique and NOT NULL</li><li>Foreign keys create a link between two tables by referencing the parent table's primary key</li><li>Referential integrity means every FK value must point to a real PK value — enforced by the database</li><li>ON DELETE CASCADE removes child rows when a parent is deleted; ON DELETE RESTRICT prevents it</li><li>Surrogate keys (auto-increment integers) are usually preferred over natural keys for stability</li><li>Always index your foreign key columns — they appear in JOINs constantly</li><li>Database-enforced constraints catch invalid data regardless of which application or script writes to the database</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>You're designing a library management system. Tables: <code>members</code>, <code>books</code>, <code>borrow_records</code>. Define all primary keys and foreign keys. What ON DELETE rules make sense for each relationship?</li></ol>
+
+<ol><li>A developer deleted a <code>categories</code> row in a product database and accidentally lost all products in that category because of ON DELETE CASCADE. How would you redesign the constraint to prevent this? What should happen instead?</li></ol>
+
+<ol><li>What's wrong with this table design? <code>orders (order<em>id, customer</em>email, customer<em>name, product</em>id, product_name, qty)</code>. Rewrite it with proper primary and foreign keys.</li></ol>
+
+<ol><li>Explain why using <code>email</code> as the primary key in a <code>users</code> table can cause problems. When does a surrogate key make more sense?</li></ol>
+
+<ol><li>In a PostgreSQL database, you have a <code>payments</code> table with a <code>user_id</code> foreign key. Queries joining <code>payments</code> to <code>users</code> are slow. What step might you have missed and how do you fix it?</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Rahul's problem with the orphaned shipments in Pune wasn't a logic error or a coding mistake — it was a schema design gap. He'd described the relationship in his mind but hadn't told the database about it. Once the foreign key was added, the database started enforcing the rule automatically, and the orphaned records stopped appearing.</p>
+
+<p>Primary and foreign keys are often called "the glue that holds relational databases together," and that description is accurate. Without them, you have a collection of independent spreadsheets that happen to be stored in the same system. With them, you have a database — a system where relationships are real, enforced, and reliable.</p>
+
+<p>The discipline of defining these constraints carefully pays off over time. When a new developer joins the team and starts writing queries, the constraints are already there. When a data migration script runs at 2 AM, the constraints catch any invalid references. When a bug in the application tries to insert a bad record, the database rejects it before it can cause damage.</p>
+
+<p>Constraints are the database doing its job so that your application doesn't have to do it alone.</p>
+
+  `,
+  'mod15-t5': `
+    <h1>One-to-Many and Many-to-Many Relationships: How Tables Talk to Each Other</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Neha was building the backend for an online tutoring platform similar to Byju's. Students could enroll in multiple courses. Each course had multiple students. Teachers taught multiple courses. Pretty simple to describe in words. But when Neha sat down to translate this into tables, she got stuck.</p>
+
+<p>Her first instinct was to add a <code>course<em>id</code> column to the <code>students</code> table. But what if a student was in five courses? Would she make five columns — <code>course</em>id<em>1</code>, <code>course</em>id<em>2</code>... <code>course</em>id<em>5</code>? That felt wrong. She tried the other way: putting <code>student</em>id</code> in the <code>courses</code> table. Same problem. She couldn't fit multiple students in one column.</p>
+
+<p>She messaged her senior, Arjun, who had been a developer at a Bengaluru edtech company for eight years. He told her: "What you have here is a many-to-many relationship. You need a third table." That third table changed everything.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>Every time you're designing a database and two entities are connected to each other, you need to answer one question: how many of one connects to how many of the other? This is the cardinality question.</p>
+
+<p>Sometimes the answer is simple: one customer places many orders, but each order belongs to exactly one customer. One department has many employees, but each employee belongs to one department. These are clean and easy to handle in SQL.</p>
+
+<p>But often, the answer is messier: one student can enroll in many courses, and one course can have many students. One product can have many tags, and one tag can apply to many products. One actor can appear in many movies, and one movie has many actors. When both sides of the relationship can be "many," you have a many-to-many relationship — and it requires a special approach that most beginners don't learn until they hit the wall.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>The relational model, defined by Edgar Codd in the 1970s, established that data should be stored in separate, normalized tables connected by keys. But the model also acknowledged that real-world entities have complex relationships — not everything is a neat one-to-one or one-to-many structure.</p>
+
+<p>The junction table (also called a bridge table, associative table, or linking table) emerged as the standard solution for many-to-many relationships. It's not a workaround — it's the correct relational design. A junction table turns a many-to-many relationship into two one-to-many relationships, which is something the relational model handles perfectly.</p>
+
+<p>This pattern has been used since the earliest commercial relational databases in the 1980s and is just as relevant today. Every complex application — from banking to healthcare to e-commerce — relies on junction tables to represent real-world many-to-many relationships correctly.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think about a school timetable. A teacher teaches multiple subjects. A subject can be taught by multiple teachers (different teachers might handle the same subject in different classes or batches). You can't put "teacher names" in the subjects table — there could be many. You can't put "subject names" in the teachers table — there could be many.</p>
+
+<p>The timetable board is the solution. It's a separate physical object that holds teacher-subject assignments. Each row in the timetable says: "Teacher A teaches Subject X in Batch 3." That timetable is the junction table. It exists specifically to capture the relationship between teachers and subjects, including extra details like which batch and what time.</p>
+
+<p>The teacher still has their own record in one register. The subject still has its own record in another register. The timetable just connects them.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think of train travel. A passenger can travel on many different trains over their lifetime. And obviously, a single train carries many passengers on each journey. You can't list all passengers in the train record. You can't list all trains in a passenger's record.</p>
+
+<p>The ticket is the connection. Each ticket says: "Passenger X traveled on Train Y on Date Z in Class C." The ticket is its own thing — it has its own details like PNR number, seat number, and fare. It belongs to both the passenger and the train, but it's separate from both.</p>
+
+<p>In SQL, that ticket is a junction table. It has a foreign key pointing to the passenger (or customer) and a foreign key pointing to the train. Plus whatever extra details the relationship carries.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p><strong>One-to-Many</strong> is the most common relationship type. One entity on one side connects to many entities on the other, but not the other way around.</p>
+
+<p>The rule for one-to-many in SQL: put the primary key of the "one" side as a foreign key in the "many" side's table. One customer, many orders: put <code>customer<em>id</code> in the <code>orders</code> table. One department, many employees: put <code>dept</em>id</code> in the <code>employees</code> table. The foreign key always goes on the "many" side.</p>
+
+<p><strong>Many-to-Many</strong> requires a junction table. You cannot represent a many-to-many relationship in just two tables without violating normalization. The junction table has at minimum two columns — the primary key of Table A and the primary key of Table B — and together those two columns usually form the composite primary key of the junction table.</p>
+
+<p>The junction table can also carry its own attributes — information that belongs to the relationship itself, not to either entity. An enrollment record has an <code>enrolled<em>date</code> and a <code>grade</code>. A ticket has a <code>seat</em>number</code> and a <code>fare</code>. These belong to the junction table.</p>
+
+<p>One more type worth knowing: <strong>One-to-One</strong> relationships. These are rare. When one row in Table A corresponds to exactly one row in Table B, you could usually just merge the tables. But sometimes one-to-one splits make sense — for example, keeping sensitive columns (like salary or SSN) in a separate table with different access permissions, while common columns stay in the main employees table.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<h3>One-to-Many: Customer and Orders</h3>
+
+<pre><code class="language-sql">CREATE TABLE customers (
+    customer_id  INT PRIMARY KEY AUTO_INCREMENT,
+    name         VARCHAR(100),
+    city         VARCHAR(50)
+);
+
+CREATE TABLE orders (
+    order_id     INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id  INT NOT NULL,          -- FK on the "many" side
+    order_date   DATE,
+    total        DECIMAL(10,2),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
+
+-- One customer, many orders:
+INSERT INTO customers (name, city) VALUES ('Priya Kapoor', 'Delhi');
+INSERT INTO orders (customer_id, order_date, total) VALUES (1, '2024-03-01', 1200.00);
+INSERT INTO orders (customer_id, order_date, total) VALUES (1, '2024-03-15', 450.00);
+INSERT INTO orders (customer_id, order_date, total) VALUES (1, '2024-04-02', 3400.00);</code></pre>
+
+<h3>Many-to-Many: Students and Courses</h3>
+
+<pre><code class="language-sql">CREATE TABLE students (
+    student_id  INT PRIMARY KEY AUTO_INCREMENT,
+    name        VARCHAR(100),
+    email       VARCHAR(150)
+);
+
+CREATE TABLE courses (
+    course_id   INT PRIMARY KEY AUTO_INCREMENT,
+    title       VARCHAR(150),
+    instructor  VARCHAR(100)
+);
+
+-- Junction table
+CREATE TABLE enrollments (
+    student_id    INT NOT NULL,
+    course_id     INT NOT NULL,
+    enrolled_on   DATE NOT NULL,
+    grade         VARCHAR(5),
+    PRIMARY KEY (student_id, course_id),
+    FOREIGN KEY (student_id) REFERENCES students(student_id),
+    FOREIGN KEY (course_id) REFERENCES courses(course_id)
+);
+
+-- Neha's platform: one student in many courses
+INSERT INTO enrollments (student_id, course_id, enrolled_on) VALUES (1, 101, '2024-01-10');
+INSERT INTO enrollments (student_id, course_id, enrolled_on) VALUES (1, 102, '2024-01-10');
+INSERT INTO enrollments (student_id, course_id, enrolled_on) VALUES (2, 101, '2024-01-12');</code></pre>
+
+<h3>Querying a One-to-Many Relationship</h3>
+
+<pre><code class="language-sql">-- All orders for a specific customer
+SELECT o.order_id, o.order_date, o.total
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+WHERE c.name = 'Priya Kapoor';
+
+-- Count orders per customer
+SELECT c.name, COUNT(o.order_id) AS order_count
+FROM customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id
+GROUP BY c.customer_id, c.name;</code></pre>
+
+<h3>Querying a Many-to-Many Relationship</h3>
+
+<pre><code class="language-sql">-- All courses a student is enrolled in
+SELECT s.name AS student, c.title AS course, e.enrolled_on
+FROM enrollments e
+JOIN students s ON e.student_id = s.student_id
+JOIN courses c ON e.course_id = c.course_id
+WHERE s.student_id = 1;
+
+-- All students in a specific course
+SELECT s.name, e.grade
+FROM enrollments e
+JOIN students s ON e.student_id = s.student_id
+WHERE e.course_id = 101;
+
+-- Count students per course
+SELECT c.title, COUNT(e.student_id) AS enrolled_students
+FROM courses c
+LEFT JOIN enrollments e ON c.course_id = e.course_id
+GROUP BY c.course_id, c.title;</code></pre>
+
+<h3>One-to-One: Employee and Salary Details</h3>
+
+<pre><code class="language-sql">CREATE TABLE employees (
+    emp_id    INT PRIMARY KEY AUTO_INCREMENT,
+    name      VARCHAR(100),
+    dept_id   INT,
+    email     VARCHAR(150)
+);
+
+-- Separate table for sensitive salary data
+CREATE TABLE employee_salaries (
+    emp_id       INT PRIMARY KEY,           -- same as employees PK
+    basic_salary DECIMAL(10,2),
+    bonus        DECIMAL(10,2),
+    pan_number   VARCHAR(15),
+    FOREIGN KEY (emp_id) REFERENCES employees(emp_id)
+);</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Relationship Type</th><th>Description</th><th>Example</th><th>SQL Implementation</th></tr></thead>
+<tbody>
+<tr><td>One-to-One</td><td>Each row in A maps to exactly one row in B</td><td>Employee to Salary Record</td><td>FK in B (or merge the tables)</td></tr>
+<tr><td>One-to-Many</td><td>One row in A maps to many rows in B</td><td>Customer to Orders</td><td>FK in the "many" (B) table</td></tr>
+<tr><td>Many-to-One</td><td>Many rows in B map to one row in A</td><td>Orders to Customer</td><td>Same as One-to-Many, different direction</td></tr>
+<tr><td>Many-to-Many</td><td>Many rows in A map to many rows in B</td><td>Students to Courses</td><td>Junction table with FKs to both A and B</td></tr>
+<tr><td>Junction Table</td><td>Bridge table for many-to-many</td><td>enrollments, order_items</td><td>Composite PK of (A<em>id, B</em>id)</td></tr>
+<tr><td>Relationship Attribute</td><td>Extra data on the relationship itself</td><td>enrollment grade, ticket seat</td><td>Column in the junction table</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<h3>Example 1: Flipkart — Products and Tags</h3>
+
+<pre><code class="language-sql">CREATE TABLE products (
+    product_id   INT PRIMARY KEY AUTO_INCREMENT,
+    product_name VARCHAR(200),
+    price        DECIMAL(8,2)
+);
+
+CREATE TABLE tags (
+    tag_id    INT PRIMARY KEY AUTO_INCREMENT,
+    tag_name  VARCHAR(50) UNIQUE
+);
+
+-- A product can have many tags; a tag can apply to many products
+CREATE TABLE product_tags (
+    product_id  INT,
+    tag_id      INT,
+    PRIMARY KEY (product_id, tag_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id),
+    FOREIGN KEY (tag_id) REFERENCES tags(tag_id)
+);
+
+-- Sample data
+INSERT INTO tags (tag_name) VALUES ('Electronics'), ('Sale'), ('New Arrival'), ('Best Seller');
+INSERT INTO product_tags VALUES (1, 1), (1, 3), (2, 1), (2, 2), (2, 4);
+
+-- Products with a specific tag:
+SELECT p.product_name FROM products p
+JOIN product_tags pt ON p.product_id = pt.product_id
+JOIN tags t ON pt.tag_id = t.tag_id
+WHERE t.tag_name = 'Sale';</code></pre>
+
+<h3>Example 2: Zomato — Restaurant and Cuisine Types</h3>
+
+<pre><code class="language-sql">CREATE TABLE restaurants (
+    restaurant_id  INT PRIMARY KEY AUTO_INCREMENT,
+    name           VARCHAR(150),
+    city           VARCHAR(50)
+);
+
+CREATE TABLE cuisines (
+    cuisine_id    INT PRIMARY KEY AUTO_INCREMENT,
+    cuisine_name  VARCHAR(80)
+);
+
+CREATE TABLE restaurant_cuisines (
+    restaurant_id  INT,
+    cuisine_id     INT,
+    PRIMARY KEY (restaurant_id, cuisine_id),
+    FOREIGN KEY (restaurant_id) REFERENCES restaurants(restaurant_id),
+    FOREIGN KEY (cuisine_id) REFERENCES cuisines(cuisine_id)
+);
+
+-- Find restaurants that serve North Indian food in Pune:
+SELECT r.name FROM restaurants r
+JOIN restaurant_cuisines rc ON r.restaurant_id = rc.restaurant_id
+JOIN cuisines c ON rc.cuisine_id = c.cuisine_id
+WHERE c.cuisine_name = 'North Indian' AND r.city = 'Pune';</code></pre>
+
+<h3>Example 3: Meesho — Sellers and Product Categories</h3>
+
+<pre><code class="language-sql">CREATE TABLE sellers (
+    seller_id   INT PRIMARY KEY AUTO_INCREMENT,
+    shop_name   VARCHAR(150),
+    city        VARCHAR(50)
+);
+
+CREATE TABLE product_categories (
+    category_id   INT PRIMARY KEY AUTO_INCREMENT,
+    category_name VARCHAR(80)
+);
+
+-- A seller can operate in multiple categories; a category has many sellers
+CREATE TABLE seller_categories (
+    seller_id    INT,
+    category_id  INT,
+    since_date   DATE,
+    PRIMARY KEY (seller_id, category_id),
+    FOREIGN KEY (seller_id) REFERENCES sellers(seller_id),
+    FOREIGN KEY (category_id) REFERENCES product_categories(category_id)
+);</code></pre>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Why can't I just put a comma-separated list of IDs in one column to handle many-to-many?</strong></p>
+<p>Because SQL can't work with lists inside a column properly. You can't JOIN to comma-separated values, you can't index them, and you can't enforce foreign key constraints on them. It's the exact 1NF violation that normalization rules against. Always use a junction table.</p>
+
+<p><strong>What if the junction table needs its own auto-increment ID?</strong></p>
+<p>Sometimes this makes sense — especially when the junction table is referenced by other tables. You can add a surrogate primary key to a junction table while still putting UNIQUE constraints on the (A<em>id, B</em>id) combination. For example, an <code>enrollments</code> table might have its own <code>enrollment_id</code> that's used in a <code>grades</code> table.</p>
+
+<p><strong>How do I tell if a relationship is one-to-many or many-to-many?</strong></p>
+<p>Ask in both directions. "Can one customer have many orders?" Yes. "Can one order belong to many customers?" No. If at least one direction is "no," it's one-to-many. If both directions are "yes," it's many-to-many.</p>
+
+<p><strong>Does a junction table always need a composite primary key?</strong></p>
+<p>Not always — you can also use a surrogate key. But the composite key on (A<em>id, B</em>id) enforces uniqueness of the pairing at the database level, which is usually what you want. A student should only be enrolled in the same course once.</p>
+
+<p><strong>Is a one-to-one relationship just a special case of one-to-many?</strong></p>
+<p>Technically yes — it's a one-to-many where the "many" is limited to one. In practice, you enforce one-to-one with a UNIQUE constraint on the foreign key column.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li>Using comma-separated IDs in a single column instead of a junction table for many-to-many</li><li>Putting the foreign key on the wrong side in a one-to-many (putting it on the "one" side instead of the "many" side)</li><li>Forgetting to add relationship-specific attributes (like grade or enrollment date) to the junction table</li><li>Making the junction table's PK just a single auto-increment ID without a UNIQUE constraint on the two foreign keys — this allows duplicate pairings</li><li>Misidentifying a relationship as one-to-many when it's actually many-to-many (or vice versa) because you only asked the question in one direction</li><li>Not indexing the FK columns in the junction table, making JOIN queries on it very slow</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Always ask the cardinality question in both directions before deciding the relationship type</li><li>For many-to-many, name the junction table after the relationship: <code>enrollments</code>, <code>order<em>items</code>, <code>product</em>tags</code></li><li>Add a composite primary key on (A<em>id, B</em>id) in junction tables to prevent duplicate pairings</li><li>Include relationship-specific attributes (dates, grades, quantities, prices) in the junction table, not in either parent table</li><li>Index both FK columns in the junction table separately, not just the composite primary key</li><li>For large junction tables, consider whether you need a surrogate key so it can be referenced by other tables</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Byju's tutoring platform is built around a massive many-to-many relationship between students and content. A student can access hundreds of videos, quizzes, and practice sets. Each piece of content can be accessed by millions of students. The <code>student_progress</code> junction table tracks which student accessed which content, when, and how much they completed. This table has billions of rows.</p>
+
+<p>Nykaa's product tagging system uses a many-to-many relationship between products and attributes (cruelty-free, vegan, for oily skin, SPF 50+, etc.). Each product can have dozens of tags, and each tag applies to thousands of products. The junction table makes it possible to filter products by any combination of attributes without complex column structures.</p>
+
+<p>Jio's telecom system uses a many-to-many between subscribers and plan add-ons. One subscriber can activate multiple add-ons (international roaming, extra data, OTT subscriptions). One add-on is active for many subscribers simultaneously. The junction table <code>subscriber_addons</code> holds the activation date, expiry date, and status for each combination.</p>
+
+<p>Razorpay's permission system uses one-to-many and many-to-many relationships. A merchant has many users. A user can have many roles. A role has many permissions. These chains of relationships are joined together to determine what any given merchant user can do in the dashboard.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>RELATIONSHIP TYPES SUMMARY
+============================
+
+ONE-TO-ONE
+  employees -----(1)-----(1)----- employee_salaries
+  (emp_id PK)              (emp_id PK and FK)
+
+ONE-TO-MANY
+  customers -----(1)-----(M)----- orders
+  (customer_id PK)        (customer_id FK in orders)
+
+MANY-TO-MANY (requires junction table)
+  students -----(M)-----(M)----- courses
+      |                              |
+      +---------&gt; enrollments &lt;------+
+                 (student_id FK)
+                 (course_id FK)
+                 + extra data: grade, enrolled_on
+
+RULE FOR PLACEMENT:
+  One-to-Many: FK goes in the "many" table
+  Many-to-Many: Create a junction table; both FKs live there
+
+JUNCTION TABLE PATTERN:
+  +------------------+
+  | A_id (FK -&gt; A)   |
+  | B_id (FK -&gt; B)   |  &lt;- composite PK
+  | relationship_attr|  &lt;- optional extra columns
+  +------------------+</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>One-to-many: one row in Table A, many rows in Table B — the FK goes in Table B</li><li>Many-to-many: many rows in A connect to many rows in B — requires a separate junction table</li><li>Junction tables have at minimum two FK columns, one pointing to each parent table</li><li>The composite PK on a junction table prevents duplicate pairings (same student enrolled in same course twice)</li><li>Relationship attributes (grade, enrollment date, quantity) belong in the junction table</li><li>Always test the cardinality question in both directions to correctly identify the relationship type</li><li>One-to-one is rare — enforce it with a UNIQUE constraint on the FK column</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>A bookstore sells books. An author can write many books. A book can have multiple authors (co-authored). Design the tables with all primary and foreign keys.</li></ol>
+
+<ol><li>Zomato wants to track which delivery partners are available to deliver from which restaurants (each partner can deliver from multiple restaurants; each restaurant uses multiple partners). Design the schema. What extra attributes might the junction table need?</li></ol>
+
+<ol><li>For a hospital: a patient can be treated by many doctors during a hospital stay, and a doctor treats many patients. When a doctor treats a patient, the treatment date and diagnosis are recorded. Design the tables.</li></ol>
+
+<ol><li>You see this table: <code>products(product<em>id, product</em>name, tag1, tag2, tag3, tag4)</code>. What relationship problem does this represent? How would you fix it correctly?</li></ol>
+
+<ol><li>Build a schema for a conference management system where speakers present at sessions, sessions are part of tracks, and attendees can register for multiple sessions. Identify which relationships are one-to-many and which are many-to-many.</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Neha's confusion about where to put the course-student relationship was completely normal. It's one of those things that seems simple when you hear the answer but isn't obvious until someone explains it the first time. The junction table isn't a hack — it's the correct, intended way to model many-to-many relationships in a relational database.</p>
+
+<p>What makes this important to master is that these patterns appear everywhere. Products and categories, users and permissions, articles and tags, doctors and patients — the real world is full of many-to-many relationships, and every one of them needs a junction table.</p>
+
+<p>Once you see the pattern, you'll start spotting it in databases you work with. You'll notice when something is missing a junction table and causing problems, or when a junction table is missing attributes that belong there. That recognition is worth a lot — it means you understand not just how to write the SQL, but why it's structured the way it is.</p>
+
+<p>Neha's platform ended up with clean, well-structured tables. Student enrollments, teacher assignments, course-material links — all handled correctly with junction tables. Her senior Arjun told her it would have taken three times longer to build if they'd tried to hack around the many-to-many problem instead of modeling it properly from the start. He was right.</p>
+
+  `,
+  'mod15-t6': `
+    <h1>Database Design Best Practices: How to Build a Database That Lasts</h1>
+
+<hr>
+
+<h2>Let's Start Here</h2>
+
+<p>Arjun had been at Razorpay for four years when a new intern, Simran, asked him a question he wasn't expecting: "How did you learn good database design? Was there a course, a book?"</p>
+
+<p>Arjun thought about it for a moment. "Mostly by breaking things," he said. He'd once designed a payment database at his previous company where the <code>transactions</code> table grew to 500 million rows without any partitioning strategy. Reports that should have taken seconds were timing out. Adding an index retroactively on a live table with 500 million rows took seven hours and required a maintenance window.</p>
+
+<p>Another time, he'd stored user preferences as a JSON blob in one column because it seemed flexible at the time. Three years later, nobody could query those preferences efficiently. Reports were running Python loops on millions of rows because SQL couldn't reach inside the blob.</p>
+
+<p>"Every bad decision I've ever made," he told Simran, "looked reasonable in the moment. The difference between a good schema and a bad one usually isn't obvious until 18 months later." Then he pulled up a document he'd been maintaining for years — his personal list of design principles. "Start with these," he said.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>When you're building something new, the database feels like the easy part. You're focused on features, UI, APIs, deadlines. The schema is something you sketch out in 20 minutes and never revisit. At 10,000 users, that's fine. At 1 million users, the cracks start showing.</p>
+
+<p>Columns that seemed fine are now causing NULLs everywhere. A table that should be two tables is now 80 columns wide and nobody fully understands it. A query that was fast when the table had 10,000 rows now takes 45 seconds because nobody added an index to that column. A developer added a feature six months ago that requires storing data that doesn't fit anywhere cleanly, so they jammed it into an existing table as an extra JSON column.</p>
+
+<p>Database design mistakes compound. Each shortcut makes the next feature slightly harder to build. Each unnormalized table makes reports slightly less reliable. Each missing constraint means slightly more defensive code in every application that uses the database. After a few years, you're sitting on technical debt that costs real engineering time every week.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Database design best practices emerged from decades of hard-won experience. In the 1970s and 80s, as commercial relational databases became widespread, organizations discovered that poorly designed schemas were expensive — not just to fix, but to run. Bad designs meant more hardware, slower queries, buggy reports, and applications that were difficult to change.</p>
+
+<p>The principles that practitioners developed — normalize your data, use proper keys, name things clearly, plan for growth — were documented in textbooks, conference papers, and later in online communities. They're not arbitrary rules. Each one exists because someone made a mistake, paid for it, and wrote down what they learned.</p>
+
+<p>The best practices in this article are drawn from that collective experience, applied to the kind of databases that modern Indian tech companies actually build.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think about building a house. A good architect doesn't just draw whatever the client asks for on day one — they ask about future needs. Will you add another floor? Do you need space for a car garage eventually? What's the load-bearing wall placement? These decisions made at the start are cheap. Changing them after the house is built is expensive.</p>
+
+<p>Good database design is the same. Decisions made during the schema design phase are nearly free to change before any data exists. Once you have 50 million rows and 20 applications pointing at your schema, changing a column name, adding a NOT NULL constraint, or splitting a table requires coordination, migration scripts, and downtime.</p>
+
+<p>The best practices in this topic are your architectural checklist — decisions to make carefully before you start building, and habits to maintain as you go.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think about naming streets in a city. Good city planning names streets clearly and consistently: "MG Road", "Anna Salai", "Linking Road". Bad city planning has three different roads called "Church Street" in the same area, abbreviations nobody remembers, and numbers that skip randomly.</p>
+
+<p>Navigation apps, delivery services, and emergency services all depend on clear, consistent naming. A poorly named street creates problems for everyone who uses the city's road network.</p>
+
+<p>Database naming is identical. Every developer, every query, every reporting tool, every ORM, every migration script depends on your column and table names making sense. A column called <code>dt</code> that sometimes means created<em>at and sometimes means updated</em>at will confuse every developer who reads it for the next five years.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>Good database design is not one single decision — it's a combination of habits applied consistently from the start.</p>
+
+<p><strong>Naming conventions</strong> matter more than people realize. Tables should be named consistently (singular or plural, pick one). Columns should describe what they contain, not how they're stored. Boolean columns should start with <code>is<em></code> or <code>has</em></code>. Date columns should end with <code><em>at</code> or <code></em>date</code>. Foreign key columns should match the primary key name they reference (<code>customer<em>id</code> in orders should match <code>customer</em>id</code> in customers).</p>
+
+<p><strong>Choosing data types carefully</strong> prevents subtle bugs and wasted storage. Using <code>VARCHAR(255)</code> for everything is lazy. A phone number stored as <code>INT</code> loses leading zeros. A price stored as <code>FLOAT</code> introduces rounding errors. A timestamp stored as <code>VARCHAR</code> can't be compared or ordered correctly. Using the right type means the database enforces correctness automatically.</p>
+
+<p><strong>Indexing thoughtfully</strong> means neither under-indexing (slow queries) nor over-indexing (slow writes, wasted storage). Index columns you filter on frequently, columns used in JOIN conditions, and columns used for sorting in large tables. Don't index every column — each index slows down INSERT and UPDATE operations.</p>
+
+<p><strong>Planning for growth</strong> means thinking about the data volumes you'll have in two years, not just today. A table that will have 100 million rows needs different design decisions than one that will have 10,000. Partitioning, archiving strategies, and denormalization for read-heavy paths all become relevant at scale.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<h3>Best Practice 1: Use Consistent Naming</h3>
+
+<pre><code class="language-sql">-- Good naming conventions
+CREATE TABLE customers (
+    customer_id   INT PRIMARY KEY AUTO_INCREMENT,   -- id format: table_name + _id
+    full_name     VARCHAR(100) NOT NULL,
+    email         VARCHAR(150) UNIQUE NOT NULL,
+    phone         VARCHAR(15),
+    is_active     BOOLEAN DEFAULT TRUE,             -- boolean: is_ prefix
+    created_at    DATETIME DEFAULT CURRENT_TIMESTAMP, -- timestamps: _at suffix
+    updated_at    DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Avoid: inconsistent naming
+-- CREATE TABLE Customers (cust_id, Name, Email_Address, phone_num, active, dt_created);</code></pre>
+
+<h3>Best Practice 2: Use the Right Data Types</h3>
+
+<pre><code class="language-sql">CREATE TABLE products (
+    product_id    INT PRIMARY KEY AUTO_INCREMENT,
+    product_name  VARCHAR(200) NOT NULL,            -- reasonable length, not 255 everywhere
+    price         DECIMAL(10,2) NOT NULL,           -- NOT FLOAT for money
+    stock_qty     SMALLINT UNSIGNED DEFAULT 0,      -- appropriate size for the data
+    sku           VARCHAR(50) UNIQUE NOT NULL,       -- NOT INT (SKUs can have letters)
+    is_published  BOOLEAN DEFAULT FALSE,
+    description   TEXT,                             -- TEXT for long strings, not VARCHAR(5000)
+    weight_grams  INT UNSIGNED,                     -- UNSIGNED since weight can't be negative
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);</code></pre>
+
+<h3>Best Practice 3: Always Have a Primary Key, Always Use NOT NULL Where Appropriate</h3>
+
+<pre><code class="language-sql">CREATE TABLE orders (
+    order_id      INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id   INT NOT NULL,               -- always NOT NULL if required
+    status        VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    total_amount  DECIMAL(12,2) NOT NULL,
+    delivery_addr TEXT NOT NULL,
+    placed_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    delivered_at  TIMESTAMP NULL,             -- nullable: might not be delivered yet
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);</code></pre>
+
+<h3>Best Practice 4: Index Strategically</h3>
+
+<pre><code class="language-sql">-- Index columns used in WHERE clauses and JOINs
+CREATE INDEX idx_orders_customer_id ON orders(customer_id);
+CREATE INDEX idx_orders_status ON orders(status);
+CREATE INDEX idx_orders_placed_at ON orders(placed_at);
+
+-- Composite index for a common combined filter
+CREATE INDEX idx_orders_status_date ON orders(status, placed_at);
+
+-- Check if index is being used
+EXPLAIN SELECT * FROM orders WHERE customer_id = 42 AND status = 'DELIVERED';</code></pre>
+
+<h3>Best Practice 5: Use ENUMs or Lookup Tables for Fixed Value Sets</h3>
+
+<pre><code class="language-sql">-- Option A: ENUM (simple, enforces values at DB level)
+CREATE TABLE payments (
+    payment_id  INT PRIMARY KEY AUTO_INCREMENT,
+    order_id    INT NOT NULL,
+    method      ENUM('UPI', 'CARD', 'NETBANKING', 'WALLET', 'COD') NOT NULL,
+    status      ENUM('PENDING', 'SUCCESS', 'FAILED', 'REFUNDED') NOT NULL,
+    amount      DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id)
+);
+
+-- Option B: Lookup table (more flexible, can add values without schema change)
+CREATE TABLE payment_methods (
+    method_id    INT PRIMARY KEY AUTO_INCREMENT,
+    method_name  VARCHAR(50) UNIQUE NOT NULL
+);</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Best Practice</th><th>What It Means</th><th>Why It Matters</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td>Consistent naming</td><td>Same format for all tables and columns</td><td>Reduces confusion, easier to query without checking docs</td><td><code>customer_id</code> not <code>custId</code> or <code>cid</code></td></tr>
+<tr><td>Right data types</td><td>Match the column type to the actual data</td><td>Prevents bugs, saves storage, enables correct comparisons</td><td>DECIMAL for money, not FLOAT</td></tr>
+<tr><td>NOT NULL constraints</td><td>Mark required columns explicitly</td><td>Prevents missing data from silently entering the database</td><td><code>customer_id INT NOT NULL</code></td></tr>
+<tr><td>Default values</td><td>Define sensible defaults for common values</td><td>Simplifies inserts, ensures consistency</td><td><code>is_active BOOLEAN DEFAULT TRUE</code></td></tr>
+<tr><td>Strategic indexing</td><td>Index columns used in filters and JOINs</td><td>Keeps queries fast as data grows</td><td>Index on <code>status</code>, <code>customer_id</code></td></tr>
+<tr><td>Audit columns</td><td>Add <code>created<em>at</code>, <code>updated</em>at</code> to most tables</td><td>Makes debugging and reporting much easier</td><td><code>created<em>at TIMESTAMP DEFAULT CURRENT</em>TIMESTAMP</code></td></tr>
+<tr><td>Referential integrity</td><td>Use foreign keys for all relationships</td><td>Prevents orphaned data and invalid references</td><td><code>FOREIGN KEY (customer_id) REFERENCES customers</code></td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<h3>Example 1: A Well-Designed Product Table for a Nykaa-like App</h3>
+
+<pre><code class="language-sql">CREATE TABLE brands (
+    brand_id    INT PRIMARY KEY AUTO_INCREMENT,
+    brand_name  VARCHAR(100) UNIQUE NOT NULL,
+    country     VARCHAR(50),
+    is_active   BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE categories (
+    category_id   INT PRIMARY KEY AUTO_INCREMENT,
+    category_name VARCHAR(80) UNIQUE NOT NULL,
+    parent_id     INT NULL,     -- for subcategories; NULL means top-level
+    FOREIGN KEY (parent_id) REFERENCES categories(category_id)
+);
+
+CREATE TABLE products (
+    product_id      INT PRIMARY KEY AUTO_INCREMENT,
+    product_name    VARCHAR(250) NOT NULL,
+    brand_id        INT NOT NULL,
+    category_id     INT NOT NULL,
+    mrp             DECIMAL(8,2) NOT NULL,
+    selling_price   DECIMAL(8,2) NOT NULL,
+    stock_qty       INT UNSIGNED DEFAULT 0,
+    is_active       BOOLEAN DEFAULT TRUE,
+    is_vegetarian   BOOLEAN DEFAULT NULL,    -- NULL = not applicable
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (brand_id) REFERENCES brands(brand_id),
+    FOREIGN KEY (category_id) REFERENCES categories(category_id),
+    CONSTRAINT chk_price CHECK (selling_price &lt;= mrp)   -- price can't exceed MRP
+);
+
+CREATE INDEX idx_products_brand ON products(brand_id);
+CREATE INDEX idx_products_category ON products(category_id);
+CREATE INDEX idx_products_active ON products(is_active, category_id);</code></pre>
+
+<h3>Example 2: Audit-Ready Transaction Table for a Fintech App</h3>
+
+<pre><code class="language-sql">CREATE TABLE transactions (
+    txn_id           BIGINT PRIMARY KEY AUTO_INCREMENT,   -- BIGINT for large volumes
+    sender_wallet_id INT NOT NULL,
+    receiver_wallet_id INT NOT NULL,
+    amount           DECIMAL(12,2) NOT NULL,
+    currency         CHAR(3) NOT NULL DEFAULT 'INR',
+    status           ENUM('INITIATED','PROCESSING','SUCCESS','FAILED','REVERSED') NOT NULL DEFAULT 'INITIATED',
+    failure_reason   VARCHAR(200) NULL,
+    reference_no     VARCHAR(50) UNIQUE NOT NULL,         -- external reference
+    initiated_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    completed_at     TIMESTAMP NULL,
+    created_by       INT NOT NULL,                        -- which user or system initiated
+    CONSTRAINT chk_amount CHECK (amount &gt; 0),
+    CONSTRAINT chk_different_wallets CHECK (sender_wallet_id != receiver_wallet_id)
+);</code></pre>
+
+<h3>Example 3: Soft Delete Pattern</h3>
+
+<pre><code class="language-sql">-- Instead of hard deleting rows (which breaks audit trails),
+-- use soft delete with a deleted_at timestamp
+CREATE TABLE users (
+    user_id     INT PRIMARY KEY AUTO_INCREMENT,
+    email       VARCHAR(150) UNIQUE NOT NULL,
+    full_name   VARCHAR(100) NOT NULL,
+    is_active   BOOLEAN DEFAULT TRUE,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at  TIMESTAMP NULL DEFAULT NULL   -- NULL means not deleted
+);
+
+-- "Delete" a user:
+UPDATE users SET deleted_at = CURRENT_TIMESTAMP, is_active = FALSE WHERE user_id = 42;
+
+-- Query active users only:
+SELECT * FROM users WHERE deleted_at IS NULL;</code></pre>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p><strong>Should I use INT or BIGINT for primary keys?</strong></p>
+<p>For most tables, INT (up to 2.1 billion rows) is fine. For high-volume tables like transactions, events, or log entries, use BIGINT. It's better to use BIGINT early than to run an ALTER TABLE when you're already at 2 billion rows.</p>
+
+<p><strong>Is it always better to normalize more?</strong></p>
+<p>Not always. There's a practical limit. A highly normalized schema with many small tables is harder to work with, requires many JOINs for simple queries, and can be slower for read-heavy workloads. 3NF is usually the right target; anything beyond that should be evaluated case by case.</p>
+
+<p><strong>Should I store JSON in a column?</strong></p>
+<p>Occasionally, for truly unstructured or highly variable data, a JSON column makes sense. But it should be the exception, not the default for "flexibility." Once data is in a JSON column, you lose the ability to index specific fields, enforce data types, or query values efficiently. If you find yourself storing the same JSON keys repeatedly, those keys should probably be their own columns.</p>
+
+<p><strong>When is NULL okay and when is it a problem?</strong></p>
+<p>NULL is appropriate when the absence of a value is meaningful — <code>delivered_at</code> being NULL means the order hasn't been delivered yet. NULL is a problem when it's used because no decision was made about whether the column is required. Every NULL should be intentional.</p>
+
+<p><strong>How many indexes are too many?</strong></p>
+<p>Every index adds write overhead. A table with 20 indexes will have noticeably slower INSERT and UPDATE performance. In practice, 4-8 indexes per table is reasonable for most OLTP tables. Focus on the columns you actually filter on in production queries, not every possible column.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li>Using <code>VARCHAR(255)</code> for every string column out of laziness, even for columns like <code>country_code</code> or <code>status</code> that should be much shorter</li><li>Not adding <code>created<em>at</code> and <code>updated</em>at</code> columns, then regretting it the first time someone asks "when was this record changed?"</li><li>Storing phone numbers as INT — leading zeros get dropped and numbers over 10 digits overflow</li><li>Naming columns with abbreviations that only the original developer understands (<code>cdt</code>, <code>usr<em>flg</code>, <code>prod</em>nm</code>)</li><li>Skipping foreign key constraints and relying on application code to maintain relationships</li><li>Building a schema for today's data volume with no thought for what it looks like at 100x the current size</li><li>Hard deleting records from tables that should have an audit trail</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul><li>Give every table a surrogate auto-increment primary key, and add <code>created<em>at</code>/<code>updated</em>at</code> timestamps</li><li>Use <code>DECIMAL</code> for all monetary values; never <code>FLOAT</code> or <code>DOUBLE</code></li><li>Name columns after what they represent, not after the data type or field number</li><li>Use NOT NULL on all columns that must have a value; leave NULLable only columns that are genuinely optional</li><li>Add a CHECK constraint anywhere a column has a restricted range (<code>amount > 0</code>, <code>rating BETWEEN 1 AND 5</code>)</li><li>Before adding any feature that changes the schema, write down the migration and test it on a copy of production data</li></ul>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>Razorpay has strict schema standards applied to every new table their engineers create. Primary keys must be BIGINT for anything transaction-related. Timestamps must use <code>created<em>at</code> and <code>updated</em>at</code> with correct defaults. Foreign keys are mandatory wherever a relationship exists. These rules are enforced in code review. The result is a database that has scaled from thousands to billions of transactions without a fundamental redesign.</p>
+
+<p>Flipkart's catalog team follows a process where every schema change is reviewed by both a senior engineer and a DBA before it goes to production. They've seen what happens when a column with the wrong data type or a missing index goes live on a table with 100 million rows — fixing it is expensive and disruptive. Reviewing schemas upfront is much cheaper.</p>
+
+<p>Jio runs one of the largest telecom databases in the world, storing subscriber data for hundreds of millions of users. Their database design practices around partitioning, archiving old records, and keeping hot data accessible have been developed over years of managing petabyte-scale storage. The same principles — clear naming, proper types, defined relationships — apply at their scale as much as they do for a startup.</p>
+
+<p>At IRCTC, compliance requirements mean every booking, payment, and cancellation must be traceable. Soft deletes, audit columns, and immutable transaction records are non-negotiable. Schema design decisions directly affect their ability to answer regulatory questions years later.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<pre><code>DATABASE DESIGN QUALITY CHECKLIST
+====================================
+
+SCHEMA DESIGN PHASE
+  [ ] ER diagram complete and reviewed
+  [ ] All relationships identified with correct cardinality
+  [ ] Junction tables created for all many-to-many relationships
+  [ ] Normalization reviewed (at least 3NF for OLTP)
+
+EACH TABLE
+  [ ] Has a primary key (preferably surrogate INT/BIGINT)
+  [ ] Has created_at timestamp
+  [ ] Has updated_at timestamp (if records change)
+  [ ] Foreign keys defined for all relationships
+  [ ] Column names are clear and consistent
+  [ ] Data types match the actual data (DECIMAL for money, etc.)
+  [ ] NOT NULL on required columns
+  [ ] CHECK constraints on restricted-range columns
+
+INDEXES
+  [ ] FK columns indexed
+  [ ] Commonly filtered columns indexed
+  [ ] Composite indexes for common filter combinations
+  [ ] No redundant or unused indexes
+
+GROWTH PLANNING
+  [ ] Primary key type sized for expected volume (INT vs BIGINT)
+  [ ] Archival strategy for high-volume tables
+  [ ] Denormalization plan for read-heavy reporting</code></pre>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<ul><li>Good database design is cheapest at the beginning — schema changes on live databases with millions of rows are expensive</li><li>Use consistent naming conventions across all tables and columns in a database</li><li>Match data types to actual data: DECIMAL for money, BIGINT for high-volume IDs, VARCHAR sized appropriately</li><li>Every required column should be NOT NULL; every nullable column should be intentionally nullable</li><li>Add <code>created<em>at</code> and <code>updated</em>at</code> to essentially every table — you'll always need them eventually</li><li>Index foreign key columns and frequently-filtered columns; review indexes before going to production</li><li>Soft deletes preserve audit trails; hard deletes destroy information that may be needed later</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>Review this table definition and list all the best practice violations: <code>CREATE TABLE emp (eid INT, nm VARCHAR(255), dep VARCHAR(255), sal FLOAT, jd VARCHAR(255), mgr VARCHAR(255))</code>. Rewrite it following the best practices in this article.</li></ol>
+
+<ol><li>A startup is building a food delivery app and wants to store payment information. The payments table will store UPI transactions. What data types, constraints, indexes, and CHECK constraints would you recommend for this table?</li></ol>
+
+<ol><li>Your team is debating whether to use <code>ENUM('ACTIVE', 'INACTIVE', 'SUSPENDED')</code> or a separate <code>status</code> lookup table for a user status column. What are the trade-offs of each approach?</li></ol>
+
+<ol><li>A table has 15 columns, including: <code>user<em>pref</em>1</code>, <code>user<em>pref</em>2</code>, <code>user<em>pref</em>3</code>, ..., <code>user<em>pref</em>8</code>. What design problem does this indicate? How would you redesign it?</li></ol>
+
+<ol><li>When should you use a soft delete pattern instead of a hard DELETE? Give two examples from an Indian tech company context where soft deletes are important.</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Arjun's document — the one he showed Simran — wasn't written in a single sitting. It accumulated over four years, one hard lesson at a time. A missing index that caused a production outage during a sale. A data type mismatch that silently corrupted pricing data. A table without an updated_at column that made a bug impossible to trace. Each entry had a story.</p>
+
+<p>That's the honest truth about database design best practices: they're learned through mistakes, and the best way to shorten the learning curve is to absorb the mistakes other people made before you.</p>
+
+<p>The technical content in this article — naming conventions, data types, indexing, constraints, audit columns — is all learnable. But the judgment underneath it, the habit of thinking "how will this look in 18 months with 10 times the data," takes time to develop. Start by applying these practices mechanically, even when they feel like extra work. Over time, they become instinctive.</p>
+
+<p>When Simran built her first production schema at Razorpay, she walked through Arjun's checklist before writing a single CREATE TABLE. Her schema review came back with two minor comments — both about index naming, not about fundamental design flaws. "That doesn't happen with first-time schemas," her reviewer said. Simran knew why. She'd had a good checklist, and she'd actually used it.</p>
+
+  `,
 
   // ── Module 16 ────────────────────────────────────────────────
-  'mod16-t1': `<h1>Top SQL Interview Questions</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod16-t2': `<h1>Window Functions Interview Q&A</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod16-t3': `<h1>Query Optimization Questions</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
-  'mod16-t4': `<h1>Real-world SQL Scenarios</h1><div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Article coming soon</div><div class="cs-sub">Our team is working on this content. Check back soon!</div></div>`,
+  'mod16-t1': `
+    <h1>Top SQL Interview Questions: A Complete Prep Guide</h1>
+
+<hr>
+
+<h2>What to Expect in a SQL Interview</h2>
+
+<p>SQL interviews in Indian tech companies are not just about syntax. They test how you think through problems, how comfortable you are with data, and whether you can write clean, working queries under a little pressure.</p>
+
+<p>At companies like Flipkart, Swiggy, Razorpay, and Meesho, the first round is usually a HackerRank or custom coding platform test. You'll be given 2–4 SQL problems, 60–90 minutes, and a real database to query against. These platforms auto-run your queries and check the output — so spelling, logic, and correct column references all matter. No partial credit for "almost right."</p>
+
+<p>If you clear that, the next round is usually a technical interview — either a video call where the interviewer shares a screen and watches you type, or a whiteboard-style discussion where you talk through your approach. Companies like Jio and Nykaa sometimes mix SQL into data analyst interviews where you're also expected to explain your reasoning. Paytm and Razorpay (especially for data engineering roles) will go harder — they'll ask about indexes, query plans, and performance. Know what level the role expects before you walk in.</p>
+
+<hr>
+
+<h2>How SQL Questions Are Structured</h2>
+
+<p>SQL interview questions fall into three tiers, and knowing which tier you're in helps you understand what the interviewer actually wants to see.</p>
+
+<p><strong>Easy questions</strong> cover the basics — SELECT, WHERE, ORDER BY, basic JOINs, GROUP BY, HAVING. These questions aren't trying to trick you. They're checking that you won't freeze when given a real table. If you're applying for a junior analyst role or a software engineer role where SQL is secondary, most questions will stay here. The bar is: correct query, correct output, no confusion about syntax.</p>
+
+<p><strong>Medium questions</strong> bring in aggregation with conditions, subqueries, window functions, self-joins, and multi-table operations. This is where most interviews for data analyst and mid-level backend engineer roles live. What they're testing here isn't just "can you write a query" but "can you translate a business question into SQL without being told step by step." You'll often get a problem phrased as a business scenario — "find customers who did X but not Y" — and you're expected to figure out the join logic yourself.</p>
+
+<p><strong>Hard questions</strong> involve multi-step reasoning, recursive CTEs, complex window functions, query optimization, and sometimes schema design. These come up in senior roles, data engineering interviews, and companies where data is core to the product — Swiggy's analytics team, Razorpay's risk team, CRED. Hard questions are also where the follow-up conversation matters most. An interviewer asking a hard question often cares as much about how you approach it as whether you get it exactly right.</p>
+
+<hr>
+
+<h2>Easy Level Questions</h2>
+
+<hr>
+
+<p><strong>1. Find all employees who earn more than 50,000 rupees.</strong></p>
+
+<p><strong>What they're testing:</strong> Basic SELECT and WHERE clause usage.</p>
+
+<p><strong>How to think about it:</strong> This is a filter problem. You just need to return rows where the salary column exceeds a threshold. Make sure you know which column holds the salary and what the table is named.</p>
+
+<pre><code class="language-sql">SELECT *
+FROM employees
+WHERE salary &gt; 50000;</code></pre>
+
+<p><strong>Common follow-up:</strong> "What if you only want their name and department, not all columns?"</p>
+
+<hr>
+
+<p><strong>2. Find the second highest salary from the employees table.</strong></p>
+
+<p><strong>What they're testing:</strong> Subqueries and the ability to think in layers.</p>
+
+<p><strong>How to think about it:</strong> The trick here is to exclude the maximum salary first, then find the maximum of what's left. A clean subquery handles this well. Some candidates overcomplicate it — keep it simple.</p>
+
+<pre><code class="language-sql">SELECT MAX(salary) AS second_highest_salary
+FROM employees
+WHERE salary &lt; (SELECT MAX(salary) FROM employees);</code></pre>
+
+<p><strong>Common follow-up:</strong> "What if there are two employees with the same highest salary? Does your query still return the correct answer?"</p>
+
+<hr>
+
+<p><strong>3. Find all duplicate email addresses in the users table.</strong></p>
+
+<p><strong>What they're testing:</strong> GROUP BY and HAVING together.</p>
+
+<p><strong>How to think about it:</strong> Duplicate means an email appears more than once. Group by email, count how many times each appears, then filter for counts greater than 1. HAVING filters after grouping — that's the key distinction from WHERE.</p>
+
+<pre><code class="language-sql">SELECT email, COUNT(*) AS occurrences
+FROM users
+GROUP BY email
+HAVING COUNT(*) &gt; 1;</code></pre>
+
+<p><strong>Common follow-up:</strong> "How would you delete the duplicates and keep only one row per email?"</p>
+
+<hr>
+
+<p><strong>4. Get the count of orders per city.</strong></p>
+
+<p><strong>What they're testing:</strong> GROUP BY with aggregation.</p>
+
+<p><strong>How to think about it:</strong> You need to group rows by city and count the rows in each group. If the city column is in a different table (like a customers table), you'll need a JOIN first — mention that if the schema isn't shown.</p>
+
+<pre><code class="language-sql">SELECT city, COUNT(*) AS total_orders
+FROM orders
+GROUP BY city
+ORDER BY total_orders DESC;</code></pre>
+
+<p><strong>Common follow-up:</strong> "How would you show only cities with more than 100 orders?"</p>
+
+<hr>
+
+<p><strong>5. Find all customers who have never placed an order.</strong></p>
+
+<p><strong>What they're testing:</strong> LEFT JOIN with NULL check, or NOT IN / NOT EXISTS logic.</p>
+
+<p><strong>How to think about it:</strong> You want customers that exist in the customers table but have no matching row in the orders table. A LEFT JOIN returns all customers — those with orders get order data filled in, those without get NULLs. Filter for the NULLs.</p>
+
+<pre><code class="language-sql">SELECT c.customer_id, c.name
+FROM customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id
+WHERE o.customer_id IS NULL;</code></pre>
+
+<p><strong>Common follow-up:</strong> "Can you write the same query using NOT EXISTS instead?"</p>
+
+<hr>
+
+<p><strong>6. Get the top 3 most ordered products.</strong></p>
+
+<p><strong>What they're testing:</strong> Aggregation + ORDER BY + LIMIT.</p>
+
+<p><strong>How to think about it:</strong> Count how many times each product appears in the orders table, sort by that count descending, then take the top 3. Clean, simple.</p>
+
+<pre><code class="language-sql">SELECT product_id, COUNT(*) AS order_count
+FROM order_items
+GROUP BY product_id
+ORDER BY order_count DESC
+LIMIT 3;</code></pre>
+
+<p><strong>Common follow-up:</strong> "What if there's a tie at position 3 — two products both have the same count? Should both show up?"</p>
+
+<hr>
+
+<p><strong>7. Find employees who joined in the last 30 days.</strong></p>
+
+<p><strong>What they're testing:</strong> Date arithmetic and filtering on date columns.</p>
+
+<p><strong>How to think about it:</strong> You need to compare the joining date to today's date. Use <code>CURRENT_DATE</code> or <code>NOW()</code> depending on the database. Subtract 30 days to get the cutoff date.</p>
+
+<pre><code class="language-sql">SELECT *
+FROM employees
+WHERE joining_date &gt;= CURRENT_DATE - INTERVAL '30 days';</code></pre>
+
+<p><strong>Common follow-up:</strong> "How would you write this to work in MySQL instead of PostgreSQL?"</p>
+
+<hr>
+
+<p><strong>8. Show all orders where the status is either 'Pending' or 'Processing'.</strong></p>
+
+<p><strong>What they're testing:</strong> IN clause vs multiple OR conditions.</p>
+
+<p><strong>How to think about it:</strong> Both approaches work, but IN is cleaner when you have multiple values to match against.</p>
+
+<pre><code class="language-sql">SELECT *
+FROM orders
+WHERE status IN ('Pending', 'Processing');</code></pre>
+
+<p><strong>Common follow-up:</strong> "What if you wanted everything except these two statuses?"</p>
+
+<hr>
+
+<h2>Medium Level Questions</h2>
+
+<hr>
+
+<p><strong>1. Find customers who placed orders in January but not in February.</strong></p>
+
+<p><strong>What they're testing:</strong> Set logic — EXCEPT or conditional aggregation.</p>
+
+<p><strong>How to think about it:</strong> Two approaches: use EXCEPT to subtract February customers from January customers, or use conditional aggregation (count orders in each month per customer and filter). EXCEPT is often cleaner to read.</p>
+
+<pre><code class="language-sql">SELECT DISTINCT customer_id
+FROM orders
+WHERE EXTRACT(MONTH FROM order_date) = 1
+  AND EXTRACT(YEAR FROM order_date) = 2024
+
+EXCEPT
+
+SELECT DISTINCT customer_id
+FROM orders
+WHERE EXTRACT(MONTH FROM order_date) = 2
+  AND EXTRACT(YEAR FROM order_date) = 2024;</code></pre>
+
+<p><strong>Common follow-up:</strong> "How would you rewrite this using NOT IN?"</p>
+
+<hr>
+
+<p><strong>2. For each department, find the employee with the highest salary.</strong></p>
+
+<p><strong>What they're testing:</strong> Correlated subquery or window functions for per-group max.</p>
+
+<p><strong>How to think about it:</strong> You can use a subquery to find the max salary per department and then join back, or use ROW_NUMBER() partitioned by department. The window function approach is cleaner in modern SQL.</p>
+
+<pre><code class="language-sql">WITH ranked AS (
+  SELECT *,
+         ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS rn
+  FROM employees
+)
+SELECT employee_id, name, department, salary
+FROM ranked
+WHERE rn = 1;</code></pre>
+
+<p><strong>Common follow-up:</strong> "What if two employees in the same department have the exact same highest salary? Should both appear?"</p>
+
+<hr>
+
+<p><strong>3. Find the running total of daily sales.</strong></p>
+
+<p><strong>What they're testing:</strong> Window functions — SUM() OVER with ORDER BY.</p>
+
+<p><strong>How to think about it:</strong> A running total adds up values cumulatively. The window function SUM() with ROWS UNBOUNDED PRECEDING handles this cleanly. The ORDER BY inside the OVER clause controls the running order.</p>
+
+<pre><code class="language-sql">SELECT
+  sale_date,
+  daily_revenue,
+  SUM(daily_revenue) OVER (ORDER BY sale_date ROWS UNBOUNDED PRECEDING) AS running_total
+FROM daily_sales
+ORDER BY sale_date;</code></pre>
+
+<p><strong>Common follow-up:</strong> "How would you reset the running total at the start of each month?"</p>
+
+<hr>
+
+<p><strong>4. Find all managers who manage more than 3 employees.</strong></p>
+
+<p><strong>What they're testing:</strong> Self-join or GROUP BY on a hierarchical relationship.</p>
+
+<p><strong>How to think about it:</strong> If the employees table has a manager<em>id column pointing back to the same table, group by manager</em>id and count. Then filter for count > 3. Join back to get the manager's name.</p>
+
+<pre><code class="language-sql">SELECT m.employee_id, m.name, COUNT(e.employee_id) AS direct_reports
+FROM employees e
+JOIN employees m ON e.manager_id = m.employee_id
+GROUP BY m.employee_id, m.name
+HAVING COUNT(e.employee_id) &gt; 3;</code></pre>
+
+<p><strong>Common follow-up:</strong> "How would you find managers whose team has an average salary below 40,000 rupees?"</p>
+
+<hr>
+
+<p><strong>5. Get the month-over-month revenue growth percentage.</strong></p>
+
+<p><strong>What they're testing:</strong> LAG() window function for comparing periods.</p>
+
+<p><strong>How to think about it:</strong> LAG() lets you look at the previous row's value. Use it to grab last month's revenue alongside this month's, then calculate the percentage difference.</p>
+
+<pre><code class="language-sql">WITH monthly_revenue AS (
+  SELECT
+    DATE_TRUNC('month', order_date) AS month,
+    SUM(amount) AS revenue
+  FROM orders
+  GROUP BY DATE_TRUNC('month', order_date)
+)
+SELECT
+  month,
+  revenue,
+  LAG(revenue) OVER (ORDER BY month) AS prev_month_revenue,
+  ROUND(
+    (revenue - LAG(revenue) OVER (ORDER BY month)) * 100.0
+    / LAG(revenue) OVER (ORDER BY month), 2
+  ) AS growth_pct
+FROM monthly_revenue
+ORDER BY month;</code></pre>
+
+<p><strong>Common follow-up:</strong> "How would you handle the first month where LAG() returns NULL?"</p>
+
+<hr>
+
+<p><strong>6. Find products that were never sold in the last 6 months.</strong></p>
+
+<p><strong>What they're testing:</strong> LEFT JOIN with date filtering, or NOT EXISTS.</p>
+
+<p><strong>How to think about it:</strong> Get all products. Left-join to orders in the last 6 months. Products with no match get NULLs — those are your answer.</p>
+
+<pre><code class="language-sql">SELECT p.product_id, p.product_name
+FROM products p
+LEFT JOIN order_items oi ON p.product_id = oi.product_id
+LEFT JOIN orders o ON oi.order_id = o.order_id
+  AND o.order_date &gt;= CURRENT_DATE - INTERVAL '6 months'
+WHERE o.order_id IS NULL;</code></pre>
+
+<p><strong>Common follow-up:</strong> "What if a product was sold 6 months ago exactly today — should it be included or excluded?"</p>
+
+<hr>
+
+<p><strong>7. For each user, find the time between their first and last order.</strong></p>
+
+<p><strong>What they're testing:</strong> MIN/MAX aggregation with date subtraction.</p>
+
+<p><strong>How to think about it:</strong> GROUP BY user, find MIN(order<em>date) and MAX(order</em>date), then calculate the difference. Cast it to days for a clean output.</p>
+
+<pre><code class="language-sql">SELECT
+  user_id,
+  MIN(order_date) AS first_order,
+  MAX(order_date) AS last_order,
+  MAX(order_date) - MIN(order_date) AS days_between
+FROM orders
+GROUP BY user_id;</code></pre>
+
+<p><strong>Common follow-up:</strong> "How would you filter to show only users where this gap is more than 90 days?"</p>
+
+<hr>
+
+<p><strong>8. Rank employees by salary within each department.</strong></p>
+
+<p><strong>What they're testing:</strong> RANK() or DENSE_RANK() with PARTITION BY.</p>
+
+<p><strong>How to think about it:</strong> RANK() gives the same rank to ties but skips numbers (1, 1, 3). DENSE_RANK() gives the same rank to ties but doesn't skip (1, 1, 2). Know the difference — interviewers love asking about it.</p>
+
+<pre><code class="language-sql">SELECT
+  employee_id,
+  name,
+  department,
+  salary,
+  RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS salary_rank
+FROM employees;</code></pre>
+
+<p><strong>Common follow-up:</strong> "What's the difference between RANK and DENSE_RANK? Write an example where they produce different results."</p>
+
+<hr>
+
+<h2>Hard Level Questions</h2>
+
+<hr>
+
+<p><strong>1. Find the Nth highest salary without using LIMIT.</strong></p>
+
+<p><strong>What they're testing:</strong> Subqueries and correlated logic — and whether you can work around database-specific features.</p>
+
+<p><strong>How to think about it:</strong> The approach is: find the salary where exactly N-1 salaries are higher. A correlated subquery counts how many distinct salaries are greater than the current one, and you filter for exactly N-1.</p>
+
+<pre><code class="language-sql">-- For the 3rd highest salary (N = 3):
+SELECT DISTINCT salary
+FROM employees e1
+WHERE 2 = (
+  SELECT COUNT(DISTINCT salary)
+  FROM employees e2
+  WHERE e2.salary &gt; e1.salary
+);</code></pre>
+
+<p><strong>Common follow-up:</strong> "How would you generalize this into a stored procedure that accepts N as a parameter?"</p>
+
+<hr>
+
+<p><strong>2. Write a query to detect fraudulent transactions (same user, same amount, within 10 minutes).</strong></p>
+
+<p><strong>What they're testing:</strong> Self-join with time range conditions, or LAG() with timestamp arithmetic.</p>
+
+<p><strong>How to think about it:</strong> Compare each transaction to other transactions by the same user with the same amount. If another transaction happened within 10 minutes, it's suspicious. A self-join works, but LAG() is more efficient.</p>
+
+<pre><code class="language-sql">SELECT
+  t1.transaction_id,
+  t1.user_id,
+  t1.amount,
+  t1.transaction_time,
+  t2.transaction_id AS matching_transaction_id,
+  t2.transaction_time AS matching_time
+FROM transactions t1
+JOIN transactions t2
+  ON t1.user_id = t2.user_id
+  AND t1.amount = t2.amount
+  AND t1.transaction_id &lt;&gt; t2.transaction_id
+  AND ABS(EXTRACT(EPOCH FROM (t1.transaction_time - t2.transaction_time))) &lt;= 600;</code></pre>
+
+<p><strong>Common follow-up:</strong> "How would you flag the second transaction rather than both? How does your logic change?"</p>
+
+<hr>
+
+<p><strong>3. Find all users who have logged in every day for the past 7 days consecutively.</strong></p>
+
+<p><strong>What they're testing:</strong> Date series logic, GROUP BY with COUNT DISTINCT on dates, or gap-and-island problems.</p>
+
+<p><strong>How to think about it:</strong> For a user to have logged in every day for the past 7 days, they must have 7 distinct login dates in that range. Count distinct login dates per user in the window, filter for exactly 7.</p>
+
+<pre><code class="language-sql">SELECT user_id
+FROM login_events
+WHERE login_date &gt;= CURRENT_DATE - INTERVAL '6 days'
+  AND login_date &lt;= CURRENT_DATE
+GROUP BY user_id
+HAVING COUNT(DISTINCT login_date) = 7;</code></pre>
+
+<p><strong>Common follow-up:</strong> "What if you wanted users who logged in on any 7 consecutive days, not necessarily the most recent ones?"</p>
+
+<hr>
+
+<p><strong>4. Flatten a parent-child hierarchy into a flat list using a recursive CTE.</strong></p>
+
+<p><strong>What they're testing:</strong> Recursive CTEs — one of the most important advanced SQL features.</p>
+
+<p><strong>How to think about it:</strong> A recursive CTE has two parts: the anchor (start at the top of the hierarchy — rows with no parent) and the recursive member (join each row to its children and repeat). The database keeps running until no more rows are added.</p>
+
+<pre><code class="language-sql">WITH RECURSIVE org_tree AS (
+  -- Anchor: top-level employees (no manager)
+  SELECT employee_id, name, manager_id, 0 AS level
+  FROM employees
+  WHERE manager_id IS NULL
+
+  UNION ALL
+
+  -- Recursive: employees under each manager
+  SELECT e.employee_id, e.name, e.manager_id, ot.level + 1
+  FROM employees e
+  JOIN org_tree ot ON e.manager_id = ot.employee_id
+)
+SELECT employee_id, name, manager_id, level
+FROM org_tree
+ORDER BY level, employee_id;</code></pre>
+
+<p><strong>Common follow-up:</strong> "How would you prevent infinite loops if the data has a cycle — where an employee is listed as their own manager, directly or indirectly?"</p>
+
+<hr>
+
+<p><strong>5. Find the top 3 products by revenue in each category.</strong></p>
+
+<p><strong>What they're testing:</strong> Window functions for top-N per group — a classic.</p>
+
+<p><strong>How to think about it:</strong> Calculate total revenue per product, rank within each category using DENSE<em>RANK() or ROW</em>NUMBER(), then filter for rank <= 3. This is the window function pattern companies ask most often.</p>
+
+<pre><code class="language-sql">WITH product_revenue AS (
+  SELECT
+    p.category,
+    p.product_id,
+    p.product_name,
+    SUM(oi.quantity * oi.unit_price) AS total_revenue
+  FROM products p
+  JOIN order_items oi ON p.product_id = oi.product_id
+  GROUP BY p.category, p.product_id, p.product_name
+),
+ranked AS (
+  SELECT *,
+         DENSE_RANK() OVER (PARTITION BY category ORDER BY total_revenue DESC) AS revenue_rank
+  FROM product_revenue
+)
+SELECT category, product_id, product_name, total_revenue, revenue_rank
+FROM ranked
+WHERE revenue_rank &lt;= 3
+ORDER BY category, revenue_rank;</code></pre>
+
+<p><strong>Common follow-up:</strong> "Why DENSE<em>RANK here instead of ROW</em>NUMBER? What changes if you switch to ROW_NUMBER?"</p>
+
+<hr>
+
+<h2>Questions They Always Ask About Joins</h2>
+
+<p>Every SQL interview will test joins at some point. Interviewers know that JOIN mistakes are the most common source of wrong query results, and they want to see that you actually understand what happens when two tables are joined — not just that you can copy the syntax.</p>
+
+<p>The most important distinction to know cold is INNER JOIN vs LEFT JOIN. An INNER JOIN returns only rows where the join condition matches in both tables. A LEFT JOIN returns all rows from the left table, with NULLs filled in for columns from the right table where there's no match. Getting this wrong is how candidates accidentally filter out the rows the question was specifically asking about.</p>
+
+<p>Here are two classic join questions:</p>
+
+<p><strong>Q: What is the difference between INNER JOIN and LEFT JOIN? Give an example.</strong></p>
+
+<pre><code class="language-sql">-- INNER JOIN: only customers who have placed at least one order
+SELECT c.name, o.order_id
+FROM customers c
+INNER JOIN orders o ON c.customer_id = o.customer_id;
+
+-- LEFT JOIN: all customers, including those with no orders (NULLs for order columns)
+SELECT c.name, o.order_id
+FROM customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id;</code></pre>
+
+<p><strong>Q: Write a query to find customers who placed orders in Mumbai but not in Delhi.</strong></p>
+
+<pre><code class="language-sql">SELECT DISTINCT c.customer_id, c.name
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+WHERE o.city = 'Mumbai'
+  AND c.customer_id NOT IN (
+    SELECT DISTINCT customer_id
+    FROM orders
+    WHERE city = 'Delhi'
+  );</code></pre>
+
+<p>One thing interviewers watch for: candidates who reach for INNER JOIN out of habit when the question is about finding things that <em>don't</em> exist. "Find customers who have never..." always needs a LEFT JOIN or NOT EXISTS — not an INNER JOIN.</p>
+
+<hr>
+
+<h2>Questions They Always Ask About Window Functions</h2>
+
+<p>Window functions are now standard in data analyst interviews, and most senior SQL roles expect you to be fluent with them. If you haven't used them before, practice these patterns until they feel natural — they'll come up.</p>
+
+<p>The most common confusion is between ROW<em>NUMBER(), RANK(), and DENSE</em>RANK(). Here's the fast way to remember: all three number rows. The difference is what happens with ties.</p>
+
+<p><strong>Q: Explain the difference between ROW<em>NUMBER, RANK, and DENSE</em>RANK. Show an example.</strong></p>
+
+<pre><code class="language-sql">SELECT
+  name,
+  salary,
+  ROW_NUMBER() OVER (ORDER BY salary DESC) AS row_num,   -- 1, 2, 3, 4 always unique
+  RANK()       OVER (ORDER BY salary DESC) AS rnk,       -- 1, 2, 2, 4 (skips 3)
+  DENSE_RANK() OVER (ORDER BY salary DESC) AS dense_rnk  -- 1, 2, 2, 3 (no skip)
+FROM employees;</code></pre>
+
+<p>If two people earn 80,000: ROW<em>NUMBER gives them different numbers (arbitrary), RANK gives both 2 and the next person 4, DENSE</em>RANK gives both 2 and the next person 3.</p>
+
+<p><strong>Q: Write a query to calculate the running total of revenue by day.</strong></p>
+
+<pre><code class="language-sql">SELECT
+  order_date,
+  SUM(amount) AS daily_revenue,
+  SUM(SUM(amount)) OVER (ORDER BY order_date ROWS UNBOUNDED PRECEDING) AS running_total
+FROM orders
+GROUP BY order_date
+ORDER BY order_date;</code></pre>
+
+<p>Note the double SUM — the outer SUM is the window function operating over the result of the GROUP BY. This trips people up. The inner SUM collapses rows by date; the outer SUM accumulates those daily totals.</p>
+
+<hr>
+
+<h2>How to Answer SQL Questions Live</h2>
+
+<p>When you're in a live coding interview — either on a shared screen or a whiteboard — the way you work matters almost as much as the final answer. Here's what actually helps:</p>
+
+<ul><li><strong>Say what you're doing before you type it.</strong> "I'm going to join the orders table to customers on customer_id, then filter for..." This shows structured thinking and gives the interviewer something to redirect if you're heading the wrong way.</li><li><strong>Clarify the schema first.</strong> Ask: "Is there a foreign key from orders to customers? Is customer_id guaranteed to be unique in the customers table?" Interviewers appreciate this — it's exactly what you'd do on the job.</li><li><strong>Start with the simplest version.</strong> Write the query for the happy path first. Get it working. Then handle edge cases — NULLs, duplicates, empty tables.</li><li><strong>Think about NULLs explicitly.</strong> Before you finalize a query, say out loud: "Are there NULLs in any of these columns that would affect my result?" Interviewers notice when candidates do this.</li><li><strong>Ask about data volume when it matters.</strong> For a hard question or optimization question: "How many rows are we talking? Millions? This affects whether I'd use a subquery or a window function."</li><li><strong>Don't freeze on syntax.</strong> If you forget the exact name of a function, say so and describe what you want to do. "I want something like DATEDIFF but I can't remember the exact syntax in PostgreSQL — the idea is..." Interviewers prefer this over silent guessing.</li><li><strong>Read your own query before submitting.</strong> Scan each clause: am I selecting the right columns, is the join condition right, is the GROUP BY complete, does the HAVING make sense?</li></ul>
+
+<hr>
+
+<h2>Common Interview Mistakes</h2>
+
+<p>These are the mistakes that cost candidates the most points — not because they're hard mistakes, but because they're avoidable:</p>
+
+<ul><li><strong>Forgetting NULLs in WHERE conditions.</strong> <code>WHERE column != 'value'</code> does not return rows where column IS NULL. NULL comparisons always need <code>IS NULL</code> or <code>IS NOT NULL</code> explicitly.</li><li><strong>Using the wrong JOIN type.</strong> INNER JOIN when the question is about things that <em>don't</em> exist in the second table. This is the most common data-loss mistake.</li><li><strong>Incomplete GROUP BY.</strong> Every column in SELECT that isn't inside an aggregate function must be in GROUP BY. Missing one causes an error or wrong results depending on the database.</li><li><strong>Using HAVING when you mean WHERE.</strong> HAVING filters after aggregation. WHERE filters before. Filtering on a non-aggregated column in HAVING still works in some databases but is logically wrong.</li><li><strong>Writing a subquery when a window function is cleaner.</strong> A correlated subquery that runs for every row is slow. If you can use a window function instead, do it. Interviewers for data-heavy roles notice this.</li><li><strong>Not explaining your approach.</strong> Typing silently for five minutes and then showing the answer is not impressive. Talking through your thinking is what separates good candidates from great ones.</li><li><strong>Assuming the interviewer's schema is normalized.</strong> Ask if you're not sure. Don't write a JOIN that makes assumptions about the schema that turn out to be wrong.</li><li><strong>Forgetting ORDER BY for window functions.</strong> <code>ROW_NUMBER() OVER (PARTITION BY dept)</code> without ORDER BY is valid SQL but produces non-deterministic row numbers. Always include ORDER BY in window functions unless you explicitly don't need ordering.</li></ul>
+
+<hr>
+
+<h2>Quick Reference: What Each Topic Tests</h2>
+
+<table>
+<thead><tr><th>Topic</th><th>What it Tests</th><th>Common Question Type</th></tr></thead>
+<tbody>
+<tr><td>SELECT / WHERE</td><td>Basic data retrieval, filtering logic</td><td>Find rows matching conditions</td></tr>
+<tr><td>JOINs</td><td>Combining tables, understanding NULL behavior</td><td>Match or anti-match across tables</td></tr>
+<tr><td>Aggregation</td><td>GROUP BY, HAVING, SUM/COUNT/AVG</td><td>Summarize data per group</td></tr>
+<tr><td>Subqueries</td><td>Nested logic, correlated queries</td><td>Filter based on another query's result</td></tr>
+<tr><td>Window Functions</td><td>Row-level calculations within groups</td><td>Rank, running totals, period comparisons</td></tr>
+<tr><td>CTEs</td><td>Readability, breaking complex logic into steps</td><td>Multi-step transformations</td></tr>
+<tr><td>Indexes</td><td>Query performance, explain plans</td><td>Optimization and slow query analysis</td></tr>
+<tr><td>Transactions</td><td>ACID properties, concurrency</td><td>Data integrity, isolation levels</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Before Your Interview: 30-Minute Checklist</h2>
+
+<p>Run through this the evening before. It's not about cramming — it's about making sure nothing catches you off guard.</p>
+
+<ul><li>Review all four JOIN types: INNER, LEFT, RIGHT, FULL OUTER. Be able to say in one sentence what each returns.</li><li>Write one window function query from memory: ROW_NUMBER with PARTITION BY and ORDER BY. If you can do that cold, the rest follows.</li><li>Remind yourself of NULL behavior: NULL = NULL is false. NULL in a NOT IN list makes the whole condition false. IS NULL is the correct check.</li><li>Know the query execution order: FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT. This tells you what you can and can't reference in each clause.</li><li>Be able to explain what ACID stands for (Atomicity, Consistency, Isolation, Durability) and give one real-world example.</li><li>Review the difference between RANK, DENSE<em>RANK, and ROW</em>NUMBER with a tie example.</li><li>Practice one recursive CTE from memory — even a simple one. If it comes up, you won't panic.</li><li>Know what a query execution plan is and roughly what EXPLAIN output tells you. You don't need to be an expert, but you should know the concept.</li><li>Think about the role's domain. Analyst at Swiggy? Think delivery data. Payments at Razorpay? Think transaction tables, fraud detection. Mentally preparing domain context helps you ask better clarifying questions.</li><li>Get a good night's sleep. SQL under fatigue is worse SQL.</li></ul>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Most SQL interviews are not trying to catch you out. They're trying to see how you think. A candidate who writes a slightly imperfect query but explains their reasoning clearly, asks the right clarifying questions, and catches their own edge cases will beat a candidate who silently produces a "correct" query with no explanation.</p>
+
+<p>The companies that have harder SQL bars — Razorpay, Meesho data team, Flipkart analytics — mostly care about whether you can take a business question and translate it into clean, correct SQL without hand-holding. Practice doing exactly that. Don't just memorize answers. Take business scenarios ("find the top customers by spend in each city") and write them from scratch.</p>
+
+<p>The best preparation is writing real queries against real data. Use a free PostgreSQL sandbox, load some sample data, and practice. An hour of hands-on querying is worth five hours of reading. By the time you walk into the interview, the syntax should feel automatic — so your brain can focus on the logic.</p>
+
+<hr>
+
+  `,
+  'mod16-t2': `
+    <h1>Window Functions Interview Q&A</h1>
+
+<h2>Let's Start Here</h2>
+
+<p>Window functions are one of the most tested topics in any data analyst or backend SQL interview in 2024. Companies like Swiggy, Meesho, Razorpay, and Nykaa expect you to use them fluently — not just know they exist. If you've been getting by with subqueries and GROUP BY, this is the topic that separates junior-level SQL from mid-to-senior level SQL work.</p>
+
+<p>This guide covers the most common window function questions that actually come up in interviews. Each question has a short explanation of what's being tested, then a clean SQL answer. The goal isn't to make you memorize syntax — it's to make the patterns click so you can write them confidently under pressure.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>Most candidates who've read about window functions can explain what they are. The interview problem is being handed a table with a business question — "rank employees by salary in each department" or "find the running total of orders by day" — and being expected to produce the right query quickly, without fumbling.</p>
+
+<p>The specific things interviewers test with window functions:</p>
+<ul><li>Whether you know when to use ROW<em>NUMBER vs RANK vs DENSE</em>RANK</li><li>Whether you understand PARTITION BY (not the same as GROUP BY)</li><li>Whether you can use LAG/LEAD for time-series comparisons</li><li>Whether you can write a running total without a correlated subquery</li><li>Whether you can do top-N per group using a CTE + window function</li></ul>
+
+<p>Those five patterns cover 90% of window function questions in interviews.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Before window functions, doing things like "rank employees within each department" required either a correlated subquery that re-ran for every row (slow, hard to read) or a GROUP BY that collapsed rows (losing individual-level detail you still needed).</p>
+
+<p>Window functions were built to let you do calculations <em>across a set of related rows</em> while still keeping every individual row in the result. They don't collapse rows the way GROUP BY does. The "window" is the set of rows each calculation looks at — defined by PARTITION BY and ORDER BY inside the OVER() clause.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Imagine you have a spreadsheet with 500 rows of employee salaries. You want to add a new column showing each person's rank within their department, without removing any rows. GROUP BY can't do that — it removes the individual rows. A window function adds the rank column while keeping all 500 rows exactly as they are.</p>
+
+<p>That's the core idea: window functions add new calculated columns based on related rows, without changing the number of rows in your result.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Think of PARTITION BY as "start over for each group." If you PARTITION BY department, the window function resets its counter, rank, or running total every time the department changes.</p>
+
+<p>ORDER BY inside OVER() controls the sequence within each partition — highest salary first, earliest date first, etc.</p>
+
+<p>Without PARTITION BY, the window function treats the entire result set as one group.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>The basic structure of any window function call:</p>
+
+<pre><code class="language-sql">function_name() OVER (
+  PARTITION BY column1        -- divide into groups (optional)
+  ORDER BY column2 DESC       -- order within each group (required for some functions)
+  ROWS BETWEEN ... AND ...    -- define the exact row range (optional, for running totals etc.)
+)</code></pre>
+
+<p>The database runs the outer query first (the FROM, WHERE, GROUP BY), then applies the window function to the result set. That's why window functions can't go in WHERE clauses — they run after filtering.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<p>Here are 10 real interview questions with full SQL answers.</p>
+
+<hr>
+
+<h3>Q1: What is the difference between ROW<em>NUMBER, RANK, and DENSE</em>RANK?</h3>
+
+<p><strong>What they're testing:</strong> Core understanding of the three ranking functions — especially behavior with ties.</p>
+
+<p>The difference is only visible when two rows have the same ORDER BY value (a tie).</p>
+
+<pre><code class="language-sql">SELECT
+  name,
+  department,
+  salary,
+  ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS row_num,
+  RANK()       OVER (PARTITION BY department ORDER BY salary DESC) AS rnk,
+  DENSE_RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS dense_rnk
+FROM employees;</code></pre>
+
+<p>Say Priya and Ankit both earn 75,000 in the Engineering department:</p>
+<ul><li>ROW_NUMBER: Priya gets 1, Ankit gets 2 (arbitrary order between ties)</li><li>RANK: Both get 1, the next person gets 3 (skips 2)</li><li>DENSE_RANK: Both get 1, the next person gets 2 (no skip)</li></ul>
+
+<p>Use ROW<em>NUMBER when you need exactly one row per position. Use DENSE</em>RANK when you want consistent sequential ranks with ties treated equally.</p>
+
+<hr>
+
+<h3>Q2: Find the top 2 earners in each department.</h3>
+
+<p><strong>What they're testing:</strong> Top-N per group — one of the most common interview patterns.</p>
+
+<pre><code class="language-sql">WITH ranked_employees AS (
+  SELECT
+    employee_id,
+    name,
+    department,
+    salary,
+    DENSE_RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS salary_rank
+  FROM employees
+)
+SELECT employee_id, name, department, salary
+FROM ranked_employees
+WHERE salary_rank &lt;= 2;</code></pre>
+
+<p>The CTE calculates the rank, then the outer query filters. You cannot put a window function directly in a WHERE clause — that's why the CTE is needed. This is a common mistake interviewers watch for.</p>
+
+<hr>
+
+<h3>Q3: Write a query to calculate the running total of revenue by date.</h3>
+
+<p><strong>What they're testing:</strong> SUM() OVER with ORDER BY and frame specification.</p>
+
+<pre><code class="language-sql">SELECT
+  order_date,
+  daily_revenue,
+  SUM(daily_revenue) OVER (
+    ORDER BY order_date
+    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+  ) AS running_total
+FROM (
+  SELECT
+    DATE(order_date) AS order_date,
+    SUM(amount) AS daily_revenue
+  FROM orders
+  GROUP BY DATE(order_date)
+) daily_summary
+ORDER BY order_date;</code></pre>
+
+<p><code>ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code> means: include all rows from the start up to and including this row. This is the explicit frame specification for a running total. If you omit it, the default frame for <code>ORDER BY</code> is the same — but writing it explicitly shows the interviewer you understand what's happening.</p>
+
+<hr>
+
+<h3>Q4: Find each employee's salary compared to their department's average.</h3>
+
+<p><strong>What they're testing:</strong> AVG() OVER with PARTITION BY — using window functions without ORDER BY.</p>
+
+<pre><code class="language-sql">SELECT
+  name,
+  department,
+  salary,
+  ROUND(AVG(salary) OVER (PARTITION BY department), 2) AS dept_avg_salary,
+  salary - ROUND(AVG(salary) OVER (PARTITION BY department), 2) AS diff_from_avg
+FROM employees
+ORDER BY department, salary DESC;</code></pre>
+
+<p>Note there's no ORDER BY inside OVER() here — we don't need it because AVG doesn't depend on row order. This is fine and correct. Interviewers sometimes ask why you didn't include ORDER BY — the answer is "AVG over a partition doesn't need row ordering, unlike running totals or ranks."</p>
+
+<hr>
+
+<h3>Q5: Using LAG, find how much revenue changed compared to the previous day.</h3>
+
+<p><strong>What they're testing:</strong> LAG() for period-over-period comparison — standard in analyst interviews.</p>
+
+<pre><code class="language-sql">SELECT
+  order_date,
+  daily_revenue,
+  LAG(daily_revenue, 1) OVER (ORDER BY order_date) AS prev_day_revenue,
+  daily_revenue - LAG(daily_revenue, 1) OVER (ORDER BY order_date) AS revenue_change,
+  ROUND(
+    (daily_revenue - LAG(daily_revenue, 1) OVER (ORDER BY order_date)) * 100.0
+    / NULLIF(LAG(daily_revenue, 1) OVER (ORDER BY order_date), 0), 2
+  ) AS pct_change
+FROM (
+  SELECT DATE(order_date) AS order_date, SUM(amount) AS daily_revenue
+  FROM orders
+  GROUP BY DATE(order_date)
+) d
+ORDER BY order_date;</code></pre>
+
+<p><code>LAG(column, 1)</code> gets the value from 1 row back in the ORDER BY sequence. <code>NULLIF(..., 0)</code> prevents division by zero when previous revenue is 0. The interviewer will likely ask about that NULL case — be ready to explain it.</p>
+
+<hr>
+
+<h3>Q6: Use LEAD to find the next order date for each customer.</h3>
+
+<p><strong>What they're testing:</strong> LEAD() — the forward-looking partner to LAG().</p>
+
+<pre><code class="language-sql">SELECT
+  customer_id,
+  order_id,
+  order_date,
+  LEAD(order_date, 1) OVER (PARTITION BY customer_id ORDER BY order_date) AS next_order_date,
+  LEAD(order_date, 1) OVER (PARTITION BY customer_id ORDER BY order_date) - order_date AS days_until_next_order
+FROM orders
+ORDER BY customer_id, order_date;</code></pre>
+
+<p>LEAD looks forward — it gives you the value from a future row. PARTITION BY customer<em>id means we reset for each customer. The last customer order per customer will show NULL for next</em>order_date, which is correct behavior.</p>
+
+<hr>
+
+<h3>Q7: Explain PARTITION BY. How is it different from GROUP BY?</h3>
+
+<p><strong>What they're testing:</strong> Conceptual understanding — interviewers ask this directly.</p>
+
+<p>This is a verbal question but you should back it up with SQL.</p>
+
+<p>GROUP BY collapses rows — you get one row per group, and all non-aggregated columns must be in the GROUP BY list. You lose the individual row detail.</p>
+
+<p>PARTITION BY doesn't collapse anything. Every original row stays in the result. The window function just performs its calculation within the defined partition.</p>
+
+<pre><code class="language-sql">-- GROUP BY: one row per department, you lose individual employees
+SELECT department, AVG(salary) AS avg_salary
+FROM employees
+GROUP BY department;
+
+-- PARTITION BY: all employees kept, avg_salary added as a column
+SELECT name, department, salary,
+       AVG(salary) OVER (PARTITION BY department) AS avg_salary
+FROM employees;</code></pre>
+
+<p>Use GROUP BY when you want summary data. Use PARTITION BY (window function) when you want both the individual rows and the group-level calculation in the same result.</p>
+
+<hr>
+
+<h3>Q8: Find each customer's first and most recent order date in a single query.</h3>
+
+<p><strong>What they're testing:</strong> MIN/MAX as window functions — less common but good to know.</p>
+
+<pre><code class="language-sql">SELECT DISTINCT
+  customer_id,
+  MIN(order_date) OVER (PARTITION BY customer_id) AS first_order_date,
+  MAX(order_date) OVER (PARTITION BY customer_id) AS latest_order_date,
+  COUNT(*) OVER (PARTITION BY customer_id) AS total_orders
+FROM orders
+ORDER BY customer_id;</code></pre>
+
+<p>Without window functions, you'd need three separate GROUP BY queries and then join them. This approach does it in one pass. The DISTINCT at the top removes duplicate rows caused by the fact that every order row now shows the same customer-level summary.</p>
+
+<hr>
+
+<h3>Q9: Write a query to calculate a 3-day moving average of sales.</h3>
+
+<p><strong>What they're testing:</strong> ROWS BETWEEN for custom window frames — comes up in analytics interviews.</p>
+
+<pre><code class="language-sql">SELECT
+  sale_date,
+  daily_sales,
+  ROUND(
+    AVG(daily_sales) OVER (
+      ORDER BY sale_date
+      ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+    ), 2
+  ) AS moving_avg_3day
+FROM (
+  SELECT DATE(order_date) AS sale_date, SUM(amount) AS daily_sales
+  FROM orders
+  GROUP BY DATE(order_date)
+) d
+ORDER BY sale_date;</code></pre>
+
+<p><code>ROWS BETWEEN 2 PRECEDING AND CURRENT ROW</code> means: look at this row and the two rows before it — a 3-row window. For the first two days, the average uses fewer rows because there's no history before day 1. That's expected and correct.</p>
+
+<hr>
+
+<h3>Q10: For each product, show the percentage of total category revenue it contributes.</h3>
+
+<p><strong>What they're testing:</strong> Using window functions for percentage-of-total calculations.</p>
+
+<pre><code class="language-sql">WITH product_revenue AS (
+  SELECT
+    p.category,
+    p.product_name,
+    SUM(oi.quantity * oi.unit_price) AS product_revenue
+  FROM products p
+  JOIN order_items oi ON p.product_id = oi.product_id
+  GROUP BY p.category, p.product_name
+)
+SELECT
+  category,
+  product_name,
+  product_revenue,
+  SUM(product_revenue) OVER (PARTITION BY category) AS category_total,
+  ROUND(product_revenue * 100.0 / SUM(product_revenue) OVER (PARTITION BY category), 2) AS pct_of_category
+FROM product_revenue
+ORDER BY category, product_revenue DESC;</code></pre>
+
+<p>SUM() OVER (PARTITION BY category) gives the total revenue for the whole category on every row — without collapsing rows. Then you divide each product's revenue by that total to get the percentage.</p>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Clause</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td>PARTITION BY col</td><td>Resets the window function for each unique value of col</td></tr>
+<tr><td>ORDER BY col</td><td>Defines the sequence within each partition</td></tr>
+<tr><td>ROWS BETWEEN ...</td><td>Specifies the exact rows included in the calculation</td></tr>
+<tr><td>UNBOUNDED PRECEDING</td><td>All rows from the start of the partition</td></tr>
+<tr><td>CURRENT ROW</td><td>The current row being calculated</td></tr>
+<tr><td>UNBOUNDED FOLLOWING</td><td>All rows to the end of the partition</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p>Take this table of Swiggy delivery data:</p>
+
+<pre><code class="language-sql">-- deliveries table
+-- delivery_id, city, delivery_partner_id, delivery_date, rating (1-5)</code></pre>
+
+<p>Try writing these yourself before looking at the pattern:</p>
+<ol><li>Rank delivery partners by average rating within each city.</li><li>For each delivery partner, show their rating compared to the previous delivery's rating.</li><li>Find the top 2 delivery partners per city by number of deliveries.</li></ol>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p>You can't use a window function in a WHERE clause. The window function runs after filtering, so you can't filter on it in the same query level. The fix is always a CTE or subquery.</p>
+
+<pre><code class="language-sql">-- WRONG:
+SELECT *, RANK() OVER (PARTITION BY dept ORDER BY salary DESC) AS rnk
+FROM employees
+WHERE rnk = 1;  -- Error: rnk doesn't exist yet at WHERE stage
+
+-- RIGHT:
+WITH ranked AS (
+  SELECT *, RANK() OVER (PARTITION BY dept ORDER BY salary DESC) AS rnk
+  FROM employees
+)
+SELECT * FROM ranked WHERE rnk = 1;</code></pre>
+
+<p>The ORDER BY inside OVER() is separate from the ORDER BY at the end of the query. They're independent. The one inside OVER() defines the sequence for the window function. The one at the end sorts the final result.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li>Using GROUP BY when you need PARTITION BY — GROUP BY removes individual rows, PARTITION BY keeps them.</li><li>Forgetting to include ORDER BY inside OVER() for functions that need it (RANK, LAG, LEAD, running totals).</li><li>Putting a window function alias in WHERE — window function results can only be filtered in an outer query or CTE.</li><li>Confusing RANK and DENSE<em>RANK in questions about "top N" — DENSE</em>RANK is usually safer when ties are possible.</li><li>Forgetting that LAG/LEAD return NULL for the first/last rows in a partition — always handle NULLs when doing arithmetic with LAG/LEAD.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<p>Always name your window functions clearly in CTEs before filtering. It makes the query readable and avoids the WHERE-clause error.</p>
+
+<p>When writing window functions for the first time on a new dataset, start simple: just select the window function result alongside the raw data and look at it before adding WHERE filters.</p>
+
+<p>Use NULLIF when dividing by a window function result — zero denominators from LAG/LEAD are a common source of runtime errors.</p>
+
+<p>For top-N queries, prefer DENSE<em>RANK over ROW</em>NUMBER when the business question is "top N by value" — ties should usually both appear.</p>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>At Swiggy, analysts use window functions to calculate a delivery partner's last 7-day average rating versus their all-time average — both shown per row without any joining.</p>
+
+<p>At Razorpay, risk teams use LAG to compare each transaction's amount to the user's previous transaction and flag sudden jumps that could indicate fraud.</p>
+
+<p>At Meesho, product teams use DENSE_RANK to find the top-selling products in each category each week, used to populate "trending" sections.</p>
+
+<p>At IRCTC, data teams use running totals to track cumulative ticket bookings per route as the booking window opens.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<p>Window functions are not an advanced feature you use occasionally. In any data-heavy role, they're the standard way to do ranking, comparison across periods, and group-level statistics while keeping row-level detail. Any analyst who only knows GROUP BY is working with one hand tied behind their back.</p>
+
+<p>The good news is there are really only five patterns to master: ranking (ROW<em>NUMBER/RANK/DENSE</em>RANK), running aggregates (SUM/COUNT OVER with ORDER BY), partition-level stats (AVG/MIN/MAX OVER without ORDER BY), period comparison (LAG/LEAD), and custom frames (ROWS BETWEEN). Everything else is a combination of these.</p>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<p>Make sure you can answer these without looking at notes:</p>
+<ul><li>What's the difference between RANK and DENSE_RANK?</li><li>Why can't you use a window function alias in a WHERE clause?</li><li>How do you partition a window function by department?</li><li>What does ROWS UNBOUNDED PRECEDING mean?</li><li>When would you use LEAD instead of LAG?</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>Write a query to show each order's amount alongside the customer's average order amount.</li><li>Find each employee's salary rank within their city (not department).</li><li>For each month, calculate the percentage growth in total orders versus the previous month.</li><li>Find customers whose most recent order value is higher than their first order value.</li><li>Write a query showing, for each product, the day it was first sold and how many days have passed since then.</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Window functions feel confusing at first because the syntax is a bit unusual — the OVER() clause with PARTITION BY and ORDER BY inside looks different from the rest of SQL. But once you've written them a few times, they become the most natural tool for a whole class of problems.</p>
+
+<p>If you can write a running total, a top-N per group, and a LAG comparison from memory, you're prepared for window function questions at most analyst and backend SQL interviews. Practice those three patterns until the code comes without thinking. The rest follows naturally.</p>
+
+  `,
+  'mod16-t3': `
+    <h1>Query Optimization Questions</h1>
+
+<h2>Let's Start Here</h2>
+
+<p>Query optimization questions come up in interviews for senior developer, data engineer, and backend engineer roles. If you're applying to a company where SQL performance matters — Flipkart, CRED, PhonePe, Zepto, any company with large transaction tables — expect at least one question about why a query might be slow and what you'd do about it.</p>
+
+<p>These questions are different from the "write a query that returns X" type. They're more open-ended. An interviewer might show you a query and ask "what's wrong with this?" or describe a slow report and ask how you'd diagnose it. The answer involves understanding how databases execute queries, how indexes work, and what patterns cause poor performance.</p>
+
+<p>This guide covers the most common optimization questions with practical, specific answers.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>The most common scenario: you're given a query that works correctly but takes 45 seconds on a table with 10 million rows. The interviewer asks what you'd do.</p>
+
+<p>Most candidates say "add an index" immediately. That's not wrong, but it's incomplete. A good answer starts with diagnosing — why is it slow? Is it a missing index? A full table scan? A bad join? A subquery running once per row? Unnecessary columns being fetched? The right optimization depends on the actual problem.</p>
+
+<p>Interviewers also ask about tradeoffs. Indexes speed up reads but slow down writes. Denormalization speeds up queries but creates data consistency risk. Know the tradeoffs, not just the techniques.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Query optimization exists because the same correct query can be written in ways that differ by 100x in execution speed. A database with a million rows returns a filtered result in milliseconds when an index exists. The same query without an index scans every row — and at 10 million rows, that's the difference between 20ms and 20 seconds in a production API.</p>
+
+<p>Query planners (the part of the database that decides <em>how</em> to execute your query) do a lot automatically. But they work best when your schema is designed well, your indexes are appropriate, and your queries don't accidentally prevent index usage.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Think of a database table like a 1,000-page book with no table of contents. Finding "all orders from Mumbai" means reading every single page. That's a full table scan.</p>
+
+<p>An index is the table of contents. It lists where each relevant value appears, sorted, so the database can jump directly to the right pages. A query with a good index reads 3 pages instead of 1,000.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Here's the mental model for query optimization:</p>
+
+<ol><li>Is the database reading too many rows? (missing index or full table scan)</li><li>Is it doing extra work per row? (correlated subquery, function on indexed column)</li><li>Is it fetching too much data? (SELECT * when you only need 2 columns)</li><li>Is it doing a bad join? (joining on unindexed or mismatched type columns)</li><li>Is the query written in a way that confuses the planner? (implicit type casts, non-SARGable predicates)</li></ol>
+
+<p>Most slow queries have one of these five problems.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>When you run a query, the database's query planner creates an execution plan — a step-by-step description of how it will fetch and process data. You can see this plan by running EXPLAIN (or EXPLAIN ANALYZE in PostgreSQL, EXPLAIN in MySQL). The plan shows whether indexes are being used, how many rows are being processed at each step, and where the cost is concentrated.</p>
+
+<p>Understanding how to read an execution plan is one of the most valuable skills in SQL optimization — and it's something interviewers at data-heavy companies specifically test.</p>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<p>Here are 10 real interview questions on query optimization with practical answers.</p>
+
+<hr>
+
+<h3>Q1: How do you find out why a query is slow?</h3>
+
+<p><strong>What they're testing:</strong> Whether you have a systematic approach to diagnosis, not just guesses.</p>
+
+<p>The first step is always EXPLAIN ANALYZE. This runs the query and shows the actual execution plan with timing.</p>
+
+<pre><code class="language-sql">-- PostgreSQL
+EXPLAIN ANALYZE
+SELECT * FROM orders
+WHERE customer_id = 1042
+  AND order_date &gt;= '2024-01-01';</code></pre>
+
+<p>Look for:</p>
+<ul><li><strong>Seq Scan</strong> — full table scan, usually means a missing or unused index</li><li><strong>rows=</strong> — if estimated rows is 1 and actual is 50,000, the planner is working on bad statistics</li><li><strong>cost=</strong> — higher cost nodes are where time is being spent</li><li><strong>loops=</strong> — if a nested loop runs 10,000 times, that's your N+1 problem</li></ul>
+
+<p>After EXPLAIN, check: are the right indexes in place? Are the columns being filtered indexed? Is there a type mismatch in the JOIN condition?</p>
+
+<hr>
+
+<h3>Q2: What is a full table scan and when does it happen?</h3>
+
+<p><strong>What they're testing:</strong> Index awareness and when indexes get bypassed.</p>
+
+<p>A full table scan (Seq Scan in PostgreSQL) means the database reads every row in the table to find the matching ones. It happens when:</p>
+
+<ol><li>There's no index on the WHERE clause column.</li><li>There's an index, but the query prevents it from being used.</li><li>The table is small enough that the planner decides a full scan is faster than using the index.</li></ol>
+
+<p>Common cases where an index exists but isn't used:</p>
+
+<pre><code class="language-sql">-- Index on phone_number, but this bypasses it due to function call:
+SELECT * FROM users WHERE UPPER(phone_number) = '9876543210';
+-- Fix: store phone numbers consistently, or create a functional index
+
+-- Index on order_date, but this bypasses it due to implicit cast:
+SELECT * FROM orders WHERE order_date = '2024-01-15';
+-- If order_date is TIMESTAMP and you compare to DATE, some databases do a cast
+-- Fix: match data types explicitly
+
+-- Correct: index will be used
+SELECT * FROM orders WHERE order_date &gt;= '2024-01-15 00:00:00'
+                       AND order_date &lt;  '2024-01-16 00:00:00';</code></pre>
+
+<hr>
+
+<h3>Q3: How do indexes work? When should you add one?</h3>
+
+<p><strong>What they're testing:</strong> Practical understanding of B-tree indexes and the read/write tradeoff.</p>
+
+<p>An index (typically a B-tree) stores a sorted copy of the indexed column's values alongside pointers to the full rows. When you filter on that column, the database uses the sorted index to find matching rows in O(log n) time instead of scanning all n rows.</p>
+
+<p>Add an index when:</p>
+<ul><li>A column is frequently used in WHERE clauses on large tables</li><li>A column is used as a JOIN key</li><li>A column is used in ORDER BY on large result sets</li></ul>
+
+<p>Don't add an index when:</p>
+<ul><li>The table is small (< a few thousand rows) — full scans are fast enough</li><li>The column has very low cardinality (e.g., a status column with only 3 values — the index won't help much)</li><li>The table has very frequent INSERT/UPDATE operations — each write must update every index</li></ul>
+
+<pre><code class="language-sql">-- Add a single-column index
+CREATE INDEX idx_orders_customer_id ON orders(customer_id);
+
+-- Add a composite index for queries that filter on both columns together
+CREATE INDEX idx_orders_customer_date ON orders(customer_id, order_date);</code></pre>
+
+<p>For composite indexes, column order matters. An index on (customer<em>id, order</em>date) helps queries that filter on customer<em>id alone, or on both. It does not help queries that filter on order</em>date alone.</p>
+
+<hr>
+
+<h3>Q4: What is an N+1 query problem? How do you fix it?</h3>
+
+<p><strong>What they're testing:</strong> Whether you understand relational data patterns and can spot inefficient loops.</p>
+
+<p>The N+1 problem is running 1 query to get N rows, then running N more queries to get related data for each row. It's common in application code but also appears in SQL when using correlated subqueries.</p>
+
+<pre><code class="language-sql">-- N+1 style: this subquery runs once for every row in orders
+SELECT
+  order_id,
+  (SELECT name FROM customers WHERE customer_id = o.customer_id) AS customer_name
+FROM orders o;</code></pre>
+
+<p>On 100,000 orders, this runs the subquery 100,000 times. Slow.</p>
+
+<p>Fix: use a JOIN instead.</p>
+
+<pre><code class="language-sql">-- Single query, much faster
+SELECT o.order_id, c.name AS customer_name
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id;</code></pre>
+
+<p>The JOIN fetches all related rows in one pass. Always prefer a JOIN over a correlated subquery when you're looking up a value from another table for each row.</p>
+
+<hr>
+
+<h3>Q5: When should you NOT use a subquery?</h3>
+
+<p><strong>What they're testing:</strong> Practical judgment on subquery vs JOIN vs window function.</p>
+
+<p>Subqueries are fine for some use cases (especially EXISTS checks, scalar lookups, or one-time filtering). But they're problematic when:</p>
+
+<p><strong>The subquery is correlated (runs once per row):</strong></p>
+
+<pre><code class="language-sql">-- Slow: correlated subquery runs for every employee row
+SELECT name, salary
+FROM employees e
+WHERE salary &gt; (
+  SELECT AVG(salary) FROM employees WHERE department = e.department
+);
+
+-- Fast: window function calculates avg once per department
+WITH dept_stats AS (
+  SELECT *, AVG(salary) OVER (PARTITION BY department) AS dept_avg
+  FROM employees
+)
+SELECT name, salary FROM dept_stats WHERE salary &gt; dept_avg;</code></pre>
+
+<p><strong>The subquery returns a large list for NOT IN:</strong></p>
+
+<pre><code class="language-sql">-- Risky: NOT IN with large subquery is slow, and breaks if subquery returns NULL
+SELECT * FROM products
+WHERE product_id NOT IN (SELECT product_id FROM order_items);
+
+-- Better: NOT EXISTS or LEFT JOIN + IS NULL
+SELECT p.*
+FROM products p
+LEFT JOIN order_items oi ON p.product_id = oi.product_id
+WHERE oi.product_id IS NULL;</code></pre>
+
+<hr>
+
+<h3>Q6: What is a SARGable predicate? Why does it matter?</h3>
+
+<p><strong>What they're testing:</strong> Deep understanding of how predicates interact with indexes.</p>
+
+<p>SARGable (Search ARGument able) means the query condition can use an index effectively. A predicate is non-SARGable when it wraps the indexed column in a function or expression — the database can't use the sorted index because the values are being transformed.</p>
+
+<pre><code class="language-sql">-- Non-SARGable: function on the column breaks index usage
+SELECT * FROM orders WHERE YEAR(order_date) = 2024;
+SELECT * FROM users WHERE LENGTH(name) &gt; 10;
+SELECT * FROM transactions WHERE amount * 1.18 &gt; 1000;
+
+-- SARGable equivalents: filter on the column directly
+SELECT * FROM orders WHERE order_date &gt;= '2024-01-01' AND order_date &lt; '2025-01-01';
+-- (for LENGTH — no index-friendly rewrite; consider storing a computed column)
+SELECT * FROM transactions WHERE amount &gt; 847.46;  -- 1000/1.18 pre-calculated</code></pre>
+
+<p>The rule: don't transform the indexed column. Transform the constant instead.</p>
+
+<hr>
+
+<h3>Q7: How would you optimize a slow JOIN between two large tables?</h3>
+
+<p><strong>What they're testing:</strong> Join optimization — index coverage, data types, join order.</p>
+
+<p>Several things make JOINs slow:</p>
+
+<p><strong>Missing index on the join column:</strong></p>
+
+<pre><code class="language-sql">-- If orders.customer_id has no index, this does a full scan of orders for every customer row
+SELECT c.name, COUNT(o.order_id)
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+GROUP BY c.name;
+
+-- Fix: index on orders.customer_id
+CREATE INDEX idx_orders_cust ON orders(customer_id);</code></pre>
+
+<p><strong>Data type mismatch on join columns:</strong></p>
+
+<pre><code class="language-sql">-- customers.id is INTEGER but orders.customer_id is VARCHAR(20)
+-- The database must cast every value before comparing — full scan
+SELECT * FROM customers c JOIN orders o ON c.id = o.customer_id;
+
+-- Fix: make the types match in the schema</code></pre>
+
+<p><strong>Joining on more columns than needed:</strong></p>
+
+<p>Keep join conditions simple. If you're joining on 4 columns and only 1 is needed to uniquely relate rows, you're doing extra work. Analyze the cardinality — join on the minimum set of columns that correctly relates the tables.</p>
+
+<p><strong>Filtering before joining (using CTEs or subqueries to pre-filter):</strong></p>
+
+<pre><code class="language-sql">-- Pre-filter orders to only 2024 before joining to customers
+WITH recent_orders AS (
+  SELECT * FROM orders WHERE order_date &gt;= '2024-01-01'
+)
+SELECT c.name, COUNT(r.order_id)
+FROM customers c
+JOIN recent_orders r ON c.customer_id = r.customer_id
+GROUP BY c.name;</code></pre>
+
+<p>This reduces the data involved in the join.</p>
+
+<hr>
+
+<h3>Q8: What is the difference between WHERE and HAVING, and how does it affect performance?</h3>
+
+<p><strong>What they're testing:</strong> Understanding of query execution order and filtering efficiency.</p>
+
+<p>WHERE filters rows before aggregation. HAVING filters groups after aggregation. Using HAVING when you should use WHERE forces the database to aggregate more rows than necessary.</p>
+
+<pre><code class="language-sql">-- Slow: aggregates all orders, then filters (HAVING runs after GROUP BY)
+SELECT customer_id, SUM(amount)
+FROM orders
+HAVING customer_id &gt; 1000
+GROUP BY customer_id;
+
+-- Fast: filters rows first, then aggregates only matching rows
+SELECT customer_id, SUM(amount)
+FROM orders
+WHERE customer_id &gt; 1000
+GROUP BY customer_id;</code></pre>
+
+<p>The rule: use WHERE for conditions on raw columns. Only use HAVING for conditions that involve aggregate results (like <code>HAVING SUM(amount) > 10000</code>).</p>
+
+<hr>
+
+<h3>Q9: What does EXPLAIN output tell you? Walk through an example.</h3>
+
+<p><strong>What they're testing:</strong> Whether you can actually read a query plan.</p>
+
+<pre><code class="language-sql">EXPLAIN SELECT * FROM orders WHERE customer_id = 5 AND order_date &gt;= '2024-01-01';</code></pre>
+
+<p>A simplified PostgreSQL output might look like:</p>
+
+<pre><code>Index Scan using idx_orders_cust_date on orders  (cost=0.43..18.65 rows=12 width=98)
+  Index Cond: ((customer_id = 5) AND (order_date &gt;= '2024-01-01'))</code></pre>
+
+<p>Key things to read:</p>
+<ul><li><strong>Index Scan</strong>: the database is using an index — good.</li><li><strong>Seq Scan</strong>: no index used — potentially bad on large tables.</li><li><strong>cost=0.43..18.65</strong>: estimated startup cost and total cost. Higher = more work.</li><li><strong>rows=12</strong>: estimated rows returned. If this is wildly different from actual, your table statistics are stale — run ANALYZE.</li><li><strong>Nested Loop</strong>: joining by looping — fine for small tables, slow for large ones.</li><li><strong>Hash Join</strong>: the database built a hash table for the join — usually better for larger datasets.</li><li><strong>Merge Join</strong>: both sides are sorted before joining — efficient when data is already ordered.</li></ul>
+
+<p>If you see a Seq Scan on a large table, that's your first thing to address.</p>
+
+<hr>
+
+<h3>Q10: How would you optimize a report query that runs every day but takes 10 minutes?</h3>
+
+<p><strong>What they're testing:</strong> Practical strategies for recurring heavy queries.</p>
+
+<p>This is an open-ended question. A good answer covers several strategies:</p>
+
+<p><strong>Indexes:</strong> Check EXPLAIN — is the right index in place? Is the query SARGable?</p>
+
+<p><strong>Materialized views:</strong> If the same computation runs daily, pre-compute and store it.</p>
+
+<pre><code class="language-sql">-- Create a materialized view for the daily sales summary
+CREATE MATERIALIZED VIEW daily_sales_summary AS
+SELECT
+  DATE(order_date) AS sale_date,
+  city,
+  SUM(amount) AS total_revenue,
+  COUNT(*) AS order_count
+FROM orders
+GROUP BY DATE(order_date), city;
+
+-- Refresh daily (schedule this in a cron job or database scheduler)
+REFRESH MATERIALIZED VIEW daily_sales_summary;</code></pre>
+
+<p><strong>Partitioning:</strong> If the table has 5 years of data but the report only needs this month, partition by date. The query only scans this month's partition.</p>
+
+<p><strong>Reducing columns fetched:</strong> Replace <code>SELECT *</code> with only the columns you actually need. This reduces I/O, especially on wide tables.</p>
+
+<p><strong>Query rewrite:</strong> Replace correlated subqueries with joins. Replace NOT IN with NOT EXISTS or LEFT JOIN + IS NULL. Move filters earlier.</p>
+
+<p><strong>Batching:</strong> If the report processes all records at once, consider processing in smaller date-range batches and combining results.</p>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Term</th><th>What It Means</th></tr></thead>
+<tbody>
+<tr><td>Seq Scan</td><td>Full table scan — every row is read</td></tr>
+<tr><td>Index Scan</td><td>Index is used to find rows — much faster on large tables</td></tr>
+<tr><td>Index Only Scan</td><td>All needed data is in the index — fastest possible</td></tr>
+<tr><td>Nested Loop</td><td>Join method using loops — good for small tables</td></tr>
+<tr><td>Hash Join</td><td>Join using a hash table — better for larger datasets</td></tr>
+<tr><td>Merge Join</td><td>Join by merging sorted inputs — efficient when sorted</td></tr>
+<tr><td>cost=</td><td>Estimated query cost (not milliseconds, but relative units)</td></tr>
+<tr><td>rows=</td><td>Estimated number of rows at this step</td></tr>
+<tr><td>SARGable</td><td>A predicate that can use an index</td></tr>
+<tr><td>Correlated Subquery</td><td>A subquery that references the outer query — runs once per outer row</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p>Take this slow query:</p>
+
+<pre><code class="language-sql">SELECT *
+FROM transactions
+WHERE YEAR(created_at) = 2024
+  AND user_id IN (SELECT user_id FROM blacklisted_users)
+ORDER BY amount DESC;</code></pre>
+
+<p>Identify the problems:</p>
+<ol><li><code>YEAR(created_at)</code> is not SARGable — fix with a date range condition.</li><li><code>IN (SELECT ...)</code> with a large blacklist is slow — replace with a JOIN or EXISTS.</li><li><code>SELECT *</code> fetches all columns — specify only what's needed.</li></ol>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p>Indexes are not always the answer. Adding an index to a table that gets 50,000 inserts per second can make write performance worse than the read improvement is worth.</p>
+
+<p>The query planner sometimes ignores indexes. If a table has 100 rows, a full scan is faster than using an index. The planner makes this call automatically. Don't assume an index will always be used.</p>
+
+<p>Stale table statistics cause bad query plans. If you've loaded a lot of new data and the planner is making poor decisions, run ANALYZE (PostgreSQL) or ANALYZE TABLE (MySQL) to refresh statistics.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li>Adding indexes to every column "just in case" — over-indexing slows writes and wastes storage.</li><li>Using SELECT * in production queries — fetches unnecessary data and prevents index-only scans.</li><li>Applying functions to indexed columns in WHERE conditions — makes the index unusable.</li><li>Using NOT IN when the subquery could return NULL — any NULL in a NOT IN list makes the whole condition return false for all rows.</li><li>Never running EXPLAIN before "optimizing" — you might be fixing the wrong thing.</li><li>Optimizing queries that run once a week but ignoring queries that run 10,000 times per minute.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<p>Always run EXPLAIN before making changes. Know what the problem is before applying a solution.</p>
+
+<p>Index foreign keys. If you're joining orders.customer<em>id to customers.id, orders.customer</em>id should have an index — it's almost never the primary key but almost always used in joins.</p>
+
+<p>Keep indexes selective. An index on a boolean column (is_active: true/false) with 90% true values is nearly useless — the database will scan more rows than it skips.</p>
+
+<p>Consider covering indexes for frequently-run queries. A covering index includes all the columns a query needs, enabling an Index Only Scan that never touches the main table.</p>
+
+<pre><code class="language-sql">-- Covering index for a specific query pattern
+CREATE INDEX idx_orders_covering ON orders(customer_id, order_date, amount);
+-- A query that only SELECTs amount and filters on customer_id + order_date can use this index alone</code></pre>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>At Zepto, engineers monitor slow query logs and set up alerts when a query crosses a time threshold. Every slow query gets investigated with EXPLAIN ANALYZE before the next release.</p>
+
+<p>At Flipkart, the catalog team uses materialized views to pre-aggregate product metrics (views, sales, ratings) so that product listing pages don't run heavy GROUP BY queries on every page load.</p>
+
+<p>At PhonePe, transaction tables are partitioned by month. Fraud detection queries that look at "last 30 days of transactions" only scan 1–2 partitions instead of years of history.</p>
+
+<p>At CRED, the data team has strict rules around SELECT * — all queries must specify columns, validated in code review.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<p>Query optimization is ultimately about understanding the gap between what your query logically does and how the database physically executes it. SQL is declarative — you say what you want. The planner decides how to get it. Your job in optimization is to write queries and maintain schemas in ways that let the planner make good decisions.</p>
+
+<p>Most performance problems come down to a few patterns: missing indexes, non-SARGable predicates, correlated subqueries, bad join types, and excessive data fetching. Get these right, and you'll handle 95% of slow query problems.</p>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<p>Make sure you can answer these:</p>
+<ul><li>What is a Seq Scan and when does it happen?</li><li>How do you read EXPLAIN output?</li><li>Why does wrapping a column in a function break index usage?</li><li>What is the difference between WHERE and HAVING in terms of query execution?</li><li>When would you choose a JOIN over a correlated subquery?</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>You have a query that filters on <code>WHERE email = 'user@example.com'</code> on a 5-million-row users table and takes 8 seconds. What do you check first?</li><li>Write the non-SARGable version and the SARGable version of a query filtering orders from the year 2023.</li><li>A JOIN between orders (10M rows) and customers (500K rows) is slow. What are three things you'd check?</li><li>Explain why <code>NOT IN (SELECT ...)</code> can be dangerous when the subquery contains NULLs.</li><li>What is a materialized view and when would you use one over a regular view?</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Query optimization is one of those skills that grows with experience. Every slow query you diagnose teaches you something about how databases actually work. The best way to build this skill is to actually run EXPLAIN on queries you write, even when they're fast — so you understand what the planner is doing before things go wrong.</p>
+
+<p>In interviews, the key is to show a systematic approach: diagnose first (EXPLAIN), identify the bottleneck (index? join? subquery? data volume?), apply the right fix, and understand the tradeoffs. That structured thinking impresses interviewers more than knowing a long list of optimization tricks.</p>
+
+  `,
+  'mod16-t4': `
+    <h1>Real-world SQL Scenarios</h1>
+
+<h2>Let's Start Here</h2>
+
+<p>Scenario-based SQL questions are the hardest kind to prepare for because there's no single correct answer — just better and worse approaches. The interviewer describes a real business problem and asks you to write SQL. Sometimes the schema is given. Sometimes you need to define it yourself. The question tests both your SQL skills and your ability to understand what the business actually wants.</p>
+
+<p>These questions show up regularly at companies where data is central to the product. Swiggy asking about delivery analytics. Paytm asking about fraud patterns. Flipkart asking about inventory management. IRCTC asking about booking trends. The SQL involved is usually medium-to-hard — window functions, multi-table joins, date logic, aggregation. But the starting point is always understanding the business problem.</p>
+
+<p>This guide has 10 complete scenarios. Each one includes the business context, the specific question, the approach, and the full SQL.</p>
+
+<hr>
+
+<h2>The Problem You'll Actually Face</h2>
+
+<p>Scenario questions often start with a lot of words before any SQL. The interviewer gives you a business description and watches whether you can extract the data question from it. Candidates who go silent and immediately start typing miss this step. The ones who ask "so we need to find X for all Y in date range Z?" and then write the query — those are the ones who get hired.</p>
+
+<p>The skill here is translation: from business language to SQL logic.</p>
+
+<hr>
+
+<h2>Why Was This Built in the First Place?</h2>
+
+<p>Every scenario in this guide represents a real analytical question that some data team at some Indian tech company has had to answer. Swiggy genuinely needs to know which areas have the worst delivery times. Paytm genuinely needs to flag suspicious transactions before they become chargebacks. Byju's genuinely tracks student engagement to find who's about to churn.</p>
+
+<p>SQL is the language these questions get answered in. Understanding the scenario helps you write the right query — not just a technically correct one, but one that answers the actual business question.</p>
+
+<hr>
+
+<h2>Think of It This Way</h2>
+
+<p>Every scenario question has a structure:</p>
+<ol><li>A table (or tables) with data</li><li>A question about patterns in that data</li><li>A SQL query that extracts those patterns</li></ol>
+
+<p>The translation from question to query usually involves deciding: which tables, which join conditions, which filters, which aggregation, and how to present the result. Work through these in order and the query writes itself.</p>
+
+<hr>
+
+<h2>A Simple Way to Picture It</h2>
+
+<p>Before writing any SQL, sketch the answer in English:</p>
+<ul><li>"I need one row per [unit of analysis]"</li><li>"I need to filter to [date range / condition]"</li><li>"I need to calculate [metric]"</li><li>"I need to sort/rank by [something]"</li></ul>
+
+<p>Once you've written that, the SQL structure is obvious.</p>
+
+<hr>
+
+<h2>How It Actually Works</h2>
+
+<p>Scenario questions test the combination of:</p>
+<ul><li>Understanding the domain (delivery, payments, e-commerce, edtech)</li><li>Knowing which SQL features solve which problems (window functions for ranking, LEFT JOIN for finding absences, date arithmetic for time-based analysis)</li><li>Writing clean, readable SQL that a colleague could maintain</li></ul>
+
+<hr>
+
+<h2>Writing It in SQL</h2>
+
+<hr>
+
+<h3>Scenario 1: Swiggy — Finding Delivery Partners with Consistently Low Ratings</h3>
+
+<p><strong>Business Context:</strong> Swiggy's operations team wants to identify delivery partners whose ratings have been declining. Specifically, they want partners whose average rating in the last 30 days is below 3.5 AND whose rating has dropped more than 0.5 points compared to the 30 days before that.</p>
+
+<p><strong>Schema:</strong></p>
+<pre><code>deliveries(delivery_id, partner_id, order_id, city, delivery_date, rating)
+partners(partner_id, name, phone, joining_date)</code></pre>
+
+<p><strong>Approach:</strong> Calculate each partner's average rating for two time windows — last 30 days and the 30 days before that. Join them and filter for partners meeting both conditions.</p>
+
+<pre><code class="language-sql">WITH last_30 AS (
+  SELECT
+    partner_id,
+    AVG(rating) AS avg_rating_recent
+  FROM deliveries
+  WHERE delivery_date &gt;= CURRENT_DATE - INTERVAL '30 days'
+    AND rating IS NOT NULL
+  GROUP BY partner_id
+),
+prev_30 AS (
+  SELECT
+    partner_id,
+    AVG(rating) AS avg_rating_previous
+  FROM deliveries
+  WHERE delivery_date &gt;= CURRENT_DATE - INTERVAL '60 days'
+    AND delivery_date &lt; CURRENT_DATE - INTERVAL '30 days'
+    AND rating IS NOT NULL
+  GROUP BY partner_id
+)
+SELECT
+  p.partner_id,
+  p.name,
+  p.phone,
+  ROUND(l.avg_rating_recent, 2) AS recent_avg,
+  ROUND(pr.avg_rating_previous, 2) AS prev_avg,
+  ROUND(pr.avg_rating_previous - l.avg_rating_recent, 2) AS rating_drop
+FROM partners p
+JOIN last_30 l ON p.partner_id = l.partner_id
+JOIN prev_30 pr ON p.partner_id = pr.partner_id
+WHERE l.avg_rating_recent &lt; 3.5
+  AND (pr.avg_rating_previous - l.avg_rating_recent) &gt; 0.5
+ORDER BY rating_drop DESC;</code></pre>
+
+<hr>
+
+<h3>Scenario 2: Paytm — Detecting Suspicious Transactions (Velocity Check)</h3>
+
+<p><strong>Business Context:</strong> Paytm's fraud team wants to flag users who made more than 5 transactions in any 1-hour window. This pattern often indicates an account takeover or an automated fraud attack.</p>
+
+<p><strong>Schema:</strong></p>
+<pre><code>transactions(transaction_id, user_id, amount, merchant_id, transaction_time, status)</code></pre>
+
+<p><strong>Approach:</strong> For each transaction, count how many transactions the same user had in the hour before it. This is a self-join on user_id with a time range condition.</p>
+
+<pre><code class="language-sql">SELECT DISTINCT t1.user_id
+FROM transactions t1
+JOIN transactions t2
+  ON t1.user_id = t2.user_id
+  AND t2.transaction_time &gt;= t1.transaction_time - INTERVAL '1 hour'
+  AND t2.transaction_time &lt;= t1.transaction_time
+  AND t1.transaction_id &lt;&gt; t2.transaction_id
+GROUP BY t1.user_id, t1.transaction_id
+HAVING COUNT(t2.transaction_id) &gt;= 5;</code></pre>
+
+<p>To see the full picture including the flagged transactions:</p>
+
+<pre><code class="language-sql">WITH txn_counts AS (
+  SELECT
+    t1.transaction_id,
+    t1.user_id,
+    t1.amount,
+    t1.transaction_time,
+    COUNT(t2.transaction_id) AS txns_in_past_hour
+  FROM transactions t1
+  JOIN transactions t2
+    ON t1.user_id = t2.user_id
+    AND t2.transaction_time &gt;= t1.transaction_time - INTERVAL '1 hour'
+    AND t2.transaction_time &lt;= t1.transaction_time
+  GROUP BY t1.transaction_id, t1.user_id, t1.amount, t1.transaction_time
+)
+SELECT *
+FROM txn_counts
+WHERE txns_in_past_hour &gt;= 5
+ORDER BY user_id, transaction_time;</code></pre>
+
+<hr>
+
+<h3>Scenario 3: Flipkart — Inventory Alert for Fast-Moving Products</h3>
+
+<p><strong>Business Context:</strong> Flipkart's warehouse team wants to identify products where the current stock level will run out within the next 7 days based on the average daily sales rate from the past 14 days.</p>
+
+<p><strong>Schema:</strong></p>
+<pre><code>inventory(product_id, current_stock, last_updated)
+order_items(order_item_id, order_id, product_id, quantity)
+orders(order_id, order_date, status)
+products(product_id, product_name, category)</code></pre>
+
+<p><strong>Approach:</strong> Calculate average daily quantity sold over the past 14 days per product. Then divide current stock by that rate to get estimated days of stock remaining. Flag anything under 7 days.</p>
+
+<pre><code class="language-sql">WITH daily_sales AS (
+  SELECT
+    oi.product_id,
+    SUM(oi.quantity) AS total_qty_sold,
+    COUNT(DISTINCT DATE(o.order_date)) AS active_days,
+    SUM(oi.quantity) * 1.0 / NULLIF(COUNT(DISTINCT DATE(o.order_date)), 0) AS avg_daily_sales
+  FROM order_items oi
+  JOIN orders o ON oi.order_id = o.order_id
+  WHERE o.order_date &gt;= CURRENT_DATE - INTERVAL '14 days'
+    AND o.status NOT IN ('Cancelled', 'Returned')
+  GROUP BY oi.product_id
+)
+SELECT
+  p.product_id,
+  p.product_name,
+  p.category,
+  i.current_stock,
+  ROUND(ds.avg_daily_sales, 2) AS avg_daily_sales,
+  ROUND(i.current_stock / NULLIF(ds.avg_daily_sales, 0), 1) AS days_of_stock_remaining
+FROM inventory i
+JOIN products p ON i.product_id = p.product_id
+JOIN daily_sales ds ON i.product_id = ds.product_id
+WHERE i.current_stock / NULLIF(ds.avg_daily_sales, 0) &lt;= 7
+ORDER BY days_of_stock_remaining ASC;</code></pre>
+
+<hr>
+
+<h3>Scenario 4: IRCTC — Booking Cancellation Analysis by Route</h3>
+
+<p><strong>Business Context:</strong> IRCTC's analytics team wants to understand which train routes have the highest cancellation rates and whether cancellations spike on certain days of the week. This helps them understand where to offer better refund policies or overbooking buffers.</p>
+
+<p><strong>Schema:</strong></p>
+<pre><code>bookings(booking_id, train_id, route_id, passenger_id, booking_date, travel_date, status, amount, class)
+routes(route_id, origin_station, destination_station, distance_km)
+trains(train_id, train_name, train_number)</code></pre>
+
+<p><strong>Approach:</strong> Group bookings by route and day of week. Calculate cancellation rate. Sort to find the worst combinations.</p>
+
+<pre><code class="language-sql">WITH booking_stats AS (
+  SELECT
+    b.route_id,
+    TO_CHAR(b.travel_date, 'Day') AS day_of_week,
+    EXTRACT(DOW FROM b.travel_date) AS day_num,
+    COUNT(*) AS total_bookings,
+    SUM(CASE WHEN b.status = 'Cancelled' THEN 1 ELSE 0 END) AS cancelled_bookings
+  FROM bookings b
+  WHERE b.booking_date &gt;= CURRENT_DATE - INTERVAL '90 days'
+  GROUP BY b.route_id, TO_CHAR(b.travel_date, 'Day'), EXTRACT(DOW FROM b.travel_date)
+)
+SELECT
+  r.origin_station,
+  r.destination_station,
+  bs.day_of_week,
+  bs.total_bookings,
+  bs.cancelled_bookings,
+  ROUND(bs.cancelled_bookings * 100.0 / NULLIF(bs.total_bookings, 0), 2) AS cancellation_rate_pct
+FROM booking_stats bs
+JOIN routes r ON bs.route_id = r.route_id
+WHERE bs.total_bookings &gt;= 50  -- filter out low-volume routes for statistical significance
+ORDER BY cancellation_rate_pct DESC
+LIMIT 20;</code></pre>
+
+<hr>
+
+<h3>Scenario 5: Byju's — Students Who Are About to Churn</h3>
+
+<p><strong>Business Context:</strong> Byju's engagement team wants to identify students who were active (watched at least 3 sessions per week) for the first 4 weeks after signing up, but have had zero activity in the past 14 days. These are the highest-priority students for a re-engagement campaign.</p>
+
+<p><strong>Schema:</strong></p>
+<pre><code>students(student_id, name, phone, signup_date, grade, city)
+sessions(session_id, student_id, course_id, session_date, duration_minutes, completed)</code></pre>
+
+<p><strong>Approach:</strong> Two conditions — (1) was active in weeks 1–4 after signup (3+ sessions/week), and (2) no sessions in the last 14 days. Use conditional aggregation.</p>
+
+<pre><code class="language-sql">WITH early_activity AS (
+  SELECT
+    s.student_id,
+    COUNT(DISTINCT DATE_TRUNC('week', se.session_date)) AS active_weeks,
+    COUNT(se.session_id) AS total_early_sessions
+  FROM students s
+  JOIN sessions se ON s.student_id = se.student_id
+  WHERE se.session_date &gt;= s.signup_date
+    AND se.session_date &lt; s.signup_date + INTERVAL '28 days'
+  GROUP BY s.student_id
+  HAVING COUNT(se.session_id) &gt;= 12  -- avg 3 sessions/week for 4 weeks
+     AND COUNT(DISTINCT DATE_TRUNC('week', se.session_date)) &gt;= 3  -- active in at least 3 of 4 weeks
+),
+recent_activity AS (
+  SELECT DISTINCT student_id
+  FROM sessions
+  WHERE session_date &gt;= CURRENT_DATE - INTERVAL '14 days'
+)
+SELECT
+  s.student_id,
+  s.name,
+  s.phone,
+  s.city,
+  s.grade,
+  s.signup_date,
+  ea.total_early_sessions
+FROM students s
+JOIN early_activity ea ON s.student_id = ea.student_id
+LEFT JOIN recent_activity ra ON s.student_id = ra.student_id
+WHERE ra.student_id IS NULL  -- no sessions in last 14 days
+ORDER BY s.signup_date ASC;</code></pre>
+
+<hr>
+
+<h3>Scenario 6: Meesho — Supplier Performance Scorecard</h3>
+
+<p><strong>Business Context:</strong> Meesho's supplier team wants a monthly scorecard for each supplier showing: total orders fulfilled, total orders returned, return rate, average delivery time (in days), and a performance tier (Good / Average / Poor) based on return rate.</p>
+
+<p><strong>Schema:</strong></p>
+<pre><code>suppliers(supplier_id, name, city, category)
+products(product_id, supplier_id, product_name)
+orders(order_id, product_id, customer_id, order_date, dispatch_date, delivery_date, status, amount)</code></pre>
+
+<p><strong>Approach:</strong> Join tables, aggregate per supplier for the target month, calculate metrics, then apply CASE-based tier logic.</p>
+
+<pre><code class="language-sql">WITH supplier_metrics AS (
+  SELECT
+    s.supplier_id,
+    s.name AS supplier_name,
+    s.city,
+    COUNT(o.order_id) AS total_orders,
+    SUM(CASE WHEN o.status = 'Returned' THEN 1 ELSE 0 END) AS returned_orders,
+    ROUND(
+      SUM(CASE WHEN o.status = 'Returned' THEN 1 ELSE 0 END) * 100.0
+      / NULLIF(COUNT(o.order_id), 0), 2
+    ) AS return_rate_pct,
+    ROUND(
+      AVG(
+        CASE WHEN o.delivery_date IS NOT NULL
+             THEN EXTRACT(EPOCH FROM (o.delivery_date - o.dispatch_date)) / 86400
+        END
+      ), 1
+    ) AS avg_delivery_days
+  FROM suppliers s
+  JOIN products p ON s.supplier_id = p.supplier_id
+  JOIN orders o ON p.product_id = o.product_id
+  WHERE DATE_TRUNC('month', o.order_date) = DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month')
+    AND o.status NOT IN ('Cancelled')
+  GROUP BY s.supplier_id, s.name, s.city
+)
+SELECT
+  supplier_id,
+  supplier_name,
+  city,
+  total_orders,
+  returned_orders,
+  return_rate_pct,
+  avg_delivery_days,
+  CASE
+    WHEN return_rate_pct &lt; 5 THEN 'Good'
+    WHEN return_rate_pct BETWEEN 5 AND 15 THEN 'Average'
+    ELSE 'Poor'
+  END AS performance_tier
+FROM supplier_metrics
+WHERE total_orders &gt;= 10  -- exclude suppliers with too few orders for meaningful stats
+ORDER BY return_rate_pct ASC;</code></pre>
+
+<hr>
+
+<h3>Scenario 7: Razorpay — Monthly Revenue Cohort Analysis</h3>
+
+<p><strong>Business Context:</strong> Razorpay's growth team wants to understand merchant retention. For each cohort of merchants (grouped by the month they first processed a payment), show what percentage of them are still active (processed at least 1 payment) in each subsequent month.</p>
+
+<p><strong>Schema:</strong></p>
+<pre><code>merchants(merchant_id, name, industry, signup_date)
+payments(payment_id, merchant_id, amount, payment_date, status)</code></pre>
+
+<p><strong>Approach:</strong> Find each merchant's first payment month (cohort). Then for each cohort, count active merchants in each subsequent month. Calculate retention percentage.</p>
+
+<pre><code class="language-sql">WITH merchant_cohorts AS (
+  SELECT
+    merchant_id,
+    DATE_TRUNC('month', MIN(payment_date)) AS cohort_month
+  FROM payments
+  WHERE status = 'Success'
+  GROUP BY merchant_id
+),
+monthly_activity AS (
+  SELECT
+    mc.merchant_id,
+    mc.cohort_month,
+    DATE_TRUNC('month', p.payment_date) AS activity_month,
+    EXTRACT(YEAR FROM AGE(DATE_TRUNC('month', p.payment_date), mc.cohort_month)) * 12 +
+    EXTRACT(MONTH FROM AGE(DATE_TRUNC('month', p.payment_date), mc.cohort_month)) AS months_since_cohort
+  FROM merchant_cohorts mc
+  JOIN payments p ON mc.merchant_id = p.merchant_id
+  WHERE p.status = 'Success'
+  GROUP BY mc.merchant_id, mc.cohort_month, DATE_TRUNC('month', p.payment_date)
+),
+cohort_sizes AS (
+  SELECT cohort_month, COUNT(DISTINCT merchant_id) AS cohort_size
+  FROM merchant_cohorts
+  GROUP BY cohort_month
+)
+SELECT
+  ma.cohort_month,
+  ma.months_since_cohort,
+  COUNT(DISTINCT ma.merchant_id) AS active_merchants,
+  cs.cohort_size,
+  ROUND(COUNT(DISTINCT ma.merchant_id) * 100.0 / cs.cohort_size, 1) AS retention_pct
+FROM monthly_activity ma
+JOIN cohort_sizes cs ON ma.cohort_month = cs.cohort_month
+GROUP BY ma.cohort_month, ma.months_since_cohort, cs.cohort_size
+ORDER BY ma.cohort_month, ma.months_since_cohort;</code></pre>
+
+<hr>
+
+<h3>Scenario 8: Zomato — Restaurant Revenue Share by Cuisine Type</h3>
+
+<p><strong>Business Context:</strong> Zomato's analytics team wants to see, for each city, which cuisine type drives the most order revenue — and what percentage of the city's total revenue each cuisine represents. The output should show the top 3 cuisines per city.</p>
+
+<p><strong>Schema:</strong></p>
+<pre><code>restaurants(restaurant_id, name, city, cuisine_type, rating)
+orders(order_id, restaurant_id, customer_id, order_date, total_amount, status)</code></pre>
+
+<p><strong>Approach:</strong> Group by city and cuisine. Calculate revenue per group. Use a window function to get city totals and city-level cuisine rank.</p>
+
+<pre><code class="language-sql">WITH cuisine_revenue AS (
+  SELECT
+    r.city,
+    r.cuisine_type,
+    SUM(o.total_amount) AS cuisine_revenue,
+    SUM(SUM(o.total_amount)) OVER (PARTITION BY r.city) AS city_total_revenue
+  FROM restaurants r
+  JOIN orders o ON r.restaurant_id = o.restaurant_id
+  WHERE o.status = 'Delivered'
+    AND o.order_date &gt;= CURRENT_DATE - INTERVAL '3 months'
+  GROUP BY r.city, r.cuisine_type
+),
+ranked_cuisines AS (
+  SELECT
+    city,
+    cuisine_type,
+    cuisine_revenue,
+    city_total_revenue,
+    ROUND(cuisine_revenue * 100.0 / NULLIF(city_total_revenue, 0), 2) AS revenue_share_pct,
+    RANK() OVER (PARTITION BY city ORDER BY cuisine_revenue DESC) AS cuisine_rank
+  FROM cuisine_revenue
+)
+SELECT
+  city,
+  cuisine_rank,
+  cuisine_type,
+  cuisine_revenue,
+  revenue_share_pct
+FROM ranked_cuisines
+WHERE cuisine_rank &lt;= 3
+ORDER BY city, cuisine_rank;</code></pre>
+
+<hr>
+
+<h3>Scenario 9: Nykaa — Repeat Purchase Rate by Product Category</h3>
+
+<p><strong>Business Context:</strong> Nykaa's product team wants to understand which categories drive repeat buyers. For each category, find: total customers who bought from it, customers who bought from it more than once, and the repeat purchase rate. Show how the repeat rate changed versus last quarter.</p>
+
+<p><strong>Schema:</strong></p>
+<pre><code>customers(customer_id, name, city, signup_date)
+products(product_id, product_name, category, brand)
+orders(order_id, customer_id, order_date, status)
+order_items(order_item_id, order_id, product_id, quantity, unit_price)</code></pre>
+
+<p><strong>Approach:</strong> For each category, count distinct customers and those with 2+ purchases. Use conditional aggregation. Repeat for current and previous quarter, then join to compare.</p>
+
+<pre><code class="language-sql">WITH current_quarter AS (
+  SELECT
+    p.category,
+    COUNT(DISTINCT o.customer_id) AS total_buyers,
+    COUNT(DISTINCT CASE
+      WHEN buyer_counts.purchase_count &gt; 1 THEN o.customer_id
+    END) AS repeat_buyers
+  FROM orders o
+  JOIN order_items oi ON o.order_id = oi.order_id
+  JOIN products p ON oi.product_id = p.product_id
+  JOIN (
+    SELECT o2.customer_id, p2.category, COUNT(DISTINCT o2.order_id) AS purchase_count
+    FROM orders o2
+    JOIN order_items oi2 ON o2.order_id = oi2.order_id
+    JOIN products p2 ON oi2.product_id = p2.product_id
+    WHERE o2.order_date &gt;= DATE_TRUNC('quarter', CURRENT_DATE)
+      AND o2.status = 'Delivered'
+    GROUP BY o2.customer_id, p2.category
+  ) buyer_counts ON o.customer_id = buyer_counts.customer_id
+                AND p.category = buyer_counts.category
+  WHERE o.order_date &gt;= DATE_TRUNC('quarter', CURRENT_DATE)
+    AND o.status = 'Delivered'
+  GROUP BY p.category
+),
+prev_quarter AS (
+  SELECT
+    p.category,
+    COUNT(DISTINCT o.customer_id) AS total_buyers_prev,
+    COUNT(DISTINCT CASE
+      WHEN buyer_counts.purchase_count &gt; 1 THEN o.customer_id
+    END) AS repeat_buyers_prev
+  FROM orders o
+  JOIN order_items oi ON o.order_id = oi.order_id
+  JOIN products p ON oi.product_id = p.product_id
+  JOIN (
+    SELECT o2.customer_id, p2.category, COUNT(DISTINCT o2.order_id) AS purchase_count
+    FROM orders o2
+    JOIN order_items oi2 ON o2.order_id = oi2.order_id
+    JOIN products p2 ON oi2.product_id = p2.product_id
+    WHERE o2.order_date &gt;= DATE_TRUNC('quarter', CURRENT_DATE) - INTERVAL '3 months'
+      AND o2.order_date &lt; DATE_TRUNC('quarter', CURRENT_DATE)
+      AND o2.status = 'Delivered'
+    GROUP BY o2.customer_id, p2.category
+  ) buyer_counts ON o.customer_id = buyer_counts.customer_id
+                AND p.category = buyer_counts.category
+  WHERE o.order_date &gt;= DATE_TRUNC('quarter', CURRENT_DATE) - INTERVAL '3 months'
+    AND o.order_date &lt; DATE_TRUNC('quarter', CURRENT_DATE)
+    AND o.status = 'Delivered'
+  GROUP BY p.category
+)
+SELECT
+  cq.category,
+  cq.total_buyers,
+  cq.repeat_buyers,
+  ROUND(cq.repeat_buyers * 100.0 / NULLIF(cq.total_buyers, 0), 2) AS repeat_rate_current,
+  ROUND(pq.repeat_buyers_prev * 100.0 / NULLIF(pq.total_buyers_prev, 0), 2) AS repeat_rate_prev,
+  ROUND(
+    (cq.repeat_buyers * 100.0 / NULLIF(cq.total_buyers, 0)) -
+    (pq.repeat_buyers_prev * 100.0 / NULLIF(pq.total_buyers_prev, 0)), 2
+  ) AS repeat_rate_change
+FROM current_quarter cq
+LEFT JOIN prev_quarter pq ON cq.category = pq.category
+ORDER BY repeat_rate_current DESC;</code></pre>
+
+<hr>
+
+<h3>Scenario 10: OLA — Driver Utilization Report</h3>
+
+<p><strong>Business Context:</strong> OLA's operations team wants a daily driver utilization report for each city. For each driver, they want to know: how many hours they were online, how many trips they completed, their average trip duration, their earnings, and their utilization percentage (time on trip / time online).</p>
+
+<p><strong>Schema:</strong></p>
+<pre><code>drivers(driver_id, name, city, vehicle_type, joining_date)
+trips(trip_id, driver_id, customer_id, pickup_city, start_time, end_time, distance_km, fare, status)
+driver_sessions(session_id, driver_id, login_time, logout_time)</code></pre>
+
+<p><strong>Approach:</strong> Join trips and sessions per driver. Calculate time-on-trip, time-online, and derive utilization.</p>
+
+<pre><code class="language-sql">WITH daily_trips AS (
+  SELECT
+    driver_id,
+    DATE(start_time) AS trip_date,
+    COUNT(*) AS completed_trips,
+    SUM(EXTRACT(EPOCH FROM (end_time - start_time)) / 3600) AS hours_on_trip,
+    ROUND(AVG(EXTRACT(EPOCH FROM (end_time - start_time)) / 60), 1) AS avg_trip_minutes,
+    SUM(fare) AS total_earnings
+  FROM trips
+  WHERE status = 'Completed'
+    AND DATE(start_time) = CURRENT_DATE - 1  -- yesterday's report
+  GROUP BY driver_id, DATE(start_time)
+),
+daily_sessions AS (
+  SELECT
+    driver_id,
+    DATE(login_time) AS session_date,
+    SUM(EXTRACT(EPOCH FROM (logout_time - login_time)) / 3600) AS hours_online
+  FROM driver_sessions
+  WHERE DATE(login_time) = CURRENT_DATE - 1
+    AND logout_time IS NOT NULL
+  GROUP BY driver_id, DATE(login_time)
+)
+SELECT
+  d.driver_id,
+  d.name,
+  d.city,
+  d.vehicle_type,
+  COALESCE(dt.completed_trips, 0) AS completed_trips,
+  ROUND(COALESCE(ds.hours_online, 0), 2) AS hours_online,
+  ROUND(COALESCE(dt.hours_on_trip, 0), 2) AS hours_on_trip,
+  COALESCE(dt.avg_trip_minutes, 0) AS avg_trip_minutes,
+  COALESCE(dt.total_earnings, 0) AS total_earnings,
+  ROUND(
+    COALESCE(dt.hours_on_trip, 0) * 100.0
+    / NULLIF(COALESCE(ds.hours_online, 0), 0), 1
+  ) AS utilization_pct
+FROM drivers d
+LEFT JOIN daily_trips dt ON d.driver_id = dt.driver_id
+LEFT JOIN daily_sessions ds ON d.driver_id = ds.driver_id
+WHERE ds.session_date IS NOT NULL  -- only show drivers who were online yesterday
+ORDER BY d.city, utilization_pct DESC;</code></pre>
+
+<hr>
+
+<h2>What Each Part Means</h2>
+
+<table>
+<thead><tr><th>Technique Used</th><th>When to Use It</th></tr></thead>
+<tbody>
+<tr><td>CTE (WITH clause)</td><td>Break complex logic into named steps for readability</td></tr>
+<tr><td>LEFT JOIN + IS NULL</td><td>Find rows in A that have no match in B</td></tr>
+<tr><td>CASE inside SUM</td><td>Count only rows matching a condition (conditional aggregation)</td></tr>
+<tr><td>Window function RANK</td><td>Top-N per group without eliminating rows</td></tr>
+<tr><td>NULLIF(expr, 0)</td><td>Prevent division by zero</td></tr>
+<tr><td>DATE_TRUNC</td><td>Group by week/month/quarter consistently</td></tr>
+<tr><td>COALESCE</td><td>Replace NULLs with defaults in the output</td></tr>
+<tr><td>Self-join with time range</td><td>Find events related to each other by proximity in time</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>Let's Try It Out</h2>
+
+<p>Take this business scenario and try writing the query yourself:</p>
+
+<p><strong>Scenario:</strong> A food delivery app wants to know which customers placed their first order in January 2024, and of those, how many came back to order again in February 2024. Show the count of "retained" first-time January customers and the retention percentage.</p>
+
+<p>Hint: You need a cohort of January first-timers, then a left-join to February orders.</p>
+
+<hr>
+
+<h2>Things That Trip People Up</h2>
+
+<p>Scenarios often involve multi-step logic. The mistake is trying to write one giant query instead of building it in CTEs. Break the problem into steps — write each step as a CTE, verify it in your head, then combine.</p>
+
+<p>NULL handling trips people up in scenario queries. When a LEFT JOIN finds no match, all columns from the right table are NULL. If you then do arithmetic on those NULLs (like calculating a rate), you get NULL. Use COALESCE or NULLIF to handle this explicitly.</p>
+
+<p>Date ranges are a common source of bugs. Always check: is the interval inclusive or exclusive? "Last 30 days" — does that include today? Most business questions treat "last 30 days" as the 30 days before today, not including today. Clarify if the interviewer doesn't specify.</p>
+
+<hr>
+
+<h2>Common Mistakes</h2>
+
+<ul><li>Not clarifying the schema before writing. If a column like <code>status</code> can have multiple values, ask what values are valid and which ones to include.</li><li>Using INNER JOIN when some records might not have matches. A restaurant with no orders in the period will disappear from the result with INNER JOIN. Usually not what the business wants.</li><li>Forgetting to exclude cancelled/invalid records. Most business questions want "successful" transactions, not all records. Always filter for relevant statuses.</li><li>Not using NULLIF when dividing. If a cohort has 0 merchants, dividing by 0 causes an error. Always wrap denominators in NULLIF(..., 0).</li><li>Over-complicating in one step. Break complex scenarios into CTEs. Each CTE should be explainable in one sentence.</li></ul>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<p>In a live interview, when given a scenario question, say the intermediate steps out loud before writing the final query. "First I'll get the cohort, then I'll join to activity data, then I'll calculate the percentage." This shows structured thinking.</p>
+
+<p>Use meaningful CTE names — <code>merchant<em>cohorts</code>, <code>monthly</em>activity</code>, <code>cohort_sizes</code> — not <code>cte1</code>, <code>cte2</code>. It makes your intent clear without explanation.</p>
+
+<p>Always handle NULLs at the end — use COALESCE to replace NULLs with 0 for numeric metrics, or 'Unknown' for categorical ones.</p>
+
+<p>After writing the query, walk through a sample row manually: "For this one merchant, cohort March 2024, activity in month 2: this row says 15 merchants were active. Does that make sense?" Sanity-checking your own output impresses interviewers.</p>
+
+<hr>
+
+<h2>How Companies Use This Every Day</h2>
+
+<p>These scenarios aren't hypothetical — they are the actual analytical work at these companies. A data analyst at Swiggy owns a dashboard showing delivery partner rating trends by city. An analyst at Razorpay runs cohort retention reports every Monday morning for the growth team. An operations analyst at OLA sends the driver utilization report to city managers each day.</p>
+
+<p>The SQL in this guide is close to what those reports actually look like. The schemas are simplified, but the logic — time-window filtering, cohort analysis, conditional aggregation, partition-based ranking — is real.</p>
+
+<hr>
+
+<h2>The Big Picture</h2>
+
+<p>Scenario questions test whether you can go from a business problem to working SQL without step-by-step guidance. The companies asking these questions are hiring people who will work independently with data — not people who need to be told exactly which tables to use and which columns to join.</p>
+
+<p>The skill gap between people who can answer scenario questions and people who can't is usually not SQL syntax. It's the ability to translate business language into data logic. Practice reading business descriptions and identifying: what's the unit of analysis? What filter applies? What metric is being calculated? How does the result get grouped and sorted?</p>
+
+<p>Once that translation becomes automatic, the SQL is the easy part.</p>
+
+<hr>
+
+<h2>Before You Move On</h2>
+
+<p>Before your next interview, practice taking a business question from your own domain and writing the SQL from scratch:</p>
+<ul><li>Define the tables involved</li><li>Write the query in plain English first</li><li>Translate each step to SQL</li><li>Handle NULLs and edge cases</li><li>Read the output back in business terms</li></ul>
+
+<hr>
+
+<h2>Practice Questions</h2>
+
+<ol><li>Write a query to find customers who spent more than ₹10,000 in their first month but have not placed an order in the past 60 days.</li><li>For a bike rental app, find stations where bikes are returned but never picked up in the afternoon peak hours (5 PM – 8 PM). What does this suggest operationally?</li><li>Write a query to find the most popular payment method per city for orders above ₹500.</li><li>An edtech platform wants to find courses where more than 50% of students who started never finished even one module. Write the query.</li><li>Find all merchants who were in the top 10 by revenue last month but are NOT in the top 10 this month.</li></ol>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>The best way to prepare for scenario questions is to work with real datasets. Load a publicly available dataset — Indian e-commerce sales data, IRCTC booking data, whatever is close to the domain you're interviewing in — and write analytical queries against it. Ask yourself business questions and answer them in SQL.</p>
+
+<p>Scenario questions reward the combination of domain intuition and SQL fluency. The more you practice translating real-world questions into queries, the more natural it becomes. By the time you walk into the interview, it shouldn't feel like a test — it should feel like the work you already do.</p>
+
+  `,
 };
 
 // Build a flat ordered list of all topic ids for prev/next navigation
