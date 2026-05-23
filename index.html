@@ -289,7 +289,13 @@
     <div class="nav-links">
       <a class="nav-link" onclick="scrollToFeatures()">Features</a>
       <a class="nav-link" onclick="scrollToQuestions()">Problems</a>
-      <a class="nav-link nav-link-learn" onclick="showLearn()">Learn SQL</a>
+      <div class="nav-dropdown-wrap">
+        <a class="nav-link nav-link-learn nav-dropdown-trigger" onclick="toggleLearnDropdown(event)">Learn <span class="nav-dd-arrow">▾</span></a>
+        <div class="nav-dropdown-menu" id="learnDropMenu">
+          <a class="nav-dropdown-item" onclick="closeLearnDropdown(); showLearn()">Learn SQL<span class="nd-label">16 modules · SQL from basics to advanced</span></a>
+          <a class="nav-dropdown-item" href="/learn-case-study.html">Business Case Study<span class="nd-label">10 modules · How analysts think through problems</span></a>
+        </div>
+      </div>
       <a class="nav-link nav-link-admin" id="adminNavLink" href="/admin-panel.html" target="_blank" style="display:none">⚙️ Admin</a>
     </div>
     <!-- Theme toggle — always visible -->

@@ -3802,6 +3802,21 @@ var Auth = (function () {
   };
 })();
 
+// ── LEARN DROPDOWN ────────────────────────────────────────────────
+function toggleLearnDropdown(e) {
+  e.stopPropagation();
+  var menu = document.getElementById('learnDropMenu');
+  if (!menu) return;
+  var isOpen = menu.classList.toggle('open');
+  if (isOpen) {
+    document.addEventListener('click', closeLearnDropdown, { once: true });
+  }
+}
+function closeLearnDropdown() {
+  var menu = document.getElementById('learnDropMenu');
+  if (menu) menu.classList.remove('open');
+}
+
 // ── THEME ─────────────────────────────────────────────────────────
 function initTheme() {
   var t = localStorage.getItem('msql_theme') || 'dark';
