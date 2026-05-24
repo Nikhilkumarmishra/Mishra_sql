@@ -4,21 +4,74 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Business Case Studies for Data Analysts | AnalystWorld</title>
-<meta name="description" content="Learn how data analysts actually think through business problems. 10 modules covering metric cases, root cause analysis, A/B testing, SQL cases, and more — with Indian business examples throughout."/>
+<meta name="description" content="Learn how data analysts actually think through business problems. 10 modules covering metric cases, root cause analysis, A/B testing, SQL cases — with Indian business examples throughout."/>
 <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
 <link rel="stylesheet" href="/style.css"/>
 <style>
-  /* ── page-level overrides for standalone file ── */
-  html, body { margin: 0; padding: 0; height: 100%; }
-  body { background: var(--bg); color: var(--text); font-family: var(--sans); }
-  /* hide the .page / .active SPA system — this is a standalone page */
+html,body{margin:0;padding:0;height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--sans)}
+
+/* ── Article content blocks ─────────────────────────────── */
+.art-lead{font-size:1.05rem;color:var(--text);line-height:1.75;margin-bottom:24px;font-weight:400}
+
+.art-callout{background:rgba(0,200,150,0.07);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:14px 20px;margin:22px 0;font-size:0.92rem;line-height:1.7;color:var(--muted)}
+.art-callout strong{color:var(--accent)}
+
+.art-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 22px;margin:22px 0}
+.art-blabel{font-size:0.67rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+
+.art-steps{margin:20px 0;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.art-step{display:flex;gap:14px;padding:14px 18px;border-bottom:1px solid var(--border);align-items:flex-start}
+.art-step:last-child{border-bottom:none}
+.art-snum{background:var(--accent);color:#0a0b0e;font-size:.75rem;font-weight:700;min-width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.art-sbody{flex:1}
+.art-sbody strong{display:block;font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:3px}
+.art-sbody p{margin:0;font-size:.87rem;color:var(--muted);line-height:1.6}
+
+.art-type-list{display:flex;flex-direction:column;gap:10px;margin:20px 0}
+.art-type{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 18px}
+.art-type-name{font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:3px}
+.art-type-eg{font-size:.79rem;color:var(--accent);font-family:var(--mono);margin-bottom:6px;opacity:.85}
+.art-type-desc{font-size:.85rem;color:var(--muted);line-height:1.55}
+
+.art-warn{background:rgba(240,165,0,0.07);border-left:3px solid #f0a500;border-radius:0 8px 8px 0;padding:12px 18px;margin:18px 0;font-size:.9rem;color:var(--muted);line-height:1.65}
+.art-warn strong{color:#f0a500}
+
+.art-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0}
+.art-compare-bad{background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:14px 16px}
+.art-compare-good{background:rgba(0,200,150,.05);border:1px solid rgba(0,200,150,.25);border-radius:8px;padding:14px 16px}
+.art-clabel{font-size:.67rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.art-compare-bad .art-clabel{color:#ef4444}
+.art-compare-good .art-clabel{color:var(--accent)}
+.art-ctext{font-size:.86rem;color:var(--muted);line-height:1.55}
+
+.art-wt{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:22px 0}
+.art-wt-head{background:var(--bg2);border-bottom:1px solid var(--border);padding:9px 18px;font-size:.67rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--hint)}
+.art-wt-body{padding:6px 0}
+.art-wt-step{padding:14px 18px;border-bottom:1px dashed var(--border)}
+.art-wt-step:last-child{border-bottom:none}
+.art-wt-label{font-size:.7rem;font-weight:700;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
+.art-wt-text{font-size:.88rem;color:var(--muted);line-height:1.65}
+.art-wt-text code{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-family:var(--mono);font-size:.83em;color:var(--accent)}
+
+.art-two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}
+.art-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+.art-card-title{font-size:.84rem;font-weight:600;color:var(--text);margin-bottom:5px}
+.art-card p{font-size:.84rem;color:var(--muted);line-height:1.55;margin:0}
+
+.art-takeaway{background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:0 0 8px 8px;padding:16px 20px;margin-top:32px;font-size:.9rem;color:var(--muted);line-height:1.65}
+.art-tlabel{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:7px}
+
+.art-rule{border:none;border-top:1px solid var(--border);margin:28px 0}
+
+@media(max-width:640px){
+  .art-two-col{grid-template-columns:1fr}
+  .art-compare{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════════════
-     LEARN NAV
-══════════════════════════════════════════════════════════ -->
 <div class="learn-nav">
   <div class="learn-nav-logo" onclick="window.location.href='/home'">Analyst<span> World</span></div>
   <div class="learn-nav-center">Business Case Studies</div>
@@ -27,887 +80,1402 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════
-     LEARN BODY
-══════════════════════════════════════════════════════════ -->
 <div class="learn-body">
-
-  <!-- SIDEBAR -->
   <aside class="learn-sidebar-wrap">
     <div class="learn-search-wrap">
-      <input type="text" class="learn-search" id="csSearch"
-             placeholder="Search topics..."
-             oninput="handleCsSearch(event)"/>
+      <input type="text" class="learn-search" id="csSearch" placeholder="Search topics..." oninput="handleCsSearch(event)"/>
       <span class="learn-search-icon">⌕</span>
     </div>
-    <div class="learn-sidebar" id="csSidebar">
-      <!-- Built by buildCsSidebar() -->
-    </div>
+    <div class="learn-sidebar" id="csSidebar"></div>
   </aside>
 
-  <!-- CONTENT -->
   <main class="learn-content-wrap" id="csContentWrap">
     <div class="learn-content" id="csContent">
       <div class="learn-welcome">
         <div class="lw-icon">🧠</div>
         <h2>Business Case Studies for Data Analysts</h2>
         <p>From zero to interview-ready — how analysts actually think through business problems.</p>
-        <p style="margin-top:8px;font-size:0.88rem;color:var(--muted)">Select a topic from the sidebar to begin.</p>
+        <p style="margin-top:6px;font-size:.88rem;color:var(--muted)">Pick a topic from the sidebar to begin.</p>
       </div>
     </div>
   </main>
-
 </div>
 
 <script>
-// ================================================================
-//  Case Study Data & Logic
-// ================================================================
-
+// ── DATA ─────────────────────────────────────────────────────────
 var CS_DATA = [
-  {
-    id: 'cs1', icon: '🎯',
-    title: 'What Actually Is a Business Case Study?',
-    topics: [
-      { id: 'cs1-t1', title: 'What interviewers are really testing' },
-      { id: 'cs1-t2', title: 'The 5 types of cases analysts face' },
-      { id: 'cs1-t3', title: 'Why most people fail before they even start' }
-    ]
-  },
-  {
-    id: 'cs2', icon: '🗺️',
-    title: 'The Framework Before You Speak',
-    topics: [
-      { id: 'cs2-t1', title: 'Clarify before you dive' },
-      { id: 'cs2-t2', title: 'The Clarify → Structure → Hypothesize → Analyze → Recommend flow' },
-      { id: 'cs2-t3', title: 'Why silence for 30 seconds is a green flag' },
-      { id: 'cs2-t4', title: 'Example: "Zomato orders dropped 20% this week"' }
-    ]
-  },
-  {
-    id: 'cs3', icon: '📉',
-    title: 'Metric Deep Dive Cases',
-    topics: [
-      { id: 'cs3-t1', title: 'What is a metric case' },
-      { id: 'cs3-t2', title: 'Leading vs lagging indicators' },
-      { id: 'cs3-t3', title: 'Building a metric tree' },
-      { id: 'cs3-t4', title: 'Example: "Swiggy\'s DAU dropped — diagnose it step by step"' }
-    ]
-  },
-  {
-    id: 'cs4', icon: '🔍',
-    title: 'Root Cause Analysis',
-    topics: [
-      { id: 'cs4-t1', title: 'The hypothesis tree approach' },
-      { id: 'cs4-t2', title: 'The 5-why method for analysts' },
-      { id: 'cs4-t3', title: 'Internal vs external factors' },
-      { id: 'cs4-t4', title: 'Example: "Blinkit\'s revenue per order fell — find the cause"' }
-    ]
-  },
-  {
-    id: 'cs5', icon: '🛠️',
-    title: 'Product Cases for Analysts',
-    topics: [
-      { id: 'cs5-t1', title: 'How analyst product cases differ from PM cases' },
-      { id: 'cs5-t2', title: 'Feature impact analysis' },
-      { id: 'cs5-t3', title: 'Success metrics definition' },
-      { id: 'cs5-t4', title: 'Example: "Flipkart added a new checkout flow — was it successful?"' }
-    ]
-  },
-  {
-    id: 'cs6', icon: '🔢',
-    title: 'Estimation and Guesstimate Cases',
-    topics: [
-      { id: 'cs6-t1', title: 'Why companies ask these' },
-      { id: 'cs6-t2', title: 'The top-down vs bottom-up approach' },
-      { id: 'cs6-t3', title: 'Sanity checking your answer' },
-      { id: 'cs6-t4', title: 'Example: "Estimate Ola rides in Bangalore per day"' }
-    ]
-  },
-  {
-    id: 'cs7', icon: '🧪',
-    title: 'A/B Test and Experiment Cases',
-    topics: [
-      { id: 'cs7-t1', title: 'What interviewers actually want here' },
-      { id: 'cs7-t2', title: 'Setting up an experiment correctly' },
-      { id: 'cs7-t3', title: 'Reading results without getting fooled' },
-      { id: 'cs7-t4', title: 'Tradeoffs and when NOT to ship' },
-      { id: 'cs7-t5', title: 'Example: "A/B test showed +3% CTR — should we roll it out?"' }
-    ]
-  },
-  {
-    id: 'cs8', icon: '🗄️',
-    title: 'SQL + Data Cases',
-    topics: [
-      { id: 'cs8-t1', title: 'When they give you a dataset and a business question' },
-      { id: 'cs8-t2', title: 'Translating business questions into queries' },
-      { id: 'cs8-t3', title: 'Presenting your output as a story' },
-      { id: 'cs8-t4', title: 'Example: "Find our most valuable customer segment"' }
-    ]
-  },
-  {
-    id: 'cs9', icon: '🎤',
-    title: 'How to Present Your Answer',
-    topics: [
-      { id: 'cs9-t1', title: 'The SCQA structure' },
-      { id: 'cs9-t2', title: 'Speaking with confidence, not complexity' },
-      { id: 'cs9-t3', title: 'What interviewers are scoring you on' },
-      { id: 'cs9-t4', title: 'The difference between a 6/10 and a 9/10 answer' }
-    ]
-  },
-  {
-    id: 'cs10', icon: '⚠️',
-    title: 'Mistakes That Kill Good Candidates',
-    topics: [
-      { id: 'cs10-t1', title: 'Jumping to solutions before clarifying' },
-      { id: 'cs10-t2', title: 'Being vague about metrics' },
-      { id: 'cs10-t3', title: 'Over-engineering simple problems' },
-      { id: 'cs10-t4', title: 'Confusing correlation with causation' },
-      { id: 'cs10-t5', title: 'What to do when you\'re stuck' }
-    ]
-  }
+  { id:'cs1', title:'What Is a Business Case Study?', topics:[
+    { id:'cs1-t1', title:'What the interviewer is actually evaluating' },
+    { id:'cs1-t2', title:'The five types of cases you\'ll face' },
+    { id:'cs1-t3', title:'Why most people fail in the first two minutes' }
+  ]},
+  { id:'cs2', title:'The Framework Before You Speak', topics:[
+    { id:'cs2-t1', title:'Ask before you answer' },
+    { id:'cs2-t2', title:'The five-step analysis framework' },
+    { id:'cs2-t3', title:'Why pausing is a strength, not a weakness' },
+    { id:'cs2-t4', title:'Walkthrough — Zomato orders dropped 20%' }
+  ]},
+  { id:'cs3', title:'Metric Deep Dive Cases', topics:[
+    { id:'cs3-t1', title:'What makes a metric case different' },
+    { id:'cs3-t2', title:'Leading vs lagging indicators' },
+    { id:'cs3-t3', title:'How to build a metric tree' },
+    { id:'cs3-t4', title:'Walkthrough — Swiggy\'s DAU fell 18%' }
+  ]},
+  { id:'cs4', title:'Root Cause Analysis', topics:[
+    { id:'cs4-t1', title:'Building a hypothesis tree' },
+    { id:'cs4-t2', title:'The 5-why method for analysts' },
+    { id:'cs4-t3', title:'Internal causes vs external causes' },
+    { id:'cs4-t4', title:'Walkthrough — Blinkit\'s revenue per order dropped' }
+  ]},
+  { id:'cs5', title:'Product Cases for Analysts', topics:[
+    { id:'cs5-t1', title:'How analyst product cases differ from PM cases' },
+    { id:'cs5-t2', title:'Measuring a feature\'s impact correctly' },
+    { id:'cs5-t3', title:'Defining success before you ship' },
+    { id:'cs5-t4', title:'Walkthrough — Flipkart\'s new checkout flow' }
+  ]},
+  { id:'cs6', title:'Estimation and Guesstimates', topics:[
+    { id:'cs6-t1', title:'Why companies ask guesstimate questions' },
+    { id:'cs6-t2', title:'Top-down vs bottom-up estimation' },
+    { id:'cs6-t3', title:'Sanity-checking your own numbers' },
+    { id:'cs6-t4', title:'Walkthrough — Ola rides in Bangalore per day' }
+  ]},
+  { id:'cs7', title:'A/B Testing and Experiments', topics:[
+    { id:'cs7-t1', title:'What the interviewer is really looking for' },
+    { id:'cs7-t2', title:'The six elements of a proper experiment' },
+    { id:'cs7-t3', title:'Reading results without being fooled' },
+    { id:'cs7-t4', title:'When not to ship, even with a positive result' },
+    { id:'cs7-t5', title:'Walkthrough — +3% CTR, should we roll it out?' }
+  ]},
+  { id:'cs8', title:'SQL and Data Cases', topics:[
+    { id:'cs8-t1', title:'Getting oriented before you query' },
+    { id:'cs8-t2', title:'Translating business questions into SQL' },
+    { id:'cs8-t3', title:'Turning query output into a story' },
+    { id:'cs8-t4', title:'Walkthrough — Find our most valuable customers' }
+  ]},
+  { id:'cs9', title:'Presenting Your Answer', topics:[
+    { id:'cs9-t1', title:'The SCQA structure' },
+    { id:'cs9-t2', title:'Simple language beats jargon every time' },
+    { id:'cs9-t3', title:'What you\'re actually being scored on' },
+    { id:'cs9-t4', title:'What separates a 6 from a 9' }
+  ]},
+  { id:'cs10', title:'Mistakes That Kill Good Candidates', topics:[
+    { id:'cs10-t1', title:'Jumping in before clarifying' },
+    { id:'cs10-t2', title:'Being vague about metrics' },
+    { id:'cs10-t3', title:'Over-engineering a simple problem' },
+    { id:'cs10-t4', title:'Correlation is not causation' },
+    { id:'cs10-t5', title:'How to recover when you\'re stuck' }
+  ]}
 ];
 
-// Flat list for prev/next navigation
 var CS_FLAT = [];
-CS_DATA.forEach(function(mod) {
-  mod.topics.forEach(function(t) { CS_FLAT.push(t); });
-});
+CS_DATA.forEach(function(m){ m.topics.forEach(function(t){ CS_FLAT.push(t); }); });
 
-// ── CONTENT ─────────────────────────────────────────────────────
+// ── CONTENT ──────────────────────────────────────────────────────
 var CS_CONTENT = {};
 
+// ── MODULE 1 ─────────────────────────────────────────────────────
+
 CS_CONTENT['cs1-t1'] = `
-<h1>What interviewers are really testing</h1>
-<p>If you walk into a business case interview thinking they want the "right answer," you've already lost. There is no right answer. What they're actually testing is how you think.</p>
-<p>When a Zomato interviewer asks "why did our order volume drop last Tuesday?", they already know the answer. The question isn't a puzzle for you to solve — it's a window into your reasoning process. Do you ask for context before diving in? Do you separate symptoms from causes? Do you know which metrics matter? Do you think like someone who'd actually be useful on a data team?</p>
-<p>Most freshers walk in with textbook frameworks memorized and immediately start reciting a structure they googled at midnight. The interviewer has heard that exact structure forty times this week. What they remember is the candidate who paused, asked two smart questions, and then built a coherent argument from real data intuition.</p>
-<p>Here's what they're actually scoring you on:</p>
-<p><strong>Structure under pressure.</strong> Can you organize a messy problem without freezing? Real analysts get messy Slack messages at 9 AM saying "revenue looks off" — they don't get a neatly formatted case prompt.</p>
-<p><strong>Business sense.</strong> Do you know that Zomato's order volume drops on hot weekday afternoons? That Swiggy runs aggressive discount campaigns on Tuesdays? Background knowledge signals genuine interest in the domain.</p>
-<p><strong>Communication.</strong> Can you explain your logic as you go? A great analysis poorly communicated is useless. In a real job, you'll present to non-technical stakeholders every week.</p>
-<p><strong>Knowing what you don't know.</strong> If you see a 20% drop and immediately say "marketing spend decreased," that's a guess, not analysis. A good candidate says "I'd want to check supply-side and demand-side separately before concluding anything."</p>
-<p>The framework, the structure, the vocabulary — all of that is learnable in a week. What's harder to fake is whether you actually think like an analyst. This course exists to build that instinct.</p>
-`;
+<h1>What the interviewer is actually evaluating</h1>
+<p class="art-lead">The case interview isn't about finding the right answer. It's about showing how you think when the answer isn't obvious.</p>
+
+<div class="art-callout">
+  When a Zomato interviewer asks "why did orders drop last Tuesday?" — they already know. The question is a window into your reasoning, not a puzzle to solve.
+</div>
+
+<h2>Four things they're actually scoring</h2>
+<div class="art-steps">
+  <div class="art-step">
+    <div class="art-snum">1</div>
+    <div class="art-sbody"><strong>Structure under pressure</strong><p>Can you organize a messy problem without freezing? Real analysts don't get neat prompts — they get a Slack at 9 AM saying "revenue looks off."</p></div>
+  </div>
+  <div class="art-step">
+    <div class="art-snum">2</div>
+    <div class="art-sbody"><strong>Business sense</strong><p>Do you know that Swiggy order volume drops on hot weekday afternoons? Domain awareness signals you've thought about the industry, not just the interview.</p></div>
+  </div>
+  <div class="art-step">
+    <div class="art-snum">3</div>
+    <div class="art-sbody"><strong>Communication</strong><p>Can you explain your logic as you go? A great analysis badly communicated is useless. On the job, you'll present to non-technical stakeholders every week.</p></div>
+  </div>
+  <div class="art-step">
+    <div class="art-snum">4</div>
+    <div class="art-sbody"><strong>Intellectual honesty</strong><p>"I'd want to check supply-side and demand-side separately before concluding" beats confidently guessing the wrong root cause every time.</p></div>
+  </div>
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Bottom line</div>
+  The framework and vocabulary are learnable in a week. What's harder to fake is whether you actually think like an analyst. That's what this course is for.
+</div>`;
 
 CS_CONTENT['cs1-t2'] = `
-<h1>The 5 types of cases analysts face</h1>
-<p>Business case interviews aren't all the same. There are roughly five distinct types, and each one requires a different mental model. Mixing them up is one of the most common junior mistakes.</p>
-<p><strong>Metric movement cases.</strong> "Our DAU dropped 15% last week — what happened?" This is the most common type. The job is diagnosis — figure out what changed and why. You'll spend most of your answer eliminating hypotheses one by one.</p>
-<p><strong>Root cause analysis cases.</strong> Similar to metric cases but more operational. "Average delivery time on Blinkit increased from 12 minutes to 19 minutes — find out why." Here you're not just looking at numbers; you're mapping a process and finding where it broke.</p>
-<p><strong>Product analytics cases.</strong> "We launched a referral program last month — is it working?" This tests whether you can define success, pick the right metrics, control for confounders, and interpret results without over-claiming.</p>
-<p><strong>Estimation / guesstimate cases.</strong> "Estimate Ola's daily gross bookings in Delhi." The answer doesn't need to be right — it needs to be reasonable, structured, and explained step by step. This tests whether you can build an estimate from first principles.</p>
-<p><strong>A/B testing and experiment cases.</strong> "We ran a test on Meesho's home page. Treatment showed a 4% lift in GMV. Should we ship?" This is more nuanced than it looks. The answer is almost never "yes, ship immediately."</p>
-<p>Different companies tend to favour different types. Consumer tech startups (Zepto, CRED, Groww) love metric and experiment cases because those are what their analysts deal with daily. Consulting-adjacent roles favour estimation and product cases. Knowing the type of case in front of you within the first 60 seconds changes how you approach it.</p>
-`;
+<h1>The five types of cases you'll face</h1>
+<p class="art-lead">Not all case interviews are the same. Each type has a different goal and a different mental model. Mixing them up wastes time and signals inexperience.</p>
+
+<div class="art-type-list">
+  <div class="art-type">
+    <div class="art-type-name">Metric movement</div>
+    <div class="art-type-eg">"Our DAU dropped 15% last week — what happened?"</div>
+    <div class="art-type-desc">The most common type. Your job is diagnosis — eliminate hypotheses one by one until you find what changed and why.</div>
+  </div>
+  <div class="art-type">
+    <div class="art-type-name">Root cause analysis</div>
+    <div class="art-type-eg">"Blinkit's average delivery time rose from 12 to 19 minutes — find out why."</div>
+    <div class="art-type-desc">More operational. You're not just reading numbers — you're mapping a process and finding exactly where it broke.</div>
+  </div>
+  <div class="art-type">
+    <div class="art-type-name">Product analytics</div>
+    <div class="art-type-eg">"We launched a referral program last month — is it working?"</div>
+    <div class="art-type-desc">Tests whether you can define success, pick the right metrics, control for confounders, and interpret results without over-claiming.</div>
+  </div>
+  <div class="art-type">
+    <div class="art-type-name">Estimation / guesstimate</div>
+    <div class="art-type-eg">"Estimate Ola's daily gross bookings in Delhi."</div>
+    <div class="art-type-desc">The answer doesn't need to be exact — it needs to be structured and defensible. Tests first-principles thinking.</div>
+  </div>
+  <div class="art-type">
+    <div class="art-type-name">A/B testing and experiments</div>
+    <div class="art-type-eg">"We ran a test on Meesho's homepage and saw +4% GMV — should we ship?"</div>
+    <div class="art-type-desc">Almost never "yes, ship immediately." Tests statistical thinking and business judgment together.</div>
+  </div>
+</div>
+
+<div class="art-callout">
+  <strong>Company pattern:</strong> Consumer tech (Zepto, CRED, Groww) heavily favour metric and experiment cases. Consulting-adjacent roles prefer estimation and product cases. Know your target company's style before you walk in.
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Bottom line</div>
+  Identify the type of case within the first 60 seconds. It changes everything — what to clarify, which framework to use, and where to spend your time.
+</div>`;
 
 CS_CONTENT['cs1-t3'] = `
-<h1>Why most people fail before they even start</h1>
-<p>The failure usually happens in the first two minutes. Not because of bad frameworks. Because of bad instincts.</p>
-<p>The most common failure mode: someone hears the problem and immediately starts solving. Zomato orders dropped → maybe marketing budget was cut. Maybe a competitor ran a promotion. Maybe the app crashed. They just start listing possibilities without any idea what they're looking for.</p>
-<p>This looks like analysis but it isn't. It's brainstorming disguised as structure. An interviewer watching this thinks: this person would be a nightmare to work with. They'd send me a 40-bullet Slack message at 11 PM listing every possible explanation without prioritizing any of them.</p>
-<p>The second failure mode: extreme framework rigidity. The candidate says "I'll use the MECE principle to break this into supply and demand factors" — then lists six generic sub-factors for each, none of which are specific to the company or business model. It sounds structured but it's hollow. Any structure that works equally well for a food delivery app and a banking app has zero business sense in it.</p>
-<p>The third failure mode: not knowing what to ask. You can ask questions before you start analyzing. Most candidates don't. Or they ask the wrong questions — things that don't actually change how they'd analyze the problem. A good first question for "Zomato orders dropped 20%": "Is the drop uniform across geographies, or concentrated in specific cities?" That one question immediately tells you whether you're looking at a national issue (app, payment, platform-wide) or a local one (restaurant supply, weather, a competitor entering a market).</p>
-<p>The fix for all three: slow down. The first 60 seconds of a case interview should be you getting clarity, not you performing analysis. The next module drills exactly this.</p>
-`;
+<h1>Why most people fail in the first two minutes</h1>
+<p class="art-lead">The failure rarely happens because someone doesn't know enough. It happens because of bad instincts in the opening seconds.</p>
+
+<h2>The three failure modes</h2>
+
+<div class="art-warn">
+  <strong>Failure mode 1: Diving straight into solutions.</strong> They hear "Zomato orders dropped" and immediately list possibilities — competitor campaign, marketing cut, app crash. This looks like analysis but it's brainstorming disguised as structure. An interviewer watching this thinks: this person would send me a 40-bullet Slack at 11 PM listing every possible explanation without prioritizing a single one.
+</div>
+
+<div class="art-warn">
+  <strong>Failure mode 2: Rigid, generic frameworks.</strong> "I'll use the MECE principle to break this into supply and demand factors." Then proceeds to list six generic sub-factors with zero connection to the actual company or business model. It sounds structured but it's hollow — any framework that works equally well for a food delivery app and a bank has no real business sense in it.
+</div>
+
+<div class="art-warn">
+  <strong>Failure mode 3: Asking the wrong questions.</strong> They do ask clarifying questions — but ones that don't actually change their approach. A good first question for "Zomato orders dropped 20%": "Is the drop uniform across cities, or concentrated in specific geographies?" That one answer immediately tells you whether you're dealing with a national issue or a local one.
+</div>
+
+<hr class="art-rule"/>
+
+<div class="art-compare">
+  <div class="art-compare-bad">
+    <div class="art-clabel">What most candidates do</div>
+    <div class="art-ctext">Hear the problem → immediately start listing hypotheses → talk for 8 minutes → arrive at a vague conclusion</div>
+  </div>
+  <div class="art-compare-good">
+    <div class="art-clabel">What strong candidates do</div>
+    <div class="art-ctext">Hear the problem → ask 2 targeted clarifying questions → pause 30 seconds to structure → speak in an organized sequence</div>
+  </div>
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Bottom line</div>
+  The first 60 seconds should be you getting clarity, not performing analysis. Slow down before you open your mouth.
+</div>`;
+
+// ── MODULE 2 ─────────────────────────────────────────────────────
 
 CS_CONTENT['cs2-t1'] = `
-<h1>Clarify before you dive</h1>
-<p>Before you touch the problem, ask exactly two or three clarifying questions. Not one — that's too few. Not eight — that's stalling.</p>
-<p>Good clarifying questions change your approach. Bad ones don't. Here's how to tell the difference.</p>
-<p>"What time period are we looking at?" — changes your approach. A one-day drop is noise. A two-week trend is signal.</p>
-<p>"Is this metric drop on the supply side or demand side, or do we not know yet?" — changes your approach. If supply (fewer restaurants, drivers), you look in a completely different place than if demand (fewer customers ordering).</p>
-<p>"Has anything changed in the product or operations recently — new feature, new market entry, pricing change?" — changes your approach. Recent changes are always the first thing to rule in or out.</p>
-<p>Bad questions: "What is our business model?" — you should know this from context. "What are our goals for the year?" — irrelevant to diagnosing a one-week drop. "Can you define DAU?" — if you don't know what DAU means, you're in the wrong interview.</p>
-<p>The ideal clarification phase takes about 60 to 90 seconds. You ask, get answers, then say something like: "Okay, let me take 30 seconds to structure this." Then you think. Then you speak.</p>
-<p>This sequence — clarify, pause, structure, speak — is what separates a 7/10 candidate from a 9/10 candidate. Not the fancy frameworks. Not the vocabulary. Just the discipline to slow down when your instinct is to charge forward.</p>
-<p>In a PhonePe or Flipkart interview, the interviewer has already noted whether you clarify well before you've said a single word about the actual problem. That's how much this matters.</p>
-`;
+<h1>Ask before you answer</h1>
+<p class="art-lead">Ask exactly two or three clarifying questions before you touch the problem. Not one — that's too few. Not eight — that's stalling.</p>
+
+<h2>What makes a good clarifying question</h2>
+<p>A good clarifying question changes your approach. A bad one doesn't. Simple test.</p>
+
+<div class="art-two-col">
+  <div class="art-card">
+    <div class="art-card-title">Good questions</div>
+    <p>"What time period are we looking at?" — a one-day drop is noise, a two-week trend is signal.<br/><br/>"Is the drop uniform across cities, or concentrated?" — tells you national vs local issue.<br/><br/>"Has anything changed on the platform in the last two weeks?" — recent changes are always the first thing to rule in or out.</p>
+  </div>
+  <div class="art-card">
+    <div class="art-card-title">Bad questions</div>
+    <p>"What is your business model?" — you should know this from context before entering the room.<br/><br/>"What are your goals for the year?" — irrelevant to a one-week metric drop.<br/><br/>"Can you define DAU?" — if you don't know what DAU means, you're in the wrong interview.</p>
+  </div>
+</div>
+
+<div class="art-callout">
+  In a PhonePe or Flipkart interview, the interviewer has already started evaluating you before you've said a single word about the actual problem. The quality of your clarifying questions is the first real signal they get.
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Quick test</div>
+  For every question you plan to ask — would the answer actually change how you analyze the problem? If not, don't ask it.
+</div>`;
 
 CS_CONTENT['cs2-t2'] = `
-<h1>The Clarify → Structure → Hypothesize → Analyze → Recommend flow</h1>
-<p>This is the backbone. Five steps. You won't always go through all five in a 30-minute interview, but you'll always touch the first three.</p>
-<p><strong>Clarify.</strong> Ask the questions that change your analysis. Scope, time range, known context, definition of the metric. Keep it tight.</p>
-<p><strong>Structure.</strong> Before diving into hypotheses, draw a mental map of the problem space. For a metric drop, the structure is usually: Is this a data issue or a real issue? If real, is it supply-side or demand-side? If demand-side, is it acquisition (fewer new users) or retention (existing users ordering less)?</p>
-<p><strong>Hypothesize.</strong> Generate three to five possible causes, ranked by likelihood. You're not committing to any of them yet — you're laying out what you'd want to investigate. "My top hypothesis is X because of Y. I'd also want to rule out Z."</p>
-<p><strong>Analyze.</strong> This is where you'd actually look at data in a real context. In an interview, you describe what data you'd look at and what you'd expect to see. "I'd segment the drop by city first — if it's concentrated in Bengaluru, that tells me it's likely a local supply issue or a competitor entering that market."</p>
-<p><strong>Recommend.</strong> At the end, you have a conclusion. Not "we need more data" — that's a cop-out. A real recommendation: "Based on what I know, the most likely cause is X, and I'd recommend fixing Y within the next week while we investigate Z."</p>
-<p>This flow isn't a cage — it's scaffolding. Real cases are messy. The interviewer might cut you off, ask for a different hypothesis, or give you new information mid-analysis. The flow helps you pick up exactly where you left off without getting confused.</p>
-`;
+<h1>The five-step analysis framework</h1>
+<p class="art-lead">Five steps. You won't always complete all five in a 30-minute interview, but you'll always touch the first three.</p>
+
+<div class="art-steps">
+  <div class="art-step">
+    <div class="art-snum">1</div>
+    <div class="art-sbody"><strong>Clarify</strong><p>Ask the questions that change your analysis. Scope, time range, known context, definition of the metric. Keep it to 2–3 questions. Keep it tight.</p></div>
+  </div>
+  <div class="art-step">
+    <div class="art-snum">2</div>
+    <div class="art-sbody"><strong>Structure</strong><p>Before hypotheses, draw a mental map of the problem space. For a metric drop: data issue or real issue? If real — supply-side or demand-side? If demand-side — acquisition or retention?</p></div>
+  </div>
+  <div class="art-step">
+    <div class="art-snum">3</div>
+    <div class="art-sbody"><strong>Hypothesize</strong><p>Generate three to five possible causes, ranked by likelihood. You're not committing yet — you're laying out what's worth investigating. "My top hypothesis is X because of Y. I'd also rule out Z."</p></div>
+  </div>
+  <div class="art-step">
+    <div class="art-snum">4</div>
+    <div class="art-sbody"><strong>Analyze</strong><p>In a real context, you'd pull data. In an interview, describe what data you'd look at and what you'd expect to see. "I'd segment by city first — if it's concentrated in Bengaluru, it's a local issue."</p></div>
+  </div>
+  <div class="art-step">
+    <div class="art-snum">5</div>
+    <div class="art-sbody"><strong>Recommend</strong><p>Finish with a concrete conclusion. Not "we need more data" — that's a cop-out. "Based on what I know, the most likely cause is X, and I'd fix Y within the next week while investigating Z."</p></div>
+  </div>
+</div>
+
+<div class="art-callout">
+  This framework is scaffolding, not a cage. The interviewer might cut you off mid-way, give you new information, or redirect you entirely. The framework helps you pick up exactly where you left off.
+</div>`;
 
 CS_CONTENT['cs2-t3'] = `
-<h1>Why silence for 30 seconds is a green flag</h1>
-<p>Most candidates are scared of silence. They feel like thinking out loud is the only way to show they're working. So the moment the interviewer finishes the question, they start talking — filling the air with words that haven't been organized into thoughts yet.</p>
+<h1>Why pausing is a strength, not a weakness</h1>
+<p class="art-lead">Most candidates are terrified of silence. So the moment the interviewer finishes the question, they start talking — filling air with words that haven't become thoughts yet.</p>
+
 <p>Experienced interviewers find this exhausting.</p>
-<p>Taking 30 seconds to think silently, or better yet saying "Give me a moment to structure this" and writing something down — that's a signal of confidence, not weakness. It means you've been in enough real situations to know that acting before thinking is how you end up chasing the wrong root cause for three days.</p>
-<p>Here's what actually happens when good candidates pause:</p>
-<p>They decide what <em>type</em> of case this is. Metric drop? Product question? Estimation? That shapes everything.</p>
-<p>They identify the most likely fault line in the problem. Where is the break most probably happening?</p>
-<p>They mentally sequence their questions. What would I want to rule out first?</p>
-<p>They think about what data they'd need to confirm or reject each hypothesis.</p>
-<p>Thirty seconds of that is worth five minutes of rambling out loud.</p>
-<p>When you finally speak, it should be organized. "I see this as a metric movement case. Before I hypothesize, I want to clarify two things..." — that opening alone puts you above 80% of candidates, before you've said anything about the problem itself.</p>
-<p>In a CRED or Meesho analyst interview, interviewers are literally trained to flag candidates who pause and structure. It's not a trick. They want to see it.</p>
-`;
+
+<p>Taking 30 seconds to think, or saying <em>"Give me a moment to structure this"</em> — that's confidence, not weakness. It means you've been in enough real situations to know that acting before thinking is how you chase the wrong root cause for three days.</p>
+
+<h2>What good candidates actually do in those 30 seconds</h2>
+
+<div class="art-box">
+  <div class="art-blabel">Mental checklist during the pause</div>
+  <div class="art-steps">
+    <div class="art-step">
+      <div class="art-snum">→</div>
+      <div class="art-sbody"><strong>Identify the case type</strong><p>Metric drop? Product question? Estimation? The type determines the entire approach.</p></div>
+    </div>
+    <div class="art-step">
+      <div class="art-snum">→</div>
+      <div class="art-sbody"><strong>Find the most likely fault line</strong><p>Where is the break most probably happening? This narrows your hypothesis space immediately.</p></div>
+    </div>
+    <div class="art-step">
+      <div class="art-snum">→</div>
+      <div class="art-sbody"><strong>Sequence your questions</strong><p>Which clarification would change your analysis the most? Ask that one first.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="art-compare">
+  <div class="art-compare-bad">
+    <div class="art-clabel">Rambling start</div>
+    <div class="art-ctext">"So, yeah, orders dropped, which could be due to many things — maybe it's the marketing, or maybe a competitor did something, or maybe a technical issue, or..."</div>
+  </div>
+  <div class="art-compare-good">
+    <div class="art-clabel">Structured start</div>
+    <div class="art-ctext">"I see this as a metric movement case. Before I hypothesize, I want to clarify two things — is the drop uniform across cities, and has anything changed on the platform recently?"</div>
+  </div>
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Bottom line</div>
+  "Give me a moment to structure this" is one of the most powerful things you can say in a case interview. It immediately signals maturity and discipline.
+</div>`;
 
 CS_CONTENT['cs2-t4'] = `
-<h1>Example: "Zomato orders dropped 20% this week"</h1>
-<p>Let's go through this end to end. You're in an interview. The interviewer says: "Zomato orders dropped 20% this week compared to last week. What's going on?"</p>
-<p><strong>Step 1 — Clarify.</strong></p>
-<p>"Before I start, a few quick questions. Is this 20% drop across all cities or concentrated in specific geographies? And is the comparison week-over-week to the prior week, or to the same week last year?"</p>
-<p>Interviewer: "Across all cities, compared to the prior week."</p>
-<p>"One more — has there been any change on the platform side in the last two weeks? New pricing, a feature change, a payment gateway issue?"</p>
-<p>Interviewer: "Not that I know of, but worth ruling out."</p>
-<p><strong>Step 2 — Structure.</strong></p>
-<p>"Let me quickly structure this. I'll first check if this is a data artifact or a real drop. If real, I'll split it into supply-side and demand-side causes."</p>
-<p><strong>Step 3 — Hypothesize.</strong></p>
-<p>"My top three hypotheses: First, a demand-side drop — maybe a competitor ran a heavy discount campaign. Second, a supply-side issue — restaurant count or availability dropped. Third, a payment or checkout issue causing cart abandonment spikes."</p>
-<p><strong>Step 4 — Analyze.</strong></p>
-<p>"I'd start by looking at order funnel data: impressions → searches → cart adds → checkout → payment success → order placed. A drop at any specific stage narrows the cause significantly. If checkout completion rate is unchanged but order volume fell, the issue is at the top of the funnel (demand). If checkout completion dropped, it's a payment or UX issue."</p>
-<p><strong>Step 5 — Recommend.</strong></p>
-<p>"Based on what I know, I'd investigate the order funnel first within the hour. If it's a payment failure spike, that's an immediate fix. If it's demand-side, I'd look at Swiggy's recent campaign history and Zomato's own discount spend changes."</p>
-<p>That's a 7-minute answer structured cleanly. An interviewer at Zomato, Swiggy, or any similar company would rate that a strong performance.</p>
-`;
+<h1>Walkthrough — Zomato orders dropped 20%</h1>
+<p class="art-lead">Let's go through the five-step framework on a real prompt, end to end.</p>
+
+<div class="art-callout">
+  <strong>The prompt:</strong> "Zomato's order volume dropped 20% this week compared to last week. What's going on?"
+</div>
+
+<div class="art-wt">
+  <div class="art-wt-head">Step-by-step walkthrough</div>
+  <div class="art-wt-body">
+    <div class="art-wt-step">
+      <div class="art-wt-label">Step 1 — Clarify</div>
+      <div class="art-wt-text">"Before I start — is this 20% drop across all cities or concentrated in specific geographies? And is the comparison to the prior week, or to the same week last year?"<br/><br/>
+      <em>Answer: All cities, compared to the prior week.</em><br/><br/>
+      "One more — has there been any platform-side change in the last two weeks? Pricing, feature change, payment gateway issue?"<br/><br/>
+      <em>Answer: Not that I know of, but worth ruling out.</em></div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Step 2 — Structure</div>
+      <div class="art-wt-text">First check: data artifact or real drop? If real: supply-side issue (restaurants, delivery partners) or demand-side issue (fewer customers ordering)?</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Step 3 — Hypothesize</div>
+      <div class="art-wt-text">Top three hypotheses, ranked by likelihood:<br/>
+      1. Demand-side drop — a competitor (Swiggy) ran a heavy discount campaign this week.<br/>
+      2. Supply-side contraction — restaurant availability dropped, possibly due to a policy change.<br/>
+      3. Payment/checkout failure spike — a bug causing cart abandonment.</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Step 4 — Analyze</div>
+      <div class="art-wt-text">Start with the order funnel: <code>impressions → search → cart add → checkout → payment → order placed</code>. A drop at any specific stage narrows the cause immediately.<br/><br/>
+      If checkout completion rate is unchanged but volume fell — demand-side issue. If checkout completion dropped — payment or UX issue.</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Step 5 — Recommend</div>
+      <div class="art-wt-text">Investigate the order funnel first, within the hour. If it's a payment failure spike — immediate fix. If it's demand-side — pull Swiggy's recent campaign data and compare Zomato's own discount spend to last week.</div>
+    </div>
+  </div>
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Why this works</div>
+  This answer is 7 minutes and fully structured. It covers every step without rambling, uses specific data points (funnel stages), and ends with a concrete action — not "we need more data."
+</div>`;
+
+// ── MODULE 3 ─────────────────────────────────────────────────────
 
 CS_CONTENT['cs3-t1'] = `
-<h1>What is a metric case</h1>
-<p>A metric case puts one number in front of you and asks you to explain it. The number has moved — up, down, or in an unexpected direction — and your job is to figure out why.</p>
-<p>These are the most common cases in product analytics and growth roles. At companies like PhonePe, Groww, or Zepto, this is literally what analysts do on a Monday morning when the weekend report lands in their inbox.</p>
-<p>What makes a metric case different from a vague "tell me about X" question is that it's grounded. You have a specific measurement, a time period, and a direction of change. That concreteness is your friend — it gives you something to disaggregate.</p>
-<p>Every metric case has the same underlying logic: the number you're looking at is an aggregate of something more granular. Orders are an aggregate of cities, categories, device types, user segments, time of day. A change in the aggregate always traces back to a change in at least one of those sub-segments.</p>
-<p>Your job is to find which sub-segment moved, and then figure out why that sub-segment moved. Two separate questions. Don't conflate them.</p>
-<p>Also: always ask if the metric itself is being measured correctly. About 30% of real-world metric drops are data pipeline issues, timezone bugs, or dashboard miscalculations. Checking for a data artifact first saves you hours of investigation. In an interview, just mentioning this — "I'd first sanity-check whether this is a tracking issue" — immediately signals senior-level thinking.</p>
-`;
+<h1>What makes a metric case different</h1>
+<p class="art-lead">A metric case puts one number in front of you and asks you to explain it. Your job is structured disaggregation — not guessing.</p>
+
+<div class="art-callout">
+  Every metric case has the same underlying logic: the number you're looking at is an aggregate of something more granular. A change in the aggregate always traces back to a change in at least one sub-segment.
+</div>
+
+<h2>Two questions, in order</h2>
+<div class="art-two-col">
+  <div class="art-card">
+    <div class="art-card-title">Question 1: Which sub-segment moved?</div>
+    <p>Orders dropped — but where? Which city, which category, which device type, which time of day? Find the sub-segment before you hypothesize the cause.</p>
+  </div>
+  <div class="art-card">
+    <div class="art-card-title">Question 2: Why did it move?</div>
+    <p>Only after you've isolated the segment do you look for the cause. These are two separate questions. Conflating them is where most candidates get lost.</p>
+  </div>
+</div>
+
+<h2>Always check for a data artifact first</h2>
+<p>About 30% of real-world metric drops are tracking issues — data pipeline failures, timezone bugs, dashboard miscalculations. Mentioning this in an interview before diving into business hypotheses immediately signals senior-level thinking.</p>
+
+<div class="art-box">
+  <div class="art-blabel">Quick artifact check</div>
+  <div class="art-steps">
+    <div class="art-step">
+      <div class="art-snum">→</div>
+      <div class="art-sbody"><strong>Is the drop in other related metrics too?</strong><p>If revenue dropped but order count didn't — likely a calculation issue, not a real drop.</p></div>
+    </div>
+    <div class="art-step">
+      <div class="art-snum">→</div>
+      <div class="art-sbody"><strong>Did the pipeline run on time?</strong><p>Late or failed data jobs will show as a metric drop on dashboards.</p></div>
+    </div>
+    <div class="art-step">
+      <div class="art-snum">→</div>
+      <div class="art-sbody"><strong>Is the date range defined consistently?</strong><p>Week-over-week comparisons break on weeks with holidays or fiscal year boundaries.</p></div>
+    </div>
+  </div>
+</div>`;
 
 CS_CONTENT['cs3-t2'] = `
 <h1>Leading vs lagging indicators</h1>
-<p>When you're diagnosing a metric, you need to know whether you're looking at a leading or lagging indicator. Most candidates don't make this distinction, and it leads to confused analysis.</p>
-<p>A <strong>lagging indicator</strong> tells you what already happened. Revenue is a lagging indicator. So is monthly active users, churn rate, and NPS score. These are outcomes. They change slowly and they tell you that something upstream already went wrong.</p>
-<p>A <strong>leading indicator</strong> tells you what's likely to happen. Session frequency, cart add rate, notification open rate, support ticket volume — these move before the outcome metric does. If Nykaa's app session frequency drops this week, order volume will probably drop next week.</p>
-<p>Why does this matter for case studies? Because when an interviewer asks you why GMV dropped, the worst thing you can do is look at more lagging indicators to explain it. GMV is already the lagging indicator — looking at revenue or profit to explain GMV tells you nothing new.</p>
-<p>What you want is to trace back upstream to the leading indicators. GMV = Orders × Average Order Value. Orders = Users × Conversion Rate. Conversion Rate = Sessions × Checkout Success Rate. Go upstream until you find where the break happened.</p>
-<p>If DAU is fine but conversion rate dropped, you're looking at a product or pricing problem. If DAU dropped, you're looking at an acquisition or retention problem. These are completely different things that require different fixes.</p>
-<p>Knowing this distinction also helps you recommend the right monitoring solution at the end of a case: "I'd set up alerts on leading indicators — specifically cart add rate and payment success rate — so we catch the signal before it hits revenue."</p>
-`;
+<p class="art-lead">When you're diagnosing a metric, knowing whether you're looking at a leading or lagging indicator changes the entire direction of your analysis.</p>
+
+<div class="art-two-col">
+  <div class="art-card">
+    <div class="art-card-title">Lagging indicators</div>
+    <p>Tell you what already happened. Revenue, monthly active users, churn rate, NPS. These are outcomes — they change slowly and tell you something upstream already went wrong.</p>
+  </div>
+  <div class="art-card">
+    <div class="art-card-title">Leading indicators</div>
+    <p>Tell you what's about to happen. Session frequency, cart add rate, notification open rate, support ticket volume. These move before the outcome metric does.</p>
+  </div>
+</div>
+
+<div class="art-callout">
+  If Nykaa's app session frequency drops this week, order volume will probably drop next week. The session frequency is the leading indicator — it gives you a week's warning.
+</div>
+
+<h2>Why this matters in a case interview</h2>
+<p>When an interviewer asks "why did GMV drop?" — the worst thing you can do is look at more lagging indicators to explain it. GMV is already the lagging indicator. Looking at revenue or profit to explain GMV tells you nothing new.</p>
+
+<p>Trace back upstream to where the break first appeared.</p>
+
+<div class="art-box">
+  <div class="art-blabel">Example upstream chain — Zomato GMV</div>
+  <div class="art-steps">
+    <div class="art-step"><div class="art-snum">→</div><div class="art-sbody"><strong>GMV</strong><p>= Orders × Average Order Value</p></div></div>
+    <div class="art-step"><div class="art-snum">→</div><div class="art-sbody"><strong>Orders</strong><p>= Active Users × Conversion Rate</p></div></div>
+    <div class="art-step"><div class="art-snum">→</div><div class="art-sbody"><strong>Conversion Rate</strong><p>= Sessions × Checkout Success Rate</p></div></div>
+    <div class="art-step"><div class="art-snum">→</div><div class="art-sbody"><strong>Sessions</strong><p>= Notification opens + Organic opens + Paid traffic</p></div></div>
+  </div>
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Bottom line</div>
+  Go upstream until you find where the break first appeared. If DAU is fine but conversion dropped — it's a product/pricing problem. If DAU dropped — it's an acquisition or retention problem. Different causes, completely different fixes.
+</div>`;
 
 CS_CONTENT['cs3-t3'] = `
-<h1>Building a metric tree</h1>
-<p>A metric tree is how you structurally disaggregate a top-level metric into its constituent parts. It's the single most useful tool in metric case interviews, and it's simple once you've done it a few times.</p>
-<p>Start with your top-level metric. Let's say it's Swiggy's Daily Revenue.</p>
-<p>Daily Revenue = Orders × Average Order Value</p>
-<p>Orders = DAU × Order Rate (% of active users who order on a given day)</p>
-<p>DAU = New Users + Retained Users</p>
-<p>Order Rate breaks down by: time of day, meal type (breakfast / lunch / dinner), geography, user segment (Gold vs regular)</p>
-<p>Average Order Value breaks down by: restaurant category, discount applied, order size, delivery charges</p>
-<p>Now you have a tree. A 15% drop in Daily Revenue can be traced down this tree by checking each branch. Are orders down or is AOV down? If orders are down, is DAU down or is the order rate per user down?</p>
-<p>Here's the key insight: <strong>you don't need to check everything</strong>. You follow the branch where the drop is. If DAU is stable but order rate dropped, you can ignore the DAU branch entirely and focus on what changed in the order conversion flow.</p>
-<p>In an interview, you don't need to draw the full tree. You narrate it: "Revenue is a function of orders and average order value — let me check which one moved first." Then go deeper on whichever moved. The interviewer will follow your logic if it's sequential and clean.</p>
-<p>Build a metric tree for every case you practice. Even for guesstimates and product cases, the tree-thinking habit will sharpen your analysis significantly.</p>
-`;
+<h1>How to build a metric tree</h1>
+<p class="art-lead">A metric tree disaggregates a top-level metric into its components. It's the most practical tool in metric cases and takes about 60 seconds to sketch.</p>
+
+<h2>Example: Swiggy Daily Revenue</h2>
+
+<div class="art-box">
+  <div class="art-blabel">Metric tree</div>
+  <pre style="margin:0;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:.83rem;line-height:1.8;overflow-x:auto"><code>Daily Revenue
+├── Orders
+│   ├── DAU (Daily Active Users)
+│   │   ├── New users
+│   │   └── Retained users
+│   └── Order rate per user
+│       ├── By meal type (breakfast / lunch / dinner)
+│       ├── By city tier
+│       └── By user segment (Gold vs regular)
+└── Average Order Value
+    ├── Restaurant category
+    ├── Discount applied
+    └── Delivery charges</code></pre>
+</div>
+
+<h2>The key insight — follow the branch</h2>
+<p>You don't need to check everything. You follow the branch where the drop is.</p>
+<p>If DAU is stable but order rate dropped — ignore the DAU branch entirely. Focus on what changed in the conversion flow. If DAU dropped but order rate per user is unchanged — ignore the conversion branch. Focus on acquisition and retention.</p>
+
+<div class="art-callout">
+  In an interview, you don't draw this on paper. You narrate it: "Revenue is a function of orders and average order value — let me check which one moved first." Then go deeper on whichever branch moved. The interviewer will follow if your logic is sequential.
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Practice rule</div>
+  Build a metric tree for every case you practice, even guesstimates and product cases. The habit makes your analysis faster and more credible.
+</div>`;
 
 CS_CONTENT['cs3-t4'] = `
-<h1>Example: "Swiggy's DAU dropped — diagnose it step by step"</h1>
-<p>The prompt: "Swiggy's DAU (Daily Active Users) dropped 18% over the past two weeks. Walk me through how you'd diagnose this."</p>
-<p><strong>Clarify first.</strong></p>
-<p>"Is the 18% drop uniform across the week, or concentrated on specific days — say, weekends or weekdays? And is it consistent across all geographies or specific to certain cities?"</p>
-<p>Answer: Across the week, but heavier in Tier-2 cities.</p>
-<p><strong>Structure.</strong></p>
-<p>"DAU can drop for two broad reasons: fewer new users coming in (acquisition problem) or existing users not returning (retention problem). I'll check both, but the Tier-2 skew already gives me a hypothesis."</p>
-<p><strong>Hypothesize.</strong></p>
-<p>"Hypothesis 1: Swiggy ran fewer performance marketing campaigns in Tier-2 cities recently — this would suppress new user acquisition there. Hypothesis 2: A competitor launched or heavily discounted in those cities. Hypothesis 3: The Tier-2 restaurant supply thinned out — if restaurant availability dropped, users come once, find nothing they want, and stop opening the app."</p>
-<p><strong>Analyze.</strong></p>
-<p>"I'd look at new user signups vs returning user DAU separately. If new signups are fine but returning users dropped, it's a retention issue — something about the core experience deteriorated. If new signups dropped, it's an acquisition channel issue. Given the Tier-2 skew, I'd also pull restaurant availability data for those cities and compare it to 4 weeks ago."</p>
-<p><strong>Conclude.</strong></p>
-<p>"My leading hypothesis is supply-side: restaurant density or availability in Tier-2 cities changed, reducing the value proposition for users in those areas. I'd validate by cross-referencing DAU drops with restaurant-availability heatmaps by city."</p>
-`;
+<h1>Walkthrough — Swiggy's DAU fell 18%</h1>
+<p class="art-lead">Applying the metric tree and diagnosis framework to a real prompt.</p>
+
+<div class="art-callout">
+  <strong>The prompt:</strong> "Swiggy's DAU dropped 18% over the past two weeks. Walk me through how you'd diagnose this."
+</div>
+
+<div class="art-wt">
+  <div class="art-wt-head">Step-by-step walkthrough</div>
+  <div class="art-wt-body">
+    <div class="art-wt-step">
+      <div class="art-wt-label">Clarify</div>
+      <div class="art-wt-text">"Is the drop uniform across the week, or concentrated on specific days? And is it consistent across all cities, or heavier in certain geographies?"<br/><br/><em>Answer: Consistent across the week, but heavier in Tier-2 cities.</em><br/><br/>That one answer immediately changes the hypothesis set. The Tier-2 skew tells us it's not a national platform issue.</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Structure</div>
+      <div class="art-wt-text">DAU drops for two reasons: fewer new users coming in (acquisition problem) or existing users not returning (retention problem). I'll check both — but the Tier-2 skew pushes me toward a supply-side hypothesis first, because Swiggy's restaurant density in Tier-2 cities is inherently thinner.</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Top 3 hypotheses</div>
+      <div class="art-wt-text">1. Restaurant supply thinned in Tier-2 cities — fewer restaurants available, users open the app, find nothing good, and stop returning.<br/><br/>
+      2. Swiggy cut performance marketing spend in Tier-2 — suppressing new user acquisition in those markets.<br/><br/>
+      3. A local competitor entered or heavily discounted in specific Tier-2 cities.</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Analyze</div>
+      <div class="art-wt-text">Pull new user signups vs returning user DAU separately for Tier-2 cities. If new signups are fine but returning users dropped — it's a retention/experience issue, not acquisition. Cross-reference restaurant availability data for Tier-2 cities vs 4 weeks ago. If restaurant count or average availability hours dropped — hypothesis 1 is confirmed.</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Recommend</div>
+      <div class="art-wt-text">My leading hypothesis is supply-side degradation in Tier-2. Recommend: immediate audit of restaurant partner health in the 10 most-affected Tier-2 cities, and a short-term re-engagement incentive for restaurant partners in those markets.</div>
+    </div>
+  </div>
+</div>`;
+
+// ── MODULE 4 ─────────────────────────────────────────────────────
 
 CS_CONTENT['cs4-t1'] = `
-<h1>The hypothesis tree approach</h1>
-<p>Root cause analysis is different from metric diagnosis in one important way: you're not just looking at what changed, you're trying to find exactly why it changed, and what to do about it.</p>
-<p>The hypothesis tree is how you avoid randomly investigating things. You start with the symptom, break it into possible causes, and test the most likely one first.</p>
-<p>The tree has three rules:</p>
-<p><strong>Rule 1: MECE.</strong> Mutually Exclusive, Collectively Exhaustive. Your branches can't overlap (otherwise you count things twice) and they need to cover all possibilities (otherwise you might miss the real cause). Don't write "poor delivery experience" and "long delivery time" as separate branches — one includes the other.</p>
-<p><strong>Rule 2: Prioritize by likelihood, not convenience.</strong> A lot of candidates check things that are easy to measure before things that are more likely. That's backwards. Check the most likely cause first, even if it's harder to verify.</p>
-<p><strong>Rule 3: One branch at a time.</strong> Don't investigate two hypotheses simultaneously. You'll confuse the signal. Investigate one, rule it in or out, then move to the next.</p>
-<p>For an operational metric like delivery time or cost per order, the hypothesis tree usually breaks into: people (driver behavior, restaurant behavior), process (routing algorithm, batching logic), and external factors (traffic, weather, platform outages).</p>
-<p>For a revenue or engagement metric, the tree breaks into: product changes, marketing changes, external market changes (competition, macro events), and data issues.</p>
-<p>Every good root cause analysis starts with "what are the possible buckets of cause?" — before touching a single data point.</p>
-`;
+<h1>Building a hypothesis tree</h1>
+<p class="art-lead">A hypothesis tree stops you from randomly investigating things. You start with the symptom, break it into possible causes, and test the most likely one first.</p>
+
+<h2>Three rules for a good hypothesis tree</h2>
+<div class="art-steps">
+  <div class="art-step">
+    <div class="art-snum">1</div>
+    <div class="art-sbody"><strong>Keep it MECE</strong><p>Mutually Exclusive, Collectively Exhaustive. Branches can't overlap and together they must cover all possibilities. Don't list "poor delivery experience" and "long delivery time" as separate branches — one contains the other.</p></div>
+  </div>
+  <div class="art-step">
+    <div class="art-snum">2</div>
+    <div class="art-sbody"><strong>Prioritize by likelihood, not convenience</strong><p>Many candidates check things that are easy to measure before things that are more likely. That's backwards. Check the most probable cause first, even if it takes more effort to verify.</p></div>
+  </div>
+  <div class="art-step">
+    <div class="art-snum">3</div>
+    <div class="art-sbody"><strong>One branch at a time</strong><p>Don't investigate two hypotheses simultaneously. You'll confuse the signals. Rule one in or out fully before moving to the next.</p></div>
+  </div>
+</div>
+
+<h2>Standard tree structures by problem type</h2>
+<div class="art-two-col">
+  <div class="art-card">
+    <div class="art-card-title">Operational metric (delivery time, cost)</div>
+    <p>People (driver/restaurant behavior) → Process (routing, batching logic) → External (traffic, weather, outages)</p>
+  </div>
+  <div class="art-card">
+    <div class="art-card-title">Revenue or engagement metric</div>
+    <p>Product changes → Marketing changes → External (competition, macro) → Data issues</p>
+  </div>
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Bottom line</div>
+  Always start with "what are the possible buckets of causes?" — before you touch a single data point. The tree is built in 60 seconds and saves 60 minutes.
+</div>`;
 
 CS_CONTENT['cs4-t2'] = `
 <h1>The 5-why method for analysts</h1>
-<p>The 5-why method is simple: you keep asking "why" until you reach a root cause that's actually actionable. Five levels is a rule of thumb — sometimes you need three, sometimes you need seven.</p>
-<p>Why this matters for analysts specifically: your job isn't just to find what happened. It's to find the thing that, if fixed, prevents the problem from happening again. That's usually two levels deeper than most junior analysts go.</p>
-<p>Example: Blinkit's revenue per order dropped.</p>
-<p>Why? Average order value decreased.</p>
-<p>Why? Fewer items per basket.</p>
-<p>Why? The "frequently bought together" recommendations stopped showing for certain SKU categories.</p>
-<p>Why? A backend service responsible for recommendation serving had a memory leak and was restarting frequently.</p>
-<p>Why? A code deployment two weeks ago introduced a bug in the recommendation service.</p>
-<p>The root cause is the deployment bug. The symptom was revenue per order. If you had stopped at "average order value decreased," you'd have recommended a discount campaign to increase basket size — the completely wrong fix.</p>
-<p>The 5-why is most useful in operational and product cases. In metric movement cases, you often stop earlier because the root cause is an external market event (a competitor campaign) that you can't "fix" — you can only respond to.</p>
-<p>One thing to keep in mind: the 5-why can lead you to multiple root causes. That's fine. Real systems often have multiple contributing factors. Acknowledge that and prioritize which one to fix first based on impact and effort.</p>
-`;
+<p class="art-lead">Keep asking "why" until you reach a cause that's actually actionable. Five levels is a rule of thumb — sometimes you need three, sometimes seven.</p>
+
+<p>Most junior analysts stop two levels deep and call it root cause. Senior analysts know that the real cause is usually buried deeper — and it's the one that, if fixed, prevents the problem from recurring.</p>
+
+<div class="art-box">
+  <div class="art-blabel">Blinkit example — revenue per order dropped</div>
+  <div class="art-steps">
+    <div class="art-step"><div class="art-snum">1</div><div class="art-sbody"><strong>Why did revenue per order drop?</strong><p>Average order value decreased.</p></div></div>
+    <div class="art-step"><div class="art-snum">2</div><div class="art-sbody"><strong>Why did average order value decrease?</strong><p>Fewer items per basket.</p></div></div>
+    <div class="art-step"><div class="art-snum">3</div><div class="art-sbody"><strong>Why fewer items per basket?</strong><p>The "frequently bought together" recommendations stopped showing for certain SKU categories.</p></div></div>
+    <div class="art-step"><div class="art-snum">4</div><div class="art-sbody"><strong>Why did recommendations stop showing?</strong><p>The recommendation service had a memory leak and was restarting frequently.</p></div></div>
+    <div class="art-step"><div class="art-snum">5</div><div class="art-sbody"><strong>Why the memory leak?</strong><p>A code deployment two weeks ago introduced a bug in the recommendation service.</p></div></div>
+  </div>
+</div>
+
+<div class="art-warn">
+  <strong>If you had stopped at level 2</strong> — "average order value decreased" — you'd have recommended a discount campaign to increase basket size. That's completely the wrong fix, and it would have cost money while solving nothing.
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Bottom line</div>
+  The 5-why can reveal multiple root causes. That's fine — real systems have multiple contributing factors. Acknowledge them and prioritize by impact and effort.
+</div>`;
 
 CS_CONTENT['cs4-t3'] = `
-<h1>Internal vs external factors</h1>
-<p>When a metric moves, the cause is either inside the company or outside it. This sounds obvious, but junior analysts often spend hours investigating internal factors when the real cause was something that happened in the market.</p>
-<p><strong>Internal factors</strong> are things the company controls or changed:</p>
-<ul>
-<li>Product changes (new feature, redesign, bug)</li>
-<li>Pricing changes (discount removal, delivery fee increase)</li>
-<li>Supply changes (fewer restaurants, partner churned)</li>
-<li>Marketing spend changes</li>
-<li>Operational changes (driver incentive policy, SLA adjustments)</li>
-</ul>
-<p><strong>External factors</strong> are things outside the company's control:</p>
-<ul>
-<li>Competitor activity (Swiggy running a mega sale)</li>
-<li>Macro events (IPL season driving food delivery surge; a public holiday reducing B2B transactions)</li>
-<li>Regulatory changes (GST rate change affecting restaurant pricing)</li>
-<li>Seasonal patterns (summer heat reducing outdoor activity; festivals increasing gifting)</li>
-<li>Local events (a political bandh, extreme weather in a city)</li>
-</ul>
-<p>The order in which you check them matters. If there's a known competitor campaign or a major holiday, check external factors first — they're often the entire answer.</p>
-<p>A useful heuristic: if the metric dropped sharply and suddenly, external or product factors are more likely (they happen in discrete events). If the metric drifted downward over several weeks, internal factors like retention decay or operational degradation are more likely.</p>
-<p>For Urban Company or Nykaa interviews, which often involve slower-moving service metrics, the emphasis is usually on internal factors because the competitive landscape is less volatile than food delivery.</p>
-<p>Always state explicitly which bucket you're checking and why, before you check it. That narration is what the interviewer is evaluating.</p>
-`;
+<h1>Internal causes vs external causes</h1>
+<p class="art-lead">When a metric moves, the cause is either inside the company or outside it. Getting this wrong means you investigate the wrong bucket for hours.</p>
+
+<div class="art-two-col">
+  <div class="art-card">
+    <div class="art-card-title">Internal causes</div>
+    <p>Things the company controls or changed: product changes, pricing changes, supply changes (fewer restaurant partners), marketing spend, operational policy changes (driver incentives, SLA adjustments).</p>
+  </div>
+  <div class="art-card">
+    <div class="art-card-title">External causes</div>
+    <p>Things outside the company's control: competitor campaigns, macro events (IPL, public holidays), regulatory changes, seasonal patterns, local events (bandhs, extreme weather).</p>
+  </div>
+</div>
+
+<h2>Which to check first</h2>
+<p>If there's a known competitor campaign or major holiday this week — check external first. They're often the entire answer and take 5 minutes to confirm.</p>
+
+<div class="art-callout">
+  <strong>A useful heuristic:</strong> Sharp, sudden drops → likely external or product change (discrete events). Gradual multi-week drift → likely internal (retention decay, operational degradation, slow market shift).
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Interview habit</div>
+  Always state explicitly which bucket you're checking and why, before you check it. "I'm going to rule out external factors first because IPL week just ended and that typically suppresses food delivery in the evenings." That narration is what's being evaluated.
+</div>`;
 
 CS_CONTENT['cs4-t4'] = `
-<h1>Example: "Blinkit's revenue per order fell — find the cause"</h1>
-<p>The prompt: "Blinkit's revenue per order dropped from ₹310 to ₹265 this month. Find the cause."</p>
-<p><strong>Clarify.</strong></p>
-<p>"Is this net revenue (after discounts) or gross? And is the drop consistent across all product categories or concentrated in a specific one?"</p>
-<p>Answer: Net revenue. Consistent across categories, but stronger in grocery.</p>
-<p><strong>Structure.</strong></p>
-<p>Revenue per order = Average Order Value − Discount Applied − (Delivery Cost recovered as fee). Let me check each component.</p>
-<p><strong>Hypothesize.</strong></p>
-<p>"Three hypotheses: First, average order value dropped — customers are ordering fewer items per session. Second, discounting increased — Blinkit ran more aggressive promotions this month. Third, delivery fee revenue changed — either the threshold for free delivery was lowered or more orders hit the free delivery floor."</p>
-<p><strong>Analyze.</strong></p>
-<p>"I'd look at: (1) Average basket size in items and in ₹, (2) Coupon redemption rate and average discount per order, (3) Delivery fee collected per order vs prior month. If basket size is unchanged but revenue per order fell, it's a discounting or fee issue. If basket size fell, I'd go upstream — are customers getting fewer recommendations? Is quick-commerce supply limited so customers can't fill their basket?"</p>
-<p><strong>Conclude.</strong></p>
-<p>"Given the grocery skew, my top hypothesis is that Blinkit lowered the free delivery threshold in grocery — possibly to compete with Swiggy Instamart or Zepto — and this is eating into delivery fee revenue. I'd validate by checking delivery fee revenue per order specifically, and cross-referencing with any policy change from Blinkit's logistics team in the last 30 days."</p>
-`;
+<h1>Walkthrough — Blinkit's revenue per order dropped</h1>
+<p class="art-lead">Root cause analysis applied to an operational metric with a multi-level cause chain.</p>
+
+<div class="art-callout">
+  <strong>The prompt:</strong> "Blinkit's revenue per order dropped from ₹310 to ₹265 this month. Find the cause."
+</div>
+
+<div class="art-wt">
+  <div class="art-wt-head">Step-by-step walkthrough</div>
+  <div class="art-wt-body">
+    <div class="art-wt-step">
+      <div class="art-wt-label">Clarify</div>
+      <div class="art-wt-text">"Is this net revenue or gross? And is the drop consistent across all product categories or concentrated in a specific one?"<br/><br/><em>Answer: Net revenue. Consistent across categories, but stronger in grocery.</em></div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Structure the metric</div>
+      <div class="art-wt-text">Revenue per order = Average Order Value − Discounts Applied − Delivery cost absorbed. Three components — I'll check which one moved.</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Top 3 hypotheses</div>
+      <div class="art-wt-text">1. Delivery fee policy changed — Blinkit lowered the free-delivery threshold in grocery to compete with Zepto or Swiggy Instamart, absorbing more delivery cost per order.<br/><br/>
+      2. More discount coupons being redeemed — a new promotion pushed redemption rates higher than planned.<br/><br/>
+      3. Average order value dropped — customers adding fewer items per basket.</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Analyze</div>
+      <div class="art-wt-text">Check in order: (1) delivery fee collected per order vs prior month, (2) coupon redemption rate and average discount per order, (3) average basket size in items and ₹. The grocery skew makes hypothesis 1 most likely — delivery fee policy changes in grocery typically precede broader rollouts.</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Recommend</div>
+      <div class="art-wt-text">Validate by pulling delivery fee revenue per order for grocery specifically. Cross-reference with any logistics policy change in the last 30 days. If confirmed — model the revenue impact of different free-delivery threshold scenarios before deciding whether to maintain or revert the change.</div>
+    </div>
+  </div>
+</div>`;
+
+// ── MODULE 5 ─────────────────────────────────────────────────────
 
 CS_CONTENT['cs5-t1'] = `
 <h1>How analyst product cases differ from PM cases</h1>
-<p>When a product manager gets a product case, they're expected to think about user needs, strategy, roadmap, and prioritization. When an analyst gets the same case, the expectation is different: you're expected to think about measurement, data, and whether the data actually supports the decision.</p>
-<p>That's a subtle but important distinction. You don't need to redesign the product. You need to tell the interviewer how you'd measure whether it worked, what signals you'd look for, and what the numbers would need to show before you'd recommend scaling it.</p>
-<p>A PM interview answer to "should we add a loyalty program to Nykaa?" might talk about competitive benchmarking, user segments, and feature design. An analyst interview answer should talk about: how would we measure the loyalty program's success? What's our primary metric and why? What are the guardrail metrics we'd protect? How would we control for confounders in the measurement?</p>
-<p>Another difference: PMs can get away with directional logic. Analysts can't. If you say "I expect this feature to increase retention," an interviewer will immediately ask: "how would you measure that?" and "what does your baseline retention curve look like?" You need to know what data you'd need and how you'd structure the analysis.</p>
-<p>In practice this means: when you get a product case, start by asking "what problem is this feature solving and for which user segment?" — but then spend most of your time on how you'd measure success, not on whether the feature is a good idea.</p>
-`;
+<p class="art-lead">You're not being asked to redesign the product. You're being asked whether the data would support doing so — and how you'd know.</p>
+
+<div class="art-compare">
+  <div class="art-compare-bad">
+    <div class="art-clabel">PM interview answer</div>
+    <div class="art-ctext">Talk about user needs, competitive benchmarking, feature design, roadmap prioritization, and what the MVP should look like.</div>
+  </div>
+  <div class="art-compare-good">
+    <div class="art-clabel">Analyst interview answer</div>
+    <div class="art-ctext">Talk about how you'd measure whether the feature worked, what metrics would define success, what guardrails you'd protect, and how you'd control for confounders.</div>
+  </div>
+</div>
+
+<p>The distinction is subtle but important. When asked "should we add a loyalty program to Nykaa?" — a PM talks about whether it's a good idea. An analyst talks about how you'd know if it worked after you built it.</p>
+
+<div class="art-callout">
+  PMs can get away with directional logic. Analysts can't. "I expect this feature to improve retention" will immediately be met with: "How would you measure that? What's your baseline retention curve?" Be ready with specifics.
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">The shift in focus</div>
+  Start every product case by asking what problem the feature is solving and for which user segment. But spend most of your time on how you'd measure success — not on whether the feature is a good idea.
+</div>`;
 
 CS_CONTENT['cs5-t2'] = `
-<h1>Feature impact analysis</h1>
-<p>When a product feature ships, your job is to figure out whether it did what it was supposed to do. This is not as simple as "did the metric go up?" because metrics go up and down for lots of reasons.</p>
-<p>A proper feature impact analysis has three components:</p>
-<p><strong>Attribution.</strong> You need to know whether the metric change is because of the feature or despite other things happening simultaneously. Did Flipkart's checkout completion rate improve because of the new flow, or because marketing happened to drive a higher-intent cohort that week? Isolating the feature's effect is the hard part.</p>
-<p><strong>Segmentation.</strong> Features don't affect all users equally. A new checkout flow might work better for mobile users than desktop users. A loyalty badge might matter more for users who bought once but haven't returned. Always segment the impact to understand who benefited and who didn't.</p>
-<p><strong>Second-order effects.</strong> Features have intended effects and unintended effects. Adding a "rate your order" prompt increases rating volume — great. It also adds friction that might reduce repeat orders slightly — not great. If you only measure the intended effect, you miss the full picture.</p>
-<p>For a Flipkart or Amazon analyst role, feature impact analysis is something you'd do every few weeks. An interviewer asking you this wants to know if you'd actually measure it correctly in the job, or if you'd send them a dashboard showing "click-through rate went up 12%" without checking whether those clicks actually converted to orders.</p>
-`;
+<h1>Measuring a feature's impact correctly</h1>
+<p class="art-lead">A feature shipped. Did it work? "The metric went up" is not a complete answer.</p>
+
+<div class="art-steps">
+  <div class="art-step">
+    <div class="art-snum">1</div>
+    <div class="art-sbody"><strong>Attribution</strong><p>Did the metric change because of the feature, or despite other things happening at the same time? If Flipkart's checkout completion rate improved the same week marketing ran a high-intent campaign — which caused the lift? Isolating the feature's effect is the hard part.</p></div>
+  </div>
+  <div class="art-step">
+    <div class="art-snum">2</div>
+    <div class="art-sbody"><strong>Segmentation</strong><p>Features don't affect all users equally. A new checkout flow might work better for mobile than desktop. A loyalty badge might matter more for one-time buyers than frequent ones. Always segment the impact — understanding who benefited and who didn't is half the analysis.</p></div>
+  </div>
+  <div class="art-step">
+    <div class="art-snum">3</div>
+    <div class="art-sbody"><strong>Second-order effects</strong><p>Features have intended effects and unintended ones. Adding an "order rating" prompt increases rating volume — good. It also adds friction that might slightly reduce repeat orders — worth checking. Measure both.</p></div>
+  </div>
+</div>
+
+<div class="art-warn">
+  <strong>Common mistake:</strong> Sending stakeholders a dashboard showing "CTR went up 12%" without checking if those clicks converted to orders. That's not feature impact analysis — that's counting clicks.
+</div>`;
 
 CS_CONTENT['cs5-t3'] = `
-<h1>Success metrics definition</h1>
-<p>Before any product launch, before any experiment, before any initiative — you define success. What does "working" look like, exactly?</p>
-<p>This sounds simple. It isn't. Most teams argue about it for a day and then ship the feature without agreeing. Analysts who can drive this conversation clearly are genuinely valuable.</p>
-<p>A good success definition has four parts:</p>
-<p><strong>Primary metric.</strong> One number that tells you if the feature succeeded. Not three, not five — one. For a new checkout flow on Flipkart, this might be checkout completion rate. For a loyalty program on Nykaa, it might be 90-day retention rate. The primary metric must be directly tied to the feature's purpose.</p>
-<p><strong>Guardrail metrics.</strong> Numbers you're committed to not moving in the wrong direction, even if the primary metric improves. If checkout completion rate improves but average order value drops 20% (because users are completing cheap orders and abandoning expensive ones), that's not a win. Guardrail metrics are the checks on your primary metric.</p>
-<p><strong>Time horizon.</strong> How long do you wait before judging success? An engagement feature might show results in 3 days. A retention feature might take 60 days to evaluate correctly. Defining this upfront prevents premature decisions.</p>
-<p><strong>Minimum detectable effect.</strong> How big does the lift need to be before it's worth shipping? If your primary metric improves by 0.1%, is that worth the engineering cost of maintaining the feature? Defining a threshold prevents you from shipping features that technically "worked" but added no real value.</p>
-<p>In a CRED or Groww interview, a candidate who can articulate all four parts unprompted is in the top 20% of who they interview.</p>
-`;
+<h1>Defining success before you ship</h1>
+<p class="art-lead">If you haven't agreed on what "working" looks like before the feature launches, you'll argue about it for weeks after. Analysts who can drive this conversation clearly are genuinely valuable.</p>
+
+<div class="art-steps">
+  <div class="art-step">
+    <div class="art-snum">1</div>
+    <div class="art-sbody"><strong>Primary metric — one number only</strong><p>Not three, not five — one metric that directly reflects the feature's purpose. For a new Flipkart checkout flow: checkout completion rate. For a Nykaa loyalty program: 90-day retention rate. If you can't name one primary metric, you don't have a clear feature goal.</p></div>
+  </div>
+  <div class="art-step">
+    <div class="art-snum">2</div>
+    <div class="art-sbody"><strong>Guardrail metrics — the things you won't sacrifice</strong><p>If checkout completion improves but average order value drops 20% (users completing cheap orders, abandoning expensive ones) — that's not a win. Define these before the experiment, not after you see results.</p></div>
+  </div>
+  <div class="art-step">
+    <div class="art-snum">3</div>
+    <div class="art-sbody"><strong>Time horizon — how long before you judge?</strong><p>An engagement feature might show results in 3 days. A retention feature takes 60 days to evaluate correctly. Decide this upfront or you'll be tempted to call success too early.</p></div>
+  </div>
+  <div class="art-step">
+    <div class="art-snum">4</div>
+    <div class="art-sbody"><strong>Minimum detectable effect — what lift is worth it?</strong><p>A 0.1% improvement in checkout rate with 3 months of maintenance work is not worth shipping. Set a minimum threshold before the experiment or every tiny positive result will create a "should we ship?" argument.</p></div>
+  </div>
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Interview signal</div>
+  A candidate who articulates all four parts unprompted — primary metric, guardrails, time horizon, minimum effect — is in the top 20% of analyst interviewees at companies like CRED or Groww.
+</div>`;
 
 CS_CONTENT['cs5-t4'] = `
-<h1>Example: "Flipkart added a new checkout flow — was it successful?"</h1>
-<p>The prompt: "Flipkart shipped a redesigned checkout page two weeks ago. How would you determine if it was successful?"</p>
-<p><strong>Clarify.</strong></p>
-<p>"What was the goal of the redesign? Was it to improve checkout completion, reduce support tickets about payment confusion, or reduce checkout time? And was this rolled out to 100% of users or was there an A/B test?"</p>
-<p>Answer: Goal was to improve checkout completion rate. It was an A/B test — 50% of users saw the new flow.</p>
-<p><strong>Structure.</strong></p>
-<p>"Good. This is a straightforward experiment analysis case. I'll look at the primary metric, guardrail metrics, and then segment the results."</p>
-<p><strong>Analyze.</strong></p>
-<p>Primary metric: checkout completion rate (users who land on checkout and complete payment / users who land on checkout). Compare this between control and treatment.</p>
-<p>Guardrail metrics I'd watch: average order value (did users complete lower-value orders in the new flow?), checkout time (did it get faster or slower?), payment failure rate (did the new flow introduce new failure points?).</p>
-<p>Segmentation: was the lift uniform across mobile and desktop? New users vs repeat? Categories like electronics vs fashion? A feature that works for mobile but fails for desktop is not a clean win.</p>
-<p><strong>Conclude.</strong></p>
-<p>"If checkout completion rate improved significantly in treatment with no degradation in guardrail metrics, and the result is consistent across key segments — I'd call it successful and recommend full rollout. But if the lift is only in one segment, I'd recommend segment-specific rollout and investigate why others didn't respond."</p>
-`;
+<h1>Walkthrough — Flipkart's new checkout flow</h1>
+<p class="art-lead">A product analytics case that turns into an experiment analysis.</p>
+
+<div class="art-callout">
+  <strong>The prompt:</strong> "Flipkart shipped a redesigned checkout page two weeks ago. How would you determine if it was successful?"
+</div>
+
+<div class="art-wt">
+  <div class="art-wt-head">Step-by-step walkthrough</div>
+  <div class="art-wt-body">
+    <div class="art-wt-step">
+      <div class="art-wt-label">Clarify the goal</div>
+      <div class="art-wt-text">"What was the goal of the redesign — improve checkout completion rate, reduce payment confusion, or reduce checkout time? And was this a full rollout or an A/B test?"<br/><br/><em>Answer: Goal was checkout completion rate. A/B test — 50% saw the new flow.</em></div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Define the primary metric</div>
+      <div class="art-wt-text">Checkout completion rate: users who complete payment / users who land on checkout. Compare treatment vs control.</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Define guardrail metrics</div>
+      <div class="art-wt-text">Three things I'd explicitly check I didn't break: (1) Average order value — did users complete more low-value orders in the new flow? (2) Payment failure rate — did the new flow introduce new failure points? (3) Checkout time — did it get faster or slower?</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Segment the result</div>
+      <div class="art-wt-text">Was the lift uniform across mobile vs desktop? New users vs repeat buyers? Electronics vs fashion? A feature that lifts mobile by 8% but drops desktop by 3% is not a clean win — it's a segmented rollout decision.</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Conclusion</div>
+      <div class="art-wt-text">If checkout completion improved significantly with no guardrail degradation and consistent results across segments — recommend full rollout. If the lift is segment-specific — targeted rollout with investigation into why the other segments didn't respond.</div>
+    </div>
+  </div>
+</div>`;
+
+// ── MODULE 6 ─────────────────────────────────────────────────────
 
 CS_CONTENT['cs6-t1'] = `
 <h1>Why companies ask guesstimate questions</h1>
-<p>Guesstimate questions feel like they're testing your ability to remember obscure statistics. They're not. They're testing whether you can build a structured estimate from first principles without freezing when you don't have data.</p>
-<p>Real analysts encounter this constantly. "How many monthly active users do you think our competitor has?" "How big is the addressable market for this product?" "How much revenue could this feature generate if we build it?" Nobody has the exact answer. Your job is to build a reasonable estimate, state your assumptions clearly, and get to a number that's defensible.</p>
-<p>Companies like Meesho, Ola, or Zepto ask guesstimates because in early-stage or growth-stage companies, you frequently have to make decisions with incomplete data. An analyst who can structure an estimate clearly is far more useful than one who says "I don't have access to that data."</p>
-<p>The skill being tested is also intellectual honesty. If your estimate comes out to something that feels obviously wrong — "so Ola would be doing 3 crore rides a day just in Bangalore?" — and you don't flag it, that's a mark against you. Sanity-checking your own numbers is part of the exercise.</p>
-<p>One more thing: they're testing whether you can communicate quantitative reasoning to a non-technical audience. The clearest guesstimates are ones where someone who isn't good at math can follow every step of your reasoning.</p>
-`;
+<p class="art-lead">Guesstimate questions aren't testing your ability to memorize statistics. They're testing whether you can build a defensible estimate when you have no data.</p>
+
+<p>Real analysts encounter this constantly: "How many monthly active users does our biggest competitor have?" "How big is the addressable market for this feature?" Nobody has the exact answer. Your job is to build a reasonable estimate, state your assumptions clearly, and arrive at a number you can defend.</p>
+
+<div class="art-callout">
+  Companies like Meesho, Zepto, and Ola ask guesstimates because in growth-stage companies, decisions are made with incomplete data every week. An analyst who can structure an estimate clearly is far more valuable than one who says "I don't have access to that data."
+</div>
+
+<h2>Three skills being tested simultaneously</h2>
+<div class="art-steps">
+  <div class="art-step"><div class="art-snum">1</div><div class="art-sbody"><strong>First-principles thinking</strong><p>Can you break a large unknown into smaller knowable pieces and combine them?</p></div></div>
+  <div class="art-step"><div class="art-snum">2</div><div class="art-sbody"><strong>Intellectual honesty</strong><p>If your answer comes out to something that sounds absurd, do you catch it yourself and revise? Or do you confidently state the wrong number?</p></div></div>
+  <div class="art-step"><div class="art-snum">3</div><div class="art-sbody"><strong>Clear communication</strong><p>Can someone who's not good at math follow every step of your reasoning? If not, your answer doesn't work.</p></div></div>
+</div>`;
 
 CS_CONTENT['cs6-t2'] = `
-<h1>The top-down vs bottom-up approach</h1>
-<p>There are two ways to build an estimate: start from the big picture and work down (top-down), or build from the smallest unit up (bottom-up). Both work. The choice depends on what data you find easiest to anchor to.</p>
-<p><strong>Top-down:</strong> Start with a large known number, then narrow it down.</p>
-<p>Example: "How many premium members does Nykaa have?" India's internet users ≈ 600 million. E-commerce users ≈ 200 million. Women who buy beauty/personal care online ≈ 60 million. Nykaa's market share in online beauty ≈ 35–40% = ~20–25 million Nykaa users. Premium/loyal buyers (order 3+ times/year) ≈ 20% → 4–5 million.</p>
-<p><strong>Bottom-up:</strong> Start from a small known unit, then scale up.</p>
-<p>Example: Same question. An average Indian city with a population of 10 lakh has maybe 1.5 lakh women who actively buy beauty products online. Nykaa reaches maybe 30% of them = 45,000 Nykaa users per city. India has about 50 such cities = 2.25 crore Nykaa users. Premium customers ≈ 20% = ~45 lakh.</p>
-<p>Both approaches land in a similar ballpark. The overlap is reassuring. When they don't overlap, you've made an assumption error somewhere — investigate which estimate feels more grounded.</p>
-<p>The best guesstimates show both. Top-down for the first number, then sanity-check it bottom-up. This also shows the interviewer you're not just doing arithmetic — you're reasoning.</p>
-`;
+<h1>Top-down vs bottom-up estimation</h1>
+<p class="art-lead">Two different paths to the same answer. Use the one you can anchor most confidently, then verify with the other.</p>
+
+<div class="art-two-col">
+  <div class="art-card">
+    <div class="art-card-title">Top-down</div>
+    <p>Start with a large known population, apply successive filters to narrow it down. Best when you have a confident anchor at the top (e.g., India's internet users, a city's population).</p>
+  </div>
+  <div class="art-card">
+    <div class="art-card-title">Bottom-up</div>
+    <p>Start from a small unit you can estimate confidently, then scale up. Best when you have good intuition for per-unit behavior (e.g., orders per restaurant per day).</p>
+  </div>
+</div>
+
+<div class="art-box">
+  <div class="art-blabel">Example: How many premium Nykaa users are there?</div>
+  <div class="art-wt-body" style="padding:0">
+    <div class="art-wt-step">
+      <div class="art-wt-label">Top-down</div>
+      <div class="art-wt-text">India internet users: ~600M → women who buy beauty online: ~60M → Nykaa's ~35% market share = 21M Nykaa users → premium buyers (~3+ orders/year): ~20% = <strong>4–5M</strong></div>
+    </div>
+    <div class="art-wt-step" style="border-bottom:none">
+      <div class="art-wt-label">Bottom-up cross-check</div>
+      <div class="art-wt-text">City of 10L population → ~1.5L women buying beauty online → 30% use Nykaa = 45K per city → 50 such cities = 2.25 crore users → 20% premium = <strong>~45L</strong></div>
+    </div>
+  </div>
+</div>
+
+<p>Both methods land in a similar ballpark. Overlap is reassuring. When they don't overlap — you've made an assumption error somewhere. Investigate which estimate feels more grounded.</p>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Best practice</div>
+  Use top-down for your primary estimate. Then do a quick bottom-up sanity check. Show both in your answer — it signals you're reasoning, not just calculating.
+</div>`;
 
 CS_CONTENT['cs6-t3'] = `
-<h1>Sanity checking your answer</h1>
-<p>The most important thing you can do after arriving at a guesstimate answer is ask yourself: does this number make sense?</p>
-<p>This requires you to know some rough benchmarks. You don't need to memorize statistics — you need to have a general sense of scale for the market you're being asked about.</p>
-<p>For India-specific estimates, some rough anchors that are useful to internalize:</p>
-<ul>
-<li>India's population: ~140 crore</li>
-<li>Smartphone users: ~80 crore</li>
-<li>Internet users: ~60 crore</li>
-<li>Urban internet users: ~35–40 crore</li>
-<li>E-commerce buyers: ~20–25 crore</li>
-<li>India's food delivery market: roughly 1–2 billion orders/year across both major platforms</li>
-<li>Average working professional's discretionary spend: ₹5,000–₹15,000/month depending on city tier</li>
-</ul>
-<p>If your estimate for Ola's daily rides in Bengaluru comes out to 80 lakh rides, that's clearly wrong — Bengaluru's entire working population is about 80 lakh and most of them don't take an Ola every day. Catching this yourself and revising down is a green flag.</p>
-<p>If your estimate for Zepto's daily orders comes out to 5 crore orders per day across India, cross-check: that would mean one in every 12 Indian internet users orders on Zepto daily. Not plausible for a quick commerce app.</p>
-<p>Say the sanity check out loud. "This gives me X — let me quickly cross-check whether this is in the right ballpark by comparing it to Y." It takes 20 seconds and immediately signals rigorous thinking.</p>
-`;
+<h1>Sanity-checking your own numbers</h1>
+<p class="art-lead">After you reach a number, the most important thing you can do is ask yourself: does this actually make sense?</p>
+
+<p>This requires rough benchmarks. You don't need to memorize statistics — you need a feel for scale in Indian markets.</p>
+
+<div class="art-box">
+  <div class="art-blabel">Useful India-specific anchors</div>
+  <div class="art-steps">
+    <div class="art-step"><div class="art-snum">→</div><div class="art-sbody"><strong>India's population</strong><p>~140 crore. Smartphone users: ~80 crore. Internet users: ~60 crore.</p></div></div>
+    <div class="art-step"><div class="art-snum">→</div><div class="art-sbody"><strong>E-commerce buyers</strong><p>~20–25 crore. About 1 in 6 internet users buys something online in a given month.</p></div></div>
+    <div class="art-step"><div class="art-snum">→</div><div class="art-sbody"><strong>Food delivery scale</strong><p>~1–2 billion orders/year across both major platforms combined. That's ~3–5 million orders per day nationally.</p></div></div>
+    <div class="art-step"><div class="art-snum">→</div><div class="art-sbody"><strong>City scale</strong><p>Bengaluru working population: ~80L. Mumbai: ~1.2 crore. Delhi NCR: ~2 crore.</p></div></div>
+  </div>
+</div>
+
+<div class="art-warn">
+  <strong>Example of catching yourself:</strong> "So Ola would be doing 80 lakh rides a day just in Bengaluru? That's the entire working population taking an Ola every single day. That's clearly wrong — let me revise my driver utilization assumption."
+</div>
+
+<div class="art-callout">
+  Say the sanity check out loud: "This gives me X — let me quickly verify this is in the right ballpark by comparing it to Y." It takes 20 seconds and immediately signals rigorous thinking.
+</div>`;
 
 CS_CONTENT['cs6-t4'] = `
-<h1>Example: "Estimate Ola rides in Bangalore per day"</h1>
-<p>The prompt: "Estimate how many Ola rides happen in Bengaluru on a typical weekday."</p>
-<p><strong>Clarify briefly.</strong></p>
-<p>"Just to confirm — we're estimating total rides booked and completed, not unique users. And this is a regular weekday, not a holiday."</p>
-<p><strong>Build the estimate (bottom-up).</strong></p>
-<p>Bengaluru's population: ~1.2 crore. Working adults who might use cab services: roughly 30–35% of population = ~40 lakh people. Of these, what fraction use Ola on a given weekday?</p>
-<p>Not everyone uses cabs daily. Many people use personal vehicles, metro, autos. I'd estimate 10–12% of working adults take a cab on any given weekday = ~4–5 lakh cab rides total across all platforms.</p>
-<p>Ola's market share in Bengaluru: roughly 40–45% of the ride-hailing market (competing primarily with Uber). So Ola rides = 40% of 4–5 lakh = ~1.6–2 lakh rides per day.</p>
-<p><strong>Account for skew.</strong></p>
-<p>Bengaluru has notoriously bad traffic and heavy office commute dependency, which might push ride volume higher. Revised estimate: 2–2.5 lakh.</p>
-<p><strong>Sanity check.</strong></p>
-<p>"2 lakh Ola rides per day means about 200,000 rides across roughly 12 active hours = ~16,700 rides per hour city-wide. Ola has maybe 40,000–60,000 active drivers in Bengaluru — that means each driver completes about 3–4 rides per hour at peak. That checks out."</p>
-<p><strong>Final answer:</strong> ~2–2.5 lakh Ola rides per day in Bengaluru.</p>
-`;
+<h1>Walkthrough — Ola rides in Bangalore per day</h1>
+<p class="art-lead">Building a structured estimate from first principles, with a sanity check at the end.</p>
+
+<div class="art-callout">
+  <strong>The prompt:</strong> "Estimate how many Ola rides happen in Bengaluru on a typical weekday."
+</div>
+
+<div class="art-wt">
+  <div class="art-wt-head">Estimation walkthrough</div>
+  <div class="art-wt-body">
+    <div class="art-wt-step">
+      <div class="art-wt-label">Clarify scope</div>
+      <div class="art-wt-text">"We're estimating total completed rides, not unique users, on a regular weekday — not a holiday or peak event day." Quick scope check before building.</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Build bottom-up</div>
+      <div class="art-wt-text">Bengaluru population: ~1.2 crore. Working adults who might use cabs: ~30% = 36L people. What fraction takes a cab on any given weekday? Accounting for personal vehicles, metro, autos — roughly 10–12% = 3.5–4.5L cab rides total across all platforms in the city.</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Apply market share</div>
+      <div class="art-wt-text">Ola's market share in Bengaluru: ~40–45% (competing primarily with Uber). So Ola rides = 40% × 4L = <strong>~1.6L rides</strong>. Bengaluru's heavy traffic and commute culture might push this higher — revised estimate: <strong>2–2.5L rides/day</strong>.</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Sanity check</div>
+      <div class="art-wt-text">2L rides/day over 12 active hours = ~16,700 rides/hour city-wide. Ola has ~40,000–60,000 active drivers in Bengaluru → each driver completes 3–4 rides/hour at peak. That's a realistic driver utilization figure. The estimate holds.</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Final answer</div>
+      <div class="art-wt-text"><strong>~2–2.5 lakh Ola rides per day in Bengaluru</strong> on a typical weekday. The range reflects uncertainty in market share and commuter behavior assumptions.</div>
+    </div>
+  </div>
+</div>`;
+
+// ── MODULE 7 ─────────────────────────────────────────────────────
 
 CS_CONTENT['cs7-t1'] = `
-<h1>What interviewers actually want in A/B test cases</h1>
-<p>When an interviewer asks you an A/B test question, they're not just checking whether you know what statistical significance means. They're checking whether you can think like someone who won't be fooled by data.</p>
-<p>A/B test cases are tricky because the "obvious" answer is almost always wrong. The experiment showed a lift → ship it. No. Not that simple.</p>
-<p>Here's what interviewers are actually looking for:</p>
-<p><strong>Do you check for data quality first?</strong> Was the experiment set up correctly? Were the control and treatment groups properly randomized? Was there any novelty effect (users behaving differently just because something looks new)? Was there any contamination between the groups?</p>
-<p><strong>Do you check the right metrics?</strong> A lift in CTR means nothing if it doesn't translate to conversion. A lift in orders means nothing if revenue per order dropped. Interviewers want to see you look beyond the headline metric.</p>
-<p><strong>Do you understand statistical validity?</strong> Was the test run long enough? Was the sample size sufficient to detect the stated effect? A 3% CTR lift with a p-value of 0.08 is not a result you should ship on.</p>
-<p><strong>Do you think about long-term effects?</strong> A feature can show a 7-day lift and a 30-day decline. Short-term novelty masks long-term behavior. For retention-related features, never evaluate based on the first week alone.</p>
-<p>The best A/B test answers spend as much time questioning the experiment setup as interpreting the results. That's the senior-level instinct.</p>
-`;
+<h1>What the interviewer is really looking for</h1>
+<p class="art-lead">A/B test cases are deceptive. The obvious answer — "the metric lifted, so we should ship" — is almost always wrong or incomplete.</p>
+
+<div class="art-callout">
+  Interviewers aren't testing whether you know what statistical significance means. They're testing whether you can think like someone who won't be fooled by data.
+</div>
+
+<h2>Four things they want to see</h2>
+<div class="art-steps">
+  <div class="art-step"><div class="art-snum">1</div><div class="art-sbody"><strong>You question the setup first</strong><p>Was the experiment properly randomized? Were groups comparable at baseline? Was there any novelty effect or group contamination?</p></div></div>
+  <div class="art-step"><div class="art-snum">2</div><div class="art-sbody"><strong>You check the right metrics</strong><p>A CTR lift means nothing if it doesn't translate to conversion. A lift in orders means nothing if revenue per order dropped. Look beyond the headline metric.</p></div></div>
+  <div class="art-step"><div class="art-snum">3</div><div class="art-sbody"><strong>You understand statistical validity</strong><p>Was the test run long enough? Was the sample size sufficient? A 3% lift with p = 0.08 is not a result to ship on — even if it looks close.</p></div></div>
+  <div class="art-step"><div class="art-snum">4</div><div class="art-sbody"><strong>You think about long-term effects</strong><p>A feature can show a 7-day lift and a 30-day decline. Short-term novelty masks long-term behaviour. For retention features, never judge by the first week alone.</p></div></div>
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Bottom line</div>
+  The best A/B test answers spend as much time questioning the experiment setup as interpreting the results. That's the senior-level signal.
+</div>`;
 
 CS_CONTENT['cs7-t2'] = `
-<h1>Setting up an experiment correctly</h1>
-<p>Before you can interpret an experiment, you need to know if it was set up correctly. In a case interview, you'll often be asked to set one up — not just analyze results.</p>
-<p>A proper experiment setup has six elements:</p>
-<p><strong>Hypothesis.</strong> What are you testing and what do you expect to happen? Not "let's see if this works" — "we expect that simplifying the checkout page will increase completion rate by 5% because users are currently dropping off at the payment step."</p>
-<p><strong>Unit of randomization.</strong> Are you randomizing by user, by session, or by order? For most product experiments, randomize by user to avoid the same person seeing both experiences, which contaminates the test.</p>
-<p><strong>Control and treatment design.</strong> What exactly is the treatment? The more specific you are, the more interpretable the result.</p>
-<p><strong>Sample size and power.</strong> How many users do you need in each group to detect your expected effect at 95% confidence? If you don't have enough users, you'll get an inconclusive result.</p>
-<p><strong>Duration.</strong> How long will you run the experiment? At minimum, one full business cycle (usually 2 weeks). Never cut a test short because it's "already showing significance" — that's p-hacking.</p>
-<p><strong>Guardrail metrics.</strong> What are you explicitly not allowed to hurt? Define these before you start, not after you see results.</p>
-<p>If you can articulate all six in an interview, you're showing you've actually thought about experiments in practice, not just read about them.</p>
-`;
+<h1>The six elements of a proper experiment</h1>
+<p class="art-lead">Before you can interpret an experiment correctly, you need to know if it was set up correctly. In interviews, you'll often be asked to design one — not just read results.</p>
+
+<div class="art-steps">
+  <div class="art-step"><div class="art-snum">1</div><div class="art-sbody"><strong>Hypothesis</strong><p>Not "let's see if this works." Specific and directional: "Simplifying the checkout page will increase completion rate by ~5% because users currently drop off at the payment step."</p></div></div>
+  <div class="art-step"><div class="art-snum">2</div><div class="art-sbody"><strong>Unit of randomization</strong><p>Randomize by user — not by session or order — to avoid the same person seeing both experiences, which contaminates the test.</p></div></div>
+  <div class="art-step"><div class="art-snum">3</div><div class="art-sbody"><strong>Treatment definition</strong><p>What exactly is different in the treatment? The more specific, the more interpretable the result. Vague treatments produce vague learnings.</p></div></div>
+  <div class="art-step"><div class="art-snum">4</div><div class="art-sbody"><strong>Sample size and power</strong><p>How many users do you need in each group to detect your expected effect at 95% confidence? Without this calculation, you risk an underpowered test that produces an inconclusive result.</p></div></div>
+  <div class="art-step"><div class="art-snum">5</div><div class="art-sbody"><strong>Duration</strong><p>At minimum, one full business cycle (usually 2 weeks). Never cut a test short because it's "already showing significance" — that's p-hacking and it will mislead you.</p></div></div>
+  <div class="art-step"><div class="art-snum">6</div><div class="art-sbody"><strong>Guardrail metrics</strong><p>Define explicitly what you're not allowed to hurt — before the experiment starts. Post-hoc guardrails are just excuses to ignore bad results.</p></div></div>
+</div>`;
 
 CS_CONTENT['cs7-t3'] = `
-<h1>Reading results without getting fooled</h1>
-<p>The experiment ran. You have results. Now what?</p>
-<p><strong>First, check if the experiment was healthy.</strong> Were both groups comparable at baseline? Were there any external events during the experiment window that might have affected one group more than the other?</p>
-<p><strong>Second, look at the primary metric.</strong> Is the lift statistically significant at your pre-defined threshold? If you set p &lt; 0.05 before the experiment, a p-value of 0.07 is not significant — even if it looks close. Don't move the goalposts after you see results.</p>
-<p><strong>Third, look at guardrail metrics.</strong> If your primary metric improved but a guardrail metric got worse, you have a tradeoff decision, not a clean win. Be explicit about what tradeoff you'd be making by shipping.</p>
-<p><strong>Fourth, segment the results.</strong> A 4% average lift might be hiding a 12% lift for mobile users and -2% for desktop users. These require different recommendations: ship for mobile, investigate for desktop.</p>
-<p><strong>Fifth, check for novelty effects.</strong> If your experiment involved a visual change, users often interact with anything new differently in the first few days just because it's new. Make sure your results hold in the second week, not just the first.</p>
-<p>At companies like Flipkart, Zepto, or CRED — which run dozens of experiments simultaneously — analysts who can read results without being fooled are the ones who get trusted with the most important experiments.</p>
-`;
+<h1>Reading results without being fooled</h1>
+<p class="art-lead">You have results. Here's the checklist for not drawing the wrong conclusion.</p>
+
+<div class="art-steps">
+  <div class="art-step"><div class="art-snum">1</div><div class="art-sbody"><strong>Was the experiment healthy?</strong><p>Were control and treatment groups comparable at baseline? If they were already different before the experiment started — your results are compromised.</p></div></div>
+  <div class="art-step"><div class="art-snum">2</div><div class="art-sbody"><strong>Is the lift actually significant?</strong><p>If you set p &lt; 0.05 before the experiment, then p = 0.07 is not significant — even if it looks close. Don't move the goalposts after seeing results.</p></div></div>
+  <div class="art-step"><div class="art-snum">3</div><div class="art-sbody"><strong>Did guardrail metrics hold?</strong><p>If your primary metric improved but a guardrail degraded — you have a trade-off, not a clean win. Be explicit about what trade-off you're accepting by shipping.</p></div></div>
+  <div class="art-step"><div class="art-snum">4</div><div class="art-sbody"><strong>Does the result hold across segments?</strong><p>A 4% average lift hiding a 12% lift for mobile and -2% for desktop is not a uniform win. These require different recommendations.</p></div></div>
+  <div class="art-step"><div class="art-snum">5</div><div class="art-sbody"><strong>Is there a novelty effect?</strong><p>If the metric was strong in week one and flat in week two — users may just be reacting to something new. Make sure the lift holds in week two before concluding it's real.</p></div></div>
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Why this matters on the job</div>
+  At companies like Flipkart, CRED, or Zepto — which run dozens of experiments simultaneously — analysts who can read results without being fooled are the ones who get trusted with the most important experiments.
+</div>`;
 
 CS_CONTENT['cs7-t4'] = `
-<h1>Tradeoffs and when NOT to ship</h1>
-<p>Knowing when not to ship a feature is as important as knowing when to ship. This consistently differentiates strong candidates from average ones.</p>
-<p>There are five situations where you should not ship, even with a positive result:</p>
-<p><strong>The lift isn't durable.</strong> Your 7-day result looks great but you have evidence of novelty effect. The metric was climbing in week one and plateauing in week two. Wait another week and see if the lift holds before shipping.</p>
-<p><strong>The guardrail metric degraded.</strong> If checkout completion rate went up 5% but average order value dropped 8%, you've lost more revenue than you gained. Net effect is negative. Don't ship.</p>
-<p><strong>The result doesn't replicate across segments.</strong> A 4% average lift that's actually +20% for a tiny power-user segment and -2% for the majority of users is a misleading aggregate. Shipping this harms most of your users.</p>
-<p><strong>The sample wasn't representative.</strong> If your experiment ran during Diwali week and behavior during Diwali is significantly different from normal weeks, your results don't generalize. Rerun in a neutral period.</p>
-<p><strong>The engineering or operational cost is too high.</strong> A 1% lift in NPS with 3 months of engineering work to maintain the feature is probably not worth it unless NPS is your north star metric.</p>
-<p>In an interview, recommending "don't ship" with clear reasoning is a stronger answer than "ship" with weak reasoning. It shows you're actually trying to be right, not just sound decisive.</p>
-`;
+<h1>When not to ship, even with a positive result</h1>
+<p class="art-lead">Knowing when not to ship is as important as knowing when to ship. This is one of the most underrated analyst skills.</p>
+
+<div class="art-warn"><strong>Don't ship if the lift isn't durable.</strong> The 7-day result looks great, but the metric was climbing in week one and plateauing in week two — novelty effect. Wait another week before deciding.</div>
+
+<div class="art-warn"><strong>Don't ship if a guardrail degraded.</strong> Checkout completion improved 5% but average order value dropped 8%. You've lost more revenue than you gained. Net effect is negative.</div>
+
+<div class="art-warn"><strong>Don't ship if the result doesn't replicate across segments.</strong> A 4% average lift that's +20% for a tiny power-user segment and -2% for the majority of users is a misleading aggregate. Shipping this harms most of your users.</div>
+
+<div class="art-warn"><strong>Don't ship if the sample wasn't representative.</strong> If your experiment ran during Diwali week and platform behaviour during Diwali is significantly different from normal — your results don't generalize. Rerun in a neutral period.</div>
+
+<div class="art-warn"><strong>Don't ship if the engineering cost doesn't justify the lift.</strong> A 0.3% NPS improvement with 3 months of maintenance work is probably not worth it unless NPS is your north star metric.</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Interview signal</div>
+  Recommending "don't ship" with clear reasoning is a stronger answer than "ship" with weak reasoning. It shows you're trying to be right, not just sound decisive.
+</div>`;
 
 CS_CONTENT['cs7-t5'] = `
-<h1>Example: "A/B test showed +3% CTR — should we roll it out?"</h1>
-<p>The prompt: "We ran an A/B test on Meesho's product listing page. The treatment (new image layout) showed a +3% increase in click-through rate. Should we roll it out?"</p>
-<p><strong>Start by questioning the result.</strong></p>
-<p>"Before I answer, a few things I'd want to check. What was the experiment duration? Was there a novelty effect — did the CTR improve immediately and then flatten, or was it consistent throughout the window? What was the sample size and confidence level?"</p>
-<p>Answer: 14-day run, p-value of 0.03, 200,000 users per arm.</p>
-<p>"Good — statistically sound at those numbers. Now, what happened to the conversion rate from click to purchase? CTR is a top-of-funnel metric. If CTR went up but purchase conversion dropped, users clicked more but bought less — the net effect might be negative."</p>
-<p>Answer: Purchase conversion rate in treatment was 2% lower than control.</p>
-<p>"This is important. Let me work through the net effect."</p>
-<p>Control: 1000 impressions → 100 clicks (10% CTR) → 12 purchases (12% conversion).</p>
-<p>Treatment: 1000 impressions → 103 clicks (10.3% CTR) → ~12.1 purchases (11.76% conversion, 2% relative drop).</p>
-<p>Net change in purchases: essentially flat or slightly negative when you account for the conversion drop.</p>
-<p><strong>Recommendation.</strong></p>
-<p>"I would not recommend rolling this out. The CTR lift is real but it doesn't translate to more purchases — and purchases are what drive business outcomes for Meesho. I'd dig into why conversion dropped: maybe the new image layout attracts clicks from lower-intent users, or the product detail page isn't matching the expectation set by the new thumbnail."</p>
-`;
+<h1>Walkthrough — +3% CTR, should we roll it out?</h1>
+<p class="art-lead">A common A/B test case where the surface-level answer is wrong.</p>
+
+<div class="art-callout">
+  <strong>The prompt:</strong> "We ran an A/B test on Meesho's product listing page. The treatment (new image layout) showed +3% CTR. Should we roll it out?"
+</div>
+
+<div class="art-wt">
+  <div class="art-wt-head">Step-by-step walkthrough</div>
+  <div class="art-wt-body">
+    <div class="art-wt-step">
+      <div class="art-wt-label">Question the setup</div>
+      <div class="art-wt-text">"Before I answer — what was the experiment duration? Was there a novelty effect? What was the sample size and confidence level?"<br/><br/><em>Answer: 14-day run, p = 0.03, 200,000 users per arm.</em><br/><br/>Good. Statistically sound at those numbers. But CTR is a top-of-funnel metric. I want to know what happened downstream.</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Check downstream conversion</div>
+      <div class="art-wt-text">"What happened to the purchase conversion rate — clicks to actual orders — in the treatment group?"<br/><br/><em>Answer: Purchase conversion was 2% lower in treatment than control.</em></div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Calculate net effect</div>
+      <div class="art-wt-text">Control: 1,000 impressions → 100 clicks (10% CTR) → 12 orders (12% conversion)<br/>
+      Treatment: 1,000 impressions → 103 clicks (10.3% CTR) → ~12.1 orders (11.76% conversion, 2% relative drop)<br/><br/>
+      Net change in orders: essentially flat to slightly negative.</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Recommendation</div>
+      <div class="art-wt-text"><strong>Do not ship.</strong> The CTR lift is real but doesn't translate to more orders — and orders drive Meesho's business outcomes, not clicks. Investigate why conversion dropped: the new image layout may be attracting clicks from lower-intent users, or setting a product expectation the detail page doesn't deliver on.</div>
+    </div>
+  </div>
+</div>`;
+
+// ── MODULE 8 ─────────────────────────────────────────────────────
 
 CS_CONTENT['cs8-t1'] = `
-<h1>When they give you a dataset and a business question</h1>
-<p>Some interviews involve open-ended data exploration: here's a table, here's a business question, tell us what you'd do. These are called SQL case studies or data case studies, and they test a different skill than pure business case interviews.</p>
-<p>What's different: you have actual data. You're not hypothesizing about what might have happened — you can verify things. But this is also where candidates get lost, because "I can check everything" easily becomes "I checked seventeen things and found nothing meaningful."</p>
-<p>The discipline here is the same as every other case type: structure before you start running queries. Before you open a SQL editor, you should know:</p>
-<p><strong>What question are you trying to answer?</strong> Write it down in plain English. "I want to understand which customer segment has the highest lifetime value" is a clear question. "I want to explore the data" is not.</p>
-<p><strong>What tables and columns are relevant?</strong> If you have an orders table, a customers table, and a products table — which one(s) do you actually need for your question?</p>
-<p><strong>What does success look like?</strong> Before you run a query, what would a useful output look like? A table? A single number? A comparison between two groups?</p>
-<p><strong>What are the edge cases?</strong> Null values, cancelled orders included or excluded, date range boundaries, users with zero orders.</p>
-<p>This upfront thinking takes two minutes and saves you fifteen minutes of running queries that don't answer the actual question.</p>
-`;
+<h1>Getting oriented before you query</h1>
+<p class="art-lead">The difference between a good SQL data case and a bad one isn't syntax — it's whether you thought before you typed.</p>
+
+<p>"I can check everything" quickly becomes "I checked seventeen things and found nothing meaningful." The discipline is the same as every other case type: structure before execution.</p>
+
+<h2>Four questions to answer before writing any SQL</h2>
+<div class="art-steps">
+  <div class="art-step"><div class="art-snum">1</div><div class="art-sbody"><strong>What exact question am I answering?</strong><p>"I want to find which customer segment has the highest lifetime value" is a question. "I want to explore the data" is not.</p></div></div>
+  <div class="art-step"><div class="art-snum">2</div><div class="art-sbody"><strong>Which tables and columns are actually relevant?</strong><p>If you have orders, customers, and products tables — which ones do you need for this specific question? Don't join everything.</p></div></div>
+  <div class="art-step"><div class="art-snum">3</div><div class="art-sbody"><strong>What would a useful output look like?</strong><p>Before writing the query, describe the output. A single number? A ranked table? A comparison between two groups? Know what you're expecting.</p></div></div>
+  <div class="art-step"><div class="art-snum">4</div><div class="art-sbody"><strong>What are the edge cases?</strong><p>Null values, cancelled orders, date range boundaries, users with zero orders. Handle these before they invalidate your result.</p></div></div>
+</div>
+
+<div class="art-callout">
+  This upfront thinking takes 2 minutes and saves 15 minutes of running queries that answer the wrong question.
+</div>`;
 
 CS_CONTENT['cs8-t2'] = `
-<h1>Translating business questions into queries</h1>
-<p>The translation from business language to SQL is a skill that takes practice. The hardest part isn't the syntax — it's knowing what SQL structure maps to which business concept.</p>
-<p>Here's a translation guide for the most common business questions:</p>
-<p><strong>"Who are our best customers?"</strong> → GROUP BY customer_id, ORDER BY total_spend DESC, LIMIT 10 or top percentile using NTILE.</p>
-<p><strong>"Are customers coming back?"</strong> → Cohort analysis. Group users by first purchase month, then track what % made a second purchase in subsequent months.</p>
-<p><strong>"Which product categories are growing?"</strong> → Compare category revenue month-over-month using date functions and window functions like LAG().</p>
-<p><strong>"Are there customers at risk of churning?"</strong> → Filter for customers who were active 60 days ago but haven't ordered in the last 30 days.</p>
-<p><strong>"Which channel brings the best customers?"</strong> → JOIN acquisition channel data with order history, GROUP BY channel, compare average LTV.</p>
-<p>The key translation skill is recognizing that most business questions have two parts: a filter (which subset of data?) and an aggregation (what do you want to measure about that subset?). Once you identify both, the SQL writes itself.</p>
-<p>A common mistake: writing a query that answers a slightly different question than the one asked. Always re-read the business question after writing your query, before running it, and ask yourself: if this returns what I expect, does it actually answer the original question?</p>
-`;
+<h1>Translating business questions into SQL</h1>
+<p class="art-lead">The hard part isn't the syntax. It's knowing which SQL structure maps to which business concept.</p>
+
+<div class="art-box">
+  <div class="art-blabel">Translation guide</div>
+  <div class="art-steps">
+    <div class="art-step"><div class="art-snum">→</div><div class="art-sbody"><strong>"Who are our best customers?"</strong><p><code>GROUP BY customer_id, ORDER BY total_spend DESC</code> — or top decile using <code>NTILE(10)</code></p></div></div>
+    <div class="art-step"><div class="art-snum">→</div><div class="art-sbody"><strong>"Are customers coming back?"</strong><p>Cohort analysis — group by first purchase month, track % who returned in subsequent months</p></div></div>
+    <div class="art-step"><div class="art-snum">→</div><div class="art-sbody"><strong>"Which categories are growing?"</strong><p>Month-over-month revenue using date functions + <code>LAG()</code> window function</p></div></div>
+    <div class="art-step"><div class="art-snum">→</div><div class="art-sbody"><strong>"Who is at risk of churning?"</strong><p>Customers active 60 days ago but with no order in the last 30 days — date filter + NOT EXISTS pattern</p></div></div>
+    <div class="art-step"><div class="art-snum">→</div><div class="art-sbody"><strong>"Which acquisition channel brings the best customers?"</strong><p><code>JOIN</code> acquisition data with order history, <code>GROUP BY channel</code>, compare average LTV per channel</p></div></div>
+  </div>
+</div>
+
+<div class="art-callout">
+  Most business questions have two parts: a <strong>filter</strong> (which subset?) and an <strong>aggregation</strong> (what to measure about that subset?). Once you identify both, the SQL writes itself.
+</div>
+
+<div class="art-warn">
+  <strong>Common mistake:</strong> Writing a query that answers a slightly different question than the one asked. Always re-read the business question after writing the query — before running it.
+</div>`;
 
 CS_CONTENT['cs8-t3'] = `
-<h1>Presenting your output as a story</h1>
-<p>Running a query is not the end. Getting a result table is not the end. The end is communicating what you found in a way that leads to a decision.</p>
-<p>Most analysts are good at the first two steps and weak at the third. They hand over a spreadsheet with 12 tabs and say "here's what I found." That's not analysis — that's data transfer.</p>
-<p>A well-presented SQL data case has four parts:</p>
-<p><strong>Headline finding.</strong> One sentence that summarizes what you found. "The top 10% of customers by order frequency account for 58% of Zomato's revenue, but their repeat rate has been declining for three months."</p>
-<p><strong>Supporting evidence.</strong> Two or three specific data points that back the headline. Not twenty. Two or three.</p>
-<p><strong>Implication.</strong> What does this mean for the business? "If this high-value segment's repeat rate continues declining, we'll see a meaningful revenue impact in the next quarter."</p>
-<p><strong>Recommended action.</strong> What should someone do with this information? "I'd recommend a targeted win-back campaign for users who were in the top decile six months ago but haven't ordered in 30 days."</p>
-<p>This structure — headline, evidence, implication, action — is how management consultants communicate. It's not just for analysts talking to executives. It's the right format whenever you're presenting findings to anyone who has to make a decision based on your work.</p>
-`;
+<h1>Turning query output into a story</h1>
+<p class="art-lead">Getting a result table is not the end. Communicating what it means — in a way that leads to a decision — is the actual deliverable.</p>
+
+<p>Most analysts are strong on the first two steps (writing and running queries) and weak on the third (communication). They hand over a spreadsheet with 12 tabs and say "here's what I found." That's data transfer, not analysis.</p>
+
+<h2>The four-part structure for any data finding</h2>
+<div class="art-steps">
+  <div class="art-step"><div class="art-snum">1</div><div class="art-sbody"><strong>Headline finding — one sentence</strong><p>"The top 10% of customers by order frequency account for 58% of Zomato's revenue, and their repeat rate has been declining for three months."</p></div></div>
+  <div class="art-step"><div class="art-snum">2</div><div class="art-sbody"><strong>Supporting evidence — two or three data points</strong><p>Not twenty. Two or three specific numbers that back the headline. More than that dilutes the impact.</p></div></div>
+  <div class="art-step"><div class="art-snum">3</div><div class="art-sbody"><strong>Implication — what this means for the business</strong><p>"If this segment's repeat rate continues declining, we'll see a meaningful revenue impact in the next quarter."</p></div></div>
+  <div class="art-step"><div class="art-snum">4</div><div class="art-sbody"><strong>Recommended action — what someone should do with this</strong><p>"I'd recommend a targeted win-back campaign for users who were in the top decile six months ago but haven't ordered in 30 days."</p></div></div>
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">The format</div>
+  Headline → evidence → implication → action. This is how management consultants communicate. Use it whenever you're presenting findings to someone who has to make a decision.
+</div>`;
 
 CS_CONTENT['cs8-t4'] = `
-<h1>Example: "Find our most valuable customer segment"</h1>
-<p>The prompt: "We have an orders table with customer_id, order_date, revenue, and city. Find our most valuable customer segment."</p>
-<p><strong>Step 1 — Clarify "most valuable."</strong></p>
-<p>"I want to clarify 'most valuable.' Do we mean highest total spend, highest average order value, or highest purchase frequency? And over what time period?"</p>
-<p>Answer: Highest total spend, last 12 months.</p>
-<p><strong>Step 2 — Structure the query logic.</strong></p>
-<p>"I'll rank customers by total revenue over the last 12 months, then segment them into deciles to see how revenue is distributed. This shows what share of revenue comes from the top X% of customers — a Pareto analysis."</p>
-<p><strong>Step 3 — Write and narrate the query.</strong></p>
-<pre><code>WITH customer_revenue AS (
+<h1>Walkthrough — Find our most valuable customers</h1>
+<p class="art-lead">An open-ended SQL data case with a structured approach from question to recommendation.</p>
+
+<div class="art-callout">
+  <strong>The prompt:</strong> "We have an orders table with customer_id, order_date, revenue, and city. Find our most valuable customer segment."
+</div>
+
+<div class="art-wt">
+  <div class="art-wt-head">Step-by-step walkthrough</div>
+  <div class="art-wt-body">
+    <div class="art-wt-step">
+      <div class="art-wt-label">Clarify "most valuable"</div>
+      <div class="art-wt-text">"Do you mean highest total spend, highest order frequency, or highest average order value? And over what time period?"<br/><br/><em>Answer: Highest total spend, last 12 months.</em></div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Structure the approach</div>
+      <div class="art-wt-text">Rank customers by 12-month revenue, then segment into deciles using NTILE(10). This gives a Pareto view — what share of revenue comes from the top X% of customers.</div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Write the query</div>
+      <div class="art-wt-text"><pre style="margin:8px 0 0;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:14px;font-size:.82rem;overflow-x:auto"><code>WITH customer_rev AS (
   SELECT
-    customer_id,
-    city,
-    SUM(revenue)   AS total_revenue,
-    COUNT(*)       AS order_count,
-    AVG(revenue)   AS avg_order_value
+    customer_id, city,
+    SUM(revenue)  AS total_revenue,
+    COUNT(*)      AS order_count,
+    AVG(revenue)  AS avg_order_value
   FROM orders
-  WHERE order_date >= DATEADD(year, -1, CURRENT_DATE)
+  WHERE order_date >= DATEADD(year,-1,CURRENT_DATE)
   GROUP BY customer_id, city
 ),
 ranked AS (
   SELECT *,
-    NTILE(10) OVER (ORDER BY total_revenue DESC) AS revenue_decile
-  FROM customer_revenue
+    NTILE(10) OVER (ORDER BY total_revenue DESC) AS decile
+  FROM customer_rev
 )
 SELECT
-  revenue_decile,
-  COUNT(*)           AS customers,
-  SUM(total_revenue) AS decile_revenue,
-  AVG(order_count)   AS avg_orders,
+  decile,
+  COUNT(*)            AS customers,
+  SUM(total_revenue)  AS revenue,
+  AVG(order_count)    AS avg_orders,
   AVG(avg_order_value) AS avg_aov
 FROM ranked
-GROUP BY revenue_decile
-ORDER BY revenue_decile;</code></pre>
-<p><strong>Step 4 — Narrate the expected output.</strong></p>
-<p>"This gives us 10 groups. If the top decile accounts for 50%+ of total revenue, we have high concentration in a small customer segment — meaning we should focus retention resources heavily on that group. I'd also add a city breakdown to see if the high-value segment is geographically concentrated, which would shape where we invest in service quality."</p>
-`;
+GROUP BY decile
+ORDER BY decile;</code></pre></div>
+    </div>
+    <div class="art-wt-step">
+      <div class="art-wt-label">Interpret the output</div>
+      <div class="art-wt-text">If decile 1 holds 50%+ of total revenue — high value concentration. Retention of this segment is critical. Add a city breakdown to see if the high-value segment is geographically concentrated, which shapes where to invest in service quality and marketing.</div>
+    </div>
+  </div>
+</div>`;
+
+// ── MODULE 9 ─────────────────────────────────────────────────────
 
 CS_CONTENT['cs9-t1'] = `
 <h1>The SCQA structure</h1>
-<p>SCQA comes from Barbara Minto's Pyramid Principle, used by McKinsey and every major consulting firm. Analysts don't always need to use it formally, but understanding the underlying logic makes your communication dramatically cleaner.</p>
-<p><strong>Situation.</strong> This is context that your audience already knows or would agree with. "Swiggy's DAU has grown steadily over the past year." Don't spend too long here — people get impatient when you tell them things they already know.</p>
-<p><strong>Complication.</strong> This is the "but." Something changed, something is wrong, something is unexpected. "However, this week we saw an 18% drop in DAU, concentrated in Tier-2 cities." The complication is what makes your analysis necessary.</p>
-<p><strong>Question.</strong> This frames what needs to be answered. Usually you don't state this explicitly in a case interview — it was already stated in the prompt. But knowing what the implied question is keeps your analysis focused.</p>
-<p><strong>Answer.</strong> This is the recommendation or conclusion, stated first. Not at the end — at the beginning. "My analysis suggests the DAU drop is driven by restaurant supply thinning in Tier-2 cities, and I'd recommend an immediate review of partner retention in those markets."</p>
-<p>The counterintuitive thing about SCQA: you state your answer before your evidence. This is the opposite of how most people communicate — they build up to the conclusion like a dramatic reveal. That's fine for movies, terrible for business presentations.</p>
-<p>In a case interview, lead with your conclusion, then support it. It signals confidence and gives the interviewer a frame through which to evaluate your evidence.</p>
-`;
+<p class="art-lead">SCQA is how McKinsey and every major consulting firm structures communication. Understanding the logic makes any answer dramatically cleaner.</p>
+
+<div class="art-steps">
+  <div class="art-step"><div class="art-snum">S</div><div class="art-sbody"><strong>Situation — context the audience already agrees with</strong><p>"Swiggy's DAU has grown steadily over the past year." Don't linger here — people get impatient when you tell them things they already know.</p></div></div>
+  <div class="art-step"><div class="art-snum">C</div><div class="art-sbody"><strong>Complication — the "but"</strong><p>"However, this week we saw an 18% drop in DAU, concentrated in Tier-2 cities." This is what makes your analysis necessary — without a complication, there's no reason to be listening.</p></div></div>
+  <div class="art-step"><div class="art-snum">Q</div><div class="art-sbody"><strong>Question — what needs to be answered</strong><p>Usually implied by the prompt, not stated explicitly. But knowing the implied question keeps your analysis focused and prevents scope creep.</p></div></div>
+  <div class="art-step"><div class="art-snum">A</div><div class="art-sbody"><strong>Answer — stated first, not last</strong><p>"My analysis suggests the DAU drop is driven by restaurant supply thinning in Tier-2 cities. I'd recommend an immediate review of partner retention in those markets."</p></div></div>
+</div>
+
+<div class="art-callout">
+  The counterintuitive part: state your answer <strong>before</strong> your evidence. Most people build up to the conclusion like a dramatic reveal. That's fine for movies — terrible for business presentations. Lead with the conclusion, then support it.
+</div>`;
 
 CS_CONTENT['cs9-t2'] = `
-<h1>Speaking with confidence, not complexity</h1>
-<p>The most common mistake in analyst interviews is using complexity as a proxy for intelligence. Candidates throw out technical terms — "multivariate regression," "statistical significance," "chi-square test" — not because those concepts are relevant, but because they sound impressive.</p>
-<p>Experienced interviewers find this exhausting, not impressive.</p>
-<p>Speaking with confidence means saying exactly what you mean, as simply as possible. If you'd diagnose a metric drop by looking at funnel data, say "I'd look at each step of the order funnel." Not "I'd conduct a multi-dimensional diagnostic across the conversion funnel stages." Same thing. The second version just has more words.</p>
-<p>There's a useful test for every sentence you say in an interview: does this sentence advance my argument, or is it just filling air? If it's filling air, cut it.</p>
-<p>Confidence also doesn't mean speaking without pausing. A well-placed pause — "give me a moment to think about this" — is more confident than rushing into an answer that isn't organized yet. Confident people don't perform certainty they don't have. They say "I'm not sure, but my best hypothesis is X because of Y" — and that's totally fine.</p>
-<p>One more thing: confidence in delivery doesn't compensate for weak reasoning. A candidate who speaks hesitantly but has sharp logic will outperform a polished-sounding candidate with shallow analysis every time. Work on the logic first. The delivery improves naturally once you trust your own reasoning.</p>
-`;
+<h1>Simple language beats jargon every time</h1>
+<p class="art-lead">The most common mistake in analyst interviews is using complexity as a proxy for intelligence. It doesn't work and experienced interviewers find it exhausting.</p>
+
+<div class="art-compare">
+  <div class="art-compare-bad">
+    <div class="art-clabel">Jargon</div>
+    <div class="art-ctext">"I'd conduct a multi-dimensional diagnostic across all conversion funnel touchpoints to identify the primary driver of conversion degradation."</div>
+  </div>
+  <div class="art-compare-good">
+    <div class="art-clabel">Clear</div>
+    <div class="art-ctext">"I'd look at each step of the order funnel to see where users are dropping off."</div>
+  </div>
+</div>
+
+<p>Same thing. The second version is shorter, clearer, and more credible — because if you propose something complex, the interviewer might ask you to actually do it.</p>
+
+<h2>A useful test for every sentence you say</h2>
+<div class="art-callout">
+  Does this sentence advance my argument, or is it just filling air? If it's filling air — cut it.
+</div>
+
+<h2>Confidence isn't the same as certainty</h2>
+<p>A well-placed pause — "Give me a moment to think" — is more confident than rushing into a disorganized answer. Saying "I'm not sure, but my best hypothesis is X because of Y" is better than performing certainty you don't have.</p>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Bottom line</div>
+  Work on the logic first. The delivery improves naturally once you trust your own reasoning.
+</div>`;
 
 CS_CONTENT['cs9-t3'] = `
-<h1>What interviewers are scoring you on</h1>
-<p>Different companies have different scorecards, but most analyst case interviews score on roughly the same dimensions. Knowing these helps you allocate your mental energy in the interview.</p>
-<p><strong>Structure (25%).</strong> Did you organize the problem before diving in? Did you use a logical framework? Did your answer flow in a way that was easy to follow?</p>
-<p><strong>Business sense (25%).</strong> Do your hypotheses make sense for the specific company and industry? Did you show awareness of competitive dynamics, user behavior, and business model constraints?</p>
-<p><strong>Analytical rigor (25%).</strong> Did you check the right things? Did you think about confounders? Did you look for edge cases? Did you sanity-check your conclusions?</p>
-<p><strong>Communication (15%).</strong> Was your answer concise and clear? Did you lead with the conclusion? Did you use simple language to explain complex ideas?</p>
-<p><strong>Intellectual honesty (10%).</strong> Did you acknowledge what you don't know? Did you distinguish between things you're confident about and things you're speculating on? Did you say "I'd need more data to confirm this" when appropriate?</p>
-<p>Most candidates are strongest on communication (they've practiced talking) and weakest on analytical rigor (they haven't practiced thinking through edge cases). Investing practice time in the rigor dimension usually has the highest return on your score.</p>
-`;
+<h1>What you're actually being scored on</h1>
+<p class="art-lead">Different companies use different scorecards, but analyst case interviews converge on the same five dimensions.</p>
+
+<div class="art-steps">
+  <div class="art-step"><div class="art-snum">25%</div><div class="art-sbody"><strong>Structure</strong><p>Did you organize the problem before diving in? Did your answer flow in a way that was easy to follow?</p></div></div>
+  <div class="art-step"><div class="art-snum">25%</div><div class="art-sbody"><strong>Business sense</strong><p>Do your hypotheses make sense for this specific company and industry? Did you show awareness of competitive dynamics and business model constraints?</p></div></div>
+  <div class="art-step"><div class="art-snum">25%</div><div class="art-sbody"><strong>Analytical rigor</strong><p>Did you check the right things? Think about confounders? Look for edge cases? Sanity-check your conclusions?</p></div></div>
+  <div class="art-step"><div class="art-snum">15%</div><div class="art-sbody"><strong>Communication</strong><p>Was your answer concise and clear? Did you lead with the conclusion? Did you use simple language to explain complex ideas?</p></div></div>
+  <div class="art-step"><div class="art-snum">10%</div><div class="art-sbody"><strong>Intellectual honesty</strong><p>Did you acknowledge what you don't know? Did you say "I'd need more data to confirm this" when appropriate — instead of over-claiming?</p></div></div>
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Where to focus your practice</div>
+  Most candidates are strong on communication (they've practiced talking) and weak on analytical rigor (they haven't practiced thinking through edge cases). That's where your practice time will have the highest return.
+</div>`;
 
 CS_CONTENT['cs9-t4'] = `
-<h1>The difference between a 6/10 and a 9/10 answer</h1>
-<p>A 6/10 answer: "Swiggy's DAU dropped. I'd look at acquisition and retention separately. On the acquisition side, maybe marketing spend dropped. On the retention side, maybe the app experience got worse. I'd also look at whether a competitor did something."</p>
-<p>A 9/10 answer: "Before I hypothesize, two questions: is the drop uniform across the week or concentrated on certain days, and is it consistent across cities? [Hears answers.] Okay, so it's heavier in Tier-2. That immediately changes where I'd look first. In Tier-2 cities, Swiggy's supply side is thinner — fewer restaurants, fewer delivery partners. My top hypothesis is a supply contraction: either restaurants exited the platform or delivery partner availability dropped, which would reduce both discovery and delivery speed, creating a compounding effect on DAU.</p>
-<p>I'd verify by pulling restaurant-availability per city against prior month, and looking at delivery time metrics for those specific cities. If delivery time spiked in the same period as DAU dropped, that strongly suggests supply degradation.</p>
-<p>If I find that, the fix is a focused re-engagement drive with restaurant partners in those cities and a short-term delivery incentive for partners in Tier-2 markets."</p>
-<p>The 6/10 answer is not wrong. It's just generic. It could apply to any app. The 9/10 answer uses the specific context clue (Tier-2 drop) to generate a targeted hypothesis, explains the mechanism (supply → discovery → delivery time → DAU), and connects the diagnosis to a specific recommended action.</p>
-<p>That specificity — using the context you're given to narrow your hypothesis faster — is the difference.</p>
-`;
+<h1>What separates a 6 from a 9</h1>
+<p class="art-lead">The difference isn't knowledge of frameworks. It's specificity and the ability to use context clues.</p>
+
+<div class="art-compare">
+  <div class="art-compare-bad">
+    <div class="art-clabel">6 out of 10 answer</div>
+    <div class="art-ctext">"Swiggy's DAU dropped. I'd look at acquisition and retention separately. Maybe marketing spend dropped, or the app experience got worse, or a competitor did something."</div>
+  </div>
+  <div class="art-compare-good">
+    <div class="art-clabel">9 out of 10 answer</div>
+    <div class="art-ctext">"Before I hypothesize — is the drop uniform across cities or skewed toward Tier-2? [Hears: heavier in Tier-2.] That immediately changes where I look. Swiggy's supply side is thinner in Tier-2 — fewer restaurants, fewer delivery partners. My top hypothesis is supply contraction: if restaurant availability dropped, users come, find nothing good, and stop returning. This creates a compounding effect on DAU."</div>
+  </div>
+</div>
+
+<p>The 6/10 answer is not wrong — it's just generic. It could apply to any app in any market.</p>
+
+<p>The 9/10 answer uses the specific context clue (Tier-2 skew) to generate a narrower, more targeted hypothesis. It explains the mechanism (supply → discovery → delivery time → DAU). And it connects the diagnosis directly to a recommended action.</p>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">The one habit that separates them</div>
+  Use every context clue you're given. Don't ignore specific details in the prompt — those details are there precisely to narrow your hypothesis space. The candidate who picks them up first wins.
+</div>`;
+
+// ── MODULE 10 ────────────────────────────────────────────────────
 
 CS_CONTENT['cs10-t1'] = `
-<h1>Jumping to solutions before clarifying</h1>
-<p>This is the single most common mistake. Someone hears "Meesho's GMV dropped 12%" and immediately says "it might be because of a competitor discount, or maybe the ad spend was reduced, or maybe there was a technical issue."</p>
-<p>That's not analysis. That's a list of guesses.</p>
-<p>The damage isn't just that the guess is often wrong. The damage is that once you've said something, you're psychologically committed to it. You'll spend the next ten minutes trying to prove your first hypothesis instead of genuinely exploring alternatives. That's confirmation bias, and it's the enemy of good root cause analysis.</p>
-<p>The fix is simple but uncomfortable: shut up for thirty seconds. Ask your clarifying questions. Write down the key facts. Then generate hypotheses.</p>
-<p>Here's what changes when you clarify first: your hypotheses become specific. "GMV dropped — maybe marketing changed" is vague. "GMV dropped 12% over two weeks, concentrated in women's fashion, in Tier-1 cities, and it started right after the end of a discount campaign" generates a much more targeted hypothesis: "the discount campaign drove artificial GMV and the drop is a normalization, not a true decline."</p>
-<p>Different question, different hypothesis, different recommendation. That's the payoff of clarifying first.</p>
-<p>In real analyst work, jumping to solutions before understanding the problem causes teams to spend weeks building dashboards that answer the wrong question. The habit of clarifying first is one of the most valuable professional habits you can build.</p>
-`;
+<h1>Jumping in before clarifying</h1>
+<p class="art-lead">The most common mistake. And the most damaging — not because the guess is often wrong, but because of what happens after you say it.</p>
+
+<p>Once you've stated a hypothesis, you're psychologically committed to it. You'll spend the next ten minutes trying to prove it instead of genuinely exploring alternatives. That's confirmation bias — and it's the enemy of good root cause analysis.</p>
+
+<div class="art-compare">
+  <div class="art-compare-bad">
+    <div class="art-clabel">Without clarifying</div>
+    <div class="art-ctext">"Meesho's GMV dropped 12% — maybe marketing spend reduced, maybe a competitor discounted, maybe there was a technical issue..."<br/><br/>Generic. Could apply to any company in any situation.</div>
+  </div>
+  <div class="art-compare-good">
+    <div class="art-clabel">After clarifying</div>
+    <div class="art-ctext">"GMV dropped 12% over two weeks, concentrated in women's fashion, in Tier-1 cities, starting right after a discount campaign ended."<br/><br/>→ Specific hypothesis: the campaign drove artificial GMV and the drop is normalization, not a decline.</div>
+  </div>
+</div>
+
+<div class="art-callout">
+  Different facts → different hypothesis → different recommendation. That's the entire payoff of clarifying first. Two sentences of context is worth 10 minutes of generic analysis.
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Real-world consequence</div>
+  In actual analyst work, jumping to solutions before understanding the problem causes teams to spend weeks building dashboards that answer the wrong question. The clarify-first habit is one of the most valuable professional habits you can build.
+</div>`;
 
 CS_CONTENT['cs10-t2'] = `
 <h1>Being vague about metrics</h1>
-<p>"I'd look at user engagement metrics." This sentence means nothing. Every interviewer who hears it is slightly more skeptical of you than before you said it.</p>
-<p>What engagement metrics? Measured how? Over what time period? Compared to what baseline?</p>
-<p>Vagueness about metrics signals one of two things: you don't actually know what metrics are relevant to the problem, or you know but you're not being specific because specificity is harder and more exposed.</p>
-<p>The cure: always name the exact metric you'd look at, why you'd look at it, and what you'd expect to see. "I'd look at the 30-day retention rate for users acquired via paid search in the last month, and compare it to the 30-day retention rate for organically acquired users over the same period. If paid-search retention is significantly lower, it tells me the marketing channel is attracting low-quality users."</p>
-<p>That's specific. The interviewer knows exactly what you mean, can push back on whether it's the right metric, and can engage with your reasoning.</p>
-<p>A related mistake: using composite metrics without defining them. "I'd track a health score for each user segment." What is a health score? If you've invented a metric for the case, define it clearly and explain what it captures and what it doesn't.</p>
-<p>In a Groww or PhonePe interview, where the business is built on financial data with specific regulatory definitions, being vague about metrics is particularly costly. "I'd look at transaction volume" — do you mean total transactions, successful transactions, failed transactions, or unique transacting users? These are different numbers that tell different stories.</p>
-`;
+<p class="art-lead">"I'd look at user engagement metrics." This sentence means nothing. Every interviewer who hears it becomes slightly more skeptical.</p>
+
+<p>What engagement metrics? Measured how? Over what time period? Compared to what baseline? Vagueness about metrics signals either that you don't know what's relevant, or that you're avoiding specificity because it's harder to defend.</p>
+
+<div class="art-compare">
+  <div class="art-compare-bad">
+    <div class="art-clabel">Vague</div>
+    <div class="art-ctext">"I'd track engagement and look at how users are interacting with the platform."</div>
+  </div>
+  <div class="art-compare-good">
+    <div class="art-clabel">Specific</div>
+    <div class="art-ctext">"I'd look at 30-day retention rate for users acquired via paid search last month, and compare it to organically acquired users in the same period. If paid-search retention is significantly lower, the channel is attracting low-quality users."</div>
+  </div>
+</div>
+
+<h2>The composite metric trap</h2>
+<div class="art-warn">
+  <strong>"I'd track a health score for each user segment."</strong> What is a health score? If you've invented a metric, define it explicitly — what it captures, how it's calculated, what it doesn't capture. Unnamed composite metrics are a red flag that you're hiding imprecision behind jargon.
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">The rule</div>
+  Name the exact metric. Explain why you chose it. Say what you'd expect to see. Three sentences. This makes every answer more credible.
+</div>`;
 
 CS_CONTENT['cs10-t3'] = `
-<h1>Over-engineering simple problems</h1>
-<p>Some candidates, when faced with a simple problem, make it complex because complexity feels like rigor. This is a mistake.</p>
-<p>"DAU dropped 10% last week" does not require a cohort analysis, a survival curve, and a multivariate regression. It probably requires you to check whether the drop was uniform across the week (to rule out a one-day event) and then look at the top two or three most likely causes.</p>
-<p>Over-engineering wastes interview time and often obscures your actual reasoning. If you spend eight minutes describing a sophisticated analytical framework and only two minutes on the actual analysis, the interviewer has learned a lot about frameworks and very little about how you think.</p>
-<p>The right level of complexity for an interview answer is: exactly as complex as the problem requires, and no more.</p>
-<p>A useful heuristic: if you can get to the same answer with a simpler approach, use the simpler one. "I'd check the funnel conversion step by step" is better than "I'd apply a multi-touch attribution model across all funnel touchpoints to identify the primary driver of conversion degradation." Both might mean the same thing, but one is clear and the other is jargon.</p>
-<p>There's also a credibility issue with over-engineering: if you propose something complex, the interviewer might ask you to actually do it. "You mentioned survival analysis — walk me through how you'd set that up for this data." If you said it just to sound sophisticated, you're now in trouble. Only propose things you can actually execute.</p>
-`;
+<h1>Over-engineering a simple problem</h1>
+<p class="art-lead">Some candidates make simple problems complex because complexity feels like rigor. It doesn't look like rigor — it looks like insecurity.</p>
+
+<p>"DAU dropped 10% last week" does not require a cohort analysis, a survival curve, and a multivariate regression. It requires checking whether the drop was uniform across the week (rules out a one-day event), and then testing the two or three most likely causes.</p>
+
+<div class="art-compare">
+  <div class="art-compare-bad">
+    <div class="art-clabel">Over-engineered</div>
+    <div class="art-ctext">"I'd apply a multi-touch attribution model across all funnel touchpoints to identify the primary driver of conversion degradation."</div>
+  </div>
+  <div class="art-compare-good">
+    <div class="art-clabel">Appropriately simple</div>
+    <div class="art-ctext">"I'd check the funnel conversion step by step to see where users are dropping off."</div>
+  </div>
+</div>
+
+<div class="art-callout">
+  Same meaning. The first version adds words and reduces clarity. If you can reach the same answer with a simpler approach — use the simpler one. Every time.
+</div>
+
+<h2>The credibility trap</h2>
+<div class="art-warn">
+  <strong>Only propose things you can actually execute.</strong> If you mention survival analysis, the interviewer might say "walk me through how you'd set that up for this data." If you said it to sound sophisticated — you're now in trouble.
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Right level of complexity</div>
+  Exactly as complex as the problem requires, and no more.
+</div>`;
 
 CS_CONTENT['cs10-t4'] = `
-<h1>Confusing correlation with causation</h1>
-<p>This one gets smart candidates killed because they know enough statistics to look analytical but not enough to catch their own reasoning errors.</p>
-<p>The classic example in a case interview: "Blinkit's orders are highest on days when driver availability is also highest. Therefore, increasing driver supply will increase orders."</p>
-<p>This might be true. It might also be that both orders and driver availability are high on weekends and low on Tuesday mornings, and the real driver is day-of-week, not a causal relationship between supply and demand.</p>
-<p>Correlation is when two things move together. Causation is when one thing causes the other. Knowing the difference sounds trivial. In practice, it's one of the hardest things to get right, especially when working with observational data — which is almost all the time in a business context.</p>
-<p>The most common correlation-causation mistakes in case interviews:</p>
-<p><em>"Users who use the app daily have 3x higher LTV"</em> → This doesn't mean making users open the app daily will increase their LTV. High-frequency users are already highly engaged — the causation likely runs the other way.</p>
-<p><em>"Markets where we ran promotions saw 20% higher orders"</em> → Promotions might be deployed to markets that already have higher demand. Both might be caused by a third factor (market health).</p>
-<p><em>"Customers who receive push notifications order more"</em> → You're likely sending push notifications to your more active users already. The correlation is selection bias.</p>
-<p>When you catch yourself saying "therefore" or "which means" in an interview, slow down and ask: is this causation I can actually defend, or am I assuming it from a correlation?</p>
-`;
+<h1>Correlation is not causation</h1>
+<p class="art-lead">This gets smart candidates killed because they know enough statistics to look analytical but not enough to catch their own reasoning errors.</p>
+
+<div class="art-callout">
+  "Blinkit's orders are highest on days when driver availability is also highest. Therefore, increasing driver supply will increase orders."<br/><br/>
+  This might be true. Or both orders and driver availability might be high on weekends and low on Tuesday mornings. The real driver is day-of-week — not a causal relationship between supply and demand.
+</div>
+
+<h2>The most common correlation-causation mistakes</h2>
+
+<div class="art-warn">
+  <strong>"Users who open the app daily have 3x higher LTV."</strong> This doesn't mean making users open the app daily will increase their LTV. High-frequency users are already highly engaged — the causation runs the other way.
+</div>
+
+<div class="art-warn">
+  <strong>"Markets where we ran promotions saw 20% higher orders."</strong> Promotions may be deployed to markets that already have higher demand. Both might be caused by a third factor — market health — not by the promotion itself.
+</div>
+
+<div class="art-warn">
+  <strong>"Customers who receive push notifications order more."</strong> You're likely sending push notifications to your more active users. The correlation is selection bias, not a causal effect of the notification.
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">The test</div>
+  When you catch yourself saying "therefore" or "which means" — slow down. Ask: is this causation I can actually defend, or am I assuming it from a correlation?
+</div>`;
 
 CS_CONTENT['cs10-t5'] = `
-<h1>What to do when you're stuck</h1>
-<p>Everyone gets stuck. The difference between strong candidates and weak ones isn't that strong candidates never get stuck — it's that they have a graceful way to recover.</p>
-<p><strong>First: don't fake it.</strong> If you're stuck, saying something vague and confident-sounding to buy time is usually obvious to an experienced interviewer. The 30 seconds of rambling buys you nothing except a slight credibility hit.</p>
-<p><strong>Second: say you're stuck, then start rebuilding.</strong> "I'm not sure where to take this next — let me step back and think about what I know." This resets the conversation and gives you permission to start fresh.</p>
-<p><strong>Third: return to structure.</strong> When you're lost in the middle of a case, go back to the beginning. What's the core question? What are the possible buckets of causes? What have you already ruled out? Rebuilding the structure from scratch often reveals the gap in your logic.</p>
-<p><strong>Fourth: ask for a nudge.</strong> This is allowed and usually appreciated. "I've checked supply-side and demand-side factors — I'm not finding a clear cause. Is there a specific dimension you'd want me to explore more?" This is not a sign of weakness. It's intellectual honesty and the ability to collaborate — both of which interviewers are specifically looking for.</p>
-<p><strong>Fifth: if you can't find the root cause, say so and recommend what to do next.</strong> "I haven't been able to pinpoint the exact cause from what I know, but here's what I'd look at with access to the full data." A clear, honest answer about the limits of your analysis is better than a confident wrong answer.</p>
-<p>Real analysts get stuck all the time. Senior analysts get stuck too. The difference is that they don't panic, don't fake it, and have a clear path back to structured thinking.</p>
-`;
+<h1>How to recover when you're stuck</h1>
+<p class="art-lead">Everyone gets stuck. Strong candidates don't avoid getting stuck — they have a graceful way to recover from it.</p>
 
-// ── STATE ────────────────────────────────────────────────────────
+<div class="art-steps">
+  <div class="art-step"><div class="art-snum">1</div><div class="art-sbody"><strong>Don't fake it</strong><p>Saying something vague and confident-sounding to buy time is obvious to experienced interviewers. The 30 seconds of rambling earns you nothing except a credibility hit.</p></div></div>
+  <div class="art-step"><div class="art-snum">2</div><div class="art-sbody"><strong>Say you're stuck — then start rebuilding</strong><p>"I'm not sure where to take this next — let me step back and think about what I know." This resets the conversation and gives you permission to restart cleanly.</p></div></div>
+  <div class="art-step"><div class="art-snum">3</div><div class="art-sbody"><strong>Return to structure</strong><p>Go back to the beginning: what's the core question? What are the possible buckets of causes? What have I already ruled out? Rebuilding structure from scratch often reveals exactly where the gap is.</p></div></div>
+  <div class="art-step"><div class="art-snum">4</div><div class="art-sbody"><strong>Ask for a nudge — it's allowed</strong><p>"I've checked supply-side and demand-side — I'm not finding a clear cause. Is there a specific dimension you'd want me to explore more?" This is intellectual honesty and collaborative instinct — both of which interviewers explicitly look for.</p></div></div>
+  <div class="art-step"><div class="art-snum">5</div><div class="art-sbody"><strong>If you can't find the cause — say so and say what's next</strong><p>"I haven't been able to pinpoint the exact cause from what I know, but here's what I'd investigate with access to the full data." An honest incomplete answer beats a confident wrong one.</p></div></div>
+</div>
+
+<div class="art-takeaway">
+  <div class="art-tlabel">Real-world context</div>
+  Senior analysts get stuck too. The difference is that they don't panic, don't fake it, and have a clear path back to structured thinking. That's what you're demonstrating when you recover gracefully.
+</div>`;
+
+// ── STATE & SIDEBAR ───────────────────────────────────────────────
 var csCurrentTopicId = null;
 var csOpenModules    = {};
 
-// ── INIT ─────────────────────────────────────────────────────────
 (function init() {
-  // Apply saved theme
-  var savedTheme = localStorage.getItem('msql_theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', savedTheme);
-
-  // Open first module by default
+  var saved = localStorage.getItem('msql_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
   csOpenModules[CS_DATA[0].id] = true;
   csCurrentTopicId = CS_DATA[0].topics[0].id;
-
   buildCsSidebar();
-
-  // Check URL for a topic
-  var hash = window.location.hash.replace('#', '');
+  var hash = window.location.hash.replace('#','');
   if (hash && CS_CONTENT[hash]) {
     csCurrentTopicId = hash;
-    // open that module
-    CS_DATA.forEach(function(mod) {
-      mod.topics.forEach(function(t) {
-        if (t.id === hash) csOpenModules[mod.id] = true;
-      });
-    });
+    CS_DATA.forEach(function(m){ m.topics.forEach(function(t){ if(t.id===hash) csOpenModules[m.id]=true; }); });
     buildCsSidebar();
     renderCsTopic(hash);
   }
 })();
 
-// ── SIDEBAR ──────────────────────────────────────────────────────
 function buildCsSidebar() {
-  var sidebar = document.getElementById('csSidebar');
-  if (!sidebar) return;
-
-  sidebar.innerHTML = CS_DATA.map(function(mod) {
+  var sb = document.getElementById('csSidebar');
+  if (!sb) return;
+  sb.innerHTML = CS_DATA.map(function(mod) {
     var isOpen = !!csOpenModules[mod.id];
-    var topicCount = mod.topics.length;
-
-    var topicsHtml = mod.topics.map(function(topic) {
-      var isActive = topic.id === csCurrentTopicId;
-      return '<div class="learn-topic-item' + (isActive ? ' active' : '') + '" ' +
-             'onclick="selectCsTopic(\'' + topic.id + '\')" ' +
-             'id="cst-' + topic.id + '">' +
-             '<span class="lt-dot"></span>' +
-             '<span class="lt-title">' + escCs(topic.title) + '</span>' +
-             '</div>';
+    var topicsHtml = mod.topics.map(function(t) {
+      var active = t.id === csCurrentTopicId;
+      return '<div class="learn-topic-item'+(active?' active':'')+'" onclick="selectCsTopic(\''+t.id+'\')" id="cst-'+t.id+'">' +
+             '<span class="lt-dot"></span><span class="lt-title">'+escCs(t.title)+'</span></div>';
     }).join('');
-
-    return '<div class="learn-module" id="csm-' + mod.id + '">' +
-      '<div class="learn-module-header" onclick="toggleCsModule(\'' + mod.id + '\')">' +
-        '<span class="lm-icon">' + mod.icon + '</span>' +
-        '<div class="lm-info">' +
-          '<span class="lm-title">' + escCs(mod.title) + '</span>' +
-          '<span class="lm-count">' + topicCount + ' topics</span>' +
-        '</div>' +
-        '<span class="lm-chevron' + (isOpen ? ' open' : '') + '">›</span>' +
+    return '<div class="learn-module" id="csm-'+mod.id+'">' +
+      '<div class="learn-module-header" onclick="toggleCsModule(\''+mod.id+'\')">' +
+        '<div class="lm-info"><span class="lm-title">'+escCs(mod.title)+'</span>' +
+        '<span class="lm-count">'+mod.topics.length+' topics</span></div>' +
+        '<span class="lm-chevron'+(isOpen?' open':'')+'">›</span>' +
       '</div>' +
-      '<div class="learn-topics-list' + (isOpen ? ' open' : '') + '">' +
-        topicsHtml +
-      '</div>' +
+      '<div class="learn-topics-list'+(isOpen?' open':'')+'">'+topicsHtml+'</div>' +
     '</div>';
   }).join('');
 }
 
-function toggleCsModule(modId) {
-  csOpenModules[modId] = !csOpenModules[modId];
+function toggleCsModule(id) { csOpenModules[id] = !csOpenModules[id]; buildCsSidebar(); }
+
+function selectCsTopic(id) {
+  csCurrentTopicId = id;
+  history.pushState({},'','#'+id);
+  CS_DATA.forEach(function(m){ m.topics.forEach(function(t){ if(t.id===id) csOpenModules[m.id]=true; }); });
   buildCsSidebar();
+  renderCsTopic(id);
+  if (window.innerWidth < 900) document.getElementById('csContent').scrollIntoView({behavior:'smooth'});
 }
 
-// ── TOPIC RENDER ─────────────────────────────────────────────────
-function selectCsTopic(topicId) {
-  csCurrentTopicId = topicId;
-  history.pushState({}, '', '#' + topicId);
-
-  CS_DATA.forEach(function(mod) {
-    mod.topics.forEach(function(t) {
-      if (t.id === topicId) csOpenModules[mod.id] = true;
-    });
-  });
-
-  buildCsSidebar();
-  renderCsTopic(topicId);
-
-  var content = document.getElementById('csContent');
-  if (content && window.innerWidth < 900) {
-    content.scrollIntoView({ behavior: 'smooth' });
-  }
-}
-
-function renderCsTopic(topicId) {
-  var content = document.getElementById('csContent');
-  if (!content) return;
-
-  var meta = null, modMeta = null;
-  CS_DATA.forEach(function(mod) {
-    mod.topics.forEach(function(t) {
-      if (t.id === topicId) { meta = t; modMeta = mod; }
-    });
-  });
+function renderCsTopic(id) {
+  var el = document.getElementById('csContent');
+  if (!el) return;
+  var meta=null, modMeta=null;
+  CS_DATA.forEach(function(m){ m.topics.forEach(function(t){ if(t.id===id){meta=t;modMeta=m;} }); });
   if (!meta) return;
-
-  var flatIdx = -1;
-  for (var i = 0; i < CS_FLAT.length; i++) {
-    if (CS_FLAT[i].id === topicId) { flatIdx = i; break; }
-  }
-  var prevTopic = flatIdx > 0 ? CS_FLAT[flatIdx - 1] : null;
-  var nextTopic = flatIdx < CS_FLAT.length - 1 ? CS_FLAT[flatIdx + 1] : null;
-
-  var articleHtml = CS_CONTENT[topicId] ||
-    '<div class="coming-soon-block">' +
-    '<div class="cs-icon">🚧</div>' +
-    '<div class="cs-title">Article coming soon</div>' +
-    '<div class="cs-sub">Our team is working on this content. Check back soon!</div>' +
-    '</div>';
-
-  content.innerHTML =
-    '<div class="learn-breadcrumb">' +
-      '<span class="lbc-mod">' + modMeta.icon + ' ' + escCs(modMeta.title) + '</span>' +
-      '<span class="lbc-sep">›</span>' +
-      '<span class="lbc-topic">' + escCs(meta.title) + '</span>' +
-    '</div>' +
-    '<div class="learn-article">' + articleHtml + '</div>' +
+  var fi=-1;
+  for(var i=0;i<CS_FLAT.length;i++){ if(CS_FLAT[i].id===id){fi=i;break;} }
+  var prev = fi>0 ? CS_FLAT[fi-1] : null;
+  var next = fi<CS_FLAT.length-1 ? CS_FLAT[fi+1] : null;
+  var art = CS_CONTENT[id] || '<div class="coming-soon-block"><div class="cs-icon">🚧</div><div class="cs-title">Coming soon</div></div>';
+  el.innerHTML =
+    '<div class="learn-breadcrumb"><span class="lbc-mod">'+escCs(modMeta.title)+'</span>' +
+    '<span class="lbc-sep">›</span><span class="lbc-topic">'+escCs(meta.title)+'</span></div>' +
+    '<div class="learn-article">'+art+'</div>' +
     '<div class="learn-nav-btns">' +
-      (prevTopic ?
-        '<button class="learn-nav-btn prev" onclick="selectCsTopic(\'' + prevTopic.id + '\')">' +
-          '<span class="lnb-arrow">‹</span>' +
-          '<div class="lnb-info"><span class="lnb-label">Previous</span><span class="lnb-title">' + escCs(prevTopic.title) + '</span></div>' +
-        '</button>' : '<div></div>') +
-      (nextTopic ?
-        '<button class="learn-nav-btn next" onclick="selectCsTopic(\'' + nextTopic.id + '\')">' +
-          '<div class="lnb-info"><span class="lnb-label">Next</span><span class="lnb-title">' + escCs(nextTopic.title) + '</span></div>' +
-          '<span class="lnb-arrow">›</span>' +
-        '</button>' : '<div></div>') +
+    (prev ? '<button class="learn-nav-btn prev" onclick="selectCsTopic(\''+prev.id+'\')"><span class="lnb-arrow">‹</span><div class="lnb-info"><span class="lnb-label">Previous</span><span class="lnb-title">'+escCs(prev.title)+'</span></div></button>' : '<div></div>') +
+    (next ? '<button class="learn-nav-btn next" onclick="selectCsTopic(\''+next.id+'\')"><div class="lnb-info"><span class="lnb-label">Next</span><span class="lnb-title">'+escCs(next.title)+'</span></div><span class="lnb-arrow">›</span></button>' : '<div></div>') +
     '</div>';
-
-  content.scrollTop = 0;
-  document.getElementById('csContentWrap').scrollTo(0, 0);
+  el.scrollTop = 0;
+  document.getElementById('csContentWrap').scrollTo(0,0);
 }
 
-// ── SEARCH ───────────────────────────────────────────────────────
 function handleCsSearch(e) {
   var q = e.target.value.trim().toLowerCase();
   var items = document.querySelectorAll('.learn-topic-item');
-  if (!q) {
-    items.forEach(function(el) { el.style.display = ''; });
-    return;
-  }
-  CS_DATA.forEach(function(mod) { csOpenModules[mod.id] = true; });
+  if (!q) { items.forEach(function(el){ el.style.display=''; }); return; }
+  CS_DATA.forEach(function(m){ csOpenModules[m.id]=true; });
   buildCsSidebar();
-  items = document.querySelectorAll('.learn-topic-item');
-  items.forEach(function(el) {
-    var title = el.querySelector('.lt-title').textContent.toLowerCase();
-    el.style.display = title.includes(q) ? '' : 'none';
+  document.querySelectorAll('.learn-topic-item').forEach(function(el){
+    el.style.display = el.querySelector('.lt-title').textContent.toLowerCase().includes(q) ? '' : 'none';
   });
 }
 
-// ── UTIL ─────────────────────────────────────────────────────────
-function escCs(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+function escCs(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Handle popstate (browser back/forward)
-window.addEventListener('popstate', function() {
-  var hash = window.location.hash.replace('#', '');
-  if (hash && CS_CONTENT[hash]) {
-    csCurrentTopicId = hash;
-    CS_DATA.forEach(function(mod) {
-      mod.topics.forEach(function(t) {
-        if (t.id === hash) csOpenModules[mod.id] = true;
-      });
-    });
-    buildCsSidebar();
-    renderCsTopic(hash);
+window.addEventListener('popstate', function(){
+  var h = window.location.hash.replace('#','');
+  if (h && CS_CONTENT[h]) {
+    csCurrentTopicId = h;
+    CS_DATA.forEach(function(m){ m.topics.forEach(function(t){ if(t.id===h) csOpenModules[m.id]=true; }); });
+    buildCsSidebar(); renderCsTopic(h);
   }
 });
 </script>
