@@ -693,14 +693,15 @@ html.theme-transitioning *::after {
 .journey-steps{display:flex;align-items:stretch;gap:0;margin-bottom:80px}
 .journey-step{
   flex:1;min-width:0;
-  background:var(--bg3);border:1px solid var(--border);border-radius:var(--r3);
+  background:var(--surface);border:1px solid var(--border2);border-radius:var(--r3);
   padding:28px 26px;
-  transition:transform .2s, border-color .2s, box-shadow .2s;
+  transition:transform .2s, border-color .2s, box-shadow .2s, background .2s;
 }
 .journey-step:hover{
   transform:translateY(-4px);
-  border-color:rgba(0,200,150,0.35);
-  box-shadow:0 14px 34px rgba(0,0,0,0.35);
+  background:var(--surface2);
+  border-color:rgba(0,200,150,0.4);
+  box-shadow:0 14px 34px rgba(0,0,0,0.4);
 }
 .js-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
 .js-icon{
@@ -721,15 +722,15 @@ html.theme-transitioning *::after {
 .offer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 .offer-card{
   display:flex;flex-direction:column;
-  background:var(--bg2);border:1px solid var(--border);border-radius:var(--r3);
+  background:var(--surface);border:1px solid var(--border2);border-radius:var(--r3);
   padding:30px 28px;text-decoration:none;cursor:pointer;
   transition:transform .2s, border-color .2s, box-shadow .2s, background .2s;
 }
 .offer-card:hover{
   transform:translateY(-4px);
-  border-color:rgba(0,200,150,0.35);
-  background:var(--bg3);
-  box-shadow:0 14px 34px rgba(0,0,0,0.35);
+  border-color:rgba(0,200,150,0.4);
+  background:var(--surface2);
+  box-shadow:0 14px 34px rgba(0,0,0,0.4);
 }
 .oc-icon{
   width:48px;height:48px;border-radius:var(--r);
