@@ -741,6 +741,42 @@ html.theme-transitioning *::after {
 .oc-desc{font-size:13.5px;color:var(--muted);line-height:1.7;flex:1}
 .oc-arrow{margin-top:20px;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--accent);letter-spacing:.02em}
 
+/* ── Advanced track: company logo marquee ────────────────── */
+.companies-section{padding:90px 0 100px;background:var(--bg2);overflow:hidden}
+.companies-head{max-width:760px;margin:0 auto 48px;padding:0 40px;text-align:center}
+.companies-head .section-label{display:inline-flex;align-items:center;gap:10px;justify-content:center}
+.soon-pill{
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.12em;
+  padding:3px 9px;border-radius:20px;
+  background:var(--accent-dim);border:1px solid rgba(0,200,150,0.3);color:var(--accent);
+}
+.companies-sub{font-size:15px;color:var(--muted);line-height:1.75;margin-top:14px}
+.logo-marquee{
+  position:relative;width:100%;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);
+}
+.logo-track{display:flex;width:max-content;animation:logoScroll 48s linear infinite}
+.logo-marquee:hover .logo-track{animation-play-state:paused}
+.logo-set{display:flex;align-items:center}
+.logo-tile{display:flex;align-items:center;justify-content:center;height:48px;padding:0 38px;flex-shrink:0}
+.logo-img{height:30px;width:auto;opacity:.45;transition:opacity .25s,transform .25s}
+.logo-tile:hover .logo-img{opacity:.95;transform:scale(1.08)}
+.logo-word{display:none;font-family:var(--display);font-size:21px;font-weight:700;color:var(--muted);white-space:nowrap;transition:color .25s}
+.logo-tile:hover .logo-word{color:var(--text)}
+[data-theme="light"] .logo-img{filter:invert(1)}
+@keyframes logoScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.logo-track{animation:none}}
+.companies-cta{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:44px;flex-wrap:wrap;padding:0 24px}
+.companies-cta-text{font-family:var(--display);font-size:16px;font-weight:600;color:var(--text)}
+.companies-cta-btn{
+  font-family:inherit;font-size:13.5px;font-weight:600;
+  padding:10px 20px;border-radius:var(--r);cursor:pointer;
+  background:var(--accent);color:#04140f;border:none;
+  transition:transform .2s,opacity .2s;
+}
+.companies-cta-btn:hover{transform:translateY(-2px);opacity:.92}
+
 /* ══════════════════════════════════════════════════════════════
    TESTIMONIALS
 ══════════════════════════════════════════════════════════════ */
@@ -1023,6 +1059,11 @@ footer{padding:40px 80px;border-top:1px solid var(--border);display:flex;align-i
   .journey-steps{flex-direction:column;gap:0}
   .js-connector{padding:14px 0;transform:rotate(90deg)}
   .offer-grid{grid-template-columns:1fr}
+  .companies-section{padding:64px 0 72px}
+  .companies-head{padding:0 24px}
+  .logo-tile{padding:0 26px;height:40px}
+  .logo-img{height:24px}
+  .logo-word{font-size:18px}
   .questions-section{padding:60px 32px}
   .nav{padding:0 24px}
   footer{padding:32px}
