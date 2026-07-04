@@ -4060,8 +4060,7 @@ function startDailyChallenge() {
   const start = new Date(new Date().getFullYear(), 0, 0);
   const dayOfYear = Math.floor((Date.now() - start) / 864e5);
   const q = QUESTIONS[dayOfYear % QUESTIONS.length];
-  const idx = QUESTIONS.findIndex(fq => fq.id === q.id);
-  showApp(idx >= 0 ? idx : 0);
+  goToProblem(q.id);
 }
 
 // ── LANDING PERSONALISATION ───────────────────────────────────────
@@ -4525,6 +4524,7 @@ function _renderLanding() {
 function _renderApp() {
   _hideAllPages();
   document.getElementById('app-page').classList.add('active');
+  buildPills();
   renderQuestion(currentQ);
 }
 
@@ -4655,11 +4655,10 @@ function showLanding() {
 
 function showApp(qIdx) {
   if (qIdx !== undefined) {
-    filteredQuestions = QUESTIONS;
-    activeTag = 'ALL';
-    currentQ  = qIdx;
+    currentQ = qIdx;
   }
-  var q = QUESTIONS[currentQ];
+  if (currentQ == null || currentQ >= filteredQuestions.length) currentQ = 0;
+  var q = filteredQuestions[currentQ];
   history.pushState({}, '', q ? questionUrl(q) : '/problems');
   _renderApp();
 }
@@ -4673,7 +4672,7 @@ function showProfile() {
 
 function goBackFromProfile() {
   if (prevPage === 'app') {
-    var q = QUESTIONS[currentQ];
+    var q = filteredQuestions[currentQ];
     history.pushState({}, '', q ? questionUrl(q) : '/problems');
     _renderApp();
   } else {
@@ -4901,9 +4900,8 @@ function filterQuestions(tag) {
 
   buildTopicFilters();
   buildLandingCards();
-  buildQuestionPills();
-  renderQuestion();
-  
+  buildPills();
+  if (filteredQuestions.length) renderQuestion(0);
 }
 
 // ── RUN ───────────────────────────────────────────────────────────
