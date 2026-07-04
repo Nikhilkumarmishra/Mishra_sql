@@ -403,54 +403,67 @@ INSERT INTO sales VALUES
 {
   id: 5,
   num: "06",
-  title: "Employees Earning Above Average Salary",
+  title: "Products Priced Below Average",
   difficulty: "Medium",
-  tags: ["AVG", "SUBQUERY", "WHERE"],
+  tags: ["SUBQUERY", "AVG", "WHERE"],
 
-  desc: `<p>You are given an <strong>employees</strong> table.</p>
-         <p>Write a query to find employees earning <strong>more than the average salary</strong>.</p>
-         <p>Return columns: <code>name</code>, <code>salary</code>.</p>`,
+  desc: `<p>You are given a <strong>products</strong> table containing product prices.</p>
+         <p>Write a query to find products priced <strong>below the average price</strong> of all products.</p>
+         <p>Return columns: <code>product_name</code>, <code>price</code>.</p>`,
 
   schema: {
-    employees: [
-      { col: "emp_id", type: "INTEGER", note: "pk" },
-      { col: "name", type: "TEXT", note: "" },
-      { col: "salary", type: "INTEGER", note: "" },
+    products: [
+      { col: "product_id",   type: "INTEGER", note: "pk" },
+      { col: "product_name", type: "TEXT",    note: "" },
+      { col: "price",        type: "INTEGER", note: "" },
     ]
   },
 
-  seed: `CREATE TABLE employees(emp_id INTEGER,name TEXT,salary INTEGER);
-INSERT INTO employees VALUES
-(1,'Alice',50000),
-(2,'Bob',40000),
-(3,'Carol',70000),
-(4,'David',30000),
-(5,'Eve',80000);`,
+  seed: `CREATE TABLE products(product_id INTEGER,product_name TEXT,price INTEGER);
+INSERT INTO products VALUES
+(1,'Laptop',80000),
+(2,'Phone',50000),
+(3,'Tablet',30000),
+(4,'Charger',2000),
+(5,'Mouse',1000);`,
 
   example: {
-    cols: ["name", "salary"],
-    rows: [["Carol",70000],["Eve",80000]]
+    cols: ["product_name", "price"],
+    rows: [["Tablet",30000],["Charger",2000],["Mouse",1000]]
   },
 
-  hint: "Use a <strong>subquery</strong> with <strong>AVG(salary)</strong> inside the WHERE clause.",
+  hint: "Use a <strong>subquery</strong> with <strong>AVG(price)</strong> inside the WHERE clause and compare using <strong>&lt;</strong>.",
 
   testCases: [
     {
-      name: "Correct number of employees returned",
+      name: "Three products returned",
       seed: null,
-      check: (rows) => rows.length === 2
+      check: (rows) => rows.length === 3
     },
     {
-      name: "Carol included",
+      name: "Laptop excluded (above average)",
       seed: null,
-      check: (rows) => rows.some(r => r.name === "Carol")
+      check: (rows) => !rows.some(r => r.product_name === "Laptop")
     },
     {
-      name: "Eve salary correct",
+      name: "Mouse included with correct price",
       seed: null,
       check: (rows) => {
-        const r = rows.find(r => r.name === "Eve");
-        return r && Number(r.salary) === 80000;
+        const r = rows.find(r => r.product_name === "Mouse");
+        return r && Number(r.price) === 1000;
+      }
+    },
+    {
+      name: "Works with a different price set",
+      seed: `CREATE TABLE products(product_id INTEGER,product_name TEXT,price INTEGER);
+INSERT INTO products VALUES
+(1,'Sofa',40000),
+(2,'Chair',6000),
+(3,'Lamp',4000),
+(4,'Rug',10000);`,
+      check: (rows) => {
+        const names = rows.map(r => r.product_name);
+        return rows.length === 3 && !names.includes("Sofa") && names.includes("Rug");
       }
     },
   ]
@@ -1078,7 +1091,7 @@ INSERT INTO employees VALUES
   num: "17",
   title: "Second Highest Salary",
   difficulty: "Medium",
-  tags: ["SUBQUERY", "MAX", "NESTED QUERY"],
+  tags: ["SUBQUERY", "MAX"],
 
   desc: `<p>You are given an <strong>employees</strong> table containing employee salaries.</p>
          <p>Write a query to find the <strong>second highest salary</strong>.</p>
@@ -1750,7 +1763,7 @@ INSERT INTO customers VALUES
     {
       name: "Correct columns returned",
       seed: null,
-      check: (rows) => rows[0].name && rows[0].city
+      check: (rows) => ("name" in rows[0]) && ("city" in rows[0])
     },
   ]
 },
@@ -1855,7 +1868,7 @@ INSERT INTO employees VALUES
     {
       name: "Correct columns returned",
       seed: null,
-      check: (rows) => rows[0].name && rows[0].department
+      check: (rows) => ("name" in rows[0]) && ("department" in rows[0])
     },
   ]
 },
@@ -2654,7 +2667,7 @@ INSERT INTO products VALUES
   num: "46",
   title: "Orders Greater Than 5000",
   difficulty: "Easy",
-  tags: ["WHERE", ">", "OPERATORS"],
+  tags: ["WHERE", "COMPARISON", "OPERATORS"],
 
   desc: `<p>You are given an <strong>orders</strong> table.</p>
          <p>Write a query to display orders having amount greater than <strong>5000</strong>.</p>
@@ -3403,7 +3416,7 @@ INSERT INTO users VALUES
   num: "58",
   title: "Customers Who Never Placed Orders",
   difficulty: "Hard",
-  tags: ["LEFT JOIN", "NULL", "JOINS"],
+  tags: ["JOIN", "LEFT JOIN", "NULL"],
 
   desc: `<p>You are given <strong>customers</strong> and <strong>orders</strong> tables.</p>
          <p>Write a query to find customers who <strong>never placed any order</strong>.</p>
