@@ -587,7 +587,9 @@
   <!-- PROBLEMS — auto-generated from QUESTIONS array in app.js -->
   <section class="questions-section" id="questions-section">
     <div class="section-label">Problem Set</div>
-    <h2 class="section-title">Start with the fundamentals.</h2>
+    <h2 class="section-title">Pick your track. Start solving.</h2>
+
+    <div class="track-toggle" id="trackToggle"></div>
 
     <div class="topic-filters" id="topicFilters"></div>
 
@@ -628,7 +630,7 @@
 
     <div class="companies-cta">
       <span class="companies-cta-text">Ready to level up?</span>
-      <button class="companies-cta-btn" onclick="showApp()">Start solving advanced track →</button>
+      <button class="companies-cta-btn" onclick="startAdvancedTrack()">Start solving advanced track →</button>
     </div>
   </section>
   <script>
@@ -1055,6 +1057,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
 
 <!-- Learn SQL data + logic -->
+<script src="/advanced-questions.js"></script>
 <script src="/learn-data.js"></script>
 <script src="/learn.js"></script>
 

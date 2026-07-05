@@ -3856,6 +3856,8 @@ let SQL               = null;
 let currentQ          = 0;
 let filteredQuestions = QUESTIONS;
 let activeTag         = "ALL";
+let ACTIVE_QUESTIONS  = QUESTIONS;   // source for the active track: QUESTIONS (basic) or ADVANCED_QUESTIONS
+let activeTrack       = 'basic';     // 'basic' | 'advanced'
 let solvedSet         = new Set();
 let solvedAtMap       = {};
 let editor            = null;
@@ -3881,7 +3883,8 @@ function toSlug(str) {
 
 // Build canonical URL for a question: /problems/14/customer-order-frequency
 function questionUrl(q) {
-  return '/problems/' + q.num + '/' + toSlug(q.title);
+  var base = '/problems/' + q.num + '/' + toSlug(q.title);
+  return activeTrack === 'advanced' ? base + '?track=advanced' : base;
 }
 
 // Build canonical URL for a learn topic: /learn/window-functions/row-number
@@ -3900,7 +3903,7 @@ function learnUrl(topicId) {
 // Find a question by its num string ("01", "14", etc.)
 function getQuestionByNum(num) {
   var padded = String(parseInt(num, 10) || 0).padStart(2, '0');
-  return QUESTIONS.find(function(q) { return q.num === padded; }) || null;
+  return ACTIVE_QUESTIONS.find(function(q) { return q.num === padded; }) || null;
 }
 
 // Find a learn topic by module slug + topic slug
@@ -3978,6 +3981,7 @@ async function init() {
     checkAnnouncement();
 
     document.getElementById('loadingScreen').style.display = 'none';
+    buildTrackToggle();
     buildPills();
     buildTopicFilters();
     buildLandingCards();
@@ -4563,13 +4567,15 @@ function handleRoute(path) {
 
   // /problems/:num/:slug  →  /problems/14/customer-order-frequency
   if (clean.startsWith('/problems/')) {
+    var wantAdvanced = /track=advanced/.test(window.location.search || '');
+    setTrack(wantAdvanced ? 'advanced' : 'basic');
     var parts = clean.split('/');          // ['','problems','14','slug']
     var num   = parts[2] || '';
     var found = getQuestionByNum(num);
     if (found) {
-      var idx = QUESTIONS.findIndex(function(x) { return x.num === found.num; });
+      var idx = ACTIVE_QUESTIONS.findIndex(function(x) { return x.num === found.num; });
       if (idx !== -1) {
-        filteredQuestions = QUESTIONS;
+        filteredQuestions = ACTIVE_QUESTIONS;
         activeTag = 'ALL';
         currentQ  = idx;
         history.replaceState({}, '', questionUrl(found)); // normalise slug in URL bar
@@ -4871,7 +4877,7 @@ function buildTopicFilters() {
   const allTags = [
     "ALL",
     ...new Set(
-      QUESTIONS.flatMap(q => q.tags || [])
+      ACTIVE_QUESTIONS.flatMap(q => q.tags || [])
     )
   ];
 
@@ -4889,9 +4895,9 @@ function filterQuestions(tag) {
   activeTag = tag;
 
   if (tag === "ALL") {
-    filteredQuestions = QUESTIONS;
+    filteredQuestions = ACTIVE_QUESTIONS;
   } else {
-    filteredQuestions = QUESTIONS.filter(q =>
+    filteredQuestions = ACTIVE_QUESTIONS.filter(q =>
       q.tags && q.tags.includes(tag)
     );
   }
@@ -4902,6 +4908,35 @@ function filterQuestions(tag) {
   buildLandingCards();
   buildPills();
   if (filteredQuestions.length) renderQuestion(0);
+}
+
+// ── TRACK TOGGLE (Basic <-> Advanced) ─────────────────────────────
+function setTrack(track) {
+  activeTrack = (track === 'advanced' && typeof ADVANCED_QUESTIONS !== 'undefined') ? 'advanced' : 'basic';
+  ACTIVE_QUESTIONS = activeTrack === 'advanced' ? ADVANCED_QUESTIONS : QUESTIONS;
+  activeTag = 'ALL';
+  filteredQuestions = ACTIVE_QUESTIONS;
+  currentQ = 0;
+  buildTrackToggle();
+  buildTopicFilters();
+  buildLandingCards();
+  buildPills();
+  if (filteredQuestions.length) renderQuestion(0);
+}
+
+function startAdvancedTrack() {
+  setTrack('advanced');
+  showApp(0);
+}
+
+function buildTrackToggle() {
+  var wrap = document.getElementById('trackToggle');
+  if (!wrap) return;
+  wrap.innerHTML =
+    '<button class="track-btn' + (activeTrack === 'basic' ? ' active' : '') + '" onclick="setTrack(\'basic\')">' +
+      '<span class="track-btn-lvl">Basic &rarr; Intermediate</span><span class="track-btn-sub">' + QUESTIONS.length + ' questions</span></button>' +
+    '<button class="track-btn' + (activeTrack === 'advanced' ? ' active' : '') + '" onclick="setTrack(\'advanced\')">' +
+      '<span class="track-btn-lvl">Intermediate &rarr; Advanced</span><span class="track-btn-sub">' + (typeof ADVANCED_QUESTIONS !== 'undefined' ? ADVANCED_QUESTIONS.length : 0) + ' interview questions</span></button>';
 }
 
 // ── RUN ───────────────────────────────────────────────────────────
@@ -5016,7 +5051,8 @@ function showToast(msg, type) {
 
 // ── UTILS ──────────────────────────────────────────────────────────
 function updateProgress() {
-  const pct = (solvedSet.size / QUESTIONS.length) * 100;
+  const solvedInTrack = ACTIVE_QUESTIONS.filter(q => solvedSet.has(q.id)).length;
+  const pct = (solvedInTrack / ACTIVE_QUESTIONS.length) * 100;
   document.getElementById('progressBar').style.width = pct + '%';
 }
 

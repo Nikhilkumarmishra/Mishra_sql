@@ -853,11 +853,25 @@ html.theme-transitioning *::after {
 
 /* ─── TOPIC FILTERS ───────────────────────── */
 
+/* ── Track toggle (Basic <-> Advanced) ───────────────────── */
+.track-toggle{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.track-btn{
+  display:flex;flex-direction:column;gap:3px;align-items:flex-start;
+  padding:14px 22px;border-radius:12px;cursor:pointer;
+  background:var(--surface);border:1px solid var(--border2);
+  transition:transform .18s,border-color .18s,background .18s;
+}
+.track-btn:hover{transform:translateY(-2px);border-color:rgba(0,200,150,0.4)}
+.track-btn.active{border-color:var(--accent);background:var(--accent-dim)}
+.track-btn-lvl{font-family:var(--display);font-size:15px;font-weight:600;color:var(--text)}
+.track-btn.active .track-btn-lvl{color:var(--accent)}
+.track-btn-sub{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
 .topic-filters{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
-  margin-top:32px;
+  margin-top:28px;
   margin-bottom:28px;
 }
 
