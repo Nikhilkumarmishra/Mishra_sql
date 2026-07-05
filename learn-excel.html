@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Excel for Data Analysts | AnalystWorld</title>
+<meta name="description" content="Excel for Data Analysts. 16 topics from the interface and formulas to PivotTables, Power Query, dashboards, and macros. Short, practical, and written for real analyst work."/>
+<link rel="icon" type="image/x-icon" href="/favicon.ico"/>
+<link rel="stylesheet" href="/style.css"/>
+<style>
+
+html,body{margin:0;padding:0;height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--sans)}
+
+/* ═══════════════════════════════════════════════
+   ARTICLE TYPOGRAPHY
+═══════════════════════════════════════════════ */
+.learn-article{font-size:.96rem;line-height:1.75;color:var(--text);max-width:860px}
+.learn-article h1{font-size:1.85rem;font-weight:800;line-height:1.2;margin:0 0 6px;letter-spacing:-.025em}
+.learn-article h2{font-size:1.08rem;font-weight:700;color:var(--text);margin:44px 0 14px;display:flex;align-items:center;gap:10px}
+.learn-article h2::before{content:'';display:inline-block;width:3px;height:18px;background:var(--accent);border-radius:2px;flex-shrink:0}
+.learn-article h3{font-size:.95rem;font-weight:700;color:var(--text);margin:28px 0 10px}
+.learn-article p{margin:0 0 16px;line-height:1.85;color:var(--muted);font-size:.94rem}
+.learn-article code{background:rgba(0,200,150,.1);border:1px solid rgba(0,200,150,.2);border-radius:4px;padding:1px 7px;font-family:var(--mono);font-size:.82em;color:var(--accent)}
+
+/* ═══════════════════════════════════════════════
+   ARTICLE HERO
+═══════════════════════════════════════════════ */
+.art-hero{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px 36px 28px;margin-bottom:40px;overflow:hidden}
+.art-hero::before{content:'';position:absolute;top:-80px;right:-80px;width:320px;height:320px;background:radial-gradient(circle,rgba(0,200,150,.1) 0%,transparent 70%);pointer-events:none}
+.art-hero::after{content:'';position:absolute;bottom:-60px;left:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(59,130,246,.06) 0%,transparent 70%);pointer-events:none}
+.art-hero-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(0,200,150,.1);border:1px solid rgba(0,200,150,.25);border-radius:20px;padding:3px 12px;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.art-hero h1{font-size:1.95rem;font-weight:800;line-height:1.18;letter-spacing:-.025em;margin:0 0 14px;color:var(--text)}
+.art-hero-lead{font-size:1rem;line-height:1.78;color:var(--muted);margin:0 0 20px;max-width:700px}
+.art-hero-meta{display:flex;align-items:center;gap:20px;padding-top:16px;border-top:1px solid var(--border)}
+.art-hero-meta span{display:flex;align-items:center;gap:5px;font-size:.75rem;color:var(--hint)}
+
+/* ═══════════════════════════════════════════════
+   CODE WINDOWS (macOS style)
+═══════════════════════════════════════════════ */
+.art-code-window{border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:28px 0 0;box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.art-code-header{background:#1e1f2e;padding:10px 16px;display:flex;align-items:center;gap:6px;border-bottom:1px solid rgba(255,255,255,.05)}
+.art-cw-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.art-cw-dot.r{background:#ff5f57}.art-cw-dot.y{background:#febc2e}.art-cw-dot.g{background:#28c840}
+.art-cw-name{margin-left:8px;font-size:.72rem;color:rgba(255,255,255,.3);font-family:var(--mono)}
+.art-cw-copy{margin-left:auto;background:none;border:1px solid rgba(255,255,255,.12);border-radius:5px;color:rgba(255,255,255,.35);font-size:.68rem;padding:3px 10px;cursor:pointer;transition:all .2s;font-family:var(--sans);letter-spacing:.03em}
+.art-cw-copy:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7)}
+.art-cw-copy.copied{color:#28c840;border-color:rgba(40,200,64,.3)}
+.art-code-window pre{margin:0!important;border:none!important;border-radius:0!important;background:#1a1b2e!important;padding:18px 20px!important}
+.art-code-window pre code{background:none!important;border:none!important;padding:0!important;font-size:.84rem!important}
+/* Plain pre (non-windowed) */
+.learn-article pre{background:#1a1b2e!important;border:1px solid var(--border);border-radius:10px 10px 0 0;padding:16px 18px;overflow-x:auto;margin:22px 0 0;position:relative}
+.learn-article pre code.language-python{background:none!important;border:none!important;padding:0!important;font-size:.84rem!important;color:inherit}
+/* Art-output block */
+.art-output{background:#0e0f1a;border:1px solid rgba(255,255,255,.07);border-top:1px dashed rgba(255,255,255,.1);border-radius:0 0 10px 10px;padding:14px 18px;margin:0 0 24px;font-family:var(--mono);font-size:.81rem;color:#7dffcb;line-height:1.75}
+.art-output-label{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-bottom:8px}
+.art-code-window+.art-output{border-radius:0 0 12px 12px;margin-top:0}
+.learn-article pre+.art-output{margin-top:0}
+
+/* ═══════════════════════════════════════════════
+   CALLOUTS
+═══════════════════════════════════════════════ */
+.art-callout{background:linear-gradient(135deg,rgba(0,200,150,.07),rgba(0,200,150,.02));border:1px solid rgba(0,200,150,.2);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:16px 20px;margin:24px 0;font-size:.9rem;line-height:1.72;color:var(--muted)}
+.art-callout strong{color:var(--accent)}
+.art-callout-blue{background:linear-gradient(135deg,rgba(59,130,246,.07),rgba(59,130,246,.02));border:1px solid rgba(59,130,246,.2);border-left:3px solid #3b82f6;border-radius:0 10px 10px 0;padding:16px 20px;margin:24px 0;font-size:.9rem;line-height:1.72;color:var(--muted)}
+.art-callout-blue strong{color:#60a5fa}
+.art-warn{background:linear-gradient(135deg,rgba(245,158,11,.07),rgba(245,158,11,.02));border:1px solid rgba(245,158,11,.22);border-left:3px solid #f59e0b;border-radius:0 10px 10px 0;padding:14px 18px;margin:20px 0;font-size:.9rem;color:var(--muted);line-height:1.68}
+.art-warn strong{color:#f59e0b}
+.art-callout-red{background:linear-gradient(135deg,rgba(239,68,68,.07),rgba(239,68,68,.02));border:1px solid rgba(239,68,68,.2);border-left:3px solid #ef4444;border-radius:0 10px 10px 0;padding:16px 20px;margin:24px 0;font-size:.9rem;line-height:1.72;color:var(--muted)}
+.art-callout-red strong{color:#f87171}
+
+/* ═══════════════════════════════════════════════
+   CONCEPT / FEATURE CARDS
+═══════════════════════════════════════════════ */
+.art-concepts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:24px 0}
+.art-concept{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 16px;transition:transform .2s,border-color .2s,box-shadow .2s;cursor:default}
+.art-concept:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:0 6px 20px rgba(0,200,150,.1)}
+.art-concept-icon{font-size:1.7rem;margin-bottom:10px;line-height:1}
+.art-concept-title{font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px}
+.art-concept p{font-size:.79rem;color:var(--hint);margin:0;line-height:1.55}
+
+/* ═══════════════════════════════════════════════
+   METRIC CARDS
+═══════════════════════════════════════════════ */
+.art-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:24px 0}
+.art-metric{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 12px;text-align:center}
+.art-metric-val{font-size:1.9rem;font-weight:800;color:var(--accent);line-height:1;margin-bottom:4px}
+.art-metric-label{font-size:.72rem;color:var(--hint);text-transform:uppercase;letter-spacing:.05em;line-height:1.3}
+
+/* ═══════════════════════════════════════════════
+   MEMORY / VARIABLE DIAGRAM
+═══════════════════════════════════════════════ */
+.art-diagram{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin:24px 0;overflow-x:auto}
+.art-diagram-title{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--hint);margin-bottom:20px;text-align:center}
+.mem-viz{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+.mem-box{border:2px solid var(--accent);border-radius:8px;overflow:hidden;min-width:110px;text-align:center;transition:transform .2s}
+.mem-box:hover{transform:scale(1.04)}
+.mem-box-label{background:var(--accent);color:#0a0b0e;font-size:.7rem;font-weight:800;padding:5px 8px;font-family:var(--mono)}
+.mem-box-value{padding:10px 12px;font-family:var(--mono);font-size:1.1rem;font-weight:700;color:var(--text)}
+.mem-box-type{font-size:.62rem;color:var(--hint);padding:0 8px 6px;font-family:var(--mono)}
+.mem-arrow{font-size:1.4rem;color:var(--accent);display:flex;align-items:center;padding-top:8px}
+/* Flow diagrams */
+.art-flow{display:flex;align-items:center;flex-wrap:wrap;gap:0;margin:20px 0;justify-content:center}
+.art-flow-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;font-size:.82rem;font-weight:600;color:var(--text);text-align:center}
+.art-flow-arrow{color:var(--accent);font-size:1.1rem;padding:0 8px}
+
+/* ═══════════════════════════════════════════════
+   STEPS
+═══════════════════════════════════════════════ */
+.art-steps{margin:24px 0;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.art-step{display:flex;gap:14px;padding:16px 20px;border-bottom:1px solid var(--border);align-items:flex-start;transition:background .15s}
+.art-step:last-child{border-bottom:none}
+.art-step:hover{background:var(--surface)}
+.art-snum{background:var(--accent);color:#0a0b0e;font-size:.72rem;font-weight:800;min-width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.art-sbody{flex:1}
+.art-sbody strong{display:block;font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:4px}
+.art-sbody p{margin:0;font-size:.86rem;color:var(--muted);line-height:1.62}
+
+/* ═══════════════════════════════════════════════
+   COMPARISON
+═══════════════════════════════════════════════ */
+.art-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:24px 0}
+.art-compare-bad{background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:16px}
+.art-compare-good{background:rgba(0,200,150,.05);border:1px solid rgba(0,200,150,.2);border-radius:10px;padding:16px}
+.art-clabel{font-size:.67rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.art-compare-bad .art-clabel{color:#ef4444}
+.art-compare-good .art-clabel{color:var(--accent)}
+.art-ctext{font-size:.83rem;color:var(--muted);line-height:1.6;font-family:var(--mono)}
+
+/* ═══════════════════════════════════════════════
+   CARDS / GRID
+═══════════════════════════════════════════════ */
+.art-two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0}
+.art-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;transition:border-color .2s,transform .2s}
+.art-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.art-card-title{font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:6px}
+.art-card p{font-size:.82rem;color:var(--muted);line-height:1.55;margin:0}
+
+/* ═══════════════════════════════════════════════
+   BOX / REFERENCE
+═══════════════════════════════════════════════ */
+.art-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin:22px 0}
+.art-blabel{font-size:.67rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+
+/* ═══════════════════════════════════════════════
+   TAKEAWAY
+═══════════════════════════════════════════════ */
+.art-takeaway{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:0 0 12px 12px;padding:20px 24px;margin-top:44px;font-size:.9rem;color:var(--muted);line-height:1.7}
+.art-tlabel{font-size:.64rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+
+/* ═══════════════════════════════════════════════
+   LEAD + MISC
+═══════════════════════════════════════════════ */
+.art-lead{font-size:1.04rem;color:var(--text);line-height:1.82;margin-bottom:28px;font-weight:400}
+.art-rule{border:none;border-top:1px solid var(--border);margin:36px 0}
+.art-type-list{margin:18px 0}
+.art-type{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:8px}
+.art-wt{margin:24px 0}
+.art-wt-head{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:12px}
+.art-wt-body{display:flex;flex-direction:column;gap:8px}
+.art-wt-step{display:flex;gap:12px;align-items:flex-start;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:8px}
+.art-wt-label{font-size:.72rem;font-weight:700;color:var(--accent);min-width:60px;padding-top:2px}
+.art-wt-text{font-size:.87rem;color:var(--muted);line-height:1.6}
+
+/* ═══════════════════════════════════════════════
+   INLINE BADGE
+═══════════════════════════════════════════════ */
+.art-badge{display:inline-block;border-radius:4px;padding:2px 8px;font-size:.72rem;font-weight:700;font-family:var(--mono)}
+.art-badge-green{background:rgba(0,200,150,.12);color:var(--accent);border:1px solid rgba(0,200,150,.2)}
+.art-badge-blue{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.2)}
+.art-badge-amber{background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.2)}
+.art-badge-purple{background:rgba(168,85,247,.12);color:#c084fc;border:1px solid rgba(168,85,247,.2)}
+
+/* ═══════════════════════════════════════════════
+   SCROLL ANIMATIONS
+═══════════════════════════════════════════════ */
+@keyframes fadeInUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse-accent{0%,100%{box-shadow:0 0 0 0 rgba(0,200,150,.3)}50%{box-shadow:0 0 0 6px rgba(0,200,150,0)}}
+.py-anim{opacity:0;transform:translateY(18px);transition:opacity .55s ease,transform .55s ease}
+.py-anim.visible{opacity:1;transform:translateY(0)}
+.py-anim-delay-1{transition-delay:.1s}
+.py-anim-delay-2{transition-delay:.2s}
+.py-anim-delay-3{transition-delay:.3s}
+
+/* ═══════════════════════════════════════════════
+   COPY BUTTON (standalone pre)
+═══════════════════════════════════════════════ */
+.art-copy-btn{position:absolute;top:10px;right:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:5px;color:rgba(255,255,255,.35);font-size:.68rem;padding:3px 10px;cursor:pointer;font-family:var(--sans);transition:all .2s;letter-spacing:.03em}
+.art-copy-btn:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)}
+.art-copy-btn.copied{color:#28c840;border-color:rgba(40,200,64,.3)}
+
+/* ═══════════════════════════════════════════════
+   READING PROGRESS
+═══════════════════════════════════════════════ */
+.art-read-progress{position:sticky;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--accent),#3b82f6);transform-origin:left;transform:scaleX(0);z-index:50;transition:transform .05s linear}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════ */
+@media(max-width:640px){
+  .art-two-col{grid-template-columns:1fr}
+  .art-compare{grid-template-columns:1fr}
+  .art-concepts{grid-template-columns:1fr 1fr}
+  .art-hero{padding:20px}
+  .art-hero h1{font-size:1.5rem}
+  .learn-article h1{font-size:1.45rem}
+}
+
+
+/* Excel-specific components */
+.learn-article ul{margin:12px 0 18px;padding-left:22px}
+.learn-article li{margin:6px 0;color:var(--muted);line-height:1.72;font-size:.93rem}
+.learn-article li strong{color:var(--text);font-weight:600}
+.art-box ul{margin:6px 0 2px}
+.art-find{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 16px;margin:18px 0}
+.art-find-label{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);white-space:nowrap}
+.art-find-path{font-family:var(--mono);font-size:.82rem;color:var(--text)}
+.art-shot{margin:22px 0;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}
+.art-shot img{display:block;width:100%;height:auto}
+.art-shot figcaption{font-size:.76rem;color:var(--hint);padding:10px 14px;text-align:center;border-top:1px solid var(--border)}
+.art-shot.art-shot-empty{border-style:dashed;border-color:var(--border2)}
+.art-shot-empty img{display:none}
+.art-shot-empty{padding:26px 16px 6px;text-align:center}
+.art-shot-empty::before{content:"Screenshot coming soon";display:block;font-size:.78rem;color:var(--hint);font-family:var(--mono);margin-bottom:6px}
+.art-shot-empty figcaption{border-top:none;padding:4px 14px 4px}
+.art-formula{background:#1a1b2e;border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin:16px 0;font-family:var(--mono);font-size:.86rem;color:#7dffcb;overflow-x:auto}
+.lt-soon{opacity:.5}
+.lt-soon .lt-title::after{content:" soon";font-size:.62rem;color:var(--hint);letter-spacing:.04em}
+
+</style>
+</head>
+<body>
+
+<div class="learn-nav">
+  <div class="learn-nav-logo" onclick="window.location.href='/home'">Analyst<span> World</span></div>
+  <div class="learn-nav-center">Excel for Data Analysts</div>
+  <div class="learn-nav-right">
+    <button class="learn-back-btn" onclick="window.location.href='/home'">Back to Home</button>
+  </div>
+</div>
+
+<div class="learn-body">
+  <aside class="learn-sidebar-wrap">
+    <div class="learn-search-wrap">
+      <input type="text" class="learn-search" id="exSearch" placeholder="Search topics..." oninput="handleExSearch(event)"/>
+      <span class="learn-search-icon">&#8981;</span>
+    </div>
+    <div class="learn-sidebar" id="exSidebar"></div>
+  </aside>
+  <main class="learn-content-wrap" id="exContentWrap">
+    <div class="learn-content" id="exContent">
+      <div class="learn-welcome">
+        <div class="lw-icon">&#128202;</div>
+        <h2>Excel for Data Analysts</h2>
+        <p>The tool every analyst is expected to know, taught the practical way.</p>
+        <p style="margin-top:6px;font-size:.88rem;color:var(--muted)">Select a topic from the sidebar to begin.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ================================================================
+//  Excel for Analysts - learn-excel.html
+//  Path routing: /learn/excel/{subtopic-slug}
+// ================================================================
+
+var EX_DATA = [
+  { id:'ex1', title:'Getting Started with Excel', topics:[
+    { id:'ex1-t1', title:'The Excel Interface and Ribbon' },
+    { id:'ex1-t2', title:'Workbooks, Worksheets and Navigation' },
+    { id:'ex1-t3', title:'Rows, Columns, Cells and Ranges' },
+    { id:'ex1-t4', title:'Entering and Editing Data' },
+    { id:'ex1-t5', title:'Essential Keyboard Shortcuts' }
+  ]},
+  { id:'ex2', title:'Cell References and Fill Tools', topics:[
+    { id:'ex2-t1', title:'Relative, Absolute and Mixed References' },
+    { id:'ex2-t2', title:'Copy, Cut and Paste Special' },
+    { id:'ex2-t3', title:'AutoFill and Fill Series' },
+    { id:'ex2-t4', title:'Flash Fill' }
+  ]},
+  { id:'ex3', title:'Formatting Data for Clarity', topics:[
+    { id:'ex3-t1', title:'Number, Currency and Accounting Formats' },
+    { id:'ex3-t2', title:'Date and Time Formatting' },
+    { id:'ex3-t3', title:'Cell Styles, Borders and Alignment' },
+    { id:'ex3-t4', title:'Conditional Formatting' }
+  ]},
+  { id:'ex4', title:'Tables, Sorting and Filtering', topics:[
+    { id:'ex4-t1', title:'Excel Tables and Structured References' },
+    { id:'ex4-t2', title:'Sorting Data' },
+    { id:'ex4-t3', title:'Filtering Data' },
+    { id:'ex4-t4', title:'Advanced Filters' }
+  ]},
+  { id:'ex5', title:'Data Validation and Clean Entry', topics:[
+    { id:'ex5-t1', title:'Data Validation Rules' },
+    { id:'ex5-t2', title:'Drop-Down Lists' },
+    { id:'ex5-t3', title:'Input Messages and Error Alerts' },
+    { id:'ex5-t4', title:'Remove Duplicates and Text to Columns' }
+  ]},
+  { id:'ex6', title:'Core Math and Aggregation', topics:[
+    { id:'ex6-t1', title:'Formula Syntax and Operators' },
+    { id:'ex6-t2', title:'SUM, SUMIF and SUMIFS' },
+    { id:'ex6-t3', title:'The COUNT Family' },
+    { id:'ex6-t4', title:'AVERAGE, MIN and MAX' },
+    { id:'ex6-t5', title:'Rounding Functions' }
+  ]},
+  { id:'ex7', title:'Statistical and Dynamic Arrays', topics:[
+    { id:'ex7-t1', title:'MEDIAN, MODE and Spread' },
+    { id:'ex7-t2', title:'RANK, PERCENTILE and QUARTILE' },
+    { id:'ex7-t3', title:'SUBTOTAL and AGGREGATE' },
+    { id:'ex7-t4', title:'Dynamic Arrays: SORT, UNIQUE, FILTER' }
+  ]},
+  { id:'ex8', title:'Logical Functions', topics:[
+    { id:'ex8-t1', title:'IF and Nested IF' },
+    { id:'ex8-t2', title:'IFS and SWITCH' },
+    { id:'ex8-t3', title:'AND, OR and NOT' },
+    { id:'ex8-t4', title:'Handling Errors with IFERROR and IFNA' }
+  ]},
+  { id:'ex9', title:'Lookup and Reference', topics:[
+    { id:'ex9-t1', title:'VLOOKUP' },
+    { id:'ex9-t2', title:'HLOOKUP' },
+    { id:'ex9-t3', title:'INDEX and MATCH' },
+    { id:'ex9-t4', title:'XLOOKUP' },
+    { id:'ex9-t5', title:'Two-Way and Multi-Criteria Lookups' }
+  ]},
+  { id:'ex10', title:'Text Functions for Cleaning', topics:[
+    { id:'ex10-t1', title:'LEFT, RIGHT, MID and LEN' },
+    { id:'ex10-t2', title:'TRIM, UPPER, LOWER and PROPER' },
+    { id:'ex10-t3', title:'CONCAT and TEXTJOIN' },
+    { id:'ex10-t4', title:'FIND, SEARCH, SUBSTITUTE and REPLACE' }
+  ]},
+  { id:'ex11', title:'Date and Time Functions', topics:[
+    { id:'ex11-t1', title:'TODAY, NOW and DATE' },
+    { id:'ex11-t2', title:'DAY, MONTH, YEAR and WEEKDAY' },
+    { id:'ex11-t3', title:'EDATE, EOMONTH and DATEDIF' },
+    { id:'ex11-t4', title:'NETWORKDAYS and WORKDAY' }
+  ]},
+  { id:'ex12', title:'PivotTables', topics:[
+    { id:'ex12-t1', title:'Creating a PivotTable' },
+    { id:'ex12-t2', title:'Rows, Values and Filters' },
+    { id:'ex12-t3', title:'Grouping Data' },
+    { id:'ex12-t4', title:'Calculated Fields' },
+    { id:'ex12-t5', title:'Slicers and Timelines' }
+  ]},
+  { id:'ex13', title:'Power Query', topics:[
+    { id:'ex13-t1', title:'What Power Query Is' },
+    { id:'ex13-t2', title:'Importing Data' },
+    { id:'ex13-t3', title:'Common Transformations' },
+    { id:'ex13-t4', title:'Merge and Append Queries' },
+    { id:'ex13-t5', title:'Unpivot and Refresh' }
+  ]},
+  { id:'ex14', title:'Charts and Visualization', topics:[
+    { id:'ex14-t1', title:'Choosing the Right Chart' },
+    { id:'ex14-t2', title:'Core Chart Types' },
+    { id:'ex14-t3', title:'Combo Charts and Sparklines' },
+    { id:'ex14-t4', title:'Visualization Best Practices' }
+  ]},
+  { id:'ex15', title:'Dashboards in Excel', topics:[
+    { id:'ex15-t1', title:'What Makes a Good Dashboard' },
+    { id:'ex15-t2', title:'KPI Cards and Scorecards' },
+    { id:'ex15-t3', title:'Slicers and Interactivity' },
+    { id:'ex15-t4', title:'Dynamic Titles and Charts' },
+    { id:'ex15-t5', title:'Assembling a Dashboard' }
+  ]},
+  { id:'ex16', title:'Automating with Macros', topics:[
+    { id:'ex16-t1', title:'Enabling Developer Mode' },
+    { id:'ex16-t2', title:'Recording and Running a Macro' },
+    { id:'ex16-t3', title:'When to Use Macros' },
+    { id:'ex16-t4', title:'Learning Macros: Resources' }
+  ]}
+];
+
+var EX_FLAT = [];
+EX_DATA.forEach(function(m){ m.topics.forEach(function(t){ EX_FLAT.push(t); }); });
+
+// ── CONTENT ──────────────────────────────────────────────────────
+var EX_CONTENT = {};
+
+EX_CONTENT['ex1-t1'] = `
+<div class="art-read-progress"></div>
+<div class="art-hero">
+  <div class="art-hero-tag">Topic 1 &middot; Getting Started</div>
+  <h1>The Excel Interface and Ribbon</h1>
+  <p class="art-hero-lead">Before any formula or pivot table, you need to know your way around the screen. Five minutes learning the interface saves hours of hunting for buttons later.</p>
+  <div class="art-hero-meta"><span>4 min read</span><span>Beginner</span></div>
+</div>
+
+<h2>What you are looking at</h2>
+<p>When you open Excel, the screen is split into a few fixed areas. Learn these names because every tutorial and every interviewer uses them.</p>
+<ul>
+  <li><strong>Ribbon</strong>: the toolbar strip across the top, organised into tabs like Home, Insert and Data.</li>
+  <li><strong>Quick Access Toolbar</strong>: the tiny row of icons above or below the ribbon for one-click actions like Save and Undo.</li>
+  <li><strong>Name Box</strong>: the small box on the far left of the formula bar that shows the address of the selected cell, such as A1.</li>
+  <li><strong>Formula Bar</strong>: shows and edits what is actually inside the selected cell.</li>
+  <li><strong>Grid</strong>: the sheet of cells where your data lives.</li>
+  <li><strong>Sheet Tabs</strong>: the tabs at the bottom that let you move between worksheets.</li>
+</ul>
+
+<figure class="art-shot"><img src="/excel-img/ex1-t1-interface.png" alt="The Excel interface with the ribbon, name box, formula bar and grid labelled" onerror="this.closest('.art-shot').classList.add('art-shot-empty')"><figcaption>The main areas of the Excel window.</figcaption></figure>
+
+<h2>How the ribbon is organised</h2>
+<p>The ribbon groups every command into <strong>tabs</strong>, and each tab is split into <strong>groups</strong>. You do not need to memorise all of them. These are the ones an analyst lives in:</p>
+<ul>
+  <li><strong>Home</strong>: formatting, number formats, sort and filter, and the fill tools.</li>
+  <li><strong>Insert</strong>: tables, PivotTables, and charts.</li>
+  <li><strong>Data</strong>: sorting, filtering, data validation, Text to Columns, and Power Query (Get Data).</li>
+  <li><strong>Formulas</strong>: the function library and formula auditing tools.</li>
+  <li><strong>View</strong>: freeze panes, gridlines, and zoom.</li>
+</ul>
+
+<div class="art-callout"><strong>Tip.</strong> Press <code>Ctrl + F1</code> to collapse or expand the ribbon. Double-clicking any tab name does the same thing. Analysts often collapse it to see more rows of data.</div>
+
+<h2>The Quick Access Toolbar</h2>
+<p>The Quick Access Toolbar (QAT) holds shortcuts that work no matter which ribbon tab is open. Right-click any ribbon button and choose <strong>Add to Quick Access Toolbar</strong> to pin the commands you use most.</p>
+<div class="art-find"><span class="art-find-label">Where to find it</span><span class="art-find-path">File &rarr; Options &rarr; Quick Access Toolbar</span></div>
+
+<h2>What to remember</h2>
+<ul>
+  <li>Commands are found under logically named tabs. If you cannot find something, guess the tab by its purpose (charts live under Insert, sorting under Data).</li>
+  <li>Hovering over any ribbon button shows a tooltip explaining what it does.</li>
+  <li>The formula bar is the source of truth. A cell may <em>display</em> a formatted number but the formula bar shows what is really stored.</li>
+</ul>
+
+<h2>Why this matters on the job</h2>
+<p>An analyst who knows the interface moves fast in front of stakeholders. When a manager asks to "just filter that quickly" in a live review, fumbling through tabs looks unprofessional. Knowing that filtering lives under both the Home and Data tabs means you act in one click.</p>
+
+<div class="art-box">
+  <div class="art-blabel">Interview question</div>
+  <p>"What is the difference between the Name Box and the Formula Bar?" The Name Box shows the address or name of the current selection and lets you jump to a cell or range by typing its address. The Formula Bar shows and edits the actual content of the selected cell.</p>
+</div>
+
+<div class="art-takeaway"><div class="art-tlabel">Key point</div>The ribbon is organised into tabs and groups by purpose. Learn where Home, Insert, Data, and Formulas live, pin your favourite commands to the Quick Access Toolbar, and trust the formula bar over what a cell displays.</div>
+`;
+
+EX_CONTENT['ex1-t2'] = `
+<div class="art-read-progress"></div>
+<div class="art-hero">
+  <div class="art-hero-tag">Topic 1 &middot; Getting Started</div>
+  <h1>Workbooks, Worksheets and Navigation</h1>
+  <p class="art-hero-lead">A single Excel file can hold many sheets of related data. Knowing how to organise and move between them keeps large analyses from turning into a mess.</p>
+  <div class="art-hero-meta"><span>4 min read</span><span>Beginner</span></div>
+</div>
+
+<h2>Workbook vs worksheet</h2>
+<ul>
+  <li>A <strong>workbook</strong> is the whole Excel file (the <code>.xlsx</code> you save).</li>
+  <li>A <strong>worksheet</strong> (or sheet) is one tab inside that file. A workbook can hold many.</li>
+</ul>
+<p>A common analyst layout is one sheet for raw data, one for calculations, and one for the final report or dashboard. Keeping these separate makes the file easy to audit and hard to break.</p>
+
+<figure class="art-shot"><img src="/excel-img/ex1-t2-sheets.png" alt="Worksheet tabs at the bottom of the Excel window" onerror="this.closest('.art-shot').classList.add('art-shot-empty')"><figcaption>Worksheet tabs sit at the bottom of the window.</figcaption></figure>
+
+<h2>Managing sheets</h2>
+<ul>
+  <li><strong>Add a sheet</strong>: click the plus icon next to the sheet tabs.</li>
+  <li><strong>Rename</strong>: double-click the tab and type a clear name like <code>Raw Data</code>.</li>
+  <li><strong>Colour a tab</strong>: right-click the tab and choose Tab Color to group related sheets visually.</li>
+  <li><strong>Move or copy</strong>: drag a tab to reorder it, or right-click and choose Move or Copy to duplicate it.</li>
+  <li><strong>Delete</strong>: right-click and choose Delete. This cannot be undone, so check first.</li>
+</ul>
+
+<div class="art-warn"><strong>Careful.</strong> Deleting a sheet is permanent and clears the Undo history for that action. Before deleting, make sure no formula on another sheet references it, or those formulas will break with a <code>#REF!</code> error.</div>
+
+<h2>Moving around quickly</h2>
+<ul>
+  <li><strong>Ctrl + Page Up / Page Down</strong>: jump to the previous or next sheet.</li>
+  <li><strong>Ctrl + Arrow key</strong>: jump to the edge of a block of data.</li>
+  <li><strong>Ctrl + Home</strong>: jump back to cell A1.</li>
+  <li><strong>Name Box</strong>: type an address like <code>M500</code> and press Enter to jump straight there.</li>
+</ul>
+
+<h2>Why this matters on the job</h2>
+<p>Real business files often have twenty or more sheets across regions, months, or product lines. Analysts who name and colour their tabs, and who navigate with keyboard shortcuts, deliver work that colleagues can actually follow and reuse.</p>
+
+<div class="art-box">
+  <div class="art-blabel">Interview question</div>
+  <p>"How would you structure a workbook that pulls raw sales data and produces a monthly report?" A clean answer: a dedicated raw-data sheet that stays untouched, a separate calculations sheet, and a report or dashboard sheet, so the source is never altered and the logic is easy to audit.</p>
+</div>
+
+<div class="art-takeaway"><div class="art-tlabel">Key point</div>A workbook holds many worksheets. Separate raw data, calculations, and reporting into different sheets, name them clearly, and move between them with Ctrl + Page Up or Page Down. Never delete a sheet without checking what references it.</div>
+`;
+
+EX_CONTENT['ex1-t3'] = `
+<div class="art-read-progress"></div>
+<div class="art-hero">
+  <div class="art-hero-tag">Topic 1 &middot; Getting Started</div>
+  <h1>Rows, Columns, Cells and Ranges</h1>
+  <p class="art-hero-lead">These four words are the vocabulary of every formula you will ever write. Get them right and everything else in Excel clicks into place.</p>
+  <div class="art-hero-meta"><span>4 min read</span><span>Beginner</span></div>
+</div>
+
+<h2>The building blocks</h2>
+<ul>
+  <li><strong>Column</strong>: a vertical strip, labelled with letters (A, B, C).</li>
+  <li><strong>Row</strong>: a horizontal strip, labelled with numbers (1, 2, 3).</li>
+  <li><strong>Cell</strong>: where a column and row meet. Its address is the column letter then the row number, like <code>B4</code>.</li>
+  <li><strong>Range</strong>: a block of cells, written as the top-left and bottom-right addresses joined by a colon, like <code>A1:C10</code>.</li>
+</ul>
+
+<div class="art-callout"><strong>Reading an address.</strong> <code>B4</code> means column B, row 4. A range <code>A1:C10</code> means "every cell from A1 down to C10", which is 3 columns wide and 10 rows tall, so 30 cells.</div>
+
+<h2>Selecting ranges</h2>
+<ul>
+  <li><strong>A block</strong>: click the first cell and drag, or click the first cell and Shift-click the last.</li>
+  <li><strong>A whole column</strong>: click the column letter. A whole row: click the row number.</li>
+  <li><strong>Non-adjacent cells</strong>: hold <code>Ctrl</code> while clicking each cell or range.</li>
+  <li><strong>The whole used area</strong>: click any cell in your data and press <code>Ctrl + A</code>.</li>
+</ul>
+
+<figure class="art-shot"><img src="/excel-img/ex1-t3-range.png" alt="A selected range A1 to C10 in the Excel grid" onerror="this.closest('.art-shot').classList.add('art-shot-empty')"><figcaption>The range A1:C10 selected in the grid.</figcaption></figure>
+
+<h2>Adding and resizing</h2>
+<ul>
+  <li><strong>Insert a row or column</strong>: right-click a row number or column letter and choose Insert.</li>
+  <li><strong>Resize</strong>: drag the border of a column letter or row number. Double-click the border to auto-fit to the content.</li>
+  <li><strong>Select non-adjacent columns</strong> then resize together to keep widths consistent.</li>
+</ul>
+
+<h2>Why this matters on the job</h2>
+<p>Every formula points at cells and ranges. When you write <code>=SUM(D2:D100)</code> you are telling Excel to add a range. Analysts who read addresses fluently can look at someone else's formula and instantly know which data it touches, which is the first step in checking whether a report is correct.</p>
+
+<div class="art-box">
+  <div class="art-blabel">Interview question</div>
+  <p>"How many cells are in the range B2:D6?" Count the columns (B, C, D is 3) and the rows (2 through 6 is 5), then multiply: 3 times 5 is 15 cells.</p>
+</div>
+
+<div class="art-takeaway"><div class="art-tlabel">Key point</div>Columns are letters, rows are numbers, a cell is where they meet (B4), and a range is a block written with a colon (A1:C10). Reading these addresses fluently is the foundation of every formula.</div>
+`;
+
+EX_CONTENT['ex1-t4'] = `
+<div class="art-read-progress"></div>
+<div class="art-hero">
+  <div class="art-hero-tag">Topic 1 &middot; Getting Started</div>
+  <h1>Entering and Editing Data</h1>
+  <p class="art-hero-lead">Excel quietly decides whether what you type is a number, text, or a date, and that decision changes what you can do with it. Knowing how it thinks prevents a whole class of bugs.</p>
+  <div class="art-hero-meta"><span>4 min read</span><span>Beginner</span></div>
+</div>
+
+<h2>How Excel reads what you type</h2>
+<p>As you type, Excel classifies the value into one of a few types, and it aligns them as a hint:</p>
+<ul>
+  <li><strong>Numbers</strong> (including dates and currency) align to the <strong>right</strong> and can be calculated.</li>
+  <li><strong>Text</strong> aligns to the <strong>left</strong> and cannot be summed.</li>
+  <li><strong>Formulas</strong> start with an equals sign and show their result.</li>
+</ul>
+<div class="art-callout"><strong>Quick check.</strong> If a column of "numbers" is left-aligned, Excel is treating them as text, which is why <code>SUM</code> returns zero. This is one of the most common data problems an analyst hits.</div>
+
+<h2>Entering data efficiently</h2>
+<ul>
+  <li><strong>Enter</strong> moves down, <strong>Tab</strong> moves right.</li>
+  <li>Select a range first, then type and press Enter to stay inside that range as you fill it.</li>
+  <li><strong>Alt + Enter</strong> starts a new line inside the same cell.</li>
+  <li><strong>Ctrl + Enter</strong> fills the same value into all selected cells at once.</li>
+</ul>
+
+<h2>Editing a cell</h2>
+<ul>
+  <li>Double-click a cell, or press <code>F2</code>, to edit in place.</li>
+  <li>Press <strong>Delete</strong> to clear contents but keep formatting.</li>
+  <li>Use <strong>Home tab &rarr; Clear</strong> to remove formatting, contents, or both.</li>
+</ul>
+<div class="art-find"><span class="art-find-label">Where to find it</span><span class="art-find-path">Home tab &rarr; Editing group &rarr; Clear</span></div>
+
+<h2>What to remember</h2>
+<ul>
+  <li>Right-aligned means Excel sees a number; left-aligned means text.</li>
+  <li>A leading apostrophe (<code>'007</code>) forces Excel to keep a value as text and preserve leading zeros, useful for codes and phone numbers.</li>
+  <li>Numbers stored as text are the silent cause of broken totals. Fixing the type is covered in the data cleaning topics.</li>
+</ul>
+
+<h2>Why this matters on the job</h2>
+<p>Data arrives from other systems as CSV exports where numbers, dates, and IDs are often misread as text. An analyst who spots the alignment clue immediately knows why a total is wrong, instead of losing an hour hunting for a formula mistake that was never there.</p>
+
+<div class="art-box">
+  <div class="art-blabel">Interview question</div>
+  <p>"Your SUM formula returns 0 even though the column clearly has numbers. What is likely wrong?" The numbers are stored as text (they will be left-aligned). They need to be converted to real numbers before Excel will add them.</p>
+</div>
+
+<div class="art-takeaway"><div class="art-tlabel">Key point</div>Excel classifies every entry as number, text, or formula, and alignment tells you which. Right-aligned values calculate, left-aligned text does not. Use Tab and Enter to move, Ctrl + Enter to fill a selection, and watch for numbers that are secretly text.</div>
+`;
+
+EX_CONTENT['ex1-t5'] = `
+<div class="art-read-progress"></div>
+<div class="art-hero">
+  <div class="art-hero-tag">Topic 1 &middot; Getting Started</div>
+  <h1>Essential Keyboard Shortcuts</h1>
+  <p class="art-hero-lead">The gap between a slow Excel user and a fast one is almost entirely shortcuts. You do not need hundreds. A dozen well-chosen ones will transform your speed.</p>
+  <div class="art-hero-meta"><span>4 min read</span><span>Beginner</span></div>
+</div>
+
+<h2>The shortcuts worth memorising first</h2>
+<div class="art-box">
+  <div class="art-blabel">Navigation and selection</div>
+  <ul>
+    <li><code>Ctrl + Arrow</code>: jump to the edge of a data block.</li>
+    <li><code>Ctrl + Shift + Arrow</code>: select from here to the edge of the block.</li>
+    <li><code>Ctrl + A</code>: select the whole data region.</li>
+    <li><code>Ctrl + Home</code>: go back to A1.</li>
+  </ul>
+</div>
+<div class="art-box">
+  <div class="art-blabel">Editing and entry</div>
+  <ul>
+    <li><code>F2</code>: edit the active cell.</li>
+    <li><code>Ctrl + Enter</code>: fill all selected cells with the same entry.</li>
+    <li><code>Ctrl + D</code>: fill down from the cell above.</li>
+    <li><code>Ctrl + ;</code>: insert today's date.</li>
+  </ul>
+</div>
+<div class="art-box">
+  <div class="art-blabel">Formatting and everyday actions</div>
+  <ul>
+    <li><code>Ctrl + C / X / V</code>: copy, cut, paste.</li>
+    <li><code>Ctrl + Z / Y</code>: undo, redo.</li>
+    <li><code>Ctrl + 1</code>: open the Format Cells dialog.</li>
+    <li><code>Ctrl + Shift + L</code>: turn filters on or off.</li>
+  </ul>
+</div>
+
+<div class="art-callout"><strong>Learn them by using them.</strong> Do not try to memorise a long list. Pick three shortcuts this week and force yourself to use them instead of the mouse. Add three more next week. Within a month they become automatic.</div>
+
+<h2>Why this matters on the job</h2>
+<p>Speed compounds. A task that takes a mouse user two minutes takes a shortcut user twenty seconds, and analysts repeat these tasks dozens of times a day. Beyond speed, working from the keyboard keeps your eyes on the data instead of on menus, so you catch errors you would otherwise miss.</p>
+
+<div class="art-box">
+  <div class="art-blabel">Interview question</div>
+  <p>"Which shortcut selects a full column of data of unknown length?" Click the top cell, then press <code>Ctrl + Shift + Down Arrow</code> to extend the selection to the last filled cell.</p>
+</div>
+
+<div class="art-takeaway"><div class="art-tlabel">Key point</div>You do not need every shortcut, just a dozen high-value ones for navigation, filling, and formatting. Learn a few at a time by using them instead of the mouse, and your speed and accuracy both climb.</div>
+`;
+
+// ── STATE ────────────────────────────────────────────────────────
+var exCurrentTopicId = null;
+var exOpenModules    = {};
+var EX_BASE = '/learn/excel';
+
+function exSlug(str) {
+  return String(str).toLowerCase().replace(/[()]/g,'').replace(/[^a-z0-9\s_-]/g,' ').replace(/[\s_]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+}
+function exTopicById(id) {
+  var found=null; EX_DATA.forEach(function(m){ m.topics.forEach(function(t){ if(t.id===id) found=t; }); }); return found;
+}
+function exTopicBySlug(slug) {
+  var found=null; EX_DATA.forEach(function(m){ m.topics.forEach(function(t){ if(exSlug(t.title)===slug) found=t; }); }); return found;
+}
+
+(function init() {
+  var saved = localStorage.getItem('msql_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  exOpenModules[EX_DATA[0].id] = true;
+
+  var path = window.location.pathname.replace(/\/+$/,'');
+  var slug = path.indexOf(EX_BASE) === 0 ? path.slice(EX_BASE.length).replace(/^\//,'') : '';
+  var target = slug ? exTopicBySlug(slug) : null;
+
+  buildExSidebar();
+  if (target && EX_CONTENT[target.id]) {
+    exCurrentTopicId = target.id;
+    EX_DATA.forEach(function(m){ m.topics.forEach(function(t){ if(t.id===target.id) exOpenModules[m.id]=true; }); });
+    buildExSidebar();
+    renderExTopic(target.id);
+  } else if (target) {
+    // known topic, content not written yet
+    exCurrentTopicId = target.id;
+    EX_DATA.forEach(function(m){ m.topics.forEach(function(t){ if(t.id===target.id) exOpenModules[m.id]=true; }); });
+    buildExSidebar();
+    renderExTopic(target.id);
+  }
+})();
+
+function buildExSidebar() {
+  var sb = document.getElementById('exSidebar');
+  if (!sb) return;
+  sb.innerHTML = EX_DATA.map(function(mod) {
+    var isOpen = !!exOpenModules[mod.id];
+    var topicsHtml = mod.topics.map(function(t) {
+      var active = t.id === exCurrentTopicId;
+      var ready = !!EX_CONTENT[t.id];
+      return '<div class="learn-topic-item'+(active?' active':'')+(ready?'':' lt-soon')+'" onclick="selectExTopic(\''+t.id+'\')" id="ext-'+t.id+'">' +
+             '<span class="lt-dot"></span><span class="lt-title">'+escEx(t.title)+'</span></div>';
+    }).join('');
+    return '<div class="learn-module" id="exm-'+mod.id+'">' +
+      '<div class="learn-module-header" onclick="toggleExModule(\''+mod.id+'\')">' +
+        '<div class="lm-info"><span class="lm-title">'+escEx(mod.title)+'</span>' +
+        '<span class="lm-count">'+mod.topics.length+' topics</span></div>' +
+        '<span class="lm-chevron'+(isOpen?' open':'')+'">&#8250;</span>' +
+      '</div>' +
+      '<div class="learn-topics-list'+(isOpen?' open':'')+'">'+topicsHtml+'</div>' +
+    '</div>';
+  }).join('');
+}
+
+function toggleExModule(id) { exOpenModules[id] = !exOpenModules[id]; buildExSidebar(); }
+
+function selectExTopic(id) {
+  exCurrentTopicId = id;
+  var t = exTopicById(id);
+  if (t) history.pushState({}, '', EX_BASE + '/' + exSlug(t.title));
+  EX_DATA.forEach(function(m){ m.topics.forEach(function(x){ if(x.id===id) exOpenModules[m.id]=true; }); });
+  buildExSidebar();
+  renderExTopic(id);
+  if (window.innerWidth < 900) document.getElementById('exContent').scrollIntoView({behavior:'smooth'});
+}
+
+function renderExTopic(id) {
+  var el = document.getElementById('exContent');
+  if (!el) return;
+  var meta=null, modMeta=null;
+  EX_DATA.forEach(function(m){ m.topics.forEach(function(t){ if(t.id===id){meta=t;modMeta=m;} }); });
+  if (!meta) return;
+  var fi=-1;
+  for(var i=0;i<EX_FLAT.length;i++){ if(EX_FLAT[i].id===id){fi=i;break;} }
+  var prev = fi>0 ? EX_FLAT[fi-1] : null;
+  var next = fi<EX_FLAT.length-1 ? EX_FLAT[fi+1] : null;
+  var art = EX_CONTENT[id] || '<div class="coming-soon-block"><div class="cs-icon">&#9995;</div><div class="cs-title">This article is coming soon</div><div class="cs-sub">We are writing the Excel track one topic at a time. Check back shortly.</div></div>';
+  el.innerHTML =
+    '<div class="learn-breadcrumb"><span class="lbc-mod">'+escEx(modMeta.title)+'</span>' +
+    '<span class="lbc-sep">&#8250;</span><span class="lbc-topic">'+escEx(meta.title)+'</span></div>' +
+    '<div class="learn-article">'+art+'</div>' +
+    '<div class="learn-nav-btns">' +
+    (prev ? '<button class="learn-nav-btn prev" onclick="selectExTopic(\''+prev.id+'\')"><span class="lnb-arrow">&#8249;</span><div class="lnb-info"><span class="lnb-label">Previous</span><span class="lnb-title">'+escEx(prev.title)+'</span></div></button>' : '<div></div>') +
+    (next ? '<button class="learn-nav-btn next" onclick="selectExTopic(\''+next.id+'\')"><div class="lnb-info"><span class="lnb-label">Next</span><span class="lnb-title">'+escEx(next.title)+'</span></div><span class="lnb-arrow">&#8250;</span></button>' : '<div></div>') +
+    '</div>';
+  var wrap = document.getElementById('exContentWrap');
+  if (wrap) wrap.scrollTop = 0;
+  initExProgress();
+}
+
+function handleExSearch(e) {
+  var q = e.target.value.toLowerCase();
+  document.querySelectorAll('.learn-topic-item').forEach(function(el){
+    el.style.display = el.querySelector('.lt-title').textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function escEx(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function initExProgress() {
+  var bar = document.querySelector('.art-read-progress');
+  var wrap = document.getElementById('exContentWrap');
+  if (!bar || !wrap) return;
+  wrap.onscroll = function() {
+    var h = wrap.scrollHeight - wrap.clientHeight;
+    bar.style.transform = 'scaleX(' + (h>0 ? wrap.scrollTop/h : 0) + ')';
+  };
+}
+
+window.addEventListener('popstate', function(){
+  var path = window.location.pathname.replace(/\/+$/,'');
+  var slug = path.indexOf(EX_BASE) === 0 ? path.slice(EX_BASE.length).replace(/^\//,'') : '';
+  var t = slug ? exTopicBySlug(slug) : null;
+  if (t) {
+    exCurrentTopicId = t.id;
+    EX_DATA.forEach(function(m){ m.topics.forEach(function(x){ if(x.id===t.id) exOpenModules[m.id]=true; }); });
+    buildExSidebar(); renderExTopic(t.id);
+  }
+});
+
+</script>
+</body>
+</html>

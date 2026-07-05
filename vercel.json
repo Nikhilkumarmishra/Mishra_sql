@@ -1,5 +1,7 @@
 {
   "rewrites": [
+    { "source": "/learn/excel", "destination": "/learn-excel.html" },
+    { "source": "/learn/excel/(.*)", "destination": "/learn-excel.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
