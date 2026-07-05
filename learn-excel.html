@@ -216,15 +216,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans)}
 .art-find{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 16px;margin:18px 0}
 .art-find-label{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);white-space:nowrap}
 .art-find-path{font-family:var(--mono);font-size:.82rem;color:var(--text)}
+.art-formula{background:#1a1b2e;border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin:16px 0;font-family:var(--mono);font-size:.86rem;color:#7dffcb;overflow-x:auto;line-height:1.7}
+.art-formula .cmt{color:rgba(255,255,255,.35)}
+
+/* Screenshot slots. Drop a PNG at excel-img/<name>.png and it appears automatically. */
 .art-shot{margin:22px 0;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}
 .art-shot img{display:block;width:100%;height:auto}
 .art-shot figcaption{font-size:.76rem;color:var(--hint);padding:10px 14px;text-align:center;border-top:1px solid var(--border)}
 .art-shot.art-shot-empty{border-style:dashed;border-color:var(--border2)}
 .art-shot-empty img{display:none}
-.art-shot-empty{padding:26px 16px 6px;text-align:center}
-.art-shot-empty::before{content:"Screenshot coming soon";display:block;font-size:.78rem;color:var(--hint);font-family:var(--mono);margin-bottom:6px}
-.art-shot-empty figcaption{border-top:none;padding:4px 14px 4px}
-.art-formula{background:#1a1b2e;border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin:16px 0;font-family:var(--mono);font-size:.86rem;color:#7dffcb;overflow-x:auto}
+.art-shot-empty{padding:24px 16px 8px;text-align:center}
+.art-shot-empty::before{content:"Add screenshot:  " attr(data-file);display:block;font-size:.76rem;color:var(--accent);font-family:var(--mono);margin-bottom:8px;word-break:break-all}
+.art-shot-empty figcaption{border-top:none;padding:6px 14px 2px;color:var(--muted)}
+
 .lt-soon{opacity:.5}
 .lt-soon .lt-title::after{content:" soon";font-size:.62rem;color:var(--hint);letter-spacing:.04em}
 
@@ -397,7 +401,7 @@ EX_CONTENT['ex1-t1'] = `
   <li><strong>Sheet Tabs</strong>: the tabs at the bottom that let you move between worksheets.</li>
 </ul>
 
-<figure class="art-shot"><img src="/excel-img/ex1-t1-interface.png" alt="The Excel interface with the ribbon, name box, formula bar and grid labelled" onerror="this.closest('.art-shot').classList.add('art-shot-empty')"><figcaption>The main areas of the Excel window.</figcaption></figure>
+<figure class="art-shot" data-file="excel-img/ex1-t1-interface.png"><img src="/excel-img/ex1-t1-interface.png" alt="The Excel interface with the ribbon, name box, formula bar and grid labelled" onerror="this.closest('.art-shot').classList.add('art-shot-empty')"><figcaption>The main areas of the Excel window.</figcaption></figure>
 
 <h2>How the ribbon is organised</h2>
 <p>The ribbon groups every command into <strong>tabs</strong>, and each tab is split into <strong>groups</strong>. You do not need to memorise all of them. These are the ones an analyst lives in:</p>
@@ -449,7 +453,7 @@ EX_CONTENT['ex1-t2'] = `
 </ul>
 <p>A common analyst layout is one sheet for raw data, one for calculations, and one for the final report or dashboard. Keeping these separate makes the file easy to audit and hard to break.</p>
 
-<figure class="art-shot"><img src="/excel-img/ex1-t2-sheets.png" alt="Worksheet tabs at the bottom of the Excel window" onerror="this.closest('.art-shot').classList.add('art-shot-empty')"><figcaption>Worksheet tabs sit at the bottom of the window.</figcaption></figure>
+<figure class="art-shot" data-file="excel-img/ex1-t2-sheets.png"><img src="/excel-img/ex1-t2-sheets.png" alt="Worksheet tabs at the bottom of the Excel window" onerror="this.closest('.art-shot').classList.add('art-shot-empty')"><figcaption>Worksheet tabs sit at the bottom of the window.</figcaption></figure>
 
 <h2>Managing sheets</h2>
 <ul>
@@ -508,7 +512,7 @@ EX_CONTENT['ex1-t3'] = `
   <li><strong>The whole used area</strong>: click any cell in your data and press <code>Ctrl + A</code>.</li>
 </ul>
 
-<figure class="art-shot"><img src="/excel-img/ex1-t3-range.png" alt="A selected range A1 to C10 in the Excel grid" onerror="this.closest('.art-shot').classList.add('art-shot-empty')"><figcaption>The range A1:C10 selected in the grid.</figcaption></figure>
+<figure class="art-shot" data-file="excel-img/ex1-t3-range.png"><img src="/excel-img/ex1-t3-range.png" alt="A selected range A1 to C10 in the Excel grid" onerror="this.closest('.art-shot').classList.add('art-shot-empty')"><figcaption>The range A1:C10 selected in the grid.</figcaption></figure>
 
 <h2>Adding and resizing</h2>
 <ul>
@@ -629,6 +633,187 @@ EX_CONTENT['ex1-t5'] = `
 </div>
 
 <div class="art-takeaway"><div class="art-tlabel">Key point</div>You do not need every shortcut, just a dozen high-value ones for navigation, filling, and formatting. Learn a few at a time by using them instead of the mouse, and your speed and accuracy both climb.</div>
+`;
+
+EX_CONTENT['ex2-t1'] = `
+<div class="art-read-progress"></div>
+<div class="art-hero">
+  <div class="art-hero-tag">Topic 2 &middot; References and Fill</div>
+  <h1>Relative, Absolute and Mixed References</h1>
+  <p class="art-hero-lead">This is the single most important idea in Excel formulas. It decides what happens when you copy a formula, and getting it wrong is the reason most beginner spreadsheets break.</p>
+  <div class="art-hero-meta"><span>5 min read</span><span>Core skill</span></div>
+</div>
+
+<h2>What a reference is</h2>
+<p>When a formula points at a cell like <code>B2</code>, that is a reference. The type of reference controls what happens to it when you copy the formula to another cell.</p>
+<ul>
+  <li><strong>Relative</strong> (<code>B2</code>): moves as you copy. Copy it one row down and it becomes <code>B3</code>.</li>
+  <li><strong>Absolute</strong> (<code>$B$2</code>): locked. It stays <code>$B$2</code> no matter where you copy it.</li>
+  <li><strong>Mixed</strong> (<code>$B2</code> or <code>B$2</code>): one part locked. <code>$B2</code> locks the column, <code>B$2</code> locks the row.</li>
+</ul>
+<div class="art-callout"><strong>The dollar sign means "lock this".</strong> A <code>$</code> before the column letter locks the column. A <code>$</code> before the row number locks the row. That is the whole rule.</div>
+
+<h2>Why it matters, with a real example</h2>
+<p>Say prices are in column B and a single tax rate sits in cell <code>F1</code>. You want tax for every row. If you write the formula with a relative reference to F1 and copy it down, F1 becomes F2, F3, and the tax breaks. Lock it instead:</p>
+<div class="art-formula">=B2*$F$1      <span class="cmt">price times the locked tax rate</span></div>
+<p>Now copy it down the whole column. The <code>B2</code> part moves to <code>B3</code>, <code>B4</code> and so on, while <code>$F$1</code> stays pinned to the tax rate every time.</p>
+
+<h2>The F4 shortcut</h2>
+<p>You do not type the dollar signs by hand. Click a reference in the formula bar and press <code>F4</code> to cycle through the options:</p>
+<div class="art-find"><span class="art-find-label">Press F4</span><span class="art-find-path">B2 &rarr; $B$2 &rarr; B$2 &rarr; $B2 &rarr; back to B2</span></div>
+
+<h2>What to remember</h2>
+<ul>
+  <li>Ask yourself: "when I copy this, should this reference move or stay?" Moving means relative, staying means absolute.</li>
+  <li>A fixed input used by every row (a tax rate, a target, a conversion factor) is almost always absolute.</li>
+  <li>Mixed references shine in grids where you multiply a row header by a column header, like a times table or a price matrix.</li>
+</ul>
+
+<h2>Why this matters on the job</h2>
+<p>Analysts build one formula and copy it across thousands of rows. If the references are not locked correctly, the numbers are quietly wrong, and wrong numbers in a report destroy trust. Mastering this one concept prevents the most common and most embarrassing spreadsheet error.</p>
+
+<div class="art-box">
+  <div class="art-blabel">Interview question</div>
+  <p>"You wrote a formula that multiplies each sales figure by a commission rate stored in one cell, but when you copy it down the results go wrong. What happened?" The commission rate was referenced relatively, so it shifted with each row. It needs to be absolute (for example <code>$C$1</code>) so every row points at the same rate.</p>
+</div>
+
+<div class="art-takeaway"><div class="art-tlabel">Key point</div>Relative references move when copied, absolute references (<code>$B$2</code>) stay locked, and mixed references lock only the row or the column. Use <code>F4</code> to toggle them, and lock any input that every row shares.</div>
+`;
+
+EX_CONTENT['ex2-t2'] = `
+<div class="art-read-progress"></div>
+<div class="art-hero">
+  <div class="art-hero-tag">Topic 2 &middot; References and Fill</div>
+  <h1>Copy, Cut and Paste Special</h1>
+  <p class="art-hero-lead">Plain copy-paste brings everything: the formula, the formatting, the lot. Paste Special lets you choose exactly what carries over, which is one of the most useful everyday tools an analyst has.</p>
+  <div class="art-hero-meta"><span>4 min read</span><span>Core skill</span></div>
+</div>
+
+<h2>The problem plain paste creates</h2>
+<p>When you copy a cell with a formula and paste it, you paste the formula, not the value it showed. Paste it somewhere the references no longer make sense and you get errors or wrong numbers. Paste Special fixes this by letting you paste only what you want.</p>
+
+<h2>The options you will actually use</h2>
+<ul>
+  <li><strong>Values</strong>: pastes the result only, dropping the formula. This "freezes" a calculation into a static number.</li>
+  <li><strong>Formulas</strong>: pastes the formula without the formatting.</li>
+  <li><strong>Formats</strong>: copies only the look (fonts, colours, number format), not the content.</li>
+  <li><strong>Transpose</strong>: flips rows into columns and columns into rows.</li>
+  <li><strong>Column widths</strong>: matches the widths of another range.</li>
+</ul>
+
+<div class="art-find"><span class="art-find-label">Where to find it</span><span class="art-find-path">Right-click &rarr; Paste Special, or Ctrl + Alt + V</span></div>
+
+<figure class="art-shot" data-file="excel-img/ex2-t2-paste-special.png"><img src="/excel-img/ex2-t2-paste-special.png" alt="The Paste Special dialog box with its options" onerror="this.closest('.art-shot').classList.add('art-shot-empty')"><figcaption>The Paste Special dialog and its main options.</figcaption></figure>
+
+<h2>The most common move: Paste Values</h2>
+<p>You built a report with live formulas that pull from other sheets. Before sending it out, you want the numbers to stay fixed even if the source changes. Select the range, copy, then Paste Special as Values over the same range. The formulas become plain numbers.</p>
+<div class="art-callout"><strong>Fast version.</strong> Copy, then press <code>Ctrl + Alt + V</code>, then <code>V</code>, then Enter. That is Paste Values in under a second, and it is a shortcut every analyst uses daily.</div>
+
+<h2>What to remember</h2>
+<ul>
+  <li>Paste Values is the safe way to share a snapshot of numbers that will not change.</li>
+  <li>Transpose is a quick fix when data arrives the wrong way round (dates across the top that you need down the side).</li>
+  <li>Paste Special only works after a copy, not after a cut.</li>
+</ul>
+
+<h2>Why this matters on the job</h2>
+<p>Reports get emailed, uploaded, and pasted into decks. If they carry live formulas that reference sheets the recipient does not have, they show errors. Pasting as values gives a clean, portable snapshot. Transpose saves the manual rework when a data export is oriented the wrong way.</p>
+
+<div class="art-box">
+  <div class="art-blabel">Interview question</div>
+  <p>"How do you convert a column of formulas into fixed values?" Copy the column, then use Paste Special and choose Values (or <code>Ctrl + Alt + V</code>, then V). The formulas are replaced by the numbers they produced.</p>
+</div>
+
+<div class="art-takeaway"><div class="art-tlabel">Key point</div>Paste Special lets you paste only what you need: values, formulas, formats, or a transposed layout. Paste Values (<code>Ctrl + Alt + V</code>, V) to freeze formulas into static numbers before sharing a report.</div>
+`;
+
+EX_CONTENT['ex2-t3'] = `
+<div class="art-read-progress"></div>
+<div class="art-hero">
+  <div class="art-hero-tag">Topic 2 &middot; References and Fill</div>
+  <h1>AutoFill and Fill Series</h1>
+  <p class="art-hero-lead">AutoFill turns a tiny drag into hundreds of filled cells. It copies formulas, continues number and date patterns, and saves an enormous amount of typing.</p>
+  <div class="art-hero-meta"><span>4 min read</span><span>Beginner</span></div>
+</div>
+
+<h2>The fill handle</h2>
+<p>Select a cell and look at the small square in the bottom-right corner of the selection box. That is the <strong>fill handle</strong>. Drag it, and Excel fills the cells you drag over.</p>
+<ul>
+  <li><strong>Copy a formula</strong>: drag a formula down and its relative references adjust for each row.</li>
+  <li><strong>Continue a series</strong>: type Jan and drag to get Feb, Mar, Apr, and so on. Dates and weekdays work the same way.</li>
+  <li><strong>Number patterns</strong>: type 1 and 2 in two cells, select both, then drag to continue 3, 4, 5.</li>
+</ul>
+
+<figure class="art-shot" data-file="excel-img/ex2-t3-fill-handle.png"><img src="/excel-img/ex2-t3-fill-handle.png" alt="The fill handle being dragged to extend a series" onerror="this.closest('.art-shot').classList.add('art-shot-empty')"><figcaption>Dragging the fill handle to continue a series.</figcaption></figure>
+
+<div class="art-callout"><strong>Why two values for numbers.</strong> A single 1 dragged down just copies 1, 1, 1. Give Excel two cells (1 and 2) so it can see the step size, then it continues the pattern correctly.</div>
+
+<h2>Handy fill shortcuts</h2>
+<ul>
+  <li><strong>Double-click the fill handle</strong>: fills a formula down as far as the neighbouring column has data. No dragging needed.</li>
+  <li><strong>Ctrl + D</strong>: fill down from the cell above.</li>
+  <li><strong>Ctrl + R</strong>: fill right from the cell to the left.</li>
+</ul>
+
+<h2>Custom lists</h2>
+<p>Excel knows months and weekdays out of the box. You can teach it your own lists, such as your company's regions or product lines, so typing the first one and dragging fills the rest.</p>
+<div class="art-find"><span class="art-find-label">Where to find it</span><span class="art-find-path">File &rarr; Options &rarr; Advanced &rarr; Edit Custom Lists</span></div>
+
+<h2>Why this matters on the job</h2>
+<p>Analysts constantly number rows, build date ranges for reports, and copy a calculation down a full column. The double-click fill trick alone saves minutes on every large dataset, and it fills exactly to the end of the data without you scrolling to find where it stops.</p>
+
+<div class="art-box">
+  <div class="art-blabel">Interview question</div>
+  <p>"You have a formula in the first row of a 10,000-row table and need it in every row. What is the fastest way?" Double-click the fill handle. Excel fills the formula down automatically to the last row that has data beside it.</p>
+</div>
+
+<div class="art-takeaway"><div class="art-tlabel">Key point</div>The fill handle copies formulas and continues patterns. Give Excel two values so it can detect a number step, double-click the handle to fill a formula to the end of your data, and use <code>Ctrl + D</code> and <code>Ctrl + R</code> to fill down and right.</div>
+`;
+
+EX_CONTENT['ex2-t4'] = `
+<div class="art-read-progress"></div>
+<div class="art-hero">
+  <div class="art-hero-tag">Topic 2 &middot; References and Fill</div>
+  <h1>Flash Fill</h1>
+  <p class="art-hero-lead">Flash Fill watches the pattern in what you type and fills the rest for you. It splits names, joins columns, and extracts pieces of text without a single formula.</p>
+  <div class="art-hero-meta"><span>4 min read</span><span>Core skill</span></div>
+</div>
+
+<h2>What it does</h2>
+<p>You show Excel one or two examples of the result you want, and it recognises the pattern and completes the column. It is perfect for the quick text jobs that come up when data arrives messy.</p>
+<ul>
+  <li><strong>Splitting</strong>: pull the first name out of "Rahul Sharma".</li>
+  <li><strong>Joining</strong>: combine a first and last name into a full name.</li>
+  <li><strong>Extracting</strong>: grab the domain from an email address, or the city from a full address.</li>
+  <li><strong>Reformatting</strong>: turn "9876543210" into "98765 43210".</li>
+</ul>
+
+<h2>How to use it</h2>
+<ul>
+  <li>In the column next to your data, type the result you want for the first row.</li>
+  <li>Start typing the second row. Excel often previews the whole column in grey.</li>
+  <li>Press <strong>Enter</strong> to accept, or press <code>Ctrl + E</code> to trigger Flash Fill directly.</li>
+</ul>
+<div class="art-find"><span class="art-find-label">Where to find it</span><span class="art-find-path">Data tab &rarr; Flash Fill, or press Ctrl + E</span></div>
+
+<div class="art-warn"><strong>Remember.</strong> Flash Fill produces static text, not a formula. If the source data changes later, the Flash Fill results do not update. For one-off cleaning that is fine. For data that keeps changing, use text functions instead (covered in the Text Functions topic).</div>
+
+<h2>What to remember</h2>
+<ul>
+  <li>It needs a clear, consistent pattern. Give it a second example if the first guess is wrong.</li>
+  <li>The result is fixed text, so re-run it if the source changes.</li>
+  <li>It is the fastest tool for a quick, one-time cleanup of names, codes, or addresses.</li>
+</ul>
+
+<h2>Why this matters on the job</h2>
+<p>Analysts receive exports where a full name sits in one column but the report needs first and last name separately, or where phone numbers and codes are formatted inconsistently. Flash Fill handles these in seconds, turning a tedious manual edit into two keystrokes.</p>
+
+<div class="art-box">
+  <div class="art-blabel">Interview question</div>
+  <p>"What is the difference between Flash Fill and a text formula for splitting names?" Flash Fill is a one-time action that writes static text and does not update when the source changes. A text formula (using LEFT, FIND and similar) is live and recalculates whenever the data changes.</p>
+</div>
+
+<div class="art-takeaway"><div class="art-tlabel">Key point</div>Flash Fill (<code>Ctrl + E</code>) detects the pattern in your example and completes the column, ideal for quickly splitting, joining, or reformatting text. The output is static, so use text functions instead when the data keeps changing.</div>
 `;
 
 // ── STATE ────────────────────────────────────────────────────────
