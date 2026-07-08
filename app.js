@@ -3988,6 +3988,7 @@ async function init() {
     updateHeroCount();
     initTestimonials();
     initEditor();                // editor must exist before renderQuestion() runs
+    initResizers();              // draggable, persistent workspace panels
     handleRoute(_initialPath);   // route to wherever the user actually landed
 
   } catch(e) {
@@ -5059,6 +5060,89 @@ function updateProgress() {
 function resetEditor() {
   editor.setValue('');
   editor.focus();
+}
+
+// ── RESIZABLE WORKSPACE ────────────────────────────────────────────
+function initResizers() {
+  var ws    = document.querySelector('.workspace');
+  var left  = document.getElementById('leftPanel');
+  var gx    = document.getElementById('wsGutterX');
+  var rp    = document.querySelector('.right-panel');
+  var outp  = document.querySelector('.output-wrap');
+  var gy    = document.getElementById('wsGutterY');
+  if (!ws || !left) return;
+
+  var refresh = function() { if (editor && editor.refresh) editor.refresh(); };
+  var isDesktop = function() { return window.innerWidth > 900; };
+
+  // Apply saved sizes (desktop only, so a saved width never leaks onto mobile)
+  if (isDesktop()) {
+    try {
+      var lw = localStorage.getItem('ws_left_w');
+      if (lw) left.style.width = lw + 'px';
+      var oh = localStorage.getItem('ws_output_h');
+      if (oh && outp) outp.style.height = oh + 'px';
+    } catch (e) {}
+  }
+  setTimeout(refresh, 30);
+
+  // Horizontal divider: problem panel width
+  if (gx) {
+    var dragX = false, sx = 0, sw = 0;
+    gx.addEventListener('pointerdown', function(e) {
+      dragX = true; sx = e.clientX; sw = left.getBoundingClientRect().width;
+      gx.classList.add('dragging'); document.body.classList.add('ws-nosel');
+      try { gx.setPointerCapture(e.pointerId); } catch (e2) {}
+    });
+    gx.addEventListener('pointermove', function(e) {
+      if (!dragX) return;
+      var w = sw + (e.clientX - sx);
+      w = Math.max(300, Math.min(ws.clientWidth * 0.72, w));
+      left.style.width = w + 'px';
+      refresh();
+    });
+    var endX = function() {
+      if (!dragX) return; dragX = false;
+      gx.classList.remove('dragging'); document.body.classList.remove('ws-nosel');
+      try { localStorage.setItem('ws_left_w', Math.round(left.getBoundingClientRect().width)); } catch (e) {}
+      refresh();
+    };
+    gx.addEventListener('pointerup', endX);
+    gx.addEventListener('pointercancel', endX);
+    gx.addEventListener('dblclick', function() {
+      left.style.width = ''; try { localStorage.removeItem('ws_left_w'); } catch (e) {}
+      refresh();
+    });
+  }
+
+  // Vertical divider: output height (editor fills the rest)
+  if (gy && outp && rp) {
+    var dragY = false, sy = 0, sh = 0;
+    gy.addEventListener('pointerdown', function(e) {
+      dragY = true; sy = e.clientY; sh = outp.getBoundingClientRect().height;
+      gy.classList.add('dragging'); document.body.classList.add('ws-nosel');
+      try { gy.setPointerCapture(e.pointerId); } catch (e2) {}
+    });
+    gy.addEventListener('pointermove', function(e) {
+      if (!dragY) return;
+      var h = sh - (e.clientY - sy);           // drag up grows the output, down grows the editor
+      h = Math.max(110, Math.min(rp.clientHeight * 0.72, h));
+      outp.style.height = h + 'px';
+      refresh();
+    });
+    var endY = function() {
+      if (!dragY) return; dragY = false;
+      gy.classList.remove('dragging'); document.body.classList.remove('ws-nosel');
+      try { localStorage.setItem('ws_output_h', Math.round(outp.getBoundingClientRect().height)); } catch (e) {}
+      refresh();
+    };
+    gy.addEventListener('pointerup', endY);
+    gy.addEventListener('pointercancel', endY);
+    gy.addEventListener('dblclick', function() {
+      outp.style.height = ''; try { localStorage.removeItem('ws_output_h'); } catch (e) {}
+      refresh();
+    });
+  }
 }
 
 function showOutputErr(msg) {
