@@ -4094,9 +4094,10 @@ function updateLandingPersonalization() {
   const nameEl = document.getElementById('heroUserName');
   if (nameEl) nameEl.textContent = firstName;
 
-  // Progress
-  const solved = solvedSet.size;
-  const total  = QUESTIONS.length;
+  // Progress (across both tracks)
+  const allQ   = getAllQuestions();
+  const solved = allQ.filter(q => solvedSet.has(q.id)).length;
+  const total  = allQ.length;
   const pct    = total ? Math.round((solved / total) * 100) : 0;
   const solvedEl = document.getElementById('heroSolvedCount');
   const fillEl   = document.getElementById('heroProgFill');
@@ -4312,7 +4313,7 @@ async function saveUserProgress(questionId) {
   while (attempts < 3) {
     attempts++;
     try {
-      var result = await Auth.from('user_progress').upsert(payload);
+      var result = await Auth.from('user_progress').upsert(payload, { onConflict: 'user_id,question_id' });
       if (!result.error) {
         // Confirmed written to DB — nothing more to do
         return;
@@ -4439,12 +4440,13 @@ function renderProfileForm() {
 }
 
 function renderProfileStats() {
-  const total  = QUESTIONS.length;
-  const solved = solvedSet.size;
+  const all    = getAllQuestions();
+  const total  = all.length;
+  const solved = all.filter(q => solvedSet.has(q.id)).length;
   const pct    = total > 0 ? Math.round((solved / total) * 100) : 0;
-  const easySolved   = QUESTIONS.filter(q => q.difficulty === 'Easy'   && solvedSet.has(q.id)).length;
-  const mediumSolved = QUESTIONS.filter(q => q.difficulty === 'Medium' && solvedSet.has(q.id)).length;
-  const hardSolved   = QUESTIONS.filter(q => q.difficulty === 'Hard'   && solvedSet.has(q.id)).length;
+  const easySolved   = all.filter(q => q.difficulty === 'Easy'   && solvedSet.has(q.id)).length;
+  const mediumSolved = all.filter(q => q.difficulty === 'Medium' && solvedSet.has(q.id)).length;
+  const hardSolved   = all.filter(q => q.difficulty === 'Hard'   && solvedSet.has(q.id)).length;
 
   document.getElementById('statSolved').textContent  = solved;
   document.getElementById('statTotal').textContent   = total;
@@ -4485,9 +4487,9 @@ function filterProfileQ(filter) {
 function renderProfileQList(filter) {
   const wrap = document.getElementById('profileQList');
   if (!wrap) return;
-  let qs = QUESTIONS;
-  if (filter === 'solved')   qs = QUESTIONS.filter(q => solvedSet.has(q.id));
-  if (filter === 'unsolved') qs = QUESTIONS.filter(q => !solvedSet.has(q.id));
+  let qs = getAllQuestions();
+  if (filter === 'solved')   qs = qs.filter(q => solvedSet.has(q.id));
+  if (filter === 'unsolved') qs = qs.filter(q => !solvedSet.has(q.id));
 
   if (qs.length === 0) {
     wrap.innerHTML = `<div class="profile-q-empty"><div class="es-icon">${filter==='solved'?'🎯':'○'}</div>${filter==='solved'?'No questions solved yet. Start practicing!':'All questions solved! 🎉'}</div>`;
@@ -4498,10 +4500,11 @@ function renderProfileQList(filter) {
     const solvedAt  = solvedAtMap[q.id]
       ? new Date(solvedAtMap[q.id]).toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'})
       : '';
+    const isAdv = q.id >= 1000;
     return `<div class="profile-q-row" onclick="goToProblem(${q.id})">
       <div class="profile-q-status ${isSolved?'solved':'unsolved'}">${isSolved?'✓':''}</div>
       <div class="profile-q-num">${q.num}</div>
-      <div class="profile-q-title">${q.title}</div>
+      <div class="profile-q-title">${q.title}${isAdv?' <span style="font-size:9px;font-weight:700;letter-spacing:.05em;color:var(--accent);border:1px solid rgba(0,200,150,.3);border-radius:4px;padding:1px 5px;margin-left:6px;vertical-align:middle">ADVANCED</span>':''}</div>
       <div class="profile-q-tags">${q.tags.slice(0,2).join(' · ')}</div>
       <div class="badge ${q.difficulty.toLowerCase()}" style="font-size:10px;padding:2px 8px">${q.difficulty}</div>
       ${isSolved && solvedAt ? `<div class="profile-q-solved-at">${solvedAt}</div>` : ''}
@@ -4689,12 +4692,15 @@ function goBackFromProfile() {
 }
 
 function goToProblem(questionId) {
-  const idx = QUESTIONS.findIndex(q => q.id === questionId);
+  var inAdv = (typeof ADVANCED_QUESTIONS !== 'undefined' && ADVANCED_QUESTIONS)
+    ? ADVANCED_QUESTIONS.some(function(x){ return x.id === questionId; }) : false;
+  setTrack(inAdv ? 'advanced' : 'basic');
+  const idx = ACTIVE_QUESTIONS.findIndex(q => q.id === questionId);
   if (idx === -1) return;
-  filteredQuestions = QUESTIONS;
+  filteredQuestions = ACTIVE_QUESTIONS;
   activeTag = 'ALL';
   currentQ  = idx;
-  const q = QUESTIONS[idx];
+  const q = ACTIVE_QUESTIONS[idx];
   history.pushState({}, '', questionUrl(q));
   _hideAllPages();
   document.getElementById('app-page').classList.add('active');
@@ -4912,6 +4918,12 @@ function filterQuestions(tag) {
 }
 
 // ── TRACK TOGGLE (Basic <-> Advanced) ─────────────────────────────
+// Every question across both tracks (basic ids 0..59, advanced ids 1000+).
+function getAllQuestions() {
+  return (typeof ADVANCED_QUESTIONS !== 'undefined' && ADVANCED_QUESTIONS)
+    ? QUESTIONS.concat(ADVANCED_QUESTIONS) : QUESTIONS;
+}
+
 function setTrack(track) {
   activeTrack = (track === 'advanced' && typeof ADVANCED_QUESTIONS !== 'undefined') ? 'advanced' : 'basic';
   ACTIVE_QUESTIONS = activeTrack === 'advanced' ? ADVANCED_QUESTIONS : QUESTIONS;
@@ -4922,6 +4934,7 @@ function setTrack(track) {
   buildTopicFilters();
   buildLandingCards();
   buildPills();
+  updateProgress();
   if (filteredQuestions.length) renderQuestion(0);
 }
 
@@ -6086,7 +6099,7 @@ var CertFlow = (function () {
     if (!block) return;
 
     var total  = QUESTIONS.length;
-    var solved = typeof solvedSet !== 'undefined' ? solvedSet.size : 0;
+    var solved = typeof solvedSet !== 'undefined' ? QUESTIONS.filter(function(q){ return solvedSet.has(q.id); }).length : 0;
 
     // Hide block entirely if neither eligible nor certified
     if (solved < total && !(userProfile && userProfile.is_certified)) {
