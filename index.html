@@ -695,6 +695,10 @@
             <button class="ebtn ebtn-run" onclick="runQuery()">▶ Run</button>
             <button class="ebtn ebtn-submit" id="submitBtn" onclick="submitQuery()">Submit</button>
           </div>
+          <button class="ebtn ebtn-icon" id="editorExpandBtn" onclick="toggleEditorFullscreen()" title="Full screen (Esc to exit)" aria-label="Toggle full screen editor">
+            <svg class="icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M16 21h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+            <svg class="icon-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M16 21v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
+          </button>
         </div>
         <div class="editor-body">
           <textarea id="sqlEditor" spellcheck="false" placeholder="-- Write your SQL query here...&#10;-- Press ▶ Run to test, Submit to check all cases"></textarea>

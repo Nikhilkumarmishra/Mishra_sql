@@ -4942,6 +4942,7 @@ function buildTrackToggle() {
 
 // ── RUN ───────────────────────────────────────────────────────────
 function runQuery() {
+  exitEditorFullscreen();
   if (!SQL) { showOutputErr('SQL engine not ready yet.'); return; }
   const query = editor.getValue().trim();
   if (!query) { showOutputErr('Write a SQL query first.'); return; }
@@ -4964,6 +4965,7 @@ function runQuery() {
 
 // ── SUBMIT ────────────────────────────────────────────────────────
 function submitQuery() {
+  exitEditorFullscreen();
   if (!currentUser) {
     openAuthModal('login');
     document.getElementById('outputLabel').textContent  = 'Login required';
@@ -5061,6 +5063,25 @@ function resetEditor() {
   editor.setValue('');
   editor.focus();
 }
+
+// ── FULLSCREEN EDITOR ──────────────────────────────────────────────
+function toggleEditorFullscreen() {
+  var w = document.querySelector('.editor-wrap');
+  if (!w) return;
+  var on = w.classList.toggle('editor-fullscreen');
+  document.body.classList.toggle('editor-fs-open', on);
+  if (editor && editor.refresh) setTimeout(function(){ editor.refresh(); editor.focus(); }, 0);
+}
+function exitEditorFullscreen() {
+  var w = document.querySelector('.editor-wrap.editor-fullscreen');
+  if (!w) return;
+  w.classList.remove('editor-fullscreen');
+  document.body.classList.remove('editor-fs-open');
+  if (editor && editor.refresh) setTimeout(function(){ editor.refresh(); }, 0);
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') exitEditorFullscreen();
+});
 
 // ── RESIZABLE WORKSPACE ────────────────────────────────────────────
 function initResizers() {
