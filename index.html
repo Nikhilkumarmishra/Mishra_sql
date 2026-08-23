@@ -289,6 +289,7 @@
     <div class="nav-links">
       <a class="nav-link" onclick="scrollToFeatures()">Features</a>
       <a class="nav-link" onclick="scrollToQuestions()">Problems</a>
+      <a class="nav-link" onclick="showResources()">Resources</a>
       <div class="nav-dropdown-wrap">
         <a class="nav-link nav-link-learn nav-dropdown-trigger" onclick="toggleLearnDropdown(event)">Learn <span class="nav-dd-arrow">▾</span></a>
         <div class="nav-dropdown-menu" id="learnDropMenu">
@@ -916,6 +917,23 @@
 </div>
 
 <!-- ══════════════════════════════════════════════════════════
+     RESOURCES PAGE
+══════════════════════════════════════════════════════════════ -->
+<div class="page" id="resources-page">
+  <div class="res-nav">
+    <div class="res-nav-logo" onclick="showLanding()">Analyst<span>World</span></div>
+    <div class="res-nav-actions">
+      <a class="res-nav-link" onclick="showLanding()">Home</a>
+      <a class="res-nav-link" onclick="showApp()">Practice</a>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Switch theme">
+        <span class="tt-moon">🌙</span><span class="tt-sun">☀️</span><div class="tt-thumb"></div>
+      </button>
+    </div>
+  </div>
+  <div class="res-wrap" id="resourcesContent"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
      CERTIFICATION MODAL
 ══════════════════════════════════════════════════════════════ -->
 <div id="certModal" class="cert-modal" style="display:none" onclick="if(event.target===this)CertFlow.close()">
@@ -1069,6 +1087,7 @@
 
 <!-- Learn SQL data + logic -->
 <script src="/advanced-questions.js"></script>
+<script src="/resources.js"></script>
 <script src="/learn-data.js"></script>
 <script src="/learn.js"></script>
 

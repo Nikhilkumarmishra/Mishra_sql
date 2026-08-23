@@ -3942,6 +3942,7 @@ async function init() {
         trackUserActivity(currentUser);
         updateAuthUI(currentUser);
         closeAuthModal();
+        if (typeof resumeResourceFlow === 'function') resumeResourceFlow();
       } else if (event === 'SIGNED_OUT') {
         currentUser = null;
         userProfile  = null;
@@ -4515,7 +4516,7 @@ function renderProfileQList(filter) {
 // ── NAVIGATION ────────────────────────────────────────────────────
 
 function _hideAllPages() {
-  ['landing-page','app-page','learn-page','profile-page'].forEach(function(id) {
+  ['landing-page','app-page','learn-page','profile-page','resources-page'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });
@@ -4621,6 +4622,16 @@ function handleRoute(path) {
     // Not found → learn index
     history.replaceState({}, '', '/learn');
     _renderLearn(null);
+    return;
+  }
+
+  // /resources  (grid)  and  /resources/:slug  (detail)
+  if (clean === '/resources' || clean.startsWith('/resources/')) {
+    _hideAllPages();
+    var rp = document.getElementById('resources-page');
+    if (rp) rp.classList.add('active');
+    var rslug = clean === '/resources' ? null : (clean.split('/')[2] || null);
+    if (typeof renderResources === 'function') renderResources(rslug);
     return;
   }
 
