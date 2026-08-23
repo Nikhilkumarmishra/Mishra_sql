@@ -264,22 +264,39 @@ function openResource(slug) {
 function backToResources() { showResources(); }
 
 // ── Gated download flow ───────────────────────────────────────────
-var _pendingResourceSlug = null;
+// The pending slug is kept in sessionStorage (not just an in-memory var)
+// so it survives the full-page reload that Google OAuth login triggers.
+var _PENDING_KEY = 'aw_pending_resource';
+
+function setPendingResource(slug) {
+  try { sessionStorage.setItem(_PENDING_KEY, slug); } catch (e) {}
+}
+function getPendingResource() {
+  try { return sessionStorage.getItem(_PENDING_KEY); } catch (e) { return null; }
+}
+function clearPendingResource() {
+  try { sessionStorage.removeItem(_PENDING_KEY); } catch (e) {}
+}
 
 function startResourceDownload(slug) {
   if (!currentUser) {
-    _pendingResourceSlug = slug;
+    setPendingResource(slug);
     openAuthModal('login');
     return;
   }
   ensureLinkedInThen(function () { doResourceAction(slug); });
 }
 
-// Called by app.js after a successful sign-in.
+// Called by app.js after a successful sign-in (both the email/password
+// SIGNED_IN event and the OAuth-reload getSession path).
 function resumeResourceFlow() {
-  if (!_pendingResourceSlug) return;
-  var s = _pendingResourceSlug;
-  _pendingResourceSlug = null;
+  var s = getPendingResource();
+  if (!s) return;
+  clearPendingResource();
+  if (!resourceBySlug(s)) return;
+  // Make sure the user is back on the resource's detail page — after an
+  // OAuth reload they land on the homepage, so navigate there first.
+  openResource(s);
   ensureLinkedInThen(function () { doResourceAction(s); });
 }
 

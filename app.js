@@ -3968,6 +3968,9 @@ async function init() {
             window.location.pathname !== _initialPath) {
           handleRoute(_initialPath);
         }
+        // Resume a gated resource download that was interrupted by an
+        // OAuth login redirect (pending slug persisted in sessionStorage).
+        if (typeof resumeResourceFlow === 'function') resumeResourceFlow();
       }
     }).catch(function(e) { console.warn('Auth session check failed:', e.message); });
 
