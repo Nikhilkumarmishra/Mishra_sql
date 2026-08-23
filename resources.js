@@ -15,7 +15,7 @@ var RESOURCES = [
     category: 'Interview Guide',
     status: 'available',
     accent: '#1D6F42',
-    cover: '/resources/img/excel-interview-guide.jpg',
+    cover: '/resources/img/Excel_interview_guide.png',
     file: '/resources/Excel_Interview_Guide.pdf',
     downloadName: 'Excel-Interview-Guide-AnalystWorld.pdf',
     tagline: "India's only Excel book built to make you job-ready.",
