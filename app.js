@@ -3703,13 +3703,22 @@ var Auth = (function () {
           return r.ok ? {data:body,error:null} : r.json().then(function(e){return {data:null,error:e};});
         }).catch(function(e){return {data:null,error:{message:e.message}};});
       },
-      upsert: async function(body) {
+      upsert: async function(body, opts) {
         var tok = await getValidToken();
         // If we only have the anon key, RLS will silently block the write — fail fast
         if (tok === SUPABASE_ANON) {
           return {data:null, error:{message:'no_valid_session'}};
         }
-        return fetch(DB+'/'+table, {
+        // on_conflict tells PostgREST which unique constraint to merge on.
+        // Without it, PostgREST infers the PRIMARY KEY as the arbiter — which
+        // breaks upserts whose real conflict target is a different unique
+        // constraint (e.g. user_progress' UNIQUE(user_id,question_id)): a repeat
+        // write then throws 23505 instead of updating. Always forward it.
+        var upsertUrl = DB+'/'+table;
+        if (opts && opts.onConflict) {
+          upsertUrl += '?on_conflict=' + encodeURIComponent(opts.onConflict);
+        }
+        return fetch(upsertUrl, {
           method:'POST',
           // return=representation: server echoes back the affected rows.
           // Empty array = silently blocked by RLS (NOT a network error, so r.ok is true).
