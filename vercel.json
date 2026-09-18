@@ -2,6 +2,8 @@
   "rewrites": [
     { "source": "/learn/excel", "destination": "/learn-excel.html" },
     { "source": "/learn/excel/(.*)", "destination": "/learn-excel.html" },
+    { "source": "/webinar", "destination": "/webinar.html" },
+    { "source": "/webinar/", "destination": "/webinar.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
