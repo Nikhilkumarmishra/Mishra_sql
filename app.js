@@ -3952,6 +3952,7 @@ async function init() {
         updateAuthUI(currentUser);
         closeAuthModal();
         if (typeof resumeResourceFlow === 'function') resumeResourceFlow();
+        if (window.PS && typeof PS.applyReferralOnSignup === 'function') PS.applyReferralOnSignup();
       } else if (event === 'SIGNED_OUT') {
         currentUser = null;
         userProfile  = null;
@@ -3980,6 +3981,7 @@ async function init() {
         // Resume a gated resource download that was interrupted by an
         // OAuth login redirect (pending slug persisted in sessionStorage).
         if (typeof resumeResourceFlow === 'function') resumeResourceFlow();
+        if (window.PS && typeof PS.applyReferralOnSignup === 'function') PS.applyReferralOnSignup();
       }
     }).catch(function(e) { console.warn('Auth session check failed:', e.message); });
 
@@ -4002,6 +4004,7 @@ async function init() {
     initTestimonials();
     initEditor();                // editor must exist before renderQuestion() runs
     initResizers();              // draggable, persistent workspace panels
+    if (window.PS && typeof PS.captureReferral === 'function') PS.captureReferral();
     handleRoute(_initialPath);   // route to wherever the user actually landed
 
   } catch(e) {
@@ -4414,6 +4417,7 @@ function renderProfilePage() {
   renderProfileForm();
   renderProfileStats();
   renderProfileQList('all');
+  if (window.PS && typeof PS.renderShareCard === 'function') PS.renderShareCard();
 }
 
 function renderProfileCard() {
@@ -4528,7 +4532,7 @@ function renderProfileQList(filter) {
 // ── NAVIGATION ────────────────────────────────────────────────────
 
 function _hideAllPages() {
-  ['landing-page','app-page','learn-page','profile-page','resources-page'].forEach(function(id) {
+  ['landing-page','app-page','learn-page','profile-page','resources-page','public-profile-page'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });
@@ -4644,6 +4648,16 @@ function handleRoute(path) {
     if (rp) rp.classList.add('active');
     var rslug = clean === '/resources' ? null : (clean.split('/')[2] || null);
     if (typeof renderResources === 'function') renderResources(rslug);
+    return;
+  }
+
+  // /u/:username  (public shareable profile — viewable by anyone)
+  if (clean.startsWith('/u/')) {
+    _hideAllPages();
+    var upp = document.getElementById('public-profile-page');
+    if (upp) upp.classList.add('active');
+    var uname = decodeURIComponent(clean.split('/')[2] || '');
+    if (window.PS && typeof PS.renderPublicProfile === 'function') PS.renderPublicProfile(uname);
     return;
   }
 
