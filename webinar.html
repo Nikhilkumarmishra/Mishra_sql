@@ -241,6 +241,11 @@
   .tcard .tnm{font-weight:700;font-size:14px}.tcard .trl{color:var(--hint);font-size:12px}
   .tcard .ph-tag{position:absolute;top:12px;right:12px;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--amber);
     background:rgba(255,176,32,.1);border:1px solid rgba(255,176,32,.3);padding:3px 7px;border-radius:6px}
+  .tcard.real{border:1px solid var(--border)}
+  .tcard .ver-tag{position:absolute;top:12px;right:12px;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;color:var(--accent);
+    background:var(--accent-dim);border:1px solid rgba(0,200,150,.3);padding:3px 8px;border-radius:6px}
+  .tcard .tstars{color:#ffb020;font-size:14px;letter-spacing:2px;margin-bottom:10px}
+  .tcard.real .tav{color:#ffb020}
 
   /* faq */
   .faq{margin-top:26px;max-width:760px}
@@ -505,8 +510,7 @@
     <h2 class="sec-title">Your host</h2>
     <div class="inst">
       <div class="inst-photo">
-        <!-- Drop a real photo at /images/instructor-nikhil.jpg to replace the initials -->
-        <img src="/images/instructor-nikhil.jpg" alt="Nikhil Kumar Mishra" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"/>
+        <img src="/images/instructor-nikhil.png" alt="Nikhil Kumar Mishra" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"/>
         <div class="inst-initials" style="display:none">NM</div>
       </div>
       <div>
@@ -568,9 +572,9 @@
 <!-- 14 — TESTIMONIALS -->
 <section class="band">
   <div class="wrap rv">
-    <span class="eyebrow">From the community</span>
-    <h2 class="sec-title">What learners say</h2>
-    <p class="sec-sub">Replace these with real learner quotes before the campaign goes live — the structure is ready.</p>
+    <span class="eyebrow">From the AnalystWorld community</span>
+    <h2 class="sec-title">What learners say about AnalystWorld</h2>
+    <p class="sec-sub">Real, verified feedback from learners on the platform that hosts this session.</p>
     <div class="tst" id="tstGrid"></div>
   </div>
 </section>
@@ -689,11 +693,15 @@
     ['What do I need installed?','Nothing mandatory to attend. Basic Python familiarity helps if you want to build along.'],
     ['Who is this for?','Data analysts, Python learners, students, developers and anyone moving into GenAI who wants to see how a real application is put together.']
   ];
-  // Testimonials: PLACEHOLDERS ONLY — never fabricate. Replace `q`,`name`,`role` with real quotes.
+  // REAL learner feedback pulled from AnalystWorld's cert_feedback (5-star ratings),
+  // lightly cleaned for spelling only. Attributed generically to protect learner privacy.
   var TESTIMONIALS=[
-    {q:'YOUR REAL LEARNER TESTIMONIAL HERE — a short, specific quote about the session or AnalystWorld.',name:'Learner name',role:'Role / background',placeholder:true},
-    {q:'YOUR REAL LEARNER TESTIMONIAL HERE — what clicked for them, in their own words.',name:'Learner name',role:'Role / background',placeholder:true},
-    {q:'YOUR REAL LEARNER TESTIMONIAL HERE — the outcome or the moment it made sense.',name:'Learner name',role:'Role / background',placeholder:true}
+    {q:'I enjoyed the practical SQL problems and the instant feedback after each query. The platform is easy to use and genuinely helps improve your SQL skills.',name:'Verified AnalystWorld learner',role:'SQL practice',stars:5},
+    {q:'The questions are beginner-friendly and easy to understand. The simple UI and well-structured problems make learning smooth and less overwhelming.',name:'Verified AnalystWorld learner',role:'Beginner',stars:5},
+    {q:'The variety of problems from different SQL functions is the most thrilling part — and it’s free, which makes it the best for students. Thank you so much!',name:'Verified AnalystWorld learner',role:'Student',stars:5},
+    {q:'Question depth and overall user experience — the website is litt. I really liked the UI.',name:'Verified AnalystWorld learner',role:'Aspiring analyst',stars:5},
+    {q:'Every question matters. I really enjoyed solving them and it cleared my concepts along the way.',name:'Verified AnalystWorld learner',role:'SQL practice',stars:5},
+    {q:'RANK vs DENSE_RANK — that one is such a classic interview trick question. Loved it.',name:'Verified AnalystWorld learner',role:'Interview prep',stars:5}
   ];
 
   // ---- render ----
@@ -719,9 +727,11 @@
     $('whoGrid').innerHTML=WHO.map(function(w){return '<div class="wc"><span class="q">“</span><span>'+esc(w)+'</span></div>';}).join('');
     $('takeGrid').innerHTML=TAKES.map(function(t){return '<div class="take"><span class="ck">✓</span><span>'+esc(t)+'</span></div>';}).join('');
     $('tstGrid').innerHTML=TESTIMONIALS.map(function(t){
-      return '<div class="tcard">'+(t.placeholder?'<span class="ph-tag">PLACEHOLDER</span>':'')+
-        '<div class="tq">"'+esc(t.q)+'"</div><div class="tmeta"><div class="tav">'+esc((t.name||'?').slice(0,2).toUpperCase())+
-        '</div><div><div class="tnm">'+esc(t.name)+'</div><div class="trl">'+esc(t.role)+'</div></div></div></div>';
+      var stars=t.stars?'<div class="tstars">'+'★'.repeat(t.stars)+'</div>':'';
+      return '<div class="tcard real">'+
+        '<span class="ver-tag">✓ Verified feedback</span>'+stars+
+        '<div class="tq">"'+esc(t.q)+'"</div><div class="tmeta"><div class="tav">★</div>'+
+        '<div><div class="tnm">'+esc(t.name)+'</div><div class="trl">'+esc(t.role)+'</div></div></div></div>';
     }).join('');
     $('faq').innerHTML=FAQ.map(function(f){
       return '<details><summary>'+esc(f[0])+'</summary><div class="fa-body">'+esc(f[1])+'</div></details>';
