@@ -4,6 +4,7 @@
     { "source": "/learn/excel/(.*)", "destination": "/learn-excel.html" },
     { "source": "/webinar", "destination": "/webinar.html" },
     { "source": "/webinar/", "destination": "/webinar.html" },
+    { "source": "/u/:username", "destination": "/api/profile?u=:username" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
