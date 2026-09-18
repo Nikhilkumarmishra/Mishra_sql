@@ -24,7 +24,7 @@ function buildTags(profile, pageUrl) {
   var bits = [solved + (solved === 1 ? ' problem solved' : ' problems solved')];
   if (profile.rank) bits.push('Rank #' + profile.rank);
   if (profile.is_certified) bits.push('Certified Analyst');
-  var headline = profile.headline ? esc(profile.headline) + ' · ' : '';
+  var headline = profile.headline ? profile.headline + ' · ' : '';
   var title = name + ' · AnalystWorld Profile';
   var desc = headline + bits.join(' · ') + '. See ' + name + '’s SQL & data-analytics progress on AnalystWorld — and start practicing free.';
   return [
