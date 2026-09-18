@@ -150,6 +150,35 @@
   @keyframes drop{0%{top:-8px;opacity:0}20%{opacity:1}80%{opacity:1}100%{top:20px;opacity:0}}
   @media(prefers-reduced-motion:reduce){.connector::after{animation:none;display:none}}
 
+  /* hero chat mockup (the exciting outcome) */
+  .chat-card{background:linear-gradient(180deg,var(--surface),var(--bg2));border:1px solid var(--border2);border-radius:20px;
+    box-shadow:0 30px 80px rgba(0,0,0,.5);overflow:hidden}
+  .cc-top{display:flex;align-items:center;gap:7px;padding:14px 16px;border-bottom:1px solid var(--border)}
+  .cc-top i{width:11px;height:11px;border-radius:50%;background:var(--border2);display:block}
+  .cc-top i:nth-child(1){background:#ff5f57}.cc-top i:nth-child(2){background:#febc2e}.cc-top i:nth-child(3){background:#28c840}
+  .cc-top span{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--hint)}
+  .cc-body{padding:18px 16px;display:flex;flex-direction:column;gap:12px;min-height:236px}
+  .cc-doc{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;background:var(--bg);border:1px solid var(--border);
+    border-radius:10px;padding:8px 12px;font-size:12.5px;color:var(--muted)}
+  .cc-doc b{color:var(--text);font-weight:600}
+  .cc-tag{font-family:var(--mono);font-size:10px;color:var(--accent);background:var(--accent-dim);border:1px solid rgba(0,200,150,.3);padding:2px 7px;border-radius:6px}
+  .cc-msg{max-width:88%;padding:11px 14px;border-radius:14px;font-size:13.5px;line-height:1.5}
+  .cc-user{align-self:flex-end;background:var(--accent);color:#04120d;border-bottom-right-radius:5px;font-weight:600}
+  .cc-ai{align-self:flex-start;background:var(--bg);border:1px solid var(--border);border-bottom-left-radius:5px;color:var(--text)}
+  .cc-ai-inner{min-height:19px}
+  .cc-typing{display:inline-flex;gap:4px;align-items:center;height:19px}
+  .cc-typing i{width:6px;height:6px;border-radius:50%;background:var(--hint);animation:ccb 1.2s infinite}
+  .cc-typing i:nth-child(2){animation-delay:.2s}.cc-typing i:nth-child(3){animation-delay:.4s}
+  @keyframes ccb{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+  .cc-src{margin-top:9px;font-family:var(--mono);font-size:10.5px;color:var(--accent);opacity:0;transition:opacity .4s}
+  .cc-src.show{opacity:1}
+  .cc-cursor{display:inline-block;width:7px;height:14px;background:var(--accent);margin-left:1px;vertical-align:-2px;animation:cccur 1s steps(1) infinite}
+  @keyframes cccur{50%{opacity:0}}
+  .cc-input{display:flex;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid var(--border)}
+  .cc-input span{flex:1;color:var(--hint);font-size:13px}
+  .cc-send{width:32px;height:32px;flex:0 0 32px;border-radius:9px;border:none;background:var(--accent);color:#04120d;font-weight:800;font-size:15px;cursor:default}
+  .cc-foot{text-align:center;font-family:var(--mono);font-size:10.5px;color:var(--hint);padding:0 16px 14px}
+
   /* ── generic section shell ── */
   .band{padding:64px 0}
   .band-alt{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
@@ -373,9 +402,18 @@
     </div>
 
     <div class="hero-visual rv">
-      <div class="pipe-card">
-        <div class="pipe-top"><i></i><i></i><i></i><span>genai_app.py</span></div>
-        <div class="flow" id="heroFlow"></div>
+      <div class="chat-card">
+        <div class="cc-top"><i></i><i></i><i></i><span>docu_chat · streamlit</span></div>
+        <div class="cc-body">
+          <div class="cc-doc">📄 <b>product_manual.pdf</b> <span class="cc-tag">indexed</span></div>
+          <div class="cc-msg cc-user">How do I reset the device to factory settings?</div>
+          <div class="cc-msg cc-ai">
+            <div class="cc-ai-inner" id="ccAnswer"></div>
+            <div class="cc-src" id="ccSrc">📄 Source: product_manual.pdf · page 24</div>
+          </div>
+        </div>
+        <div class="cc-input"><span>Ask anything about your PDF…</span><button class="cc-send" aria-hidden="true">↑</button></div>
+        <div class="cc-foot">Built live with RAG · Embeddings · Gemini · Groq</div>
       </div>
     </div>
   </div>
@@ -529,38 +567,8 @@
   </div>
 </section>
 
-<!-- 12 — WHY DIFFERENT -->
-<section class="band">
-  <div class="wrap rv">
-    <span class="eyebrow">Why this is different</span>
-    <h2 class="sec-title">This isn't a 90-minute slide deck.</h2>
-    <div class="split">
-      <div class="col bad">
-        <h4>Typical webinar</h4>
-        <div class="chain">
-          <span class="step">Theory</span><span class="arw">↓</span>
-          <span class="step">Slides</span><span class="arw">↓</span>
-          <span class="step">Definitions</span><span class="arw">↓</span>
-          <span class="step">Goodbye</span>
-        </div>
-      </div>
-      <div class="col good">
-        <h4>This session</h4>
-        <div class="chain good">
-          <span class="step">Problem</span><span class="arw">↓</span>
-          <span class="step">Architecture</span><span class="arw">↓</span>
-          <span class="step">Code</span><span class="arw">↓</span>
-          <span class="step">Components</span><span class="arw">↓</span>
-          <span class="step">Build</span><span class="arw">↓</span>
-          <span class="step">Working mental model</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- 13 — TAKEAWAYS -->
-<section class="band band-alt">
+<section class="band">
   <div class="wrap rv">
     <span class="eyebrow">What you'll walk away with</span>
     <h2 class="sec-title">You'll have a clearer answer to one question:</h2>
@@ -655,7 +663,6 @@
   }
 
   // ---- data ----
-  var HERO_FLOW=[['📄','PDF / Doc','input'],['✂️','Chunks','split'],['🧬','Embeddings','vector'],['🔎','Retriever','search'],['🤖','LLM','gemini/groq'],['💬','AI Response','output']];
   var BUILD_FLOW=[['📄','PDF / Doc'],['🔡','Text Extraction'],['✂️','Chunking + Tokens'],['🧬','Embeddings'],['🔎','Retrieval'],['🤖','Gemini / Groq'],['🖥️','Streamlit App']];
   var Q_FLOW=[['❓','You ask a question','01'],['⚙️','App processes it','02'],['🔎','Relevant info retrieved','03'],['📎','Context passed to LLM','04'],['🤖','LLM generates answer','05'],['💬','You see the response','06']];
   var LEARN=[
@@ -706,10 +713,6 @@
 
   // ---- render ----
   function renderFlows(){
-    $('heroFlow').innerHTML=HERO_FLOW.map(function(n,i){
-      return '<div class="node"><div class="ic">'+n[0]+'</div><div class="nt">'+esc(n[1])+'</div><div class="nd">'+esc(n[2])+'</div></div>'+
-        (i<HERO_FLOW.length-1?'<div class="connector"></div>':'');
-    }).join('');
     $('buildFlow').innerHTML=BUILD_FLOW.map(function(n){
       return '<div class="arch-node"><div class="an-ic">'+n[0]+'</div><div class="an-t">'+esc(n[1])+'</div></div>';
     }).join('');
@@ -737,6 +740,28 @@
       return '<details><summary>'+esc(f[0])+'</summary><div class="fa-body">'+esc(f[1])+'</div></details>';
     }).join('');
     $('yr').textContent=new Date().getFullYear();
+  }
+
+  // ---- hero chat animation (typing -> streamed answer, looping) ----
+  function initChat(){
+    var ans=$('ccAnswer'),src=$('ccSrc');
+    if(!ans)return;
+    var text='Go to Settings → System → Reset, then choose "Factory reset". The device reboots and restores the defaults.';
+    var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    if(reduce){ans.textContent=text;src.classList.add('show');return;}
+    var typeTimer=null;
+    function showTyping(){if(typeTimer)clearInterval(typeTimer);ans.innerHTML='<span class="cc-typing"><i></i><i></i><i></i></span>';src.classList.remove('show');}
+    function stream(){
+      ans.innerHTML='<span class="cc-txt"></span><span class="cc-cursor"></span>';
+      var txt=ans.querySelector('.cc-txt'),i=0;
+      typeTimer=setInterval(function(){
+        i++;txt.textContent=text.slice(0,i);
+        if(i>=text.length){clearInterval(typeTimer);var c=ans.querySelector('.cc-cursor');if(c)c.remove();src.classList.add('show');}
+      },24);
+    }
+    function cycle(){showTyping();setTimeout(stream,1300);}
+    cycle();
+    setInterval(cycle,9000);
   }
 
   // ---- countdown ----
@@ -878,6 +903,7 @@
   // ---- boot ----
   document.addEventListener('DOMContentLoaded',function(){
     renderFlows();
+    initChat();
     renderRegCard(false);
     tick();var t=setInterval(function(){if(!tick())clearInterval(t);},1000);
     initObservers();
