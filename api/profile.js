@@ -27,12 +27,11 @@ function buildTags(profile, pageUrl) {
   var headline = profile.headline ? profile.headline + ' · ' : '';
   var title = name + ' · AnalystWorld Profile';
   var desc = headline + bits.join(' · ') + '. See ' + name + '’s SQL & data-analytics progress on AnalystWorld — and start practicing free.';
-  // Use the user's uploaded photo if they have one; else the branded cover.
-  var hasAvatar = !!profile.avatar_url;
-  var img = hasAvatar ? profile.avatar_url : OG_IMAGE;
-  // A square avatar reads best as "summary"; the brand cover is a wide image.
-  var twCard = hasAvatar ? 'summary' : 'summary_large_image';
-  var dims = hasAvatar ? '' : '<meta property="og:image:width" content="1200"/>\n<meta property="og:image:height" content="630"/>\n';
+  // Prefer the generated 1200x630 share card (photo + name + stats); else the
+  // branded cover. Both are wide, so always use the large-image card.
+  var img = profile.og_card_url || OG_IMAGE;
+  var twCard = 'summary_large_image';
+  var dims = '<meta property="og:image:width" content="1200"/>\n<meta property="og:image:height" content="630"/>\n';
   return [
     '<title>' + esc(title) + '</title>',
     '<meta name="description" content="' + esc(desc) + '"/>',

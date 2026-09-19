@@ -4356,6 +4356,10 @@ async function loadUserProfile(userId) {
     const { data, error } = await Auth.from('user_profiles').select('*').eq('id', userId).single();
     if (error && error.code !== 'PGRST116') { console.error('Profile load error:', error); return; }
     userProfile = data || null;
+    // If the profile page is already on screen (e.g. a hard refresh of /profile),
+    // re-render it now that the profile data (avatar, links, etc.) has loaded.
+    var pp = document.getElementById('profile-page');
+    if (pp && pp.classList.contains('active') && typeof renderProfilePage === 'function') renderProfilePage();
   } catch(e) { console.warn('loadUserProfile failed:', e.message); }
 }
 
@@ -4427,7 +4431,16 @@ function renderProfileCard() {
   const initials = getInitials(name);
   const joined   = new Date(currentUser.created_at).toLocaleDateString('en-IN', { year:'numeric', month:'long', day:'numeric' });
 
-  document.getElementById('profileAvatar').textContent      = initials;
+  var _av = document.getElementById('profileAvatar');
+  if (userProfile?.avatar_url) {
+    _av.textContent = '';
+    _av.style.backgroundImage = 'url(' + userProfile.avatar_url + ')';
+    _av.style.backgroundSize = 'cover';
+    _av.style.backgroundPosition = 'center';
+  } else {
+    _av.textContent = initials;
+    _av.style.backgroundImage = '';
+  }
   document.getElementById('profileDisplayName').textContent = name;
   document.getElementById('profileEmail').textContent       = currentUser.email;
   document.getElementById('profileJoined').textContent      = 'Joined ' + joined;

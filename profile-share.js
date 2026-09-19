@@ -325,30 +325,111 @@
     return String(name || '?').trim().split(/\s+/).map(function (w) { return w[0]; }).slice(0, 2).join('').toUpperCase();
   }
 
-  // Square-crop + downscale to <=400px JPEG. Returns a small Blob.
-  function compressImage(file, maxDim, quality) {
+  // Load any file (any size) into an <img>.
+  function loadImage(file) {
     return new Promise(function (resolve, reject) {
       var img = new Image();
-      img.onload = function () {
-        try {
-          var side = Math.min(img.width, img.height);
-          var sx = (img.width - side) / 2, sy = (img.height - side) / 2;
-          var out = Math.min(maxDim, side);
-          var canvas = document.createElement('canvas');
-          canvas.width = out; canvas.height = out;
-          var ctx = canvas.getContext('2d');
-          ctx.drawImage(img, sx, sy, side, side, 0, 0, out, out);
-          canvas.toBlob(function (blob) { blob ? resolve(blob) : reject(new Error('compress failed')); }, 'image/jpeg', quality);
-        } catch (e) { reject(e); }
-        finally { URL.revokeObjectURL(img.src); }
-      };
+      img.onload = function () { resolve(img); };
       img.onerror = function () { reject(new Error('Could not read that image.')); };
       img.src = URL.createObjectURL(file);
     });
   }
 
+  // Square-crop + downscale, then iterate quality/size down until <= targetBytes.
+  function toSquareBlob(img, startDim, targetBytes) {
+    return new Promise(function (resolve, reject) {
+      var dim = startDim, quality = 0.85;
+      function attempt() {
+        var side = Math.min(img.width, img.height);
+        var sx = (img.width - side) / 2, sy = (img.height - side) / 2;
+        var canvas = document.createElement('canvas');
+        canvas.width = dim; canvas.height = dim;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, dim, dim);
+        canvas.toBlob(function (blob) {
+          if (!blob) { reject(new Error('compress failed')); return; }
+          if (blob.size <= targetBytes || (quality <= 0.4 && dim <= 160)) { resolve(blob); return; }
+          if (quality > 0.5) quality -= 0.12; else dim = Math.round(dim * 0.82);
+          attempt();
+        }, 'image/jpeg', quality);
+      }
+      attempt();
+    });
+  }
+
+  // Draw a branded 1200x630 LinkedIn/OG share card with the photo + name + stats.
+  function makeCardBlob(img, opts) {
+    return new Promise(function (resolve, reject) {
+      var W = 1200, H = 630;
+      var c = document.createElement('canvas'); c.width = W; c.height = H;
+      var g = c.getContext('2d');
+      // background
+      g.fillStyle = '#0a0b0e'; g.fillRect(0, 0, W, H);
+      var grad = g.createLinearGradient(0, 0, W, H);
+      grad.addColorStop(0, 'rgba(0,200,150,0.10)'); grad.addColorStop(1, 'rgba(0,200,150,0)');
+      g.fillStyle = grad; g.fillRect(0, 0, W, H);
+      g.fillStyle = '#00c896'; g.fillRect(0, 0, W, 8); // top accent bar
+      // circular photo on the left
+      var R = 190, cx = 250, cy = 300;
+      g.save(); g.beginPath(); g.arc(cx, cy, R, 0, Math.PI * 2); g.closePath(); g.clip();
+      var side = Math.min(img.width, img.height), sx = (img.width - side) / 2, sy = (img.height - side) / 2;
+      g.drawImage(img, sx, sy, side, side, cx - R, cy - R, R * 2, R * 2);
+      g.restore();
+      g.lineWidth = 6; g.strokeStyle = '#00c896'; g.beginPath(); g.arc(cx, cy, R, 0, Math.PI * 2); g.stroke();
+      // text block on the right
+      var tx = 500;
+      g.textBaseline = 'alphabetic';
+      g.fillStyle = '#eef0f4';
+      g.font = '800 66px "DM Sans", system-ui, sans-serif';
+      wrapText(g, opts.name || 'AnalystWorld', tx, 220, 640, 70, 2);
+      if (opts.headline) { g.fillStyle = '#a6adbb'; g.font = '500 30px "DM Sans", system-ui, sans-serif'; g.fillText(clip(opts.headline, 42), tx, 300); }
+      // stat chips
+      var chips = [];
+      if (opts.solved) chips.push(opts.solved + ' problems solved');
+      if (opts.certified) chips.push('✓ Certified Analyst');
+      g.font = '700 26px "DM Sans", system-ui, sans-serif';
+      var chipY = 360;
+      chips.forEach(function (t) {
+        var w = g.measureText(t).width + 40;
+        g.fillStyle = 'rgba(0,200,150,0.12)'; roundRect(g, tx, chipY, w, 48, 24); g.fill();
+        g.strokeStyle = 'rgba(0,200,150,0.4)'; g.lineWidth = 1.5; roundRect(g, tx, chipY, w, 48, 24); g.stroke();
+        g.fillStyle = '#12e0a8'; g.fillText(t, tx + 20, chipY + 32);
+        chipY += 64;
+      });
+      // brand footer
+      g.fillStyle = '#eef0f4'; g.font = '800 30px "DM Sans", system-ui, sans-serif';
+      g.fillText('Analyst', tx, 560); var aw = g.measureText('Analyst').width;
+      g.fillStyle = '#00c896'; g.fillText('World', tx + aw, 560);
+      g.fillStyle = '#727889'; g.font = '400 24px "DM Sans", system-ui, sans-serif';
+      g.fillText('· analystworld.in/u/' + (opts.username || ''), tx + aw + g.measureText('World').width + 12, 560);
+      c.toBlob(function (b) { b ? resolve(b) : reject(new Error('card failed')); }, 'image/jpeg', 0.9);
+    });
+  }
+  function clip(s, n) { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
+  function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+  function wrapText(g, text, x, y, maxW, lh, maxLines) {
+    var words = String(text).split(/\s+/), line = '', lines = [];
+    for (var i = 0; i < words.length; i++) {
+      var test = line ? line + ' ' + words[i] : words[i];
+      if (g.measureText(test).width > maxW && line) { lines.push(line); line = words[i]; } else line = test;
+    }
+    if (line) lines.push(line);
+    lines = lines.slice(0, maxLines);
+    lines.forEach(function (ln, i) { g.fillText(ln, x, y + i * lh); });
+  }
+
   async function authToken() {
     try { var s = await Auth.getSession(); return s && s.data && s.data.session && s.data.session.access_token; } catch (e) { return null; }
+  }
+
+  async function uploadToStorage(name, blob, token) {
+    var up = await fetch(SUPABASE_URL + '/storage/v1/object/avatars/' + name, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'apikey': SUPABASE_ANON, 'x-upsert': 'true', 'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=31536000, immutable' },
+      body: blob
+    });
+    if (!up.ok) throw new Error('upload failed');
+    return SUPABASE_URL + '/storage/v1/object/public/avatars/' + name + '?v=' + Date.now();
   }
 
   function pickPhoto() { var i = document.getElementById('pubPhotoInput'); if (i) i.click(); }
@@ -358,28 +439,34 @@
     if (!file || !currentUser) return;
     var btn = document.getElementById('pubPhotoBtn');
     if (!/^image\//.test(file.type)) { if (typeof showToast === 'function') showToast('Please choose an image file.', 'error'); return; }
-    if (file.size > 1024 * 1024) { if (typeof showToast === 'function') showToast('Please choose an image under 1 MB.', 'error'); return; }
-    if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Processing…'; }
     try {
-      var blob = await compressImage(file, 400, 0.82);
+      var img = await loadImage(file);           // accepts ANY size
       var token = await authToken();
       if (!token) throw new Error('no session');
-      var path = currentUser.id + '/avatar.jpg';
-      var up = await fetch(SUPABASE_URL + '/storage/v1/object/avatars/' + path, {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + token, 'apikey': SUPABASE_ANON, 'x-upsert': 'true', 'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=31536000, immutable' },
-        body: blob
+
+      // 1) small square avatar for the page (<= 50 KB)
+      var avatarBlob = await toSquareBlob(img, 320, 50 * 1024);
+      var avatarUrl = await uploadToStorage(currentUser.id + '/avatar.jpg', avatarBlob, token);
+
+      // 2) branded 1200x630 share card for link previews
+      var nm = (userProfile && (userProfile.display_name || userProfile.full_name)) || (currentUser.email ? currentUser.email.split('@')[0] : 'AnalystWorld');
+      var cardBlob = await makeCardBlob(img, {
+        name: nm,
+        headline: (userProfile && (userProfile.headline || userProfile.qualification)) || '',
+        username: (userProfile && userProfile.username) || '',
+        solved: (typeof solvedSet !== 'undefined' && solvedSet) ? solvedSet.size : 0,
+        certified: !!(userProfile && userProfile.is_certified)
       });
-      if (!up.ok) throw new Error('upload failed');
-      var publicUrl = SUPABASE_URL + '/storage/v1/object/public/avatars/' + path + '?v=' + Date.now();
-      var r = await Auth.from('user_profiles').eq('id', currentUser.id).update({ avatar_url: publicUrl });
+      var cardUrl = await uploadToStorage(currentUser.id + '/card.jpg', cardBlob, token);
+
+      URL.revokeObjectURL(img.src);
+      var r = await Auth.from('user_profiles').eq('id', currentUser.id).update({ avatar_url: avatarUrl, og_card_url: cardUrl });
       if (r && r.error) throw new Error('save failed');
-      if (userProfile) userProfile.avatar_url = publicUrl;
+      if (userProfile) { userProfile.avatar_url = avatarUrl; userProfile.og_card_url = cardUrl; }
       if (typeof showToast === 'function') showToast('Photo updated!', 'ok');
       renderShareCard();
-      // reflect on the profile page's main avatar card too, if present
-      var av = document.getElementById('profileAvatar');
-      if (av) { av.style.backgroundImage = 'url(' + publicUrl + ')'; av.style.backgroundSize = 'cover'; av.style.backgroundPosition = 'center'; av.textContent = ''; }
+      if (typeof renderProfileCard === 'function') renderProfileCard();
     } catch (e) {
       if (typeof showToast === 'function') showToast('Upload failed. Please try again.', 'error');
       if (btn) { btn.disabled = false; btn.textContent = 'Upload photo'; }
@@ -390,13 +477,15 @@
     if (!currentUser) return;
     try {
       var token = await authToken();
-      // best-effort delete of the stored object
+      // best-effort delete of the stored objects
       try { await fetch(SUPABASE_URL + '/storage/v1/object/avatars/' + currentUser.id + '/avatar.jpg', { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token, 'apikey': SUPABASE_ANON } }); } catch (e) {}
-      var r = await Auth.from('user_profiles').eq('id', currentUser.id).update({ avatar_url: null });
+      try { await fetch(SUPABASE_URL + '/storage/v1/object/avatars/' + currentUser.id + '/card.jpg', { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token, 'apikey': SUPABASE_ANON } }); } catch (e) {}
+      var r = await Auth.from('user_profiles').eq('id', currentUser.id).update({ avatar_url: null, og_card_url: null });
       if (r && r.error) throw new Error('save failed');
-      if (userProfile) userProfile.avatar_url = null;
+      if (userProfile) { userProfile.avatar_url = null; userProfile.og_card_url = null; }
       if (typeof showToast === 'function') showToast('Photo removed.', 'ok');
       renderShareCard();
+      if (typeof renderProfileCard === 'function') renderProfileCard();
     } catch (e) { if (typeof showToast === 'function') showToast('Could not remove photo.', 'error'); }
   }
 
