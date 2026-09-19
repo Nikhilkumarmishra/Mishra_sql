@@ -27,6 +27,12 @@ function buildTags(profile, pageUrl) {
   var headline = profile.headline ? profile.headline + ' · ' : '';
   var title = name + ' · AnalystWorld Profile';
   var desc = headline + bits.join(' · ') + '. See ' + name + '’s SQL & data-analytics progress on AnalystWorld — and start practicing free.';
+  // Use the user's uploaded photo if they have one; else the branded cover.
+  var hasAvatar = !!profile.avatar_url;
+  var img = hasAvatar ? profile.avatar_url : OG_IMAGE;
+  // A square avatar reads best as "summary"; the brand cover is a wide image.
+  var twCard = hasAvatar ? 'summary' : 'summary_large_image';
+  var dims = hasAvatar ? '' : '<meta property="og:image:width" content="1200"/>\n<meta property="og:image:height" content="630"/>\n';
   return [
     '<title>' + esc(title) + '</title>',
     '<meta name="description" content="' + esc(desc) + '"/>',
@@ -36,14 +42,13 @@ function buildTags(profile, pageUrl) {
     '<meta property="og:title" content="' + esc(title) + '"/>',
     '<meta property="og:description" content="' + esc(desc) + '"/>',
     '<meta property="og:url" content="' + esc(pageUrl) + '"/>',
-    '<meta property="og:image" content="' + OG_IMAGE + '"/>',
-    '<meta property="og:image:width" content="1200"/>',
-    '<meta property="og:image:height" content="630"/>',
+    '<meta property="og:image" content="' + esc(img) + '"/>',
+    dims +
     '<meta property="og:image:alt" content="' + esc(name) + ' on AnalystWorld"/>',
-    '<meta name="twitter:card" content="summary_large_image"/>',
+    '<meta name="twitter:card" content="' + twCard + '"/>',
     '<meta name="twitter:title" content="' + esc(title) + '"/>',
     '<meta name="twitter:description" content="' + esc(desc) + '"/>',
-    '<meta name="twitter:image" content="' + OG_IMAGE + '"/>'
+    '<meta name="twitter:image" content="' + esc(img) + '"/>'
   ].join('\n');
 }
 

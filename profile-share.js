@@ -114,7 +114,7 @@
     host.innerHTML =
       '<div class="pp-card">' +
         '<div class="pp-head">' +
-          '<div class="pp-avatar">' + esc(initials) + '</div>' +
+          '<div class="pp-avatar">' + (d.avatar_url ? '<img src="' + esc(d.avatar_url) + '" alt="' + esc(name) + '"/>' : esc(initials)) + '</div>' +
           '<div class="pp-id">' +
             '<div class="pp-name">' + esc(name) + (certified ? ' <span class="pp-verified" title="Certified on AnalystWorld">✔ Certified</span>' : '') + '</div>' +
             (d.headline ? '<div class="pp-headline">' + esc(d.headline) + '</div>' : '') +
@@ -190,9 +190,24 @@
     var uname = (userProfile && userProfile.username) || '';
     var isPublic = !!(userProfile && userProfile.is_public);
 
+    var pName = (userProfile && (userProfile.display_name || userProfile.full_name)) || (currentUser && currentUser.email ? currentUser.email.split('@')[0] : 'You');
+    var pInit = psInitials(pName);
+    var avatar = userProfile && userProfile.avatar_url;
+
     var html =
       '<div class="profile-section-title">Your public profile</div>' +
-      '<p class="pub-sub">Claim a handle and share a clean link on LinkedIn or your resume. Your email is never shown.</p>' +
+      '<p class="pub-sub">Add a photo, claim a handle, and share a clean link on LinkedIn or your resume. Your email is never shown.</p>' +
+      '<div class="pub-photo-row">' +
+        '<div class="pub-photo" id="pubPhoto">' + (avatar ? '<img src="' + esc(avatar) + '" alt=""/>' : esc(pInit)) + '</div>' +
+        '<div class="pub-photo-side">' +
+          '<div class="pub-photo-actions">' +
+            '<button class="form-btn pub-btn" id="pubPhotoBtn" onclick="PS.pickPhoto()" style="width:auto;padding:8px 18px">' + (avatar ? 'Change photo' : 'Upload photo') + '</button>' +
+            (avatar ? '<button class="pub-remove" onclick="PS.removePhoto()">Remove</button>' : '') +
+          '</div>' +
+          '<div class="pub-photo-hint">JPG or PNG, up to 1 MB. We compress it automatically.</div>' +
+        '</div>' +
+        '<input type="file" id="pubPhotoInput" accept="image/jpeg,image/png,image/webp" hidden onchange="PS.onPhotoPick(event)"/>' +
+      '</div>' +
       '<div class="form-group">' +
         '<label class="form-label">Username</label>' +
         '<div class="pub-uname-row">' +
@@ -305,6 +320,86 @@
     if (row) el.textContent = '👀 ' + (row.views || 0) + ' total views · ' + (row.views_7d || 0) + ' in the last 7 days';
   }
 
+  // ---- avatar upload ----
+  function psInitials(name) {
+    return String(name || '?').trim().split(/\s+/).map(function (w) { return w[0]; }).slice(0, 2).join('').toUpperCase();
+  }
+
+  // Square-crop + downscale to <=400px JPEG. Returns a small Blob.
+  function compressImage(file, maxDim, quality) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () {
+        try {
+          var side = Math.min(img.width, img.height);
+          var sx = (img.width - side) / 2, sy = (img.height - side) / 2;
+          var out = Math.min(maxDim, side);
+          var canvas = document.createElement('canvas');
+          canvas.width = out; canvas.height = out;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, sx, sy, side, side, 0, 0, out, out);
+          canvas.toBlob(function (blob) { blob ? resolve(blob) : reject(new Error('compress failed')); }, 'image/jpeg', quality);
+        } catch (e) { reject(e); }
+        finally { URL.revokeObjectURL(img.src); }
+      };
+      img.onerror = function () { reject(new Error('Could not read that image.')); };
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  async function authToken() {
+    try { var s = await Auth.getSession(); return s && s.data && s.data.session && s.data.session.access_token; } catch (e) { return null; }
+  }
+
+  function pickPhoto() { var i = document.getElementById('pubPhotoInput'); if (i) i.click(); }
+
+  async function onPhotoPick(ev) {
+    var file = ev.target.files && ev.target.files[0];
+    if (!file || !currentUser) return;
+    var btn = document.getElementById('pubPhotoBtn');
+    if (!/^image\//.test(file.type)) { if (typeof showToast === 'function') showToast('Please choose an image file.', 'error'); return; }
+    if (file.size > 1024 * 1024) { if (typeof showToast === 'function') showToast('Please choose an image under 1 MB.', 'error'); return; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
+    try {
+      var blob = await compressImage(file, 400, 0.82);
+      var token = await authToken();
+      if (!token) throw new Error('no session');
+      var path = currentUser.id + '/avatar.jpg';
+      var up = await fetch(SUPABASE_URL + '/storage/v1/object/avatars/' + path, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'apikey': SUPABASE_ANON, 'x-upsert': 'true', 'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=31536000, immutable' },
+        body: blob
+      });
+      if (!up.ok) throw new Error('upload failed');
+      var publicUrl = SUPABASE_URL + '/storage/v1/object/public/avatars/' + path + '?v=' + Date.now();
+      var r = await Auth.from('user_profiles').eq('id', currentUser.id).update({ avatar_url: publicUrl });
+      if (r && r.error) throw new Error('save failed');
+      if (userProfile) userProfile.avatar_url = publicUrl;
+      if (typeof showToast === 'function') showToast('Photo updated!', 'ok');
+      renderShareCard();
+      // reflect on the profile page's main avatar card too, if present
+      var av = document.getElementById('profileAvatar');
+      if (av) { av.style.backgroundImage = 'url(' + publicUrl + ')'; av.style.backgroundSize = 'cover'; av.style.backgroundPosition = 'center'; av.textContent = ''; }
+    } catch (e) {
+      if (typeof showToast === 'function') showToast('Upload failed. Please try again.', 'error');
+      if (btn) { btn.disabled = false; btn.textContent = 'Upload photo'; }
+    } finally { try { ev.target.value = ''; } catch (e) {} }
+  }
+
+  async function removePhoto() {
+    if (!currentUser) return;
+    try {
+      var token = await authToken();
+      // best-effort delete of the stored object
+      try { await fetch(SUPABASE_URL + '/storage/v1/object/avatars/' + currentUser.id + '/avatar.jpg', { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token, 'apikey': SUPABASE_ANON } }); } catch (e) {}
+      var r = await Auth.from('user_profiles').eq('id', currentUser.id).update({ avatar_url: null });
+      if (r && r.error) throw new Error('save failed');
+      if (userProfile) userProfile.avatar_url = null;
+      if (typeof showToast === 'function') showToast('Photo removed.', 'ok');
+      renderShareCard();
+    } catch (e) { if (typeof showToast === 'function') showToast('Could not remove photo.', 'error'); }
+  }
+
   // expose
   window.PS = {
     renderPublicProfile: renderPublicProfile,
@@ -313,6 +408,9 @@
     claimUsername: claimUsername,
     togglePublic: togglePublic,
     copyLink: copyLink,
+    pickPhoto: pickPhoto,
+    onPhotoPick: onPhotoPick,
+    removePhoto: removePhoto,
     captureReferral: captureReferral,
     applyReferralOnSignup: applyReferralOnSignup
   };
