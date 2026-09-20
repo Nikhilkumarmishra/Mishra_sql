@@ -227,6 +227,12 @@
 
       if (isPublic) {
         var url = profileUrl(uname);
+        // LinkedIn caches a preview per exact URL and is sticky about it. Append a
+        // version tied to the current card so a photo change makes LinkedIn treat
+        // it as a fresh URL and re-scrape the latest card. Copy/View stay clean.
+        var cardV = '';
+        try { var m = (userProfile.og_card_url || '').match(/v=(\d+)/); if (m) cardV = '?v=' + m[1]; } catch (e) {}
+        var liUrl = url + cardV;
         html +=
           '<div class="pub-share">' +
             '<div class="pub-link-row">' +
@@ -234,7 +240,7 @@
               '<button class="pub-copy-btn" onclick="PS.copyLink()">Copy</button>' +
             '</div>' +
             '<div class="pub-share-actions">' +
-              '<a class="pub-share-btn" target="_blank" rel="noopener" href="https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url) + '">Share on LinkedIn</a>' +
+              '<a class="pub-share-btn" target="_blank" rel="noopener" href="https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(liUrl) + '">Share on LinkedIn</a>' +
               '<a class="pub-share-btn pub-view-btn" target="_blank" rel="noopener" href="' + esc(url) + '">View my profile ↗</a>' +
             '</div>' +
             '<div class="pub-views" id="pubViews"></div>' +
