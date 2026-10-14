@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en" class="aw-new">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AnalystWorld — Small steps. Serious SQL skills.</title>
+  <meta name="description" content="Build real SQL problem-solving skills, one concept at a time. Explore beginner lessons, topic-wise practice and advanced interview-style challenges on AnalystWorld.">
+  <meta name="theme-color" content="#fafaf7">
+  <link rel="canonical" href="https://analystworld.in/new-page">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="preload" href="/assets/new/inter-latin-variable.woff2" as="font" type="font/woff2" crossorigin>
+  <!-- Runs before styles/paint. Isolated from the existing app's theme and session. -->
+  <script src="/assets/new/theme.js"></script>
+  <link rel="stylesheet" href="/assets/new/homepage.css">
+  <script src="/assets/new/homepage.js" defer></script>
+</head>
+<body>
+  <a class="aw-skip" href="#main">Skip to content</a>
+  <header class="aw-header aw-container">
+    <a class="aw-wordmark" href="/new-page" aria-label="AnalystWorld home">Analyst<span>World</span><span class="aw-brand-dot" aria-hidden="true">.</span></a>
+    <nav class="aw-desktop-nav" aria-label="Main navigation">
+      <a href="#practice">Practice</a>
+      <a href="/learn">Learning Paths</a>
+      <a href="#beginners">For Beginners</a>
+    </nav>
+    <div class="aw-header-actions">
+      <a class="aw-login" href="/profile">Log in</a>
+      <a class="aw-button aw-button-small aw-header-cta" href="/problems/26/show-all-employee-names">Start Practising <span aria-hidden="true">↗</span></a>
+      <div class="aw-theme-control">
+        <label for="aw-theme" class="aw-sr-only">Colour theme</label>
+        <svg class="aw-theme-icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>
+        <select id="aw-theme" aria-label="Colour theme">
+          <option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option>
+        </select>
+      </div>
+      <button class="aw-menu-button" type="button" aria-expanded="false" aria-controls="aw-mobile-nav" aria-label="Open navigation"><span></span><span></span></button>
+    </div>
+    <nav id="aw-mobile-nav" class="aw-mobile-nav" aria-label="Mobile navigation" hidden>
+      <a href="#practice">Practice <span aria-hidden="true">↗</span></a>
+      <a href="/learn">Learning Paths <span aria-hidden="true">↗</span></a>
+      <a href="#beginners">For Beginners <span aria-hidden="true">↗</span></a>
+      <a href="/profile">Log in / View progress <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <section class="aw-hero aw-container" aria-labelledby="aw-hero-title">
+      <div class="aw-hero-copy">
+        <p class="aw-eyebrow"><span class="aw-small-rule" aria-hidden="true"></span> A clearer way to learn SQL</p>
+        <h1 id="aw-hero-title">Small steps.<br><span>Serious SQL<br class="aw-desktop-break"> skills.</span></h1>
+        <p class="aw-hero-description">Go from your first query to solving unfamiliar problems. One concept at a time, with practice that builds on what you know.</p>
+        <div class="aw-hero-actions">
+          <a class="aw-button" href="/problems/26/show-all-employee-names">Start Practising <span aria-hidden="true">↗</span></a>
+          <a class="aw-text-link" href="#method">See how it works <span aria-hidden="true">↓</span></a>
+        </div>
+        <p class="aw-cta-note">Free to run queries. No sign-up needed.</p>
+      </div>
+
+      <div class="aw-product" aria-label="SQL learning progression and exercise preview">
+        <div class="aw-product-heading"><span class="aw-eyebrow">From concepts to confidence</span><span class="aw-preview-tag">Practice preview</span></div>
+        <div class="aw-concepts" role="tablist" aria-label="Explore SQL practice examples">
+          <button id="aw-tab-select" role="tab" aria-selected="true" aria-controls="aw-exercise" data-example="select" type="button"><span>01</span> Select</button>
+          <button id="aw-tab-aggregate" role="tab" aria-selected="false" aria-controls="aw-exercise" data-example="aggregate" tabindex="-1" type="button"><span>02</span> Aggregate</button>
+          <button id="aw-tab-join" role="tab" aria-selected="false" aria-controls="aw-exercise" data-example="join" tabindex="-1" type="button"><span>03</span> Join</button>
+        </div>
+        <div id="aw-exercise" class="aw-exercise" role="tabpanel" aria-labelledby="aw-tab-select" tabindex="0">
+          <div class="aw-exercise-title"><h2 id="aw-example-title">Show All Employee Names</h2><span class="aw-difficulty" id="aw-difficulty">Easy</span></div>
+          <p id="aw-example-description">Start with the essentials. Retrieve names from a table.</p>
+          <div class="aw-code-heading"><span>query.sql</span><span>SQL</span></div>
+          <pre class="aw-code"><code id="aw-example-code"><span class="aw-code-line"><span class="aw-syntax">SELECT</span> name</span><span class="aw-code-line"><span class="aw-syntax">FROM</span> employees;</span></code></pre>
+          <div class="aw-result-heading"><span><span class="aw-result-dot" aria-hidden="true"></span> Expected result</span><span>3 rows</span></div>
+          <div class="aw-table-wrap"><table class="aw-result-table" id="aw-result"><caption class="aw-sr-only">Expected output for Show All Employee Names</caption><thead><tr><th scope="col">name</th></tr></thead><tbody><tr><td>Alice</td></tr><tr><td>Bob</td></tr><tr><td>Carol</td></tr></tbody></table></div>
+          <div class="aw-exercise-footer"><span>Real exercise. A preview, not an editor.</span><a id="aw-example-link" href="/problems/26/show-all-employee-names">Try it yourself <span aria-hidden="true">↗</span></a></div>
+        </div>
+        <a class="aw-product-next" href="/learn/window-functions"><span>And beyond</span> Subqueries, CTEs &amp; window functions <span aria-hidden="true">↗</span></a>
+      </div>
+      <div class="aw-hero-footnote"><span>Built for the way analysts think.</span><ul><li>Learn by topic</li><li>Write real queries</li><li>Build problem-solving skills</li></ul></div>
+    </section>
+
+    <section id="method" class="aw-method aw-container aw-section" aria-labelledby="aw-method-title">
+      <div class="aw-section-heading"><div><p class="aw-eyebrow">01 / The method</p><h2 id="aw-method-title">Don't just learn the syntax.<br>Learn how to think in SQL.</h2></div><p>A big subject becomes manageable<br class="aw-desktop-break"> when every step has a purpose.</p></div>
+      <ol class="aw-method-steps">
+        <li><div class="aw-step-top"><span>01</span><span aria-hidden="true">→</span></div><h3>Understand</h3><p>Start with one concept. Learn what it does and when to use it.</p></li>
+        <li><div class="aw-step-top"><span>02</span><span aria-hidden="true">→</span></div><h3>Practise</h3><p>Write queries, inspect the output and use a hint when you need one.</p></li>
+        <li><div class="aw-step-top"><span>03</span><span aria-hidden="true">→</span></div><h3>Combine</h3><p>Bring concepts together. Turn a business question into a working query.</p></li>
+        <li><div class="aw-step-top"><span>04</span><span aria-hidden="true">↗</span></div><h3>Advance</h3><p>Go deeper with multi-step logic and interview-style SQL challenges.</p></li>
+      </ol>
+    </section>
+
+    <section id="practice" class="aw-practice aw-section" aria-labelledby="aw-practice-title">
+      <div class="aw-container">
+        <div class="aw-section-heading"><div><p class="aw-eyebrow">02 / Find your starting point</p><h2 id="aw-practice-title">Meet yourself where you are.<br>Then go further.</h2></div><a class="aw-text-link" href="/home#questions-section">Explore all practice <span aria-hidden="true">↗</span></a></div>
+        <div class="aw-track-list">
+          <a id="beginners" class="aw-track aw-track-beginner" href="/learn/introduction-to-sql/your-first-sql-query"><span class="aw-track-number">01</span><div class="aw-track-title"><span class="aw-track-level">New to SQL? Start here</span><h3>Your First SQL Query</h3></div><div class="aw-track-description"><p>No prior knowledge needed. Get comfortable with tables and write your first SELECT.</p><span>Introduction to SQL · Guided lesson</span></div><span class="aw-track-action">Start learning <span aria-hidden="true">↗</span></span></a>
+          <a class="aw-track" href="/problems/01/top-spending-departments"><span class="aw-track-number">02</span><div class="aw-track-title"><span class="aw-track-level">Build your foundation</span><h3>Basic → Intermediate</h3></div><div class="aw-track-description"><p>Move from selecting data to aggregations, joins and more involved SQL logic.</p><span>Topic-wise questions · Hints · Live SQL editor</span></div><span class="aw-track-action">Open track <span aria-hidden="true">↗</span></span></a>
+          <a class="aw-track" href="/problems/01/first-and-last-page-of-each-session?track=advanced"><span class="aw-track-number">03</span><div class="aw-track-title"><span class="aw-track-level">Stretch your thinking</span><h3>Intermediate → Advanced</h3></div><div class="aw-track-description"><p>Work through window functions, CTEs and multi-step interview-style problems.</p><span>Complex queries · Practical scenarios</span></div><span class="aw-track-action">Open track <span aria-hidden="true">↗</span></span></a>
+        </div>
+        <p class="aw-returning">Already learning with us? <a href="/profile">View your saved progress <span aria-hidden="true">↗</span></a></p>
+      </div>
+    </section>
+
+    <section class="aw-outcomes aw-section aw-container" aria-labelledby="aw-outcomes-title">
+      <div class="aw-outcomes-copy"><p class="aw-eyebrow">03 / Skills that go somewhere</p><h2 id="aw-outcomes-title">SQL is the starting point.<br>Your next chapter is bigger.</h2><p>Build the confidence to approach real analytics problems and explain your thinking in an interview.</p><div class="aw-career-labels" aria-label="Career contexts"><span>Data Analyst</span><span>Business Analyst</span><span>Analytics &amp; beyond</span></div><p class="aw-vision-note">Our wider direction: supporting more careers in data.<br>Our focus today: helping you get better at SQL.</p></div>
+      <aside class="aw-proof" aria-label="Team-reported learner outcome"><p class="aw-proof-number">100<span>+</span></p><p class="aw-proof-description">students helped into their<br>first analytics job.</p><div class="aw-proof-source"><span class="aw-small-rule" aria-hidden="true"></span> According to the AnalystWorld team</div><p class="aw-proof-note">A team-reported outcome, not an independently verified placement rate or a job guarantee.</p></aside>
+    </section>
+
+    <section class="aw-final aw-container" aria-labelledby="aw-final-title"><p class="aw-eyebrow">One concept. One query. One step forward.</p><h2 id="aw-final-title">Your next SQL problem starts here.</h2><a class="aw-button" href="/problems/26/show-all-employee-names">Start Practising <span aria-hidden="true">↗</span></a><p>No perfect starting point needed. Just curiosity.</p></section>
+  </main>
+  <footer class="aw-footer aw-container"><div><a class="aw-wordmark" href="/new-page">Analyst<span>World</span><span class="aw-brand-dot" aria-hidden="true">.</span></a><p>Made for the next generation of analysts.</p></div><nav aria-label="Footer navigation"><a href="/home">Original home</a><a href="/learn">Learn SQL</a><a href="https://forms.gle/BvbbF6rNCuFsT15J8" target="_blank" rel="noopener noreferrer">Report an issue <span class="aw-sr-only">(opens in a new tab)</span><span aria-hidden="true">↗</span></a></nav><span class="aw-footer-note">Small steps. Real progress.</span></footer>
+</body>
+</html>
