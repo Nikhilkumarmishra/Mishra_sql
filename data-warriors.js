@@ -131,31 +131,46 @@
     reveals.forEach(function(el){io.observe(el);});
   }
 
-  /* ---------- cursor sparkles (desktop, subtle) ---------- */
-  (function sparkles(){
-    var fine=window.matchMedia&&window.matchMedia('(pointer:fine)').matches;
-    if(reduce||!fine||window.innerWidth<860)return;
-    var cv=document.getElementById('sparkles'); if(!cv)return; var ctx=cv.getContext('2d');
-    var dpr=Math.min(window.devicePixelRatio||1,2),parts=[],last=0,running=false;
-    function resize(){cv.width=innerWidth*dpr;cv.height=innerHeight*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
+  /* ---------- honeybee guide (scroll-aware, subtle sparkle trail) ---------- */
+  (function bee(){
+    if(reduce||window.innerWidth<760)return;                 // matches CSS gate
+    var el=document.getElementById('bee'); if(!el)return;
+    var stops=Array.prototype.slice.call(document.querySelectorAll('[data-bee-stop]'));
+    if(!stops.length)return;
+    var cv=document.getElementById('sparkles'),ctx=cv&&cv.getContext('2d');
+    var dpr=Math.min(window.devicePixelRatio||1,2),parts=[];
+    function resize(){if(!ctx)return;cv.width=innerWidth*dpr;cv.height=innerHeight*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
     resize();window.addEventListener('resize',resize,{passive:true});
-    function spawn(x,y){
-      if(parts.length>26)return;
-      var n=1+(Math.random()<.35?1:0);
-      for(var i=0;i<n;i++){parts.push({x:x+(Math.random()*10-5),y:y+(Math.random()*10-5),vx:(Math.random()-.5)*.5,vy:-(Math.random()*.7+.2),life:1,r:Math.random()*1.6+1,c:Math.random()<.5?'240,25,32':'17,17,17'});}
-      if(!running){running=true;requestAnimationFrame(loop);}
+    function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+    var bx=innerWidth-64,by=innerHeight*0.4,dir=1;
+    el.classList.add('show');
+    function target(){
+      // active stop = the one whose centre is nearest the viewport centre
+      var vc=innerHeight/2,best=stops[0],bd=1e9;
+      for(var i=0;i<stops.length;i++){var r=stops[i].getBoundingClientRect();var c=r.top+r.height/2;var d=Math.abs(c-vc);if(d<bd){bd=d;best=stops[i];}}
+      var r=best.getBoundingClientRect();
+      var tx=innerWidth-64, ty=clamp(r.top+Math.min(r.height*0.3,140),90,innerHeight-90);
+      var cta=best.querySelector('[data-bee-cta]');
+      if(cta){var cr=cta.getBoundingClientRect();if(cr.bottom>60&&cr.top<innerHeight-60){tx=clamp(cr.right+28,innerWidth*0.45,innerWidth-54);ty=clamp(cr.top+cr.height/2,90,innerHeight-90);}}
+      return {x:tx,y:ty,cta:!!cta};
     }
-    function loop(){
-      ctx.clearRect(0,0,innerWidth,innerHeight);
-      for(var i=parts.length-1;i>=0;i--){var p=parts[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.012;p.life-=.028;
-        if(p.life<=0){parts.splice(i,1);continue;}
-        ctx.globalAlpha=Math.max(0,p.life)*.6;ctx.fillStyle='rgba('+p.c+',1)';
-        ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,6.283);ctx.fill();
+    function loop(now){
+      var t=target(),ndx=t.x-bx,ndy=t.y-by,dist=Math.hypot(ndx,ndy);
+      bx+=ndx*0.055; by+=ndy*0.055;
+      if(ndx<-0.4)dir=-1; else if(ndx>0.4)dir=1;
+      var bob=dist<8?Math.sin(now/420)*4:0;
+      el.style.transform='translate('+bx.toFixed(1)+'px,'+(by+bob).toFixed(1)+'px) scaleX('+dir+')';
+      if(ctx){
+        var moved=Math.min(dist,40);
+        var glint=(dist<10&&t.cta&&Math.random()<0.08); // occasional glint while paused at a CTA
+        if((moved>3||glint)&&parts.length<24){var n=moved>14?2:1;for(var k=0;k<n;k++)parts.push({x:bx+6+(Math.random()*8-4),y:by+bob+6+(Math.random()*8-4),life:1,r:Math.random()*1.4+0.8});}
+        ctx.clearRect(0,0,innerWidth,innerHeight);
+        for(var i=parts.length-1;i>=0;i--){var p=parts[i];p.life-=0.03;p.y+=0.25;if(p.life<=0){parts.splice(i,1);continue;}ctx.globalAlpha=Math.max(0,p.life)*0.8;ctx.fillStyle='rgba(245,179,1,1)';ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,6.283);ctx.fill();}
+        ctx.globalAlpha=1;
       }
-      ctx.globalAlpha=1;
-      if(parts.length){requestAnimationFrame(loop);}else{running=false;}
+      requestAnimationFrame(loop);
     }
-    window.addEventListener('mousemove',function(e){var t=performance.now();if(t-last<36)return;last=t;spawn(e.clientX,e.clientY);},{passive:true});
+    requestAnimationFrame(loop);
   })();
 
   /* ---------- init ---------- */

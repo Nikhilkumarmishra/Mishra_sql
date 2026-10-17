@@ -8,7 +8,7 @@
   <meta name="description" content="A free workspace for data &amp; analytics job seekers. Track every application across LinkedIn, Naukri, Hirist and company sites, log your SQL/Excel/Python prep, and see your progress in one dashboard.">
   <link rel="canonical" href="https://analystworld.in/data-warriors">
   <meta property="og:title" content="Data Warriors | Track Your Job Search &amp; Interview Prep">
-  <meta property="og:description" content="Stop losing track of your job search. Track applications, build interview-ready skills, and see your progress in one place.">
+  <meta property="og:description" content="Stop losing track of your job search. Bring your applications and interview prep into one workspace and see your progress.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://analystworld.in/data-warriors">
   <meta name="twitter:card" content="summary_large_image">
@@ -19,6 +19,22 @@
 </head>
 <body>
   <canvas id="sparkles" aria-hidden="true"></canvas>
+  <div id="bee" aria-hidden="true">
+    <svg viewBox="0 0 48 40" width="38" height="32" role="presentation">
+      <g class="bee-wings">
+        <ellipse class="wing wl" cx="20" cy="11" rx="9" ry="6"/>
+        <ellipse class="wing wr" cx="30" cy="11" rx="9" ry="6"/>
+      </g>
+      <g class="bee-body">
+        <ellipse cx="26" cy="22" rx="13" ry="10" fill="#f5b301"/>
+        <path d="M20 13.5c3 1.2 3 15.8 0 17" stroke="#1b1b1d" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+        <path d="M27 12.5c3.4 1.6 3.4 17.4 0 19" stroke="#1b1b1d" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+        <path d="M34 15c2.4 2 2.4 12 0 14" stroke="#1b1b1d" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <circle cx="14" cy="20" r="2.1" fill="#1b1b1d"/>
+        <path d="M11 13l2 4M16 12l1.5 4.5" stroke="#1b1b1d" stroke-width="1.4" stroke-linecap="round"/>
+      </g>
+    </svg>
+  </div>
 
   <!-- ===== NAV ===== -->
   <header class="nav" id="nav">
@@ -26,7 +42,7 @@
       <a class="brand" href="/home" aria-label="AnalystWorld home">Analyst<span>World</span><em>Data Warriors</em></a>
       <nav class="nav-links" id="navLinks" aria-label="Primary">
         <a href="#problem">The problem</a>
-        <a href="#solution">What you get</a>
+        <a href="#analytics">What you get</a>
         <a href="#how">How it works</a>
         <a href="#challenge">10-day challenge</a>
       </nav>
@@ -39,21 +55,20 @@
   </header>
 
   <main id="main">
-    <!-- ===== HERO ===== -->
-    <section class="hero reveal">
+    <!-- ===== HERO (recognition + relief) ===== -->
+    <section class="hero reveal" data-bee-stop>
       <div class="hero-text">
         <span class="offer-pill"><i class="dotpulse"></i> Free for the first 500 members</span>
         <h1>Stop losing track of your <span>job search.</span></h1>
-        <p class="lead">Track every application, build interview-ready skills, and see your progress in one place — your free workspace for job hunting and daily preparation.</p>
+        <p class="lead">You're applying, learning and practising every week. Bring your applications and interview prep into one workspace — so you can see what you've done, what's working, and what needs your attention next.</p>
         <div class="actions">
-          <button class="btn primary lg" data-action="start">Create My Free Workspace <span aria-hidden="true">→</span></button>
+          <button class="btn primary lg" data-action="start" data-bee-cta>Create My Free Workspace <span aria-hidden="true">→</span></button>
           <a class="btn ghost lg" href="#how">See How It Works</a>
         </div>
         <p class="trust-line">Free for the first 500 registered users · Uses your existing AnalystWorld account · No credit card.</p>
         <p class="audience-line">Built for your next role in data &amp; analytics — Data Analyst, Business Analyst, BI, Product, Growth, MIS &amp; more.</p>
       </div>
 
-      <!-- Hero product preview: job + skill tracker -->
       <aside class="hero-visual" aria-label="Illustrative workspace preview">
         <div class="mini-dash">
           <div class="md-top">
@@ -83,127 +98,173 @@
       </aside>
     </section>
 
-    <!-- ===== THE PROBLEM ===== -->
+    <!-- ===== PROBLEM (recognition) ===== -->
     <section class="section reveal" id="problem">
       <div class="section-head">
-        <span class="eyebrow">THE PROBLEM</span>
-        <h2>Your job search is scattered.<br>So is your prep.</h2>
-        <p class="section-intro">You're already doing the work — applying everywhere and studying hard. But it lives across portals, emails, spreadsheets, and memory. So it's impossible to see what's actually working.</p>
+        <span class="eyebrow">SOUND FAMILIAR?</span>
+        <h2>Your applications are everywhere.<br>Your prep is too.</h2>
+        <p class="section-intro">You've applied to dozens of companies and studied for weeks. But it all lives across portals, emails, notes and memory — so you can't actually tell what's working.</p>
       </div>
       <div class="two-col">
         <article class="problem-card">
-          <h3>Applications everywhere</h3>
-          <p>You apply through LinkedIn, Naukri, Hirist, company career pages and more — then lose track of:</p>
+          <h3>80 applications, zero overview</h3>
+          <p>You applied through LinkedIn, Naukri, Hirist and company sites — now, honestly, can you answer:</p>
           <ul class="x-list">
-            <li>Which companies you applied to, and when.</li>
-            <li>Which portal each opportunity came from.</li>
-            <li>Which applications got a response or an interview.</li>
-            <li>Who needs a follow-up — and which platforms actually work for you.</li>
+            <li>How many did I actually apply to this week?</li>
+            <li>Who responded, and what reached an interview?</li>
+            <li>Which platform is actually getting me replies?</li>
+            <li>What happened to the ones I sent two weeks ago?</li>
           </ul>
         </article>
         <article class="problem-card">
-          <h3>Preparation you can't measure</h3>
-          <p>You practise SQL, Excel, Python, Power BI, statistics and communication — but it's inconsistent and invisible:</p>
+          <h3>Weeks of prep, no record</h3>
+          <p>You're grinding SQL, Excel, Python, Power BI, stats and communication — but:</p>
           <ul class="x-list">
-            <li>You forget what you practised and which topics you covered.</li>
-            <li>You can't see how consistent you've actually been.</li>
-            <li>You don't know where you still need work.</li>
-            <li>There's no single record of your effort over time.</li>
+            <li>Today's practice is disconnected from yesterday's.</li>
+            <li>You forget which topics you've already covered.</li>
+            <li>You can't see how consistent you've been.</li>
+            <li>Watching tutorials quietly replaces real practice.</li>
           </ul>
         </article>
       </div>
     </section>
 
-    <!-- ===== THE SOLUTION ===== -->
-    <section class="section band reveal" id="solution">
+    <!-- ===== BEFORE / AFTER (relief — the centerpiece) ===== -->
+    <section class="section band reveal" id="compare" data-bee-stop>
       <div class="section-head center">
-        <span class="eyebrow">THE SOLUTION</span>
-        <h2>Two trackers. One workspace.</h2>
-        <p class="section-intro">Your job search has a tracker. Your preparation has a tracker. Data Warriors brings both together so you can see your real progress.</p>
+        <span class="eyebrow">THE DIFFERENCE</span>
+        <h2>From scattered effort to visible progress.</h2>
+        <p class="section-intro">Same effort you're already putting in — finally in one place you can actually read.</p>
       </div>
-
-      <div class="feature-rows">
-        <!-- A: job tracker -->
-        <article class="feature-row">
-          <div class="fr-text">
-            <span class="kicker">A · Job search tracker</span>
-            <h3>Your job search, finally organised</h3>
-            <p>Record every application in one dashboard — company, role, source, job link, dates, status, responses and follow-ups. It answers the questions a scattered search can't:</p>
-            <ul class="check-list">
-              <li>How many jobs did I apply to this week?</li>
-              <li>Which platforms are generating the most responses?</li>
-              <li>How many applications reached an interview?</li>
-              <li>Which applications need a follow-up today?</li>
-            </ul>
-            <p class="honesty">This is a <strong>manual tracker</strong> — you add applications yourself. Nothing auto-syncs from LinkedIn, Naukri or other portals, and platform performance is calculated only from what you record.</p>
+      <div class="ba-grid">
+        <article class="ba-card before">
+          <div class="ba-tag">Before</div>
+          <div class="ba-scatter">
+            <span class="scrap s1">LinkedIn — applied?</span>
+            <span class="scrap s2">Naukri tab (×7 open)</span>
+            <span class="scrap s3">"follow up with… someone"</span>
+            <span class="scrap s4">SQL notes.txt</span>
+            <span class="scrap s5">that email from Acme</span>
+            <span class="scrap s6">Excel — did I finish?</span>
+            <span class="scrap s7">random YouTube playlist</span>
           </div>
-          <div class="fr-ui">
-            <div class="ui-card">
-              <div class="ui-row head"><span>Company</span><span>Source</span><span>Status</span></div>
-              <div class="ui-row"><span><b>Acme Analytics</b><em>Data Analyst</em></span><span class="src">LinkedIn</span><span class="status interview">Interview</span></div>
-              <div class="ui-row"><span><b>Northwind</b><em>Business Analyst</em></span><span class="src">Naukri</span><span class="status applied">Applied</span></div>
-              <div class="ui-row"><span><b>Lumen Media</b><em>Marketing Analyst</em></span><span class="src">Company site</span><span class="status saved">Saved</span></div>
-              <div class="ui-row"><span><b>Vertex BI</b><em>BI Analyst</em></span><span class="src">Hirist</span><span class="status response">Response</span></div>
-            </div>
-          </div>
+          <p class="ba-cap">Portals, notes, emails and memory. Lots of effort, no clear picture.</p>
         </article>
-
-        <!-- B: skill tracker -->
-        <article class="feature-row reverse">
-          <div class="fr-text">
-            <span class="kicker">B · Interview-prep tracker</span>
-            <h3>One place for your interview prep</h3>
-            <p>Log what you studied or practised each day across the subjects that get you hired — and add a resource link when it's useful:</p>
-            <div class="tags">
-              <span class="tag on">SQL</span><span class="tag on">Excel</span><span class="tag on">Python</span>
-              <span class="tag">Power BI</span><span class="tag">DAX</span><span class="tag">Statistics</span><span class="tag">Communication</span><span class="tag">+ custom</span>
-            </div>
-            <p class="honesty">Data Warriors shows your <strong>recorded effort and coverage</strong> — practice vs learning, by subject, over time. It doesn't score your skill level or claim mastery; logging activity isn't an assessment.</p>
+        <div class="ba-arrow" aria-hidden="true">→</div>
+        <article class="ba-card after">
+          <div class="ba-tag on">After</div>
+          <div class="ba-organised">
+            <div class="org-row"><span class="org-dot"></span>18 applications tracked this week</div>
+            <div class="org-row"><span class="org-dot"></span>5 responses · 2 interviews recorded</div>
+            <div class="org-row"><span class="org-dot"></span>LinkedIn is your best source so far</div>
+            <div class="org-row"><span class="org-dot"></span>2 follow-ups due today</div>
+            <div class="org-row"><span class="org-dot"></span>15 prep sessions logged across 4 subjects</div>
           </div>
-          <div class="fr-ui">
-            <div class="ui-card">
-              <div class="log-row"><span class="dot practice">Practice</span>SQL · Window functions</div>
-              <div class="log-row"><span class="dot learn">Learn</span>Python · Pandas groupby</div>
-              <div class="log-row"><span class="dot practice">Practice</span>Excel · XLOOKUP cases</div>
-              <div class="log-row"><span class="dot practice">Practice</span>Communication · Project walkthrough</div>
-              <div class="log-row add">+ Log today's practice</div>
-            </div>
-          </div>
-        </article>
-
-        <!-- C: combined dashboard -->
-        <article class="feature-row">
-          <div class="fr-text">
-            <span class="kicker">C · Progress dashboard</span>
-            <h3>A dashboard that shows your progress</h3>
-            <p>Your applications and your preparation, side by side — so you can see momentum and adjust:</p>
-            <ul class="check-list">
-              <li>Applications submitted, responses, and interviews reached.</li>
-              <li>Applications by source and response rate per platform.</li>
-              <li>Practice &amp; learning activity by subject.</li>
-              <li>Daily and weekly consistency, recent activity and upcoming follow-ups.</li>
-            </ul>
-            <p class="honesty">Every number comes from data you've entered. New here? You'll see a clear empty state with one obvious next step — add your first application or log your first practice session.</p>
-          </div>
-          <div class="fr-ui">
-            <div class="ui-card">
-              <div class="ui-kpis">
-                <div><span>Applications</span><strong>42</strong></div>
-                <div><span>Responses</span><strong>11</strong></div>
-                <div><span>Interviews</span><strong>4</strong></div>
-              </div>
-              <div class="ui-chart" aria-hidden="true">
-                <span style="height:40%"></span><span style="height:65%"></span><span style="height:50%"></span><span style="height:85%"></span><span style="height:70%"></span><span style="height:95%"></span><span style="height:60%"></span>
-              </div>
-              <div class="ui-foot">Last 7 days · <span class="preview-tag inline">sample data</span></div>
-            </div>
-          </div>
+          <p class="ba-cap">One record of applications, outcomes, preparation and next actions.</p>
         </article>
       </div>
     </section>
 
-    <!-- ===== HOW IT WORKS ===== -->
-    <section class="section reveal" id="how">
+    <!-- ===== JOB + PLATFORM ANALYTICS (possibility) ===== -->
+    <section class="section reveal" id="analytics" data-bee-stop>
+      <div class="feature-row">
+        <div class="fr-text">
+          <span class="kicker">Job search tracker</span>
+          <h3>Stop guessing which job platforms are working.</h3>
+          <p>Record every application with its source — LinkedIn, Naukri, Hirist, a company site — then compare responses and interviews <strong>by platform</strong>, built from your own data. Put your effort where it's actually paying off.</p>
+          <ul class="check-list">
+            <li>How many jobs did I apply to this week?</li>
+            <li>Which source gives me the most responses?</li>
+            <li>How many applications reached an interview?</li>
+            <li>Which applications need a follow-up today?</li>
+          </ul>
+          <p class="honesty">This is a <strong>manual tracker</strong> — you add applications yourself; nothing auto-syncs from LinkedIn, Naukri or other portals. Rates are responses ÷ applications per source from what you record. With no responses yet, you'll see an honest empty state, not an invented percentage.</p>
+        </div>
+        <div class="fr-ui">
+          <div class="ui-card">
+            <div class="ui-row head"><span>Source</span><span>Applied</span><span>Response rate</span></div>
+            <div class="src-rate"><span class="src">LinkedIn</span><i class="bar"><b style="width:40%"></b></i><strong>4 / 10</strong></div>
+            <div class="src-rate"><span class="src">Naukri</span><i class="bar"><b style="width:20%"></b></i><strong>1 / 5</strong></div>
+            <div class="src-rate"><span class="src">Hirist</span><i class="bar"><b style="width:50%"></b></i><strong>2 / 4</strong></div>
+            <div class="src-rate"><span class="src">Company site</span><i class="bar none"><b style="width:0"></b></i><strong class="muted">0 / 3</strong></div>
+            <div class="ui-foot">Last 30 days · <span class="preview-tag inline">sample data</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PREPARATION (possibility) ===== -->
+    <section class="section band reveal" id="prep" data-bee-stop>
+      <div class="feature-row reverse">
+        <div class="fr-text">
+          <span class="kicker">Interview-prep tracker</span>
+          <h3>Every practice session should count.</h3>
+          <p>Log today's SQL questions, Excel exercises, Python practice or a communication session — with the topic and a resource link. Over time you can see what you've covered and which subjects you've been neglecting.</p>
+          <div class="tags">
+            <span class="tag on">SQL</span><span class="tag on">Excel</span><span class="tag on">Python</span>
+            <span class="tag">Power BI</span><span class="tag">DAX</span><span class="tag">Statistics</span><span class="tag">Communication</span><span class="tag">+ custom</span>
+          </div>
+          <p class="honesty">Data Warriors separates <strong>practice from learning</strong> and shows recorded effort and coverage by subject over time. It doesn't score your skill or claim interview readiness — logging activity isn't an assessment.</p>
+        </div>
+        <div class="fr-ui">
+          <div class="ui-card">
+            <div class="log-row"><span class="dot practice">Practice</span>SQL · Window functions</div>
+            <div class="log-row"><span class="dot learn">Learn</span>Python · Pandas groupby</div>
+            <div class="log-row"><span class="dot practice">Practice</span>Excel · XLOOKUP cases</div>
+            <div class="log-row"><span class="dot practice">Practice</span>Communication · Project walkthrough</div>
+            <div class="log-row add">+ Log today's practice</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== WEEKLY PROGRESS (possibility — tangible reward) ===== -->
+    <section class="section reveal" id="progress" data-bee-stop>
+      <div class="section-head">
+        <span class="eyebrow">YOUR WEEK, AT A GLANCE</span>
+        <h2>At the end of the week,<br>know exactly where you stand.</h2>
+        <p class="section-intro">Applications and preparation side by side — so you can see momentum and decide what to do next.</p>
+      </div>
+      <div class="dash-preview" aria-label="Illustrative weekly dashboard">
+        <span class="preview-tag">Preview · sample data</span>
+        <div class="dp-kpis">
+          <div class="dp-kpi"><span>Applications</span><strong>18</strong></div>
+          <div class="dp-kpi"><span>Responses</span><strong>5</strong></div>
+          <div class="dp-kpi"><span>Interviews</span><strong>2</strong></div>
+          <div class="dp-kpi"><span>Prep sessions</span><strong>15</strong></div>
+        </div>
+        <div class="dp-body">
+          <div class="dp-panel">
+            <h4>Applications this week</h4>
+            <div class="ui-chart" aria-hidden="true">
+              <span style="height:40%"></span><span style="height:65%"></span><span style="height:50%"></span><span style="height:85%"></span><span style="height:70%"></span><span style="height:95%"></span><span style="height:55%"></span>
+            </div>
+            <div class="dp-follow">
+              <strong>Follow-ups due</strong>
+              <div class="fu"><span class="org-dot"></span>Acme Analytics · today</div>
+              <div class="fu"><span class="org-dot"></span>Vertex BI · tomorrow</div>
+            </div>
+          </div>
+          <div class="dp-panel">
+            <h4>Prep by subject</h4>
+            <div class="dp-cats">
+              <div class="dp-cat"><span>SQL</span><i class="bar"><b style="width:100%"></b></i><em>6</em></div>
+              <div class="dp-cat"><span>Excel</span><i class="bar"><b style="width:66%"></b></i><em>4</em></div>
+              <div class="dp-cat"><span>Python</span><i class="bar"><b style="width:50%"></b></i><em>3</em></div>
+              <div class="dp-cat"><span>Communication</span><i class="bar"><b style="width:33%"></b></i><em>2</em></div>
+            </div>
+            <div class="dp-recent">
+              <div class="r"><span class="dot practice">Practice</span>SQL · Window functions</div>
+              <div class="r"><span class="dot learn">Learn</span>Python · Pandas groupby</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="muted-note">New here? You'll start with a clear empty state and one obvious next step — add your first application or log your first practice session. Every number above comes from data you enter.</p>
+    </section>
+
+    <!-- ===== HOW IT WORKS (action) ===== -->
+    <section class="section band reveal" id="how">
       <div class="section-head">
         <span class="eyebrow">HOW IT WORKS</span>
         <h2>Set up in minutes.<br>Use it every day.</h2>
@@ -212,32 +273,33 @@
         <article class="step">
           <span class="step-num">01</span>
           <h3>Create your free workspace</h3>
-          <p>Sign in with your existing AnalystWorld account — no second login, no credit card. Free for the first 500 members.</p>
+          <p>Sign in and you're in — free for the first 500 members, no credit card.</p>
         </article>
         <article class="step">
           <span class="step-num">02</span>
           <h3>Record your applications &amp; prep</h3>
-          <p>Add the jobs you apply to and log what you study each day. It takes seconds and builds your real history.</p>
+          <p>Add the jobs you apply to and log what you study. Seconds a day, and it builds your real history.</p>
         </article>
         <article class="step">
           <span class="step-num">03</span>
-          <h3>Review your progress</h3>
-          <p>See what's working, which platforms respond, where to follow up, and how consistent your prep has been.</p>
+          <h3>Review and decide what's next</h3>
+          <p>See what's working, which platforms respond, where to follow up, and how consistent you've been.</p>
         </article>
       </div>
     </section>
 
-    <!-- ===== OPTIONAL 10-DAY CHALLENGE ===== -->
+    <!-- ===== OPTIONAL CHALLENGE ===== -->
     <section class="section reveal" id="challenge">
       <div class="challenge-wrap">
         <div class="ch-text">
-          <span class="eyebrow">OPTIONAL · BUILD CONSISTENCY</span>
-          <h2>Want a push? Take the 10-day challenge.</h2>
-          <p class="section-intro">The workspace is yours to use at your own pace. If you want structure, the optional 10-day challenge helps you show up daily — log your practice and applications for 10 consecutive days to qualify for <strong>Super Warriors</strong>, an advanced track for deeper, peer-accountable prep.</p>
+          <span class="eyebrow">OPTIONAL</span>
+          <h2>Need a little structure? Start with 10 days.</h2>
+          <p class="section-intro">The workspace is fully yours without it. But if you want a push to stay consistent, log your applications and practice for 10 straight days to qualify for <strong>Super Warriors</strong>, an advanced track for deeper, peer-accountable prep.</p>
           <ul class="check-list">
-            <li>Entirely optional — the trackers work with or without it.</li>
+            <li>Completely optional — the trackers work with or without it.</li>
             <li>Complete all 10 consecutive days to qualify.</li>
-            <li>Super Warriors is an upcoming track — we won't pretend features exist before they're ready.</li>
+            <li>Think of it as the start of a longer ~45-day habit — a suggested horizon, not a promise of a job.</li>
+            <li>Super Warriors is an upcoming track; we won't pretend features exist before they're ready.</li>
           </ul>
         </div>
         <aside class="ch-visual" aria-hidden="true">
@@ -253,13 +315,13 @@
       </div>
     </section>
 
-    <!-- ===== FINAL CTA ===== -->
-    <section class="end-cta reveal">
+    <!-- ===== FINAL CTA (action) ===== -->
+    <section class="end-cta reveal" data-bee-stop>
       <div>
-        <h2>Bring your whole job search together.</h2>
-        <p>Your applications have a tracker. Your prep has a tracker. Start using both — free for the first 500 members.</p>
+        <h2>You're already putting in the effort.<br>Start keeping track of it.</h2>
+        <p>Bring your job search and interview preparation together in one place — free for the first 500 members.</p>
       </div>
-      <button class="btn primary lg" data-action="start">Create My Free Workspace →</button>
+      <button class="btn primary lg" data-action="start" data-bee-cta>Create My Free Workspace →</button>
     </section>
   </main>
 
