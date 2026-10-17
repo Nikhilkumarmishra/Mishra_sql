@@ -1,17 +1,21 @@
-/* Data Warriors — landing interactions. Isolated page; reuses the same
-   Supabase project and msql_sess session as AnalystWorld. The daily
-   dashboard / challenge RPCs are wired in a later phase. */
+/* Data Warriors — landing + workspace. Isolated page; reuses the same
+   Supabase project and msql_sess session as AnalystWorld. All challenge
+   state flows through the owner-scoped dw_* RPCs. */
 (function () {
   'use strict';
 
   var SUPABASE_URL = 'https://wyxutuqckkdkraawyxff.supabase.co';
   var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5eHV0dXFja2tka3JhYXd5eGZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMzQ3NzksImV4cCI6MjA5MzcxMDc3OX0.ale0hHkE36PPQwKiqo5ViS3bi28krpU8gHXiWCKyLAU';
   var AUTH = SUPABASE_URL + '/auth/v1';
+  var API = SUPABASE_URL + '/rest/v1';
 
   var dialog = document.getElementById('authDialog');
   var authContent = document.getElementById('authContent');
   var toastEl = document.getElementById('toast');
   var session = null, toastTimer;
+  var state = null, currentRange = 7, currentView = 'dashboard', wsBound = false, community = null;
+  var SOURCES = ['LinkedIn','Naukri','Hirist','Company site','Referral','Other'];
+  var RANGES = [['Today',1],['3 days',3],['7 days',7],['10 days',10],['15 days',15],['30 days',30],['45 days',45]];
 
   function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function toast(msg){toastEl.textContent=msg;toastEl.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){toastEl.classList.remove('show');},3400);}
@@ -19,6 +23,14 @@
   function saveSession(s){session=s;try{localStorage.setItem('msql_sess',JSON.stringify(s));}catch(_){}}
   function displayName(){var u=session&&session.user;return (u&&((u.user_metadata&&(u.user_metadata.full_name||u.user_metadata.name))||(u.email&&u.email.split('@')[0])))||'Warrior';}
   function authHeaders(){return {'Content-Type':'application/json','apikey':SUPABASE_ANON};}
+  function tzGuess(){try{return Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Kolkata';}catch(_){return 'Asia/Kolkata';}}
+  async function rpc(name, params){
+    var token = session ? session.access_token : SUPABASE_ANON;
+    var res = await fetch(API + '/rpc/' + name, {method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON,'Authorization':'Bearer '+token}, body:JSON.stringify(params||{})});
+    var data = await res.json().catch(function(){return null;});
+    if(!res.ok){ throw new Error((data&&(data.message||data.hint||data.details))||'Something went wrong. Please try again.'); }
+    return data;
+  }
 
   async function validSession(){
     var s=readSession(); if(!s||!s.access_token) return null;
@@ -46,11 +58,8 @@
 
   /* ---------- primary CTA ---------- */
   function start(){
-    if(session&&session.user){
-      toast('You’re signed in, '+displayName()+'. Your workspace opens in the next update.');
-    }else{
-      showAuth('signup');
-    }
+    if(session&&session.user){ register(); }
+    else { try{localStorage.setItem('dw_pending_registration','1');}catch(_){ } showAuth('signup'); }
   }
 
   /* ---------- auth dialog ---------- */
@@ -73,7 +82,7 @@
 
   async function authenticate(ev){
     ev.preventDefault();
-    var form=ev.currentTarget,fd=new FormData(form),signup=!!fd.get('name');
+    var form=ev.target,fd=new FormData(form),signup=!!fd.get('name');
     var email=String(fd.get('email')||'').trim(),password=String(fd.get('password')||'');
     var err=document.getElementById('authError'),btn=form.querySelector('button[type=submit]');
     err.textContent='';btn.disabled=true;btn.textContent='Please wait…';
@@ -86,7 +95,8 @@
       if(data.access_token){
         data.expires_at=Math.floor(Date.now()/1000)+(data.expires_in||3600);
         saveSession(data);dialog.close();renderAccount();
-        toast('Welcome, '+displayName()+'. You’re ready for Data Warriors.');
+        toast('Welcome, '+displayName()+'.');
+        afterAuth();
       }else{
         err.textContent='Account created. Check your email to confirm, then return here and log in.';
         btn.disabled=false;btn.textContent='Create account & continue';
@@ -102,7 +112,7 @@
     try{var u=await fetch(AUTH+'/user',{headers:{apikey:SUPABASE_ANON,Authorization:'Bearer '+access}}).then(function(r){return r.json();});if(u.id)s.user=u;}catch(_){}
     saveSession(s);history.replaceState({},'', '/data-warriors');
   }
-  function logout(){session=null;try{localStorage.removeItem('msql_sess');}catch(_){}renderAccount();toast('You are signed out.');}
+  function logout(){session=null;state=null;community=null;try{localStorage.removeItem('msql_sess');}catch(_){}exitToLanding();renderAccount();toast('You are signed out.');}
 
   /* ---------- delegated events ---------- */
   document.addEventListener('click',function(ev){
@@ -142,6 +152,230 @@
   else{
     var io=new IntersectionObserver(function(entries){entries.forEach(function(en){if(en.isIntersecting){activate(en.target);io.unobserve(en.target);}});},{rootMargin:'0px 0px -8% 0px',threshold:.12});
     animated.forEach(function(el){io.observe(el);});
+  }
+
+  /* ================= WORKSPACE (registered users) ================= */
+  var wsEl = document.getElementById('workspace');
+  var prepCat = null, prepType = 'practice', jobStatus = 'applied', jobSource = 'LinkedIn', appFilter = 'all';
+
+  function register(){
+    if(!session){ try{localStorage.setItem('dw_pending_registration','1');}catch(_){ } showAuth('signup'); return Promise.resolve(); }
+    return rpc('dw_register',{p_timezone:tzGuess()}).then(function(){ return loadWorkspace(currentRange); })
+      .then(function(){ toast('Your workspace is ready.'); }).catch(function(e){ toast(e.message); });
+  }
+  async function loadWorkspace(days){
+    if(days) currentRange = days;
+    state = await rpc('dw_get_state',{p_days:currentRange});
+    if(state && state.registered){ enterWorkspace(); } else { exitToLanding(); }
+  }
+  async function afterAuth(){
+    var pending=false; try{pending=localStorage.getItem('dw_pending_registration')==='1'; localStorage.removeItem('dw_pending_registration');}catch(_){ }
+    try{ var st=await rpc('dw_get_state',{p_days:currentRange}); if(st&&st.registered){ state=st; enterWorkspace(); return; } }catch(_){ }
+    if(pending){ await register(); }
+  }
+
+  function enterWorkspace(){
+    var main=document.getElementById('main'), nav=document.getElementById('nav'), ft=document.querySelector('.footer');
+    if(main) main.hidden=true; if(nav) nav.style.display='none'; if(ft) ft.style.display='none';
+    var bee=document.getElementById('bee'); if(bee) bee.style.display='none';
+    var sp=document.getElementById('sparkles'); if(sp) sp.style.display='none';
+    document.body.classList.add('ws-mode');
+    wsEl.hidden=false;
+    if(!wsBound){ bindWorkspace(); wsBound=true; }
+    renderWorkspace();
+    window.scrollTo(0,0);
+  }
+  function exitToLanding(){
+    var main=document.getElementById('main'), nav=document.getElementById('nav'), ft=document.querySelector('.footer');
+    if(main) main.hidden=false; if(nav) nav.style.display=''; if(ft) ft.style.display='';
+    document.body.classList.remove('ws-mode');
+    wsEl.hidden=true; wsEl.innerHTML='';
+  }
+  function setView(v){ currentView=v; if(v==='community' && !community){ renderWorkspace(); loadCommunity(); } else { renderWorkspace(); } }
+  function setRange(days){ loadWorkspace(days); }
+
+  /* ---- small render helpers ---- */
+  function pct(a,b){ return Math.max(0,Math.min(100, Math.round((a/Math.max(1,b))*100))); }
+  function ring(count,target){
+    var r=22,c=2*Math.PI*r,off=c*(1-Math.min(1,count/Math.max(1,target))),done=count>=target;
+    return '<div class="ring '+(done?'done':'')+'"><svg viewBox="0 0 56 56" aria-hidden="true"><circle class="rt" cx="28" cy="28" r="'+r+'"/><circle class="rf" cx="28" cy="28" r="'+r+'" style="stroke-dasharray:'+c.toFixed(1)+';stroke-dashoffset:'+off.toFixed(1)+'"/></svg><span class="ring-num">'+count+'<em>/'+target+'</em></span></div>';
+  }
+  function statusChip(s){ return '<span class="st st-'+esc(s)+'">'+esc(s)+'</span>'; }
+  function fmtDate(d){ if(!d) return ''; try{var x=new Date(d+'T00:00:00');return x.toLocaleDateString(undefined,{month:'short',day:'numeric'});}catch(_){return d;} }
+  function fmtAgo(ts){ try{var s=(Date.now()-new Date(ts).getTime())/1000; if(s<60)return 'just now'; if(s<3600)return Math.floor(s/60)+'m ago'; if(s<86400)return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago';}catch(_){return '';} }
+
+  function renderWorkspace(){
+    if(!state) return;
+    var m=state.member, name=displayName();
+    wsEl.innerHTML =
+      '<header class="ws-head"><div class="ws-head-in">'+
+        '<a class="brand" href="/home">Analyst<span>World</span><em>Data Warriors</em></a>'+
+        '<div class="ws-streak"><b>'+(state.streak.current)+'</b> day streak · Day '+Math.max(1,m.day_number)+'</div>'+
+        '<div class="ws-head-right">'+
+          '<label class="ws-range-wrap">Range <select class="ws-range" data-ws="range">'+RANGES.map(function(r){return '<option value="'+r[1]+'"'+(r[1]===currentRange?' selected':'')+'>'+r[0]+'</option>';}).join('')+'</select></label>'+
+          '<span class="ws-user">'+esc(session&&session.user&&session.user.email||name)+'</span>'+
+          '<button class="link-btn" data-ws="logout">Log out</button>'+
+        '</div>'+
+      '</div></header>'+
+      '<nav class="ws-tabs">'+['dashboard','Dashboard','applications','Applications','prep','Prep','community','Community'].reduce(function(a,_,i,arr){if(i%2)return a;return a+'<button class="ws-tab'+(arr[i]===currentView?' on':'')+'" data-ws="view" data-view="'+arr[i]+'">'+arr[i+1]+'</button>';},'')+'</nav>'+
+      '<main class="ws-body">'+ (
+        currentView==='applications'?viewApplications():
+        currentView==='prep'?viewPrep():
+        currentView==='community'?viewCommunity():
+        viewDashboard()
+      )+'</main>';
+  }
+
+  /* ---- Dashboard view ---- */
+  function viewDashboard(){
+    var k=state.kpis, t=state.today, tg=state.targets, s=state.streak, rangeLabel=(RANGES.filter(function(r){return r[1]===currentRange;})[0]||['',''])[0];
+    var kpis=[['Applications',k.applications,'applied'],['Responses',k.responses,'heard back'],['Interviews',k.interviews,'reached'],['Prep sessions',k.prep_sessions,'logged'],['Active days',k.active_days,'in range'],['Saved',k.saved,'parked']];
+    var html='<section class="ws-sec"><div class="ws-sec-h"><h2>Your progress</h2><span class="ws-range-note">Last '+esc(rangeLabel)+'</span></div>'+
+      '<div class="kpi-row">'+kpis.map(function(x){return '<div class="kpi"><span>'+x[0]+'</span><strong>'+x[1]+'</strong><em>'+x[2]+'</em></div>';}).join('')+'</div></section>';
+    // today goal
+    html+='<section class="ws-sec"><div class="ws-grid2">'+
+      '<div class="panel goal"><h3>Today’s goal</h3><div class="goal-rings">'+
+        '<div class="gr">'+ring(t.applications_applied,tg.applications)+'<span>Applications</span></div>'+
+        '<div class="gr">'+ring(t.prep_total,tg.prep)+'<span>Prep entries</span></div>'+
+      '</div>'+(t.day_complete?'<div class="goal-done">✓ Day complete — streak counted</div>':'<div class="goal-todo">Hit both targets to complete today.</div>')+
+      '<div class="inline-cta"><button class="btn primary sm" data-ws="view" data-view="applications">Log a job</button><button class="btn ghost sm" data-ws="view" data-view="prep">Log prep</button></div></div>'+
+      '<div class="panel challenge-panel"><h3>10-day challenge</h3><div class="dots10">'+Array.apply(null,{length:10}).map(function(_,i){var on=i<s.current;return '<span class="d10'+(on?' on':'')+'">'+(i+1)+'</span>';}).join('')+'</div>'+
+        '<p class="subtle">'+(s.qualified?'🎉 You’ve completed a 10-day streak — Super Warriors (coming soon).':'Current streak '+s.current+' / 10 · longest '+s.max+'. Complete '+tg.applications+' apps + '+tg.prep+' prep on 10 straight days.')+'</p></div>'+
+      '</div></section>';
+    // insights
+    html+='<section class="ws-sec"><div class="ws-grid2">';
+    // sources
+    html+='<div class="panel"><h3>Which sources respond</h3>'+ (state.sources.length?state.sources.map(function(s2){return '<div class="src-rate"><span class="src">'+esc(s2.source)+'</span><i class="bar"><b style="width:'+pct(s2.responses,s2.applied)+'%"></b></i><strong>'+s2.responses+' / '+s2.applied+'</strong></div>';}).join(''):'<p class="empty-note">No applications in this range yet. Log a few to see which platforms reply.</p>') +'</div>';
+    // prep by subject
+    html+='<div class="panel"><h3>Prep by subject</h3>'+ (state.prep_by_subject.length?state.prep_by_subject.map(function(p){var mx=state.prep_by_subject[0].total;return '<div class="src-rate"><span class="src">'+esc(p.name)+'</span><i class="bar"><b style="width:'+pct(p.total,mx)+'%"></b></i><strong>'+p.total+'</strong></div>';}).join(''):'<p class="empty-note">No prep logged in this range yet.</p>') +'</div>';
+    html+='</div></section>';
+    // follow-ups + consistency + recent
+    html+='<section class="ws-sec"><div class="ws-grid3">';
+    html+='<div class="panel"><h3>Follow-ups due</h3>'+ (state.follow_ups.length?state.follow_ups.map(function(f){return '<div class="fu"><span class="org-dot'+(f.overdue?' od':'')+'"></span><div><b>'+esc(f.company)+'</b><em>'+esc(f.role)+' · '+(f.overdue?'overdue':fmtDate(f.follow_up_date))+'</em></div></div>';}).join(''):'<p class="empty-note">No follow-ups scheduled.</p>') +'</div>';
+    html+='<div class="panel"><h3>Consistency</h3><div class="consist">'+ state.consistency.map(function(c){var tot=c.apps+c.prep,h=Math.min(100,tot*8);return '<span class="cbar" title="'+c.date+': '+c.apps+' apps, '+c.prep+' prep" style="height:'+Math.max(6,h)+'%"></span>';}).join('') +'</div><p class="subtle">Daily activity over the range.</p></div>';
+    html+='<div class="panel"><h3>Recent activity</h3>'+ (state.recent.length?'<div class="recent">'+state.recent.slice(0,8).map(function(r){return r.kind==='app'?'<div class="rc"><span class="rc-k app">Job</span>'+esc(r.company)+' · '+esc(r.role)+' <em>'+fmtAgo(r.at)+'</em></div>':'<div class="rc"><span class="rc-k prep">'+esc(r.type)+'</span>'+esc(r.category)+' · '+esc(r.topic)+' <em>'+fmtAgo(r.at)+'</em></div>';}).join('')+'</div>':'<p class="empty-note">Nothing logged yet.</p>') +'</div>';
+    html+='</div></section>';
+    return html;
+  }
+
+  /* ---- Applications view ---- */
+  function viewApplications(){
+    var apps=state.applications, tg=state.targets, t=state.today;
+    var filtered=apps.filter(function(a){ if(appFilter==='all')return true; if(appFilter==='saved')return a.status==='saved'; if(appFilter==='applied')return a.status!=='saved'; return a.status===appFilter; });
+    var html='<section class="ws-sec"><div class="ws-sec-h"><h2>Job applications</h2><span class="ws-range-note">'+t.applications_applied+' / '+tg.applications+' applied today</span></div>'+
+      '<form class="quick-add" data-ws-form="job">'+
+        '<div class="qa-row"><input name="company" placeholder="Company" required maxlength="120"><input name="role" placeholder="Role / title" required maxlength="120"></div>'+
+        '<div class="qa-row"><input class="wide" name="url" type="url" placeholder="Job URL (optional)" maxlength="1000"></div>'+
+        '<div class="chips" data-chips="source">'+SOURCES.map(function(s){return '<button type="button" class="chip'+(s===jobSource?' on':'')+'" data-source="'+esc(s)+'">'+esc(s)+'</button>';}).join('')+'</div>'+
+        '<div class="qa-actions"><div class="seg"><button type="button" class="seg-btn'+(jobStatus==='applied'?' on':'')+'" data-status="applied">Applied</button><button type="button" class="seg-btn'+(jobStatus==='saved'?' on':'')+'" data-status="saved">Saved for later</button></div><button class="btn primary sm" type="submit">Add</button></div>'+
+      '</form>';
+    html+='<div class="filter-chips">'+[['all','All'],['applied','Applied'],['saved','Saved'],['interview','Interview'],['offer','Offer'],['rejected','Rejected']].map(function(f){return '<button class="fchip'+(appFilter===f[0]?' on':'')+'" data-ws="appfilter" data-filter="'+f[0]+'">'+f[1]+'</button>';}).join('')+'</div>';
+    html+= filtered.length? '<div class="app-list">'+filtered.map(appRow).join('')+'</div>' : '<div class="empty-state"><h3>No applications here yet</h3><p>Add your first one above — company, role, where you found it. It takes seconds.</p></div>';
+    html+='</section>';
+    return html;
+  }
+  function appRow(a){
+    var statuses=['saved','applied','screening','interview','offer','rejected'];
+    return '<div class="app-row" data-id="'+a.id+'">'+
+      '<div class="app-main"><div class="app-title"><b>'+esc(a.role)+'</b> <span class="at-co">'+esc(a.company)+'</span></div>'+
+        '<div class="app-meta"><span class="src">'+esc(a.source)+'</span>'+(a.date_applied?'<span>applied '+fmtDate(a.date_applied)+'</span>':'<span>saved</span>')+(a.job_url?' · <a href="'+esc(a.job_url)+'" target="_blank" rel="noopener noreferrer">link</a>':'')+'</div></div>'+
+      '<div class="app-ctrl">'+
+        '<select class="app-status" data-ws="status" data-id="'+a.id+'">'+statuses.map(function(s){return '<option value="'+s+'"'+(s===a.status?' selected':'')+'>'+s+'</option>';}).join('')+'</select>'+
+        '<label class="fu-date" title="Follow-up date">⏰<input type="date" value="'+(a.follow_up_date||'')+'" data-ws="followup" data-id="'+a.id+'"></label>'+
+        '<button class="icon-btn" data-ws="delapp" data-id="'+a.id+'" aria-label="Delete">×</button>'+
+      '</div></div>';
+  }
+
+  /* ---- Prep view ---- */
+  function viewPrep(){
+    var cats=state.categories, active=cats.filter(function(c){return c.is_active;});
+    if(!prepCat || !active.some(function(c){return c.id===prepCat;})) prepCat = active.length?active[0].id:null;
+    var tg=state.targets;
+    var html='<section class="ws-sec"><div class="ws-sec-h"><h2>Interview prep</h2><span class="ws-range-note">'+state.today.prep_total+' / '+tg.prep+' entries today</span></div>';
+    html+='<form class="quick-add" data-ws-form="prep">'+
+      '<div class="chips" data-chips="cat">'+active.map(function(c){return '<button type="button" class="chip'+(c.id===prepCat?' on':'')+'" data-cat="'+c.id+'">'+esc(c.name)+'</button>';}).join('')+ (active.length?'':'<span class="empty-note">Activate a skill below to start logging.</span>') +'</div>'+
+      '<div class="qa-row"><input class="wide" name="topic" placeholder="What did you work on? (e.g. Window functions)" required maxlength="160"></div>'+
+      '<div class="qa-row"><input class="wide" name="url" type="url" placeholder="Resource link (optional)" maxlength="1000"></div>'+
+      '<div class="qa-actions"><div class="seg"><button type="button" class="seg-btn'+(prepType==='practice'?' on':'')+'" data-type="practice">Practice</button><button type="button" class="seg-btn'+(prepType==='learn'?' on':'')+'" data-type="learn">Learn</button></div><button class="btn primary sm" type="submit"'+(active.length?'':' disabled')+'>Add entry</button></div>'+
+    '</form>';
+    // category rings
+    html+='<div class="cat-rings">'+active.map(function(c){return '<div class="cr">'+ring(c.today_count,tg.prep)+'<span>'+esc(c.name)+'</span><em>'+c.streak+'🔥</em></div>';}).join('')+'</div>';
+    // today entries
+    html+='<div class="ws-sec-h sub"><h3>Today’s entries</h3></div>';
+    html+= state.today_prep.length? '<div class="prep-list">'+state.today_prep.map(function(p){return '<div class="prep-row"><span class="dot '+esc(p.type)+'">'+esc(p.type)+'</span><span class="pr-cat">'+esc(p.category)+'</span><span class="pr-topic">'+esc(p.topic)+(p.resource_url?' · <a href="'+esc(p.resource_url)+'" target="_blank" rel="noopener noreferrer">link</a>':'')+'</span><button class="icon-btn" data-ws="delprep" data-id="'+p.id+'" aria-label="Delete">×</button></div>';}).join('')+'</div>' : '<p class="empty-note">No entries yet today. Pick a skill and log what you practised.</p>';
+    // manage skills
+    html+='<div class="ws-sec-h sub"><h3>Your skills</h3></div><div class="skills-manage">'+cats.map(function(c){return '<div class="skill-row'+(c.is_active?'':' off')+'"><span>'+esc(c.name)+(c.is_default?' <em>default</em>':'')+'</span><div class="skill-ctrl"><button class="mini-btn" data-ws="togglecat" data-id="'+c.id+'" data-active="'+(c.is_active?'0':'1')+'">'+(c.is_active?'Deactivate':'Activate')+'</button>'+(c.is_default?'':'<button class="icon-btn" data-ws="delcat" data-id="'+c.id+'" aria-label="Remove">×</button>')+'</div></div>';}).join('')+
+      '<form class="add-skill" data-ws-form="cat"><input name="name" placeholder="Add a skill (Python, Power BI, DAX…)" maxlength="40"><button class="mini-btn" type="submit">Add</button></form></div>';
+    html+='</section>';
+    return html;
+  }
+
+  /* ---- Community view ---- */
+  function viewCommunity(){
+    var html='<section class="ws-sec"><div class="ws-sec-h"><h2>Community job board</h2><span class="ws-range-note">Share 5 · discover more</span></div>'+
+      '<p class="section-intro" style="margin:0 0 18px">Post opportunities you find and discover roles other members shared. The feed grows as more people contribute.</p>'+
+      '<form class="quick-add" data-ws-form="share">'+
+        '<div class="qa-row"><input name="company" placeholder="Company" required maxlength="120"><input name="role" placeholder="Role" required maxlength="120"></div>'+
+        '<div class="qa-row"><input class="wide" name="url" type="url" placeholder="Original job URL (https://…)" required maxlength="1000"></div>'+
+        '<div class="qa-row"><input name="location" placeholder="Location (optional)" maxlength="80"><select name="work_mode"><option value="">Work mode</option><option value="remote">Remote</option><option value="hybrid">Hybrid</option><option value="onsite">On-site</option></select></div>'+
+        '<div class="qa-actions"><span class="subtle">Please share only real, public listings.</span><button class="btn primary sm" type="submit">Share opportunity</button></div>'+
+      '</form>'+
+      '<div class="comm-search"><input type="search" placeholder="Search company, role, location…" data-ws="commsearch" value="'+esc(community&&community.q||'')+'"></div>';
+    if(!community){ html+='<div class="empty-note">Loading opportunities…</div>'; }
+    else if(!community.jobs.length){ html+='<div class="empty-state"><h3>No opportunities yet</h3><p>Be the first to share a role — it helps everyone preparing alongside you.</p></div>'; }
+    else {
+      html+='<div class="ws-range-note" style="margin:4px 0 12px">'+community.total+' active opportunities</div><div class="job-board">'+community.jobs.map(function(j){
+        return '<div class="jb-card"><div class="jb-top"><div><b>'+esc(j.role)+'</b><span class="jb-co">'+esc(j.company)+'</span></div>'+(j.mine?'<span class="jb-mine">You shared</span>':'')+'</div>'+
+          '<div class="jb-meta">'+(j.location?'<span>'+esc(j.location)+'</span>':'')+(j.work_mode?'<span class="jb-mode">'+esc(j.work_mode)+'</span>':'')+(j.source?'<span>'+esc(j.source)+'</span>':'')+'<span>'+fmtDate(j.shared_date)+'</span></div>'+
+          '<div class="jb-actions"><a class="btn primary sm" href="'+esc(j.job_url)+'" target="_blank" rel="noopener noreferrer">Open &amp; apply →</a>'+(j.reported?'<span class="subtle">Reported</span>':'<button class="mini-btn" data-ws="reportjob" data-id="'+j.id+'">Report</button>')+'</div></div>';
+      }).join('')+'</div>';
+    }
+    html+='</section>';
+    return html;
+  }
+  async function loadCommunity(q){
+    try{ community = await rpc('dw_community_feed',{p_limit:40,p_offset:0,p_search:q||null}); community.q=q||''; }
+    catch(e){ community={jobs:[],total:0,q:q||''}; toast(e.message); }
+    if(currentView==='community') renderWorkspace();
+  }
+
+  /* ---- workspace actions (delegated) ---- */
+  function bindWorkspace(){
+    wsEl.addEventListener('click', function(ev){
+      var b=ev.target.closest('[data-ws],[data-source],[data-cat],[data-status],[data-type]'); if(!b) return;
+      var act=b.getAttribute('data-ws');
+      if(b.hasAttribute('data-source')){ jobSource=b.getAttribute('data-source'); b.parentNode.querySelectorAll('.chip').forEach(function(x){x.classList.toggle('on',x===b);}); return; }
+      if(b.hasAttribute('data-cat')){ prepCat=b.getAttribute('data-cat'); b.parentNode.querySelectorAll('.chip').forEach(function(x){x.classList.toggle('on',x===b);}); return; }
+      if(b.hasAttribute('data-type')){ prepType=b.getAttribute('data-type'); b.parentNode.querySelectorAll('.seg-btn').forEach(function(x){x.classList.toggle('on',x===b);}); return; }
+      if(b.hasAttribute('data-status') && b.classList.contains('seg-btn')){ jobStatus=b.getAttribute('data-status'); b.parentNode.querySelectorAll('.seg-btn').forEach(function(x){x.classList.toggle('on',x===b);}); return; }
+      if(act==='view'){ setView(b.getAttribute('data-view')); return; }
+      if(act==='logout'){ logout(); return; }
+      if(act==='appfilter'){ appFilter=b.getAttribute('data-filter'); renderWorkspace(); return; }
+      if(act==='delapp'){ doAction(rpc('dw_delete_application',{p_id:b.getAttribute('data-id')}),'Removed.'); return; }
+      if(act==='delprep'){ doAction(rpc('dw_delete_prep',{p_id:b.getAttribute('data-id')}),'Removed.'); return; }
+      if(act==='togglecat'){ doAction(rpc('dw_set_category_active',{p_id:b.getAttribute('data-id'),p_active:b.getAttribute('data-active')==='1'}),'Updated.'); return; }
+      if(act==='delcat'){ doAction(rpc('dw_delete_category',{p_id:b.getAttribute('data-id')}),'Skill removed.'); return; }
+      if(act==='reportjob'){ var reason=prompt('Why report this? (expired, broken, duplicate, spam, other)'); if(reason){ rpc('dw_report_job',{p_job_id:b.getAttribute('data-id'),p_reason:reason.toLowerCase().trim()}).then(function(){toast('Thanks — reported.');loadCommunity(community&&community.q);}).catch(function(e){toast(e.message);}); } return; }
+    });
+    wsEl.addEventListener('change', function(ev){
+      var el=ev.target, act=el.getAttribute('data-ws');
+      if(act==='range'){ setRange(parseInt(el.value,10)); return; }
+      if(act==='status'){ doAction(rpc('dw_update_application',{p_id:el.getAttribute('data-id'),p_status:el.value}),'Status updated.'); return; }
+      if(act==='followup'){ var v=el.value||null; doAction(rpc('dw_update_application',{p_id:el.getAttribute('data-id'),p_follow_up:v,p_clear_follow_up:!v}),'Follow-up set.'); return; }
+    });
+    wsEl.addEventListener('submit', function(ev){
+      var f=ev.target, kind=f.getAttribute('data-ws-form'); if(!kind) return; ev.preventDefault();
+      var fd=new FormData(f);
+      if(kind==='job'){ doAction(rpc('dw_add_application',{p_company:fd.get('company'),p_role:fd.get('role'),p_source:jobSource,p_url:fd.get('url')||null,p_status:jobStatus}),'Application added.'); }
+      else if(kind==='prep'){ if(!prepCat){toast('Add or activate a skill first.');return;} doAction(rpc('dw_add_prep',{p_category_id:prepCat,p_type:prepType,p_topic:fd.get('topic'),p_url:fd.get('url')||null}),'Logged. Keep going!'); }
+      else if(kind==='cat'){ var n=(fd.get('name')||'').trim(); if(!n)return; doAction(rpc('dw_add_category',{p_name:n}),'Skill added.'); }
+      else if(kind==='share'){ rpc('dw_share_job',{p_company:fd.get('company'),p_role:fd.get('role'),p_url:fd.get('url'),p_source:null,p_location:fd.get('location')||null,p_work_mode:fd.get('work_mode')||null}).then(function(r){ toast(r&&r.duplicate?'Already on the board — thanks!':'Shared with the community.'); f.reset(); loadCommunity(community&&community.q); }).catch(function(e){toast(e.message);}); }
+    });
+    var si;
+    wsEl.addEventListener('input', function(ev){ if(ev.target.getAttribute('data-ws')==='commsearch'){ clearTimeout(si); var q=ev.target.value; si=setTimeout(function(){loadCommunity(q);},350); } });
+  }
+  function doAction(promise, okMsg){
+    promise.then(function(){ return loadWorkspace(currentRange); }).then(function(){ if(okMsg) toast(okMsg); }).catch(function(e){ toast(e.message); });
   }
 
   /* ---------- firefly-bee: idle hover + flutter, swims on scroll, returns home ---------- */
@@ -194,8 +428,11 @@
 
   /* ---------- init ---------- */
   (async function init(){
-    try{await handleCallback();session=await validSession();}catch(_){}
+    try{await handleCallback();session=await validSession();}catch(_){ }
     renderAccount();
-    if(session&&new URLSearchParams(location.search).get('join')==='1'){toast('You’re signed in. Your Data Warriors workspace opens in the next update.');}
+    if(!session) return;
+    try{ var st=await rpc('dw_get_state',{p_days:currentRange}); if(st&&st.registered){ state=st; enterWorkspace(); return; } }catch(_){ }
+    var pending=false; try{pending=localStorage.getItem('dw_pending_registration')==='1';}catch(_){ }
+    if(pending||new URLSearchParams(location.search).get('join')==='1'){ try{localStorage.removeItem('dw_pending_registration');}catch(_){ } await register(); }
   })();
 })();
