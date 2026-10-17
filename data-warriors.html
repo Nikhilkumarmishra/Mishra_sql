@@ -20,19 +20,44 @@
 <body>
   <canvas id="sparkles" aria-hidden="true"></canvas>
   <div id="bee" aria-hidden="true">
-    <svg viewBox="0 0 48 40" width="38" height="32" role="presentation">
+    <svg viewBox="0 0 120 134" width="58" height="65" role="presentation">
+      <defs>
+        <radialGradient id="beeGlow" cx="50%" cy="64%" r="55%">
+          <stop offset="0%" stop-color="#ffe680" stop-opacity=".95"/>
+          <stop offset="45%" stop-color="#ffd21a" stop-opacity=".5"/>
+          <stop offset="100%" stop-color="#ffd21a" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="beeAbd" cx="42%" cy="34%" r="72%">
+          <stop offset="0%" stop-color="#fff7cc"/>
+          <stop offset="46%" stop-color="#ffd21a"/>
+          <stop offset="100%" stop-color="#f2a500"/>
+        </radialGradient>
+        <radialGradient id="beeHead" cx="38%" cy="30%" r="78%">
+          <stop offset="0%" stop-color="#45464c"/>
+          <stop offset="60%" stop-color="#1d1d20"/>
+          <stop offset="100%" stop-color="#111113"/>
+        </radialGradient>
+      </defs>
+      <ellipse class="bee-halo" cx="60" cy="88" rx="48" ry="44" fill="url(#beeGlow)"/>
       <g class="bee-wings">
-        <ellipse class="wing wl" cx="20" cy="11" rx="9" ry="6"/>
-        <ellipse class="wing wr" cx="30" cy="11" rx="9" ry="6"/>
+        <g class="wing wl2"><ellipse cx="33" cy="72" rx="17" ry="11" transform="rotate(-30 33 72)"/></g>
+        <g class="wing wr2"><ellipse cx="87" cy="72" rx="17" ry="11" transform="rotate(30 87 72)"/></g>
+        <g class="wing wl1"><ellipse cx="37" cy="58" rx="21" ry="13" transform="rotate(-18 37 58)"/></g>
+        <g class="wing wr1"><ellipse cx="83" cy="58" rx="21" ry="13" transform="rotate(18 83 58)"/></g>
       </g>
-      <g class="bee-body">
-        <ellipse cx="26" cy="22" rx="13" ry="10" fill="#f5b301"/>
-        <path d="M20 13.5c3 1.2 3 15.8 0 17" stroke="#1b1b1d" stroke-width="3.2" fill="none" stroke-linecap="round"/>
-        <path d="M27 12.5c3.4 1.6 3.4 17.4 0 19" stroke="#1b1b1d" stroke-width="3.4" fill="none" stroke-linecap="round"/>
-        <path d="M34 15c2.4 2 2.4 12 0 14" stroke="#1b1b1d" stroke-width="3" fill="none" stroke-linecap="round"/>
-        <circle cx="14" cy="20" r="2.1" fill="#1b1b1d"/>
-        <path d="M11 13l2 4M16 12l1.5 4.5" stroke="#1b1b1d" stroke-width="1.4" stroke-linecap="round"/>
-      </g>
+      <path class="bee-abd" d="M60 58c20 0 30 16 30 35 0 20-14 35-30 35S30 113 30 93c0-19 10-35 30-35z" fill="url(#beeAbd)"/>
+      <ellipse cx="49" cy="82" rx="7" ry="10" fill="#fff" opacity=".4"/>
+      <path d="M50 24C46 11 40 7 36 5" stroke="#1d1d20" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M70 24C74 11 80 7 84 5" stroke="#1d1d20" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="35" cy="5" r="5.2" fill="#ffd21a" stroke="#1d1d20" stroke-width="2.4"/>
+      <circle cx="85" cy="5" r="5.2" fill="#ffd21a" stroke="#1d1d20" stroke-width="2.4"/>
+      <circle cx="60" cy="43" r="26" fill="url(#beeHead)"/>
+      <ellipse cx="50" cy="33" rx="7" ry="5" fill="#fff" opacity=".16"/>
+      <path d="M46 42c2.4 3.4 7.6 3.4 10 0" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+      <path d="M64 42c2.4 3.4 7.6 3.4 10 0" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+      <path d="M52 50c3.5 6 12.5 6 16 0z" fill="#fff"/>
+      <ellipse cx="45" cy="50" rx="4" ry="2.6" fill="#e6889f" opacity=".85"/>
+      <ellipse cx="75" cy="50" rx="4" ry="2.6" fill="#e6889f" opacity=".85"/>
     </svg>
   </div>
 
@@ -65,20 +90,19 @@
           <button class="btn primary lg" data-action="start" data-bee-cta>Create My Free Workspace <span aria-hidden="true">→</span></button>
           <a class="btn ghost lg" href="#how">See How It Works</a>
         </div>
-        <p class="trust-line">Free for the first 500 registered users · Uses your existing AnalystWorld account · No credit card.</p>
         <p class="audience-line">Built for your next role in data &amp; analytics — Data Analyst, Business Analyst, BI, Product, Growth, MIS &amp; more.</p>
       </div>
 
       <aside class="hero-visual" aria-label="Illustrative workspace preview">
-        <div class="mini-dash">
+        <div class="mini-dash" data-fill>
           <div class="md-top">
             <span class="md-title">Your workspace</span>
             <span class="preview-tag">Preview · sample</span>
           </div>
           <div class="md-kpis">
-            <div class="md-kpi"><span>Applied this week</span><strong>18</strong></div>
-            <div class="md-kpi"><span>Responses</span><strong>5</strong></div>
-            <div class="md-kpi"><span>Interviews</span><strong>2</strong></div>
+            <div class="md-kpi"><span>Applied this week</span><strong data-count="18">18</strong></div>
+            <div class="md-kpi"><span>Responses</span><strong data-count="5">5</strong></div>
+            <div class="md-kpi"><span>Interviews</span><strong data-count="2">2</strong></div>
           </div>
           <div class="md-sec">
             <div class="md-sec-h">Applications by source<em>response rate</em></div>
@@ -102,7 +126,7 @@
     <section class="section reveal" id="problem">
       <div class="section-head">
         <span class="eyebrow">SOUND FAMILIAR?</span>
-        <h2>Your applications are everywhere.<br>Your prep is too.</h2>
+        <h2>Your applications are <span class="mark pain">everywhere</span>.<br>Your prep is too.</h2>
         <p class="section-intro">You've applied to dozens of companies and studied for weeks. But it all lives across portals, emails, notes and memory — so you can't actually tell what's working.</p>
       </div>
       <div class="two-col">
@@ -133,7 +157,7 @@
     <section class="section band reveal" id="compare" data-bee-stop>
       <div class="section-head center">
         <span class="eyebrow">THE DIFFERENCE</span>
-        <h2>From scattered effort to visible progress.</h2>
+        <h2>From scattered effort to <span class="mark win">visible progress</span>.</h2>
         <p class="section-intro">Same effort you're already putting in — finally in one place you can actually read.</p>
       </div>
       <div class="ba-grid">
@@ -170,7 +194,7 @@
       <div class="feature-row">
         <div class="fr-text">
           <span class="kicker">Job search tracker</span>
-          <h3>Stop guessing which job platforms are working.</h3>
+          <h3>Stop guessing which job platforms are <span class="mark win">working</span>.</h3>
           <p>Record every application with its source — LinkedIn, Naukri, Hirist, a company site — then compare responses and interviews <strong>by platform</strong>, built from your own data. Put your effort where it's actually paying off.</p>
           <ul class="check-list">
             <li>How many jobs did I apply to this week?</li>
@@ -181,7 +205,7 @@
           <p class="honesty">This is a <strong>manual tracker</strong> — you add applications yourself; nothing auto-syncs from LinkedIn, Naukri or other portals. Rates are responses ÷ applications per source from what you record. With no responses yet, you'll see an honest empty state, not an invented percentage.</p>
         </div>
         <div class="fr-ui">
-          <div class="ui-card">
+          <div class="ui-card" data-fill>
             <div class="ui-row head"><span>Source</span><span>Applied</span><span>Response rate</span></div>
             <div class="src-rate"><span class="src">LinkedIn</span><i class="bar"><b style="width:40%"></b></i><strong>4 / 10</strong></div>
             <div class="src-rate"><span class="src">Naukri</span><i class="bar"><b style="width:20%"></b></i><strong>1 / 5</strong></div>
@@ -198,7 +222,7 @@
       <div class="feature-row reverse">
         <div class="fr-text">
           <span class="kicker">Interview-prep tracker</span>
-          <h3>Every practice session should count.</h3>
+          <h3>Every practice session should <span class="mark win">count</span>.</h3>
           <p>Log today's SQL questions, Excel exercises, Python practice or a communication session — with the topic and a resource link. Over time you can see what you've covered and which subjects you've been neglecting.</p>
           <div class="tags">
             <span class="tag on">SQL</span><span class="tag on">Excel</span><span class="tag on">Python</span>
@@ -222,16 +246,16 @@
     <section class="section reveal" id="progress" data-bee-stop>
       <div class="section-head">
         <span class="eyebrow">YOUR WEEK, AT A GLANCE</span>
-        <h2>At the end of the week,<br>know exactly where you stand.</h2>
+        <h2>At the end of the week,<br>know <span class="mark win">exactly where you stand</span>.</h2>
         <p class="section-intro">Applications and preparation side by side — so you can see momentum and decide what to do next.</p>
       </div>
-      <div class="dash-preview" aria-label="Illustrative weekly dashboard">
+      <div class="dash-preview" aria-label="Illustrative weekly dashboard" data-fill>
         <span class="preview-tag">Preview · sample data</span>
         <div class="dp-kpis">
-          <div class="dp-kpi"><span>Applications</span><strong>18</strong></div>
-          <div class="dp-kpi"><span>Responses</span><strong>5</strong></div>
-          <div class="dp-kpi"><span>Interviews</span><strong>2</strong></div>
-          <div class="dp-kpi"><span>Prep sessions</span><strong>15</strong></div>
+          <div class="dp-kpi"><span>Applications</span><strong data-count="18">18</strong></div>
+          <div class="dp-kpi"><span>Responses</span><strong data-count="5">5</strong></div>
+          <div class="dp-kpi"><span>Interviews</span><strong data-count="2">2</strong></div>
+          <div class="dp-kpi"><span>Prep sessions</span><strong data-count="15">15</strong></div>
         </div>
         <div class="dp-body">
           <div class="dp-panel">
@@ -293,14 +317,8 @@
       <div class="challenge-wrap">
         <div class="ch-text">
           <span class="eyebrow">OPTIONAL</span>
-          <h2>Need a little structure? Start with 10 days.</h2>
-          <p class="section-intro">The workspace is fully yours without it. But if you want a push to stay consistent, log your applications and practice for 10 straight days to qualify for <strong>Super Warriors</strong>, an advanced track for deeper, peer-accountable prep.</p>
-          <ul class="check-list">
-            <li>Completely optional — the trackers work with or without it.</li>
-            <li>Complete all 10 consecutive days to qualify.</li>
-            <li>Think of it as the start of a longer ~45-day habit — a suggested horizon, not a promise of a job.</li>
-            <li>Super Warriors is an upcoming track; we won't pretend features exist before they're ready.</li>
-          </ul>
+          <h2>Need a little structure?<br>Start with 10 days.</h2>
+          <p class="section-intro">The workspace is fully yours without it. Want a push to stay consistent? Log 10 straight days to qualify for <strong>Super Warriors</strong> — an upcoming advanced track, not live yet.</p>
         </div>
         <aside class="ch-visual" aria-hidden="true">
           <div class="ch-card">

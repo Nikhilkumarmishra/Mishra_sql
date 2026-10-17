@@ -264,9 +264,14 @@ h3{font-family:var(--display);font-weight:700;letter-spacing:-.03em}
 .ba-tag{align-self:flex-start;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 13px;margin-bottom:18px}
 .ba-tag.on{color:var(--green);background:var(--green-soft);border-color:var(--green-line)}
 .ba-scatter{position:relative;flex:1;min-height:200px;display:flex;flex-wrap:wrap;align-content:center;gap:10px;justify-content:center;padding:6px 0}
-.scrap{font-size:12.5px;font-weight:600;color:var(--muted);background:#fff;border:1px dashed #d8d8da;border-radius:9px;padding:8px 11px;box-shadow:0 1px 3px rgba(17,17,17,.04)}
-.scrap.s1{transform:rotate(-4deg)}.scrap.s2{transform:rotate(3deg)}.scrap.s3{transform:rotate(-2deg)}
-.scrap.s4{transform:rotate(5deg)}.scrap.s5{transform:rotate(-5deg)}.scrap.s6{transform:rotate(2deg)}.scrap.s7{transform:rotate(-3deg)}
+.scrap{--r:0deg;font-size:12.5px;font-weight:600;color:var(--muted);background:#fff;border:1px dashed #d8d8da;border-radius:9px;padding:8px 11px;box-shadow:0 1px 3px rgba(17,17,17,.04);transform:rotate(var(--r))}
+.scrap.s1{--r:-4deg}.scrap.s2{--r:3deg}.scrap.s3{--r:-2deg}
+.scrap.s4{--r:5deg}.scrap.s5{--r:-5deg}.scrap.s6{--r:2deg}.scrap.s7{--r:-3deg}
+.ba-card.before .scrap{animation:scrapwobble 5s ease-in-out infinite}
+.ba-card.before .scrap:nth-child(odd){animation-duration:6s}
+.ba-card.before .scrap:nth-child(3n){animation-delay:-2s}
+.ba-card.before .scrap:nth-child(3n+1){animation-delay:-3.5s}
+@keyframes scrapwobble{0%,100%{transform:rotate(var(--r)) translateY(0)}50%{transform:rotate(calc(var(--r) * -0.55)) translateY(-3px)}}
 .ba-organised{flex:1;display:flex;flex-direction:column;justify-content:center;gap:13px;min-height:200px}
 .org-row{display:flex;align-items:center;gap:11px;font-size:14.5px;font-weight:600;color:var(--ink-2);background:#fff;border:1px solid var(--line);border-radius:11px;padding:12px 14px}
 .org-dot{width:9px;height:9px;border-radius:50%;background:var(--green);flex:none;box-shadow:0 0 0 3px var(--green-soft)}
@@ -302,17 +307,56 @@ h3{font-family:var(--display);font-weight:700;letter-spacing:-.03em}
 .dp-recent .r{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
 .muted-note{max-width:720px;margin:20px auto 0;text-align:center;font-size:13px;color:var(--muted);line-height:1.6}
 
-/* ---------- honeybee guide ---------- */
-#sparkles{z-index:4}
-#bee{position:fixed;left:0;top:0;z-index:5;pointer-events:none;opacity:0;will-change:transform,opacity;transition:opacity .5s ease}
-#bee.show{opacity:1}
-#bee svg{display:block;filter:drop-shadow(0 4px 8px rgba(17,17,17,.18))}
-.bee-wings .wing{fill:rgba(180,210,255,.55);transform-box:fill-box;transform-origin:50% 100%;animation:flutter .18s ease-in-out infinite alternate}
-.bee-wings .wr{animation-delay:.09s}
-@keyframes flutter{from{transform:scaleY(1) rotate(0)}to{transform:scaleY(.7) rotate(6deg)}}
+/* ---------- scroll emphasis: pain stress + value highlight ---------- */
+/* animated marker highlight behind key words */
+.mark{position:relative;z-index:0;white-space:nowrap}
+.mark::before{content:"";position:absolute;left:-4px;right:-4px;bottom:.06em;height:34%;z-index:-1;border-radius:3px;transform:scaleX(0);transform-origin:left center;transition:transform .6s .25s var(--ease)}
+.is-visible .mark::before{transform:scaleX(1)}
+.mark.pain::before{background:rgba(240,25,32,.22)}
+.mark.pain{color:var(--red-ink)}
+.mark.win::before{background:rgba(23,134,74,.22)}
+
+/* bars fill smoothly when their section reveals (JS zeroes then restores width) */
+.bar b{transition:width 1s var(--ease)}
+
+/* PAIN — problem x-list enters with tension (staggered, slight shake) */
+.x-list li{opacity:0;transform:translateX(-10px);transition:opacity .45s var(--ease),transform .45s var(--ease)}
+.is-visible .x-list li{opacity:1;transform:none}
+.x-list li:nth-child(1){transition-delay:.06s}
+.x-list li:nth-child(2){transition-delay:.15s}
+.x-list li:nth-child(3){transition-delay:.24s}
+.x-list li:nth-child(4){transition-delay:.33s}
+.is-visible .x-list li::before{animation:xjolt .34s ease-in-out both}
+.is-visible .x-list li:nth-child(1)::before{animation-delay:.2s}
+.is-visible .x-list li:nth-child(2)::before{animation-delay:.29s}
+.is-visible .x-list li:nth-child(3)::before{animation-delay:.38s}
+.is-visible .x-list li:nth-child(4)::before{animation-delay:.47s}
+@keyframes xjolt{0%,100%{transform:translateX(0)}30%{transform:translateX(-2px) scale(1.15)}70%{transform:translateX(2px)}}
+
+/* RELIEF — "after" rows settle in one by one */
+.ba-card.after .org-row{opacity:0;transform:translateY(10px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.is-visible .ba-card.after .org-row{opacity:1;transform:none}
+.is-visible .ba-card.after .org-row:nth-child(1){transition-delay:.15s}
+.is-visible .ba-card.after .org-row:nth-child(2){transition-delay:.28s}
+.is-visible .ba-card.after .org-row:nth-child(3){transition-delay:.41s}
+.is-visible .ba-card.after .org-row:nth-child(4){transition-delay:.54s}
+.is-visible .ba-card.after .org-row:nth-child(5){transition-delay:.67s}
+.is-visible .ba-card.after .org-dot{animation:dotpop .5s var(--ease) both}
+.is-visible .ba-card.after .org-row:nth-child(2) .org-dot{animation-delay:.28s}
+.is-visible .ba-card.after .org-row:nth-child(3) .org-dot{animation-delay:.41s}
+.is-visible .ba-card.after .org-row:nth-child(4) .org-dot{animation-delay:.54s}
+.is-visible .ba-card.after .org-row:nth-child(5) .org-dot{animation-delay:.67s}
+@keyframes dotpop{0%{transform:scale(0)}60%{transform:scale(1.4)}100%{transform:scale(1)}}
+
+/* KPI numbers lift subtly as they count up */
+[data-count]{display:inline-block}
+
 @media (prefers-reduced-motion:reduce){
-  #bee{display:none}
-  .bee-wings .wing{animation:none}
+  .ba-card.before .scrap{animation:none}
+  .mark::before{transform:scaleX(1);transition:none}
+  .x-list li,.ba-card.after .org-row{opacity:1;transform:none;transition:none}
+  .is-visible .x-list li::before,.is-visible .ba-card.after .org-dot{animation:none}
+  .bar b{transition:none}
 }
 
 /* ---------- responsive (added sections) ---------- */
@@ -329,3 +373,19 @@ h3{font-family:var(--display);font-weight:700;letter-spacing:-.03em}
 @media (max-width:440px){
   .src-rate{grid-template-columns:84px 1fr auto;gap:8px}
 }
+
+/* ---------- premium firefly-bee guide ---------- */
+#sparkles{z-index:4}
+#bee{position:fixed;left:0;top:0;z-index:5;pointer-events:none;opacity:0;will-change:transform;transition:opacity .6s ease;filter:drop-shadow(0 0 9px rgba(255,205,30,.55)) drop-shadow(0 6px 10px rgba(17,17,17,.16))}
+#bee.show{opacity:1}
+#bee svg{display:block;overflow:visible}
+.bee-wings .wing ellipse{fill:rgba(255,255,255,.52);stroke:rgba(190,195,210,.55);stroke-width:1}
+.bee-wings .wing{transform-box:view-box;transform-origin:60px 66px;animation:flapL .2s ease-in-out infinite alternate}
+.bee-wings .wr1,.bee-wings .wr2{animation-name:flapR}
+.bee-wings .wl2,.bee-wings .wr2{animation-duration:.26s}
+.bee-halo{animation:beehalo 2.4s ease-in-out infinite}
+@keyframes flapL{from{transform:rotate(0) scaleY(1)}to{transform:rotate(-9deg) scaleY(.78)}}
+@keyframes flapR{from{transform:rotate(0) scaleY(1)}to{transform:rotate(9deg) scaleY(.78)}}
+@keyframes beehalo{0%,100%{opacity:.8}50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){#bee{display:none}}
+@media (max-width:760px){#bee{display:none}}
