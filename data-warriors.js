@@ -153,40 +153,42 @@
     function resize(){if(!ctx)return;cv.width=innerWidth*dpr;cv.height=innerHeight*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
     resize();window.addEventListener('resize',resize,{passive:true});
     function homeX(){return innerWidth-96;} function homeY(){return innerHeight-132;}
-    var bx=homeX(),by=homeY(),dir=1,scrolling=false,lastScroll=0;
-    window.addEventListener('scroll',function(){scrolling=true;lastScroll=performance.now();},{passive:true});
+    function clamp(v,a,b){return v<a?a:v>b?b:v;}
+    var bx=homeX(),by=homeY(),vx=0,vy=0,dir=1;
+    // scroll "nudge" that decays smoothly — no hard state switch, so no stop-jerk
+    var nudgeX=0,nudgeY=0,lastY=window.scrollY;
+    window.addEventListener('scroll',function(){
+      var y=window.scrollY,dy=y-lastY; lastY=y;
+      nudgeY+=clamp(dy,-46,46)*0.6; nudgeX+=(Math.random()-0.5)*6;
+    },{passive:true});
     el.classList.add('show');
     function loop(now){
-      if(scrolling&&now-lastScroll>480)scrolling=false;
-      var tx,ty;
-      if(scrolling){                               // swim around the reading area
-        tx=innerWidth-118+Math.sin(now*0.0040)*52;
-        ty=innerHeight*0.46+Math.cos(now*0.0032)*markRange();
-      }else{                                        // float gently around home
-        tx=homeX()+Math.sin(now*0.0014)*17;
-        ty=homeY()+Math.cos(now*0.0019)*14;
-      }
-      var ox=bx,oy=by;
-      bx+=(tx-bx)*0.06; by+=(ty-by)*0.06;
-      var vx=bx-ox,vy=by-oy,speed=Math.hypot(vx,vy);
-      if(vx<-0.3)dir=-1; else if(vx>0.3)dir=1;
-      var tilt=Math.max(-12,Math.min(12,vx*1.5));
-      el.style.transform='translate('+(bx-29).toFixed(1)+'px,'+(by-32).toFixed(1)+'px) rotate('+tilt.toFixed(1)+'deg) scaleX('+dir+')';
+      nudgeX*=0.9; nudgeY*=0.9;
+      if(Math.abs(nudgeX)<0.05)nudgeX=0; if(Math.abs(nudgeY)<0.05)nudgeY=0;
+      nudgeX=clamp(nudgeX,-70,70); nudgeY=clamp(nudgeY,-170,170);
+      var tx=clamp(homeX()+Math.sin(now*0.0012)*15-nudgeX,70,innerWidth-50);
+      var ty=clamp(homeY()+Math.cos(now*0.0016)*12-nudgeY,80,innerHeight-60);
+      // spring-damper: smooths every direction change, including when scrolling stops
+      vx=(vx+(tx-bx)*0.10)*0.72; vy=(vy+(ty-by)*0.10)*0.72;
+      bx+=vx; by+=vy;
+      var speed=Math.hypot(vx,vy);
+      if(vx<-0.25)dir=-1; else if(vx>0.25)dir=1;
+      var tilt=clamp(vx*1.3,-10,10);
+      el.style.transform='translate('+(bx-30).toFixed(1)+'px,'+(by-35).toFixed(1)+'px) rotate('+tilt.toFixed(1)+'deg) scaleX('+dir+')';
       if(ctx){
-        if(speed>0.6&&parts.length<60){var n=speed>5?2:1;for(var k=0;k<n;k++)parts.push({x:bx-dir*7,y:by+9,life:1,r:5+Math.random()*4});}
-        if(Math.random()<0.16&&parts.length<60)parts.push({x:bx+(Math.random()*16-8),y:by+13+(Math.random()*8),life:.7,r:2+Math.random()*2});
+        if(speed>0.5&&parts.length<60){var n=speed>5?2:1;for(var k=0;k<n;k++)parts.push({x:bx-dir*7,y:by+12,life:1,r:5+Math.random()*4});}
+        if(Math.random()<0.14&&parts.length<60)parts.push({x:bx+(Math.random()*16-8),y:by+16+(Math.random()*8),life:.7,r:2+Math.random()*2});
         ctx.clearRect(0,0,innerWidth,innerHeight);
         ctx.globalCompositeOperation='lighter';
         for(var i=parts.length-1;i>=0;i--){var p=parts[i];p.life-=0.022;if(p.life<=0){parts.splice(i,1);continue;}
           var a=Math.max(0,p.life),rr=p.r*(0.6+a*0.6),g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,rr);
-          g.addColorStop(0,'rgba(255,226,135,'+(a*0.7)+')');g.addColorStop(.5,'rgba(255,196,30,'+(a*0.33)+')');g.addColorStop(1,'rgba(255,196,30,0)');
+          g.addColorStop(0,'rgba(255,228,140,'+(a*0.7)+')');g.addColorStop(.5,'rgba(255,198,32,'+(a*0.33)+')');g.addColorStop(1,'rgba(255,198,32,0)');
           ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,rr,0,6.283);ctx.fill();
         }
         ctx.globalCompositeOperation='source-over';
       }
       requestAnimationFrame(loop);
     }
-    function markRange(){return Math.min(150,innerHeight*0.28);}
     requestAnimationFrame(loop);
   })();
 

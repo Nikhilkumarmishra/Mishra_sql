@@ -20,44 +20,47 @@
 <body>
   <canvas id="sparkles" aria-hidden="true"></canvas>
   <div id="bee" aria-hidden="true">
-    <svg viewBox="0 0 120 134" width="58" height="65" role="presentation">
+    <svg viewBox="0 0 120 142" width="60" height="71" role="presentation">
       <defs>
-        <radialGradient id="beeGlow" cx="50%" cy="64%" r="55%">
-          <stop offset="0%" stop-color="#ffe680" stop-opacity=".95"/>
-          <stop offset="45%" stop-color="#ffd21a" stop-opacity=".5"/>
+        <radialGradient id="beeGlow" cx="50%" cy="66%" r="58%">
+          <stop offset="0%" stop-color="#ffe98f" stop-opacity=".95"/>
+          <stop offset="42%" stop-color="#ffd21a" stop-opacity=".48"/>
           <stop offset="100%" stop-color="#ffd21a" stop-opacity="0"/>
         </radialGradient>
-        <radialGradient id="beeAbd" cx="42%" cy="34%" r="72%">
-          <stop offset="0%" stop-color="#fff7cc"/>
-          <stop offset="46%" stop-color="#ffd21a"/>
-          <stop offset="100%" stop-color="#f2a500"/>
+        <radialGradient id="beeAbd" cx="40%" cy="30%" r="82%">
+          <stop offset="0%" stop-color="#fff8d6"/>
+          <stop offset="40%" stop-color="#ffd934"/>
+          <stop offset="78%" stop-color="#f9bd09"/>
+          <stop offset="100%" stop-color="#e9a200"/>
         </radialGradient>
-        <radialGradient id="beeHead" cx="38%" cy="30%" r="78%">
-          <stop offset="0%" stop-color="#45464c"/>
-          <stop offset="60%" stop-color="#1d1d20"/>
-          <stop offset="100%" stop-color="#111113"/>
+        <radialGradient id="beeHead" cx="35%" cy="27%" r="84%">
+          <stop offset="0%" stop-color="#4e4f56"/>
+          <stop offset="52%" stop-color="#242428"/>
+          <stop offset="100%" stop-color="#0d0d0f"/>
         </radialGradient>
       </defs>
-      <ellipse class="bee-halo" cx="60" cy="88" rx="48" ry="44" fill="url(#beeGlow)"/>
+      <ellipse class="bee-halo" cx="60" cy="96" rx="54" ry="50" fill="url(#beeGlow)"/>
       <g class="bee-wings">
-        <g class="wing wl2"><ellipse cx="33" cy="72" rx="17" ry="11" transform="rotate(-30 33 72)"/></g>
-        <g class="wing wr2"><ellipse cx="87" cy="72" rx="17" ry="11" transform="rotate(30 87 72)"/></g>
-        <g class="wing wl1"><ellipse cx="37" cy="58" rx="21" ry="13" transform="rotate(-18 37 58)"/></g>
-        <g class="wing wr1"><ellipse cx="83" cy="58" rx="21" ry="13" transform="rotate(18 83 58)"/></g>
+        <g class="wing wl2"><ellipse cx="29" cy="76" rx="19" ry="11" transform="rotate(-33 29 76)"/></g>
+        <g class="wing wr2"><ellipse cx="91" cy="76" rx="19" ry="11" transform="rotate(33 91 76)"/></g>
+        <g class="wing wl1"><ellipse cx="34" cy="61" rx="23" ry="13.5" transform="rotate(-20 34 61)"/></g>
+        <g class="wing wr1"><ellipse cx="86" cy="61" rx="23" ry="13.5" transform="rotate(20 86 61)"/></g>
       </g>
-      <path class="bee-abd" d="M60 58c20 0 30 16 30 35 0 20-14 35-30 35S30 113 30 93c0-19 10-35 30-35z" fill="url(#beeAbd)"/>
-      <ellipse cx="49" cy="82" rx="7" ry="10" fill="#fff" opacity=".4"/>
-      <path d="M50 24C46 11 40 7 36 5" stroke="#1d1d20" stroke-width="3" fill="none" stroke-linecap="round"/>
-      <path d="M70 24C74 11 80 7 84 5" stroke="#1d1d20" stroke-width="3" fill="none" stroke-linecap="round"/>
-      <circle cx="35" cy="5" r="5.2" fill="#ffd21a" stroke="#1d1d20" stroke-width="2.4"/>
-      <circle cx="85" cy="5" r="5.2" fill="#ffd21a" stroke="#1d1d20" stroke-width="2.4"/>
-      <circle cx="60" cy="43" r="26" fill="url(#beeHead)"/>
-      <ellipse cx="50" cy="33" rx="7" ry="5" fill="#fff" opacity=".16"/>
-      <path d="M46 42c2.4 3.4 7.6 3.4 10 0" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round"/>
-      <path d="M64 42c2.4 3.4 7.6 3.4 10 0" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round"/>
-      <path d="M52 50c3.5 6 12.5 6 16 0z" fill="#fff"/>
-      <ellipse cx="45" cy="50" rx="4" ry="2.6" fill="#e6889f" opacity=".85"/>
-      <ellipse cx="75" cy="50" rx="4" ry="2.6" fill="#e6889f" opacity=".85"/>
+      <path class="bee-abd" d="M60 55c19 0 31 17 31 38 0 22-14 40-31 40s-31-18-31-40c0-21 12-38 31-38z" fill="url(#beeAbd)"/>
+      <ellipse cx="48" cy="82" rx="8.5" ry="14" fill="#fff" opacity=".5"/>
+      <ellipse cx="52" cy="74" rx="4" ry="5.5" fill="#fff" opacity=".85"/>
+      <path d="M51 22C47 11 42 7 40 5" stroke="#15151a" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <path d="M69 22C73 11 78 7 80 5" stroke="#15151a" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <circle cx="39" cy="5" r="5" fill="#ffd21a" stroke="#15151a" stroke-width="1.6"/>
+      <circle cx="81" cy="5" r="5" fill="#ffd21a" stroke="#15151a" stroke-width="1.6"/>
+      <circle cx="60" cy="42" r="27" fill="url(#beeHead)"/>
+      <ellipse cx="49" cy="31" rx="9" ry="6.5" fill="#fff" opacity=".14"/>
+      <circle cx="71" cy="34" r="3" fill="#fff" opacity=".18"/>
+      <path d="M43 42q6 7.5 12 0" stroke="#fdfdfd" stroke-width="3.1" fill="none" stroke-linecap="round"/>
+      <path d="M65 42q6 7.5 12 0" stroke="#fdfdfd" stroke-width="3.1" fill="none" stroke-linecap="round"/>
+      <path d="M48 51c2.5 11 21.5 11 24 0 -5.5 4.5 -18.5 4.5 -24 0z" fill="#fff"/>
+      <ellipse cx="43.5" cy="51.5" rx="4.4" ry="2.8" fill="#ef96ad" opacity=".85"/>
+      <ellipse cx="76.5" cy="51.5" rx="4.4" ry="2.8" fill="#ef96ad" opacity=".85"/>
     </svg>
   </div>
 
