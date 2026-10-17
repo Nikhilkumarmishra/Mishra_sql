@@ -47,7 +47,7 @@
   /* ---------- primary CTA ---------- */
   function start(){
     if(session&&session.user){
-      toast('You’re signed in, '+displayName()+'. Your daily dashboard opens in the next update.');
+      toast('You’re signed in, '+displayName()+'. Your workspace opens in the next update.');
     }else{
       showAuth('signup');
     }
@@ -57,7 +57,7 @@
   function formHtml(mode){
     var signup=mode==='signup';
     authContent.innerHTML='<form class="auth-form" id="authForm">'+
-      '<h2>'+(signup?'Start your 10-day streak':'Welcome back')+'</h2>'+
+      '<h2>'+(signup?'Create your free workspace':'Welcome back')+'</h2>'+
       '<p>'+(signup?'Your AnalystWorld account is your Data Warriors account — no second login.':'Log in with the account you use on AnalystWorld.')+'</p>'+
       (signup?'<label for="dwName">Full name</label><input id="dwName" name="name" autocomplete="name" required maxlength="100">':'')+
       '<label for="dwEmail">Email</label><input id="dwEmail" name="email" type="email" autocomplete="email" required>'+
@@ -162,6 +162,6 @@
   (async function init(){
     try{await handleCallback();session=await validSession();}catch(_){}
     renderAccount();
-    if(session&&new URLSearchParams(location.search).get('join')==='1'){toast('You’re signed in. Your Data Warriors dashboard opens in the next update.');}
+    if(session&&new URLSearchParams(location.search).get('join')==='1'){toast('You’re signed in. Your Data Warriors workspace opens in the next update.');}
   })();
 })();
