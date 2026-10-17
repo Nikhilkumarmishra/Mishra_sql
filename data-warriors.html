@@ -1,20 +1,313 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#f01920"><meta name="description" content="A 45-day consistency challenge for aspiring data analysts. Practice daily, track your progress, and earn your next level.">
-  <title>Data Warriors · AnalystWorld</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f01920">
+  <title>Data Warriors | Build Skills, Streaks &amp; Career Opportunities</title>
+  <meta name="description" content="Build daily learning habits, track your skills, discover relevant job opportunities, and grow with the AnalystWorld community. Start your 10-day streak.">
+  <link rel="canonical" href="https://analystworld.in/data-warriors">
+  <meta property="og:title" content="Data Warriors | Build Skills, Streaks &amp; Career Opportunities">
+  <meta property="og:description" content="Show up daily. Track your learning. Discover opportunities. Grow together.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://analystworld.in/data-warriors">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/data-warriors.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/home" aria-label="AnalystWorld home">Analyst<span>World</span></a><div id="accountArea"><a class="text-link" href="/home">Back to AnalystWorld</a></div></header>
-  <main id="app" aria-live="polite">
-    <section class="loading"><span class="spinner"></span><p>Loading Data Warriors…</p></section>
+  <!-- cursor sparkle layer (desktop, respects reduced-motion) -->
+  <canvas id="sparkles" aria-hidden="true"></canvas>
+
+  <!-- ===== NAV ===== -->
+  <header class="nav" id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/home" aria-label="AnalystWorld home">Analyst<span>World</span><em>Data Warriors</em></a>
+      <nav class="nav-links" id="navLinks" aria-label="Primary">
+        <a href="#how">How it works</a>
+        <a href="#routine">Daily routine</a>
+        <a href="#community">Community</a>
+        <a href="#levels">Super Warriors</a>
+      </nav>
+      <div class="nav-actions">
+        <span id="accountArea"></span>
+        <button class="btn primary sm" data-action="start">Start My 10-Day Streak</button>
+        <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ===== HERO ===== -->
+    <section class="hero reveal">
+      <div class="hero-text">
+        <div class="eyebrow">ANALYSTWORLD PRESENTS</div>
+        <h1>Your growth<br>deserves a <span>streak.</span></h1>
+        <p class="lead">Build skills, track your daily effort, and discover relevant job opportunities with a community that is growing alongside you.</p>
+        <div class="actions">
+          <button class="btn primary lg" data-action="start">Start My 10-Day Streak <span aria-hidden="true">→</span></button>
+          <a class="btn ghost lg" href="#how">Explore How It Works</a>
+        </div>
+        <ul class="hero-benefits">
+          <li><svg viewBox="0 0 24 24" class="ic"><path d="M20 6 9 17l-5-5"/></svg>Practice a little every day.</li>
+          <li><svg viewBox="0 0 24 24" class="ic"><path d="M20 6 9 17l-5-5"/></svg>Discover opportunities shared by peers.</li>
+          <li><svg viewBox="0 0 24 24" class="ic"><path d="M20 6 9 17l-5-5"/></svg>Build momentum toward Super Warriors.</li>
+        </ul>
+      </div>
+
+      <!-- Hero streak-tracker visual -->
+      <aside class="hero-visual" aria-hidden="true">
+        <div class="streak-card">
+          <div class="streak-card-top">
+            <div>
+              <span class="sc-label">Current streak</span>
+              <div class="sc-streak"><strong>7</strong><span class="flame">🔥</span></div>
+            </div>
+            <span class="sc-pill">Day 7 / 10</span>
+          </div>
+          <div class="cal-label">Your last 10 days</div>
+          <div class="cal-grid">
+            <span class="cal on">1</span><span class="cal on">2</span><span class="cal on">3</span>
+            <span class="cal on">4</span><span class="cal on">5</span><span class="cal on">6</span>
+            <span class="cal on today">7</span><span class="cal">8</span><span class="cal">9</span><span class="cal">10</span>
+          </div>
+          <div class="sc-rows">
+            <div class="sc-row"><span>SQL</span><i class="bar"><b style="width:100%"></b></i><em>5/5</em></div>
+            <div class="sc-row"><span>Excel</span><i class="bar"><b style="width:80%"></b></i><em>4/5</em></div>
+            <div class="sc-row"><span>Communication</span><i class="bar"><b style="width:60%"></b></i><em>3/5</em></div>
+            <div class="sc-row"><span>Applications</span><i class="bar"><b style="width:100%"></b></i><em>5/5</em></div>
+          </div>
+        </div>
+        <div class="float-chip chip-a">+1 SQL · Window functions</div>
+        <div class="float-chip chip-b">Shared 5 roles ✓</div>
+      </aside>
+    </section>
+
+    <!-- ===== HOW: three steps ===== -->
+    <section class="section reveal" id="how">
+      <div class="section-head">
+        <h2>Three steps.<br>One better habit.</h2>
+        <p class="section-intro">A simple loop you can repeat every day — no classroom, no pressure. Just momentum.</p>
+      </div>
+      <div class="steps">
+        <article class="step">
+          <span class="step-num">01</span>
+          <h3>Pick your skills</h3>
+          <p>Start with Excel, SQL, and Communication. Add Python, Power BI, Machine Learning, or any other skill you want to improve.</p>
+          <div class="mini-ui tags">
+            <span class="tag on">Excel</span><span class="tag on">SQL</span><span class="tag on">Communication</span>
+            <span class="tag">+ Python</span><span class="tag">+ Power BI</span>
+          </div>
+        </article>
+        <article class="step">
+          <span class="step-num">02</span>
+          <h3>Log your daily effort</h3>
+          <p>Record what you solved, what you learned, and where you practised. Add links so your progress has context.</p>
+          <div class="mini-ui log">
+            <div class="log-row"><span class="dot practice">Practice</span>Window functions</div>
+            <div class="log-row"><span class="dot learn">Learn</span>Pandas groupby</div>
+            <div class="log-row add">+ Add entry</div>
+          </div>
+        </article>
+        <article class="step">
+          <span class="step-num">03</span>
+          <h3>Grow with the community</h3>
+          <p>Share relevant job opportunities, discover roles posted by other members, and build your streak over time.</p>
+          <div class="mini-ui share">
+            <div class="share-flow"><span>You share</span><i>→</i><span>Community</span><i>→</i><span>You discover</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ===== DAILY ROUTINE ===== -->
+    <section class="section reveal" id="routine">
+      <div class="section-head">
+        <h2>Make progress<br>visible.</h2>
+        <p class="section-intro">Two things each day: practise your skills, and chase real opportunities. Everything you log builds your streak and your record.</p>
+      </div>
+
+      <div class="routine-grid">
+        <!-- Skill practice -->
+        <article class="routine-card">
+          <div class="rc-head"><span class="kicker">Skill practice</span><span class="target-badge">5 entries · per category</span></div>
+          <p class="rc-copy">Every day, log <strong>five</strong> learning or practice entries for <strong>each active skill category</strong>. For every entry, choose <strong>Practice</strong> or <strong>Learn</strong>, note what you worked on, and add a link where you have one.</p>
+          <div class="examples">
+            <div class="ex"><span class="cat">SQL</span><span class="dot practice">Practice</span>Window functions</div>
+            <div class="ex"><span class="cat">Excel</span><span class="dot practice">Practice</span>XLOOKUP interview questions</div>
+            <div class="ex"><span class="cat">Python</span><span class="dot learn">Learn</span>Pandas groupby</div>
+            <div class="ex"><span class="cat">Communication</span><span class="dot practice">Practice</span>Explaining my project</div>
+          </div>
+          <div class="callout">
+            <strong>That's five entries per category — not five in total.</strong>
+            Your three defaults are Excel, SQL, and Communication. Add or remove your own — Python, Power BI, Machine Learning, DAX, Statistics — so you only track what you're actually learning.
+          </div>
+        </article>
+
+        <!-- Job applications -->
+        <article class="routine-card">
+          <div class="rc-head"><span class="kicker">Job applications</span><span class="target-badge red">Apply to 5 roles · daily</span></div>
+          <p class="rc-copy">Find at least five relevant opportunities each day. Record the company, role, and job link, and track whether you actually applied — then share the good ones with the community.</p>
+          <div class="job-rows">
+            <div class="job-row">
+              <div class="job-meta"><strong>Data Analyst</strong><span>Acme Analytics</span></div>
+              <span class="status applied">Applied</span>
+            </div>
+            <div class="job-row">
+              <div class="job-meta"><strong>Business Analyst</strong><span>Northwind Co.</span></div>
+              <span class="status saved">Saved</span>
+            </div>
+            <div class="job-row">
+              <div class="job-meta"><strong>Marketing Analyst</strong><span>Lumen Media</span></div>
+              <span class="status applied">Applied</span>
+            </div>
+          </div>
+          <div class="callout subtle-callout">
+            A <strong>saved</strong> opportunity is one you're keeping for later. It only counts toward your daily five once you've actually <strong>applied</strong>.
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ===== COMMUNITY ===== -->
+    <section class="section band reveal" id="community">
+      <div class="section-head center">
+        <h2>You share 5.<br>You discover more.</h2>
+        <p class="section-intro">Find relevant opportunities shared by people preparing for the same kinds of roles. Share useful openings, and help everyone move forward.</p>
+      </div>
+
+      <div class="community-flow">
+        <div class="cf-node"><span class="cf-k">YOU SHARE</span><p>Post relevant roles</p></div>
+        <div class="cf-arrow">→</div>
+        <div class="cf-node"><span class="cf-k">COMMUNITY DISCOVERS</span><p>Peers find your openings</p></div>
+        <div class="cf-arrow">→</div>
+        <div class="cf-node"><span class="cf-k">YOU DISCOVER MORE</span><p>Roles you'd have missed</p></div>
+      </div>
+
+      <div class="two-col">
+        <article class="give-card">
+          <h3>When you share</h3>
+          <ul>
+            <li>Post five relevant job opportunities.</li>
+            <li>Help other members discover openings.</li>
+            <li>Contribute to a useful, growing job feed.</li>
+          </ul>
+        </article>
+        <article class="give-card">
+          <h3>When you explore</h3>
+          <ul>
+            <li>Discover opportunities shared by other members.</li>
+            <li>Find roles you may not have discovered yourself.</li>
+            <li>Open the original listing and apply directly.</li>
+          </ul>
+        </article>
+      </div>
+      <p class="fine-print">Sharing five opportunities is a community contribution goal — not a second application requirement. The value grows as more members contribute, so the feed is only as strong as the people in it.</p>
+    </section>
+
+    <!-- ===== LEVELS ===== -->
+    <section class="section reveal" id="levels">
+      <div class="section-head">
+        <h2>Start small.<br>Build momentum. Level up.</h2>
+        <p class="section-intro">The first 10 days are your consistency milestone. Clear them, and the next level opens.</p>
+      </div>
+
+      <div class="levels">
+        <article class="level-card active">
+          <div class="level-top"><span class="level-k">LEVEL 1</span><span class="level-badge">Open to everyone</span></div>
+          <h3>Data Warriors</h3>
+          <p class="level-copy">For your first 10 consecutive challenge days:</p>
+          <ul class="level-list">
+            <li>Log five learning or practice entries per active skill category.</li>
+            <li>Apply to at least five relevant jobs.</li>
+            <li>Track the work you complete.</li>
+            <li>Maintain your daily streak.</li>
+          </ul>
+          <p class="qualify">Complete every requirement on all <strong>10 consecutive days</strong> to qualify for the next track.</p>
+        </article>
+
+        <article class="level-card locked">
+          <div class="level-top"><span class="level-k">LEVEL 2</span><span class="level-badge lock">🔒 Unlocks after 10 days</span></div>
+          <h3>Super Warriors</h3>
+          <p class="level-copy">Consistency got you here. Keep growing — the advanced track focuses on:</p>
+          <ul class="level-list">
+            <li>More focused peer accountability.</li>
+            <li>Stronger learning routines.</li>
+            <li>Deeper skill-building.</li>
+            <li>Better-structured progress reviews.</li>
+          </ul>
+          <p class="qualify muted">Super Warriors opens once you complete the 10-day track. It's an upcoming track — we'll never pretend a feature exists before it's ready.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ===== DASHBOARD PREVIEW ===== -->
+    <section class="section reveal" id="preview">
+      <div class="section-head">
+        <h2>See the effort.<br>See the progress.</h2>
+        <p class="section-intro">Here's the dashboard you register for. This is an illustrative preview — your real numbers start at zero on Day 1.</p>
+      </div>
+
+      <div class="dash-preview" aria-label="Illustrative dashboard preview">
+        <span class="preview-tag">Preview · sample data</span>
+        <div class="dp-kpis">
+          <div class="dp-kpi"><span class="dp-k">Current streak</span><strong>7 <em>days</em></strong></div>
+          <div class="dp-kpi"><span class="dp-k">Entries today</span><strong>12 <em>/ 15</em></strong></div>
+          <div class="dp-kpi"><span class="dp-k">Applications</span><strong>5 <em>/ 5</em></strong></div>
+          <div class="dp-kpi"><span class="dp-k">10-day track</span><strong>70<em>%</em></strong></div>
+        </div>
+        <div class="dp-body">
+          <div class="dp-panel">
+            <h4>Active categories</h4>
+            <div class="dp-cats">
+              <div class="dp-cat"><span>SQL</span><i class="bar"><b style="width:100%"></b></i><em>5/5</em></div>
+              <div class="dp-cat"><span>Excel</span><i class="bar"><b style="width:80%"></b></i><em>4/5</em></div>
+              <div class="dp-cat"><span>Communication</span><i class="bar"><b style="width:60%"></b></i><em>3/5</em></div>
+              <div class="dp-cat"><span>Python</span><i class="bar"><b style="width:40%"></b></i><em>2/5</em></div>
+            </div>
+          </div>
+          <div class="dp-panel">
+            <h4>Last 10 days</h4>
+            <div class="dp-chart" aria-hidden="true">
+              <span style="height:40%"></span><span style="height:70%"></span><span style="height:55%"></span>
+              <span style="height:90%"></span><span style="height:65%"></span><span style="height:100%"></span>
+              <span style="height:80%"></span><span style="height:95%"></span><span style="height:60%"></span><span style="height:100%"></span>
+            </div>
+            <div class="dp-recent">
+              <div class="r"><span class="dot practice">Practice</span>SQL · Window functions</div>
+              <div class="r"><span class="dot learn">Learn</span>Python · Pandas groupby</div>
+              <div class="r"><span class="dot practice">Practice</span>Excel · XLOOKUP</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FINAL CTA ===== -->
+    <section class="end-cta reveal">
+      <div>
+        <h2>Ready to become a Data Warrior?</h2>
+        <p>Learn something. Practise something. Share opportunities. Show up again tomorrow.</p>
+      </div>
+      <button class="btn primary lg" data-action="start">Start My 10-Day Streak →</button>
+    </section>
   </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <a class="brand" href="/home">Analyst<span>World</span></a>
+      <p>Data Warriors helps you build consistency, skills, and community. It supports opportunity discovery — it does not guarantee employment.</p>
+      <a class="text-link" href="/home">← Back to AnalystWorld</a>
+    </div>
+  </footer>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <dialog id="authDialog" class="auth-dialog"><form method="dialog" class="dialog-close"><button aria-label="Close">×</button></form><div id="authContent"></div></dialog>
+  <dialog id="authDialog" class="auth-dialog">
+    <form method="dialog" class="dialog-close"><button aria-label="Close">×</button></form>
+    <div id="authContent"></div>
+  </dialog>
   <script src="/data-warriors.js" defer></script>
 </body>
 </html>

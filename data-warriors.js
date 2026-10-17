@@ -1,101 +1,167 @@
-/* Data Warriors — isolated page. Uses the same Supabase project and msql_sess
-   session as AnalystWorld. Challenge data is accessed only through the secured
-   database RPCs shipped in supabase/migrations/. */
+/* Data Warriors — landing interactions. Isolated page; reuses the same
+   Supabase project and msql_sess session as AnalystWorld. The daily
+   dashboard / challenge RPCs are wired in a later phase. */
 (function () {
   'use strict';
+
   var SUPABASE_URL = 'https://wyxutuqckkdkraawyxff.supabase.co';
   var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5eHV0dXFja2tka3JhYXd5eGZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMzQ3NzksImV4cCI6MjA5MzcxMDc3OX0.ale0hHkE36PPQwKiqo5ViS3bi28krpU8gHXiWCKyLAU';
-  var API = SUPABASE_URL + '/rest/v1';
   var AUTH = SUPABASE_URL + '/auth/v1';
-  var app = document.getElementById('app');
+
   var dialog = document.getElementById('authDialog');
   var authContent = document.getElementById('authContent');
-  var session = null;
-  var config = null;
-  var participant = null;
-  var toastTimer;
+  var toastEl = document.getElementById('toast');
+  var session = null, toastTimer;
 
-  function esc(value) { return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
-  function toast(message) { var el=document.getElementById('toast'); el.textContent=message; el.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(function(){el.classList.remove('show');},3200); }
-  function readSession() { try { return JSON.parse(localStorage.getItem('msql_sess') || 'null'); } catch (_) { return null; } }
-  function saveSession(s) { session=s; try { localStorage.setItem('msql_sess',JSON.stringify(s)); } catch (_) {} }
-  async function validSession() {
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function toast(msg){toastEl.textContent=msg;toastEl.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){toastEl.classList.remove('show');},3400);}
+  function readSession(){try{return JSON.parse(localStorage.getItem('msql_sess')||'null');}catch(_){return null;}}
+  function saveSession(s){session=s;try{localStorage.setItem('msql_sess',JSON.stringify(s));}catch(_){}}
+  function displayName(){var u=session&&session.user;return (u&&((u.user_metadata&&(u.user_metadata.full_name||u.user_metadata.name))||(u.email&&u.email.split('@')[0])))||'Warrior';}
+  function authHeaders(){return {'Content-Type':'application/json','apikey':SUPABASE_ANON};}
+
+  async function validSession(){
     var s=readSession(); if(!s||!s.access_token) return null;
-    if (s.expires_at && Date.now()/1000 > s.expires_at-60) {
+    if(s.expires_at && Date.now()/1000 > s.expires_at-60){
       if(!s.refresh_token) return null;
-      var rr=await fetch(AUTH+'/token?grant_type=refresh_token',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON},body:JSON.stringify({refresh_token:s.refresh_token})});
-      var refreshed=await rr.json(); if(!refreshed.access_token) return null;
-      refreshed.expires_at=Math.floor(Date.now()/1000)+(refreshed.expires_in||3600); saveSession(refreshed); s=refreshed;
+      try{
+        var rr=await fetch(AUTH+'/token?grant_type=refresh_token',{method:'POST',headers:authHeaders(),body:JSON.stringify({refresh_token:s.refresh_token})});
+        var refreshed=await rr.json(); if(!refreshed.access_token) return null;
+        refreshed.expires_at=Math.floor(Date.now()/1000)+(refreshed.expires_in||3600); saveSession(refreshed); s=refreshed;
+      }catch(_){return null;}
     }
-    if(!s.user||!s.user.id) {
-      var ur=await fetch(AUTH+'/user',{headers:{apikey:SUPABASE_ANON,Authorization:'Bearer '+s.access_token}});
-      var u=await ur.json(); if(u.id){s.user=u;saveSession(s);}
+    if(!s.user||!s.user.id){
+      try{var ur=await fetch(AUTH+'/user',{headers:{apikey:SUPABASE_ANON,Authorization:'Bearer '+s.access_token}});var u=await ur.json();if(u.id){s.user=u;saveSession(s);}}catch(_){}
     }
     return s.user&&s.user.id?s:null;
   }
-  async function rpc(name, params) {
-    if(!session && name!=='dw_public_config') throw new Error('Please log in to continue.');
-    var token=session?session.access_token:SUPABASE_ANON;
-    var res=await fetch(API+'/rpc/'+name,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON,Authorization:'Bearer '+token},body:JSON.stringify(params||{})});
-    var data=await res.json().catch(function(){return {};});
-    if(!res.ok) throw new Error(data.message||data.details||data.hint||'Could not save this yet. Please try again.');
-    return data;
-  }
-  function name() { var u=session&&session.user; return (u&&(u.user_metadata&& (u.user_metadata.full_name||u.user_metadata.name)||u.email&&u.email.split('@')[0]))||'Warrior'; }
-  function authHeaders() { return {'Content-Type':'application/json','apikey':SUPABASE_ANON}; }
 
-  function landing() {
-    var open=!!(config&&config.registration_open&&config.start_date);
-    var cta=participant?'Open My Dashboard':(open?'Register for the Challenge':'Registration opens soon');
-    var p1=Number(config&&config.phase1_days||10), cohortDays=Number(config&&config.challenge_days||45), targets=config&&config.targets||{}, target1=targets.phase1||{applications:5,sql:10,excel:5,recordings:2}, target2=targets.phase2||{applications:15,sql:10,excel:5,recordings:2};
-    app.innerHTML='<section class="hero"><div class="eyebrow">ANALYSTWORLD PRESENTS</div><h1>DATA<span>WARRIORS</span></h1><p class="hero-copy">Build consistency. Practice daily. Chase opportunities.</p><div class="actions"><button class="btn primary" data-action="register" '+(!open&&!participant?'disabled':'')+'>'+cta+' <span aria-hidden="true">→</span></button><a class="btn secondary" href="#how">How It Works</a></div><div class="stats"><div class="stat"><strong>'+cohortDays+' days</strong><span>One shared cohort</span></div><div class="stat"><strong>'+p1+' days</strong><span>Consecutive to qualify</span></div><div class="stat"><strong>3 placements</strong><span>Shared target, not a guarantee</span></div></div>'+(open?'':'<div class="notice">Registration is not open yet. The cohort start date and registration window will be announced here.</div>')+'</section><section class="section" id="how"><div class="section-head"><div><h2>One mission.<br>Show up daily.</h2><p class="section-intro">A simple '+cohortDays+'-day structure to turn practice into a repeatable habit.</p></div></div><div class="steps"><article class="step"><span class="step-num">01 / REGISTER</span><h3>Use your AnalystWorld account</h3><p>No second account. Your existing AnalystWorld login is your Data Warriors login.</p></article><article class="step"><span class="step-num">02 / PRACTICE</span><h3>Complete today’s targets</h3><p>Track applications, SQL, Excel, and two practice recordings. Add evidence as you go.</p></article><article class="step"><span class="step-num">03 / QUALIFY</span><h3>Earn the advanced squad</h3><p>Complete every Phase 1 requirement on all '+p1+' consecutive cohort days to qualify.</p></article></div><div class="notice"><strong>Strict qualification:</strong> a missed or incomplete Phase 1 day means you do not qualify for this cohort’s Phase 2. Complete all '+p1+' consecutive days. The cohort has one official start date; registration does not start an individual timer.</div></section><section class="section"><div class="section-head"><div><h2>Daily targets</h2><p class="section-intro">Targets rise after qualification. Progress evidence is recorded in your dashboard; external applications and videos are not automatically verified.</p></div></div><div class="target-grid"><article class="target"><div class="target-num">'+Number(target1.applications)+' → '+Number(target2.applications)+'</div><h3>Job applications</h3><p>Relevant roles. '+Number(target1.applications)+' per day in Phase 1; '+Number(target2.applications)+' in Phase 2.</p></article><article class="target"><div class="target-num">'+Number(target1.sql)+'</div><h3>SQL questions</h3><p>Practice questions each day. AnalystWorld solves are counted where available.</p></article><article class="target"><div class="target-num">'+Number(target1.excel)+'</div><h3>Excel questions</h3><p>Log completed questions and supporting evidence.</p></article><article class="target"><div class="target-num">'+Number(target1.recordings)+'</div><h3>Practice recordings</h3><p>Explain your introduction, a project, or a SQL solution.</p></article></div><p class="note">Evidence is submitted through the platform. User-provided URLs and notes are records, not independent verification of external activity.</p></section><section class="section"><div class="end-cta"><div><h2>Ready to become a Data Warrior?</h2><p>Register. Show up. Track your progress. Earn your next level.</p></div><button class="btn primary" data-action="register" '+(!open&&!participant?'disabled':'')+'>'+(participant?'Open My Dashboard':(open?'Register Now':'Registration opens soon'))+' →</button></div></section>'+adminPanel()+'<footer class="footer">AnalystWorld · Data Warriors · Opportunity is a goal, never a guaranteed outcome.</footer>';
-    document.getElementById('accountArea').innerHTML=session?'<span class="text-link">Signed in as '+esc(session.user.email||name())+'</span> · <a class="text-link" href="/home">AnalystWorld</a>':'<a class="text-link" href="/home">Back to AnalystWorld</a>';
+  /* ---------- account area / nav ---------- */
+  function renderAccount(){
+    var el=document.getElementById('accountArea'); if(!el) return;
+    if(session&&session.user){
+      el.innerHTML='<span class="sign">'+esc(session.user.email||displayName())+'</span> · <button class="link-btn" data-action="logout">Log out</button>';
+    }else{ el.innerHTML=''; }
   }
-  function adminPanel(){if(!session||!config||!config.is_admin)return '';var t=config.targets||{};return '<section class="section" id="dwAdmin"><div class="panel"><div class="eyebrow">ADMIN · EXISTING ACCOUNT PERMISSION</div><h2 style="margin-top:14px">Cohort controls</h2><p class="subtle">Only accounts marked is_admin in AnalystWorld can change these settings. No start date is preselected.</p><form class="entry-form" id="adminForm"><label>Official cohort start<input name="start_date" type="date" value="'+esc(config.start_date||'')+'" required></label><label>Registration<input name="registration_open" type="checkbox" '+(config.registration_open?'checked':'')+'> Open registration</label><label>Phase 1 days<input name="phase1_days" type="number" min="1" max="44" value="'+Number(config.phase1_days||10)+'"></label><label>Challenge days<input name="challenge_days" type="number" min="2" max="365" value="'+Number(config.challenge_days||45)+'"></label><label>Timezone<select name="timezone"><option '+(config.timezone==='Asia/Kolkata'?'selected':'')+'>Asia/Kolkata</option><option '+(config.timezone==='UTC'?'selected':'')+'>UTC</option><option '+(config.timezone==='Asia/Dubai'?'selected':'')+'>Asia/Dubai</option><option '+(config.timezone==='Europe/London'?'selected':'')+'>Europe/London</option><option '+(config.timezone==='America/New_York'?'selected':'')+'>America/New_York</option></select></label><label>Daily deadline (cohort local time)<input name="daily_deadline" type="time" value="'+esc(config.daily_deadline||'23:59')+'"></label><label>Phase 1 applications<input name="p1_apps" type="number" min="1" value="'+Number((t.phase1||{}).applications||5)+'"></label><label>Phase 2 applications<input name="p2_apps" type="number" min="1" value="'+Number((t.phase2||{}).applications||15)+'"></label><label>Daily SQL questions<input name="sql_target" type="number" min="1" value="'+Number((t.phase1||{}).sql||10)+'"></label><label>Daily Excel questions<input name="excel_target" type="number" min="1" value="'+Number((t.phase1||{}).excel||5)+'"></label><label>Daily recordings<input name="recording_target" type="number" min="1" value="'+Number((t.phase1||{}).recordings||2)+'"></label><button class="btn primary wide" type="submit">Save cohort settings</button></form><div class="inline-actions"><button class="mini-btn" data-action="admin-participants">Load participant summary</button></div><div id="participantSummary" class="record-list"></div></div></section>';}
-  function progressBar(n,target){return '<div class="progress-track"><div class="progress-fill" style="width:'+Math.min(100,Math.round((n/Math.max(1,target))*100))+'%"></div></div>';}
-  function dashboard(s) {
-    var day=Number(s.day_number||0), phase=Number(s.phase||1), phaseDays=Number(s.phase1_days||10), challengeDays=Number(s.challenge_days||45), targets=s.targets||{}, p=s.today||{};
-    var appGoal=Number(targets.applications||(phase===1?5:15)), sqlGoal=Number(targets.sql||10), excelGoal=Number(targets.excel||5), recGoal=Number(targets.recordings||2);
-    var appCount=Number(p.applications||0), sqlCount=Number(p.sql||0), excelCount=Number(p.excel||0), recCount=Number(p.recordings||0), complete=!!p.completed;
-    var total=Math.min(100,Math.round(((Math.min(appGoal,appCount)/appGoal)+(Math.min(sqlGoal,sqlCount)/sqlGoal)+(Math.min(excelGoal,excelCount)/excelGoal)+(Math.min(recGoal,recCount)/recGoal))/4*100));
-    var canTrack=day>=1&&day<=Number(s.challenge_days||45)&&!s.closed, canSubmit=canTrack&&s.can_submit!==false;
-    var tasks=[['Applications',appCount,appGoal,'application'],['SQL questions',sqlCount,sqlGoal,'sql'],['Excel questions',excelCount,excelGoal,'excel'],['Practice recordings',recCount,recGoal,'recording']].map(function(x){
-      var done=x[1]>=x[2];
-      var action=done?'<span class="task-done">Target reached</span>':(!canSubmit?'<span class="subtle">Submission window closed</span>':(x[3]==='sql'?'<span class="subtle">Solve SQL questions in AnalystWorld. Saved solves count for today.</span>':'<div class="inline-actions"><button class="mini-btn" data-action="show-form" data-form="'+x[3]+'">Add '+(x[3]==='application'?'application':x[3]==='excel'?'Excel evidence':'recording')+'</button></div>'));
-      return '<div class="task-row"><div class="task-top"><strong>'+x[0]+'</strong><span class="task-count">'+x[1]+'/'+x[2]+'</span></div>'+progressBar(x[1],x[2])+action+'</div>';
-    }).join('');
-    var activityRows=(s.activities||[]).map(function(a){var st=a.details&&a.details.status||'applied';var opts=['applied','screening','interview','rejected','offer'].map(function(v){return '<option value="'+v+'" '+(v===st?'selected':'')+'>'+v+'</option>';}).join('');var extra=a.details&&a.details.url?'<a href="'+esc(a.details.url)+'" target="_blank" rel="noopener noreferrer">Job link</a> · '+esc(a.details.company||'')+' — '+esc(a.details.role||'')+' <select aria-label="Update application status" id="status-'+esc(a.id)+'">'+opts+'</select><button class="mini-btn" data-action="app-status" data-id="'+esc(a.id)+'">Update</button>':esc(a.evidence);return '<li><strong>'+esc(a.label)+'</strong> · '+esc(a.type)+' · '+esc(a.date||'')+' · '+extra+'</li>';}).join('');
-    var phase1=Number(s.phase1_completed||0), streak=Number(s.streak||0), qualify=!!s.qualified;
-    app.innerHTML=`<section class="dashboard">
-      <div class="dash-head"><div><div class="eyebrow">DATA WARRIORS</div><h1>Welcome, ${esc(name())}.</h1><div class="identity">${esc(session.user.email||'AnalystWorld member')} · ${qualify?'Phase 2 · Advanced squad':'Phase 1 · Day '+(day>0?day:'—')+' of '+phaseDays}</div></div><span class="phase-pill">${qualify?'QUALIFIED':'DAY '+(day>0?day:'—')+' / '+challengeDays}</span></div>
-      ${s.start_date?`<div class="dash-grid"><section class="panel"><h2>Your streak</h2><div class="big-streak"><strong>${streak}</strong><span>consecutive challenge days</span></div>${progressBar(phase1,phaseDays)}<div class="subtle">Phase 1: ${phase1} / ${phaseDays} consecutive days · ${qualify?'Qualified for the advanced phase':'Qualification requires all 10 days in a row'}</div></section><section class="panel"><h2>Challenge progress</h2><div class="big-streak"><strong>${Number(s.completed_days||0)}</strong><span>of ${Number(s.challenge_days||45)} days complete</span></div>${progressBar(Number(s.completed_days||0),Number(s.challenge_days||45))}<div class="subtle">${s.deadline?'Cohort closes '+esc(s.deadline):'Daily close: '+esc(s.daily_deadline||'11:59 PM cohort time')}</div></section></div>
-      <section class="section"><div class="section-head"><div><h2>Today’s mission</h2><p class="section-intro">Day ${day>0?day:'—'} · ${phase===1?'Phase 1 targets':'Advanced Phase 2 targets'} · ${esc(s.today_date||'')}</p></div><span class="phase-pill">${total}% COMPLETE</span></div>
-      ${canTrack?`<div class="dash-grid"><div><div class="task-list">${tasks}</div><div class="record-list"><strong>Recent saved evidence</strong>${activityRows?'<ul>'+activityRows+'</ul>':'<p>No application, Excel, or recording evidence saved yet.</p>'}</div></div><div><div class="panel"><h2>Today’s progress</h2><div class="big-streak"><strong>${total}%</strong><span>mission complete</span></div>${progressBar(total,100)}<p class="subtle">A day counts only when all four targets and evidence requirements are met. Completion is checked by the server.</p><button class="btn primary" data-action="complete-day" ${complete||!canSubmit?'disabled':''}>${complete?'Day complete ✓':(canSubmit?'Check and complete day':'Submission window closed')}</button></div>${s.qualification_rule?'<div class="notice">'+esc(s.qualification_rule)+'</div>':''}</div></div>${complete?'<div class="notice" style="border-color:#b8e6cc;background:#f0fbf4;color:#24613d;margin-top:16px">Day complete. Your streak and cohort progress have been updated.</div>':''}<div class="notice">Applications, Excel evidence, and recording links are self-reported and not independently verified. Use public/shareable evidence only; do not submit sensitive personal data.</div>`:'<div class="notice">The current day is not open for submissions, or its deadline has passed. Your completed-day history is preserved.</div>'}</section>`:'<section class="section"><div class="notice">The cohort has not started yet, or its 45-day window has ended. Your registration and history are preserved.</div></section>'}
-      ${adminPanel()}<footer class="footer">Cohort timezone: ${esc(s.timezone||'Asia/Kolkata')} · <a href="/home">Return to AnalystWorld</a></footer></section>`;
-    if(canSubmit) renderOpenForm();
-  }
-  function renderOpenForm(){var f=document.querySelector('[data-entry-form]'); if(!f)return;var kind=f.getAttribute('data-entry-form'); if(kind==='application') f.innerHTML='<form class="entry-form" id="entryForm"><input name="company" placeholder="Company" required maxlength="120"><input name="role" placeholder="Role" required maxlength="160"><input class="wide" name="url" type="url" placeholder="Job posting URL (https://…)" required maxlength="1000"><select class="wide" name="status"><option value="applied">Applied</option><option value="screening">Screening</option><option value="interview">Interview</option><option value="rejected">Rejected</option><option value="offer">Offer</option></select><button class="btn primary wide" type="submit">Save application</button></form>'; else if(kind==='excel')f.innerHTML='<form class="entry-form" id="entryForm"><input class="wide" name="label" placeholder="Question / exercise name" required maxlength="180"><input class="wide" name="evidence" placeholder="Evidence note or link (https://…)" required maxlength="1000"><button class="btn primary wide" type="submit">Save Excel progress</button></form>';else if(kind==='recording')f.innerHTML='<form class="entry-form" id="entryForm"><input class="wide" name="label" placeholder="Introduction, project, or SQL explanation" required maxlength="180"><input class="wide" name="evidence" type="url" placeholder="Shareable recording link (https://…)" required maxlength="1000"><button class="btn primary wide" type="submit">Save recording link</button></form>'; }
 
-  function loading(){app.innerHTML='<section class="loading"><span class="spinner"></span><p>Loading your challenge…</p></section>';}
-  async function loadConfig(){try{config=await rpc('dw_public_config',{});}catch(e){config={registration_open:false,start_date:null};console.warn('Data Warriors configuration unavailable:',e.message);} }
-  async function openDashboard(){loading();try{var state=await rpc('dw_get_my_state',{}); participant=true; dashboard(state); document.getElementById('accountArea').innerHTML='<span class="text-link">'+esc(session.user.email||name())+'</span> · <button class="text-link" data-action="logout" style="border:0;background:none;cursor:pointer">Log out</button>';}catch(e){participant=false;landing();toast(e.message.indexOf('dw_')!==-1?'Challenge setup is pending. Please try again later.':e.message);}}
-  async function register(){if(!session){localStorage.setItem('dw_pending_registration','1');showAuth('login');return;}loading();try{await rpc('dw_register',{});participant=true;await openDashboard();toast('You’re registered. Welcome, Warrior.');}catch(e){landing();toast(e.message);}}
-  function formHtml(mode){var signup=mode==='signup';authContent.innerHTML='<form class="auth-form" id="authForm"><h2>'+(signup?'Create your AnalystWorld account':'Log in to AnalystWorld')+'</h2><p>'+(signup?'Your existing AnalystWorld account gives you access to Data Warriors.':'Sign in with the account you use on AnalystWorld.')+'</p>'+(signup?'<label for="dwName">Full name</label><input id="dwName" name="name" autocomplete="name" required maxlength="100">':'')+'<label for="dwEmail">Email</label><input id="dwEmail" name="email" type="email" autocomplete="email" required><label for="dwPassword">Password</label><input id="dwPassword" name="password" type="password" autocomplete="'+(signup?'new-password':'current-password')+'" minlength="6" required><div class="auth-error" id="authError"></div><button class="btn primary" type="submit">'+(signup?'Create account':'Log in')+'</button><p class="switch">'+(signup?'Already have an account?':'New to AnalystWorld?')+' <button type="button" data-action="auth-switch" data-mode="'+(signup?'login':'signup')+'">'+(signup?'Log in':'Create account')+'</button></p><p class="switch"><button type="button" data-action="google-login">Continue with Google</button></p></form>';}
+  /* ---------- primary CTA ---------- */
+  function start(){
+    if(session&&session.user){
+      toast('You’re signed in, '+displayName()+'. Your daily dashboard opens in the next update.');
+    }else{
+      showAuth('signup');
+    }
+  }
+
+  /* ---------- auth dialog ---------- */
+  function formHtml(mode){
+    var signup=mode==='signup';
+    authContent.innerHTML='<form class="auth-form" id="authForm">'+
+      '<h2>'+(signup?'Start your 10-day streak':'Welcome back')+'</h2>'+
+      '<p>'+(signup?'Your AnalystWorld account is your Data Warriors account — no second login.':'Log in with the account you use on AnalystWorld.')+'</p>'+
+      (signup?'<label for="dwName">Full name</label><input id="dwName" name="name" autocomplete="name" required maxlength="100">':'')+
+      '<label for="dwEmail">Email</label><input id="dwEmail" name="email" type="email" autocomplete="email" required>'+
+      '<label for="dwPassword">Password</label><input id="dwPassword" name="password" type="password" autocomplete="'+(signup?'new-password':'current-password')+'" minlength="6" required>'+
+      '<div class="auth-error" id="authError"></div>'+
+      '<button class="btn primary" type="submit">'+(signup?'Create account & continue':'Log in')+'</button>'+
+      '<p class="switch">'+(signup?'Already have an account?':'New to AnalystWorld?')+' <button type="button" data-action="auth-switch" data-mode="'+(signup?'login':'signup')+'">'+(signup?'Log in':'Create account')+'</button></p>'+
+      '<p class="switch"><button type="button" data-action="google-login">Continue with Google</button></p>'+
+    '</form>';
+  }
   function showAuth(mode){formHtml(mode);if(!dialog.open)dialog.showModal();}
   function safeReturn(){return window.location.origin+'/data-warriors?join=1';}
-  async function authenticate(ev){ev.preventDefault();var form=ev.currentTarget,fd=new FormData(form),signup=!!fd.get('name'),email=String(fd.get('email')||'').trim(),password=String(fd.get('password')||''),err=document.getElementById('authError'),btn=form.querySelector('button[type=submit]');err.textContent='';btn.disabled=true;btn.textContent='Please wait…';try{var endpoint=signup?'/signup?redirect_to='+encodeURIComponent(safeReturn()):'/token?grant_type=password';var body=signup?{email:email,password:password,data:{full_name:String(fd.get('name')).trim()}}:{email:email,password:password};var res=await fetch(AUTH+endpoint,{method:'POST',headers:authHeaders(),body:JSON.stringify(body)}),data=await res.json();if(!res.ok||data.error||data.msg){throw new Error(data.error_description||data.msg||'Could not authenticate. Check your details and try again.');}if(data.access_token){data.expires_at=Math.floor(Date.now()/1000)+(data.expires_in||3600);saveSession(data);dialog.close();await afterAuth();}else{err.textContent='Account created. Check your email to confirm, then return here and log in. Your registration will resume after sign-in.';btn.disabled=false;btn.textContent='Create account';}}catch(e){err.textContent=e.message;btn.disabled=false;btn.textContent=signup?'Create account':'Log in';}}
-  async function google(){localStorage.setItem('dw_pending_registration','1');var red=encodeURIComponent(safeReturn());window.location.href=AUTH+'/authorize?provider=google&redirect_to='+red;}
-  async function handleCallback(){var hash=window.location.hash;if(hash.indexOf('access_token')<0)return false;var q=new URLSearchParams(hash.slice(1)),access=q.get('access_token');if(!access)return false;var s={access_token:access,refresh_token:q.get('refresh_token'),expires_in:Number(q.get('expires_in')||3600),expires_at:Math.floor(Date.now()/1000)+Number(q.get('expires_in')||3600),token_type:q.get('token_type')||'bearer'};var u=await fetch(AUTH+'/user',{headers:{apikey:SUPABASE_ANON,Authorization:'Bearer '+access}}).then(function(r){return r.json();});if(u.id)s.user=u;saveSession(s);history.replaceState({},'', '/data-warriors'+(location.search||''));return true;}
-  async function afterAuth(){await loadConfig();if(localStorage.getItem('dw_pending_registration')==='1'){localStorage.removeItem('dw_pending_registration');await register();}else{await checkState();}}
-  async function checkState(){if(!session){landing();return;}try{var state=await rpc('dw_get_my_state',{});participant=!!state.registration; if(participant){dashboard(state);document.getElementById('accountArea').innerHTML='<span class="text-link">'+esc(session.user.email||name())+'</span> · <button class="text-link" data-action="logout" style="border:0;background:none;cursor:pointer">Log out</button>';}else landing();}catch(e){landing();if(e.message.indexOf('JWT')!==-1)toast('Your session expired. Please log in again.');}}
-  async function logout(){session=null;participant=false;localStorage.removeItem('msql_sess');await loadConfig();landing();toast('You are signed out.');}
-  function showForm(kind){var existing=document.querySelector('[data-entry-form]');if(existing&&existing.getAttribute('data-entry-form')===kind){existing.remove();return;}document.querySelectorAll('[data-entry-form]').forEach(function(x){x.remove();});var row=Array.from(document.querySelectorAll('.task-row')).find(function(x){return x.querySelector('[data-form="'+kind+'"]');});if(!row)return;var box=document.createElement('div');box.setAttribute('data-entry-form',kind);row.appendChild(box);renderOpenForm();box.scrollIntoView({behavior:'smooth',block:'nearest'});}
-  async function submitEntry(ev){ev.preventDefault();var form=ev.currentTarget,fd=new FormData(form),kind=document.querySelector('[data-entry-form]').getAttribute('data-entry-form'),payload={p_type:kind,p_label:String(fd.get('label')||''),p_evidence:String(fd.get('evidence')||fd.get('url')||''),p_company:String(fd.get('company')||''),p_role:String(fd.get('role')||''),p_url:String(fd.get('url')||''),p_status:String(fd.get('status')||'')};var btn=form.querySelector('button');btn.disabled=true;try{await rpc('dw_log_activity',payload);toast('Progress saved.');await openDashboard();}catch(e){toast(e.message);btn.disabled=false;}}
-  async function completeDay(){try{await rpc('dw_complete_day',{});await openDashboard();toast('Day complete. Streak updated.');}catch(e){toast(e.message);}}
-  async function saveAdmin(ev){ev.preventDefault();var f=ev.currentTarget,fd=new FormData(f),tm=String(fd.get('daily_deadline')||'23:59');if(tm.split(':').length===2)tm+=':00';try{await rpc('dw_admin_update_config',{p_start_date:fd.get('start_date'),p_registration_open:fd.get('registration_open')==='on',p_phase1_days:Number(fd.get('phase1_days')),p_challenge_days:Number(fd.get('challenge_days')),p_timezone:fd.get('timezone'),p_daily_deadline:tm,p_targets:{phase1:{applications:Number(fd.get('p1_apps')),sql:Number(fd.get('sql_target')),excel:Number(fd.get('excel_target')),recordings:Number(fd.get('recording_target'))},phase2:{applications:Number(fd.get('p2_apps')),sql:Number(fd.get('sql_target')),excel:Number(fd.get('excel_target')),recordings:Number(fd.get('recording_target'))}}});await loadConfig();toast('Cohort settings saved.');landing();}catch(e){toast(e.message);}}
-  async function loadParticipants(){var box=document.getElementById('participantSummary');if(!box)return;box.textContent='Loading…';try{var rows=await rpc('dw_admin_participants',{});box.innerHTML='<strong>'+rows.length+' registered participants</strong>'+(rows.length?'<ul>'+rows.map(function(x){return '<li><strong>'+esc(x.name||x.email||x.user_id)+'</strong> · '+esc(x.email||'')+' · '+esc(x.completed_days)+' completed days · '+(x.phase1_complete?'Phase 1 qualified':'Not qualified')+' · '+esc(x.applications)+' applications / '+esc(x.interviews)+' interviews / '+esc(x.offers)+' offers</li>';}).join('')+'</ul>':'');}catch(e){box.textContent=e.message;}}
-  async function updateApplication(id){var select=document.getElementById('status-'+id);if(!select)return;try{await rpc('dw_update_application_status',{p_activity_id:id,p_status:select.value});toast('Application status updated.');await openDashboard();}catch(e){toast(e.message);}}
-  document.addEventListener('click',function(ev){var b=ev.target.closest('[data-action]');if(!b)return;var act=b.getAttribute('data-action');if(act==='register')register();if(act==='auth-switch')formHtml(b.getAttribute('data-mode'));if(act==='google-login')google();if(act==='logout')logout();if(act==='show-form')showForm(b.getAttribute('data-form'));if(act==='complete-day')completeDay();if(act==='admin-participants')loadParticipants();if(act==='app-status')updateApplication(b.getAttribute('data-id'));});
-  document.addEventListener('submit',function(ev){if(ev.target.id==='authForm')authenticate(ev);if(ev.target.id==='entryForm')submitEntry(ev);if(ev.target.id==='adminForm')saveAdmin(ev);});
-  (async function init(){try{await handleCallback();session=await validSession();await loadConfig();if(session){try{var st=await rpc('dw_get_my_state',{});participant=!!st.registration;if((localStorage.getItem('dw_pending_registration')==='1'||new URLSearchParams(location.search).get('join')==='1')&&!participant){localStorage.removeItem('dw_pending_registration');await register();return;}if(participant){dashboard(st);document.getElementById('accountArea').innerHTML='<span class="text-link">'+esc(session.user.email||name())+'</span> · <button class="text-link" data-action="logout" style="border:0;background:none;cursor:pointer">Log out</button>';return;}}catch(_){}}landing();if(new URLSearchParams(location.search).get('join')==='1'&&localStorage.getItem('dw_pending_registration')==='1'&&session)await afterAuth();}catch(e){console.error(e);landing();}})();
+
+  async function authenticate(ev){
+    ev.preventDefault();
+    var form=ev.currentTarget,fd=new FormData(form),signup=!!fd.get('name');
+    var email=String(fd.get('email')||'').trim(),password=String(fd.get('password')||'');
+    var err=document.getElementById('authError'),btn=form.querySelector('button[type=submit]');
+    err.textContent='';btn.disabled=true;btn.textContent='Please wait…';
+    try{
+      var endpoint=signup?'/signup?redirect_to='+encodeURIComponent(safeReturn()):'/token?grant_type=password';
+      var body=signup?{email:email,password:password,data:{full_name:String(fd.get('name')).trim()}}:{email:email,password:password};
+      var res=await fetch(AUTH+endpoint,{method:'POST',headers:authHeaders(),body:JSON.stringify(body)});
+      var data=await res.json();
+      if(!res.ok||data.error||data.msg){throw new Error(data.error_description||data.msg||'Could not authenticate. Check your details and try again.');}
+      if(data.access_token){
+        data.expires_at=Math.floor(Date.now()/1000)+(data.expires_in||3600);
+        saveSession(data);dialog.close();renderAccount();
+        toast('Welcome, '+displayName()+'. You’re ready for Data Warriors.');
+      }else{
+        err.textContent='Account created. Check your email to confirm, then return here and log in.';
+        btn.disabled=false;btn.textContent='Create account & continue';
+      }
+    }catch(e){err.textContent=e.message;btn.disabled=false;btn.textContent=signup?'Create account & continue':'Log in';}
+  }
+  function google(){try{localStorage.setItem('dw_pending_registration','1');}catch(_){}
+    window.location.href=AUTH+'/authorize?provider=google&redirect_to='+encodeURIComponent(safeReturn());}
+  async function handleCallback(){
+    var hash=window.location.hash; if(hash.indexOf('access_token')<0) return;
+    var q=new URLSearchParams(hash.slice(1)),access=q.get('access_token'); if(!access) return;
+    var s={access_token:access,refresh_token:q.get('refresh_token'),expires_in:Number(q.get('expires_in')||3600),expires_at:Math.floor(Date.now()/1000)+Number(q.get('expires_in')||3600),token_type:q.get('token_type')||'bearer'};
+    try{var u=await fetch(AUTH+'/user',{headers:{apikey:SUPABASE_ANON,Authorization:'Bearer '+access}}).then(function(r){return r.json();});if(u.id)s.user=u;}catch(_){}
+    saveSession(s);history.replaceState({},'', '/data-warriors');
+  }
+  function logout(){session=null;try{localStorage.removeItem('msql_sess');}catch(_){}renderAccount();toast('You are signed out.');}
+
+  /* ---------- delegated events ---------- */
+  document.addEventListener('click',function(ev){
+    var b=ev.target.closest('[data-action]'); if(!b) return;
+    var act=b.getAttribute('data-action');
+    if(act==='start')start();
+    else if(act==='auth-switch')formHtml(b.getAttribute('data-mode'));
+    else if(act==='google-login')google();
+    else if(act==='logout')logout();
+  });
+  document.addEventListener('submit',function(ev){if(ev.target.id==='authForm')authenticate(ev);});
+
+  /* ---------- nav: scrolled state + mobile toggle + smooth close ---------- */
+  var nav=document.getElementById('nav'),navLinks=document.getElementById('navLinks'),navToggle=document.getElementById('navToggle');
+  function onScroll(){nav.classList.toggle('scrolled',window.scrollY>8);}
+  window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+  if(navToggle){navToggle.addEventListener('click',function(){var open=navLinks.classList.toggle('open');navToggle.setAttribute('aria-expanded',open?'true':'false');});
+    navLinks.addEventListener('click',function(e){if(e.target.tagName==='A'){navLinks.classList.remove('open');navToggle.setAttribute('aria-expanded','false');}});}
+
+  /* ---------- scroll reveal ---------- */
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var reveals=document.querySelectorAll('.reveal');
+  if(reduce||!('IntersectionObserver'in window)){reveals.forEach(function(el){el.classList.add('is-visible');});}
+  else{
+    var io=new IntersectionObserver(function(entries){entries.forEach(function(en){if(en.isIntersecting){en.target.classList.add('is-visible');io.unobserve(en.target);}});},{rootMargin:'0px 0px -8% 0px',threshold:.12});
+    reveals.forEach(function(el){io.observe(el);});
+  }
+
+  /* ---------- cursor sparkles (desktop, subtle) ---------- */
+  (function sparkles(){
+    var fine=window.matchMedia&&window.matchMedia('(pointer:fine)').matches;
+    if(reduce||!fine||window.innerWidth<860)return;
+    var cv=document.getElementById('sparkles'); if(!cv)return; var ctx=cv.getContext('2d');
+    var dpr=Math.min(window.devicePixelRatio||1,2),parts=[],last=0,running=false;
+    function resize(){cv.width=innerWidth*dpr;cv.height=innerHeight*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
+    resize();window.addEventListener('resize',resize,{passive:true});
+    function spawn(x,y){
+      if(parts.length>26)return;
+      var n=1+(Math.random()<.35?1:0);
+      for(var i=0;i<n;i++){parts.push({x:x+(Math.random()*10-5),y:y+(Math.random()*10-5),vx:(Math.random()-.5)*.5,vy:-(Math.random()*.7+.2),life:1,r:Math.random()*1.6+1,c:Math.random()<.5?'240,25,32':'17,17,17'});}
+      if(!running){running=true;requestAnimationFrame(loop);}
+    }
+    function loop(){
+      ctx.clearRect(0,0,innerWidth,innerHeight);
+      for(var i=parts.length-1;i>=0;i--){var p=parts[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.012;p.life-=.028;
+        if(p.life<=0){parts.splice(i,1);continue;}
+        ctx.globalAlpha=Math.max(0,p.life)*.6;ctx.fillStyle='rgba('+p.c+',1)';
+        ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,6.283);ctx.fill();
+      }
+      ctx.globalAlpha=1;
+      if(parts.length){requestAnimationFrame(loop);}else{running=false;}
+    }
+    window.addEventListener('mousemove',function(e){var t=performance.now();if(t-last<36)return;last=t;spawn(e.clientX,e.clientY);},{passive:true});
+  })();
+
+  /* ---------- init ---------- */
+  (async function init(){
+    try{await handleCallback();session=await validSession();}catch(_){}
+    renderAccount();
+    if(session&&new URLSearchParams(location.search).get('join')==='1'){toast('You’re signed in. Your Data Warriors dashboard opens in the next update.');}
+  })();
 })();
