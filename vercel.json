@@ -5,6 +5,8 @@
     { "source": "/webinar", "destination": "/webinar.html" },
     { "source": "/webinar/", "destination": "/webinar.html" },
     { "source": "/webinar-dashboard", "destination": "/webinar-dashboard.html" },
+    { "source": "/data-warriors", "destination": "/data-warriors.html" },
+    { "source": "/data-warriors/", "destination": "/data-warriors.html" },
     { "source": "/u/:username", "destination": "/api/profile?u=:username" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
