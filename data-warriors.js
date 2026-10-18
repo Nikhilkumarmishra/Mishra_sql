@@ -24,11 +24,33 @@
   function displayName(){var u=session&&session.user;return (u&&((u.user_metadata&&(u.user_metadata.full_name||u.user_metadata.name))||(u.email&&u.email.split('@')[0])))||'Warrior';}
   function authHeaders(){return {'Content-Type':'application/json','apikey':SUPABASE_ANON};}
   function tzGuess(){try{return Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Kolkata';}catch(_){return 'Asia/Kolkata';}}
+  function normUrl(u){ u=String(u||'').trim(); if(!u) return null; if(!/^https?:\/\//i.test(u)) u='https://'+u.replace(/^\/+/,''); return u; }
+  // Refresh the access token using the stored refresh token.
+  async function refreshNow(){
+    var s=session||readSession(); if(!s||!s.refresh_token) return false;
+    try{
+      var rr=await fetch(AUTH+'/token?grant_type=refresh_token',{method:'POST',headers:authHeaders(),body:JSON.stringify({refresh_token:s.refresh_token})});
+      var r=await rr.json();
+      if(r&&r.access_token){ r.expires_at=Math.floor(Date.now()/1000)+(r.expires_in||3600); if(!r.user&&s.user) r.user=s.user; saveSession(r); return true; }
+    }catch(_){}
+    return false;
+  }
+  async function freshToken(){
+    if(!session||!session.access_token) return SUPABASE_ANON;
+    if(session.expires_at && Date.now()/1000 > session.expires_at-60){ await refreshNow(); }
+    return (session&&session.access_token)?session.access_token:SUPABASE_ANON;
+  }
   async function rpc(name, params){
-    var token = session ? session.access_token : SUPABASE_ANON;
-    var res = await fetch(API + '/rpc/' + name, {method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON,'Authorization':'Bearer '+token}, body:JSON.stringify(params||{})});
+    function call(tok){ return fetch(API+'/rpc/'+name,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON,'Authorization':'Bearer '+tok},body:JSON.stringify(params||{})}); }
+    var token = await freshToken();
+    var res = await call(token);
+    if(res.status===401 && session && session.refresh_token){ if(await refreshNow()){ res = await call(session.access_token); } }
     var data = await res.json().catch(function(){return null;});
-    if(!res.ok){ throw new Error((data&&(data.message||data.hint||data.details))||'Something went wrong. Please try again.'); }
+    if(!res.ok){
+      var msg=(data&&(data.message||data.hint||data.details))||'';
+      if(res.status===401 || /jwt|token|expired/i.test(msg)){ throw new Error('Your session expired — please log in again.'); }
+      throw new Error(msg||'Something went wrong. Please try again.');
+    }
     return data;
   }
 
@@ -274,7 +296,7 @@
     var html='<section class="ws-sec"><div class="ws-sec-h"><h2>Job applications</h2><span class="ws-range-note">'+t.applications_applied+' / '+tg.applications+' applied today</span></div>'+
       '<form class="quick-add" data-ws-form="job">'+
         '<div class="qa-row"><input name="company" placeholder="Company" required maxlength="120"><input name="role" placeholder="Role / title" required maxlength="120"></div>'+
-        '<div class="qa-row"><input class="wide" name="url" type="url" placeholder="Job URL (optional)" maxlength="1000"></div>'+
+        '<div class="qa-row"><input class="wide" name="url" type="text" inputmode="url" placeholder="Job URL (optional)" maxlength="1000"></div>'+
         '<div class="chips" data-chips="source">'+SOURCES.map(function(s){return '<button type="button" class="chip'+(s===jobSource?' on':'')+'" data-source="'+esc(s)+'">'+esc(s)+'</button>';}).join('')+'</div>'+
         '<div class="qa-actions"><div class="seg"><button type="button" class="seg-btn'+(jobStatus==='applied'?' on':'')+'" data-status="applied">Applied</button><button type="button" class="seg-btn'+(jobStatus==='saved'?' on':'')+'" data-status="saved">Saved for later</button></div><button class="btn primary sm" type="submit">Add</button></div>'+
       '</form>';
@@ -304,7 +326,7 @@
     html+='<form class="quick-add" data-ws-form="prep">'+
       '<div class="chips" data-chips="cat">'+active.map(function(c){return '<button type="button" class="chip'+(c.id===prepCat?' on':'')+'" data-cat="'+c.id+'">'+esc(c.name)+'</button>';}).join('')+ (active.length?'':'<span class="empty-note">Activate a skill below to start logging.</span>') +'</div>'+
       '<div class="qa-row"><input class="wide" name="topic" placeholder="What did you work on? (e.g. Window functions)" required maxlength="160"></div>'+
-      '<div class="qa-row"><input class="wide" name="url" type="url" placeholder="Resource link (optional)" maxlength="1000"></div>'+
+      '<div class="qa-row"><input class="wide" name="url" type="text" inputmode="url" placeholder="Resource link (optional)" maxlength="1000"></div>'+
       '<div class="qa-actions"><div class="seg"><button type="button" class="seg-btn'+(prepType==='practice'?' on':'')+'" data-type="practice">Practice</button><button type="button" class="seg-btn'+(prepType==='learn'?' on':'')+'" data-type="learn">Learn</button></div><button class="btn primary sm" type="submit"'+(active.length?'':' disabled')+'>Add entry</button></div>'+
     '</form>';
     // category rings
@@ -325,7 +347,7 @@
       '<p class="section-intro" style="margin:0 0 18px">Post opportunities you find and discover roles other members shared. The feed grows as more people contribute.</p>'+
       '<form class="quick-add" data-ws-form="share">'+
         '<div class="qa-row"><input name="company" placeholder="Company" required maxlength="120"><input name="role" placeholder="Role" required maxlength="120"></div>'+
-        '<div class="qa-row"><input class="wide" name="url" type="url" placeholder="Original job URL (https://…)" required maxlength="1000"></div>'+
+        '<div class="qa-row"><input class="wide" name="url" type="text" inputmode="url" placeholder="Original job URL (https://…)" required maxlength="1000"></div>'+
         '<div class="qa-row"><input name="location" placeholder="Location (optional)" maxlength="80"><select name="work_mode"><option value="">Work mode</option><option value="remote">Remote</option><option value="hybrid">Hybrid</option><option value="onsite">On-site</option></select></div>'+
         '<div class="qa-actions"><span class="subtle">Please share only real, public listings.</span><button class="btn primary sm" type="submit">Share opportunity</button></div>'+
       '</form>'+
@@ -378,16 +400,16 @@
     wsEl.addEventListener('submit', function(ev){
       var f=ev.target, kind=f.getAttribute('data-ws-form'); if(!kind) return; ev.preventDefault();
       var fd=new FormData(f);
-      if(kind==='job'){ doAction(rpc('dw_add_application',{p_company:fd.get('company'),p_role:fd.get('role'),p_source:jobSource,p_url:fd.get('url')||null,p_status:jobStatus}),'Application added.'); }
-      else if(kind==='prep'){ if(!prepCat){toast('Add or activate a skill first.');return;} doAction(rpc('dw_add_prep',{p_category_id:prepCat,p_type:prepType,p_topic:fd.get('topic'),p_url:fd.get('url')||null}),'Logged. Keep going!'); }
+      if(kind==='job'){ doAction(rpc('dw_add_application',{p_company:fd.get('company'),p_role:fd.get('role'),p_source:jobSource,p_url:normUrl(fd.get('url')),p_status:jobStatus}),'Application added.'); }
+      else if(kind==='prep'){ if(!prepCat){toast('Add or activate a skill first.');return;} doAction(rpc('dw_add_prep',{p_category_id:prepCat,p_type:prepType,p_topic:fd.get('topic'),p_url:normUrl(fd.get('url'))}),'Logged. Keep going!'); }
       else if(kind==='cat'){ var n=(fd.get('name')||'').trim(); if(!n)return; doAction(rpc('dw_add_category',{p_name:n}),'Skill added.'); }
-      else if(kind==='share'){ rpc('dw_share_job',{p_company:fd.get('company'),p_role:fd.get('role'),p_url:fd.get('url'),p_source:null,p_location:fd.get('location')||null,p_work_mode:fd.get('work_mode')||null}).then(function(r){ toast(r&&r.duplicate?'Already on the board — thanks!':'Shared with the community.'); f.reset(); loadCommunity(community&&community.q); }).catch(function(e){toast(e.message);}); }
+      else if(kind==='share'){ rpc('dw_share_job',{p_company:fd.get('company'),p_role:fd.get('role'),p_url:normUrl(fd.get('url')),p_source:null,p_location:fd.get('location')||null,p_work_mode:fd.get('work_mode')||null}).then(function(r){ toast(r&&r.duplicate?'Already on the board — thanks!':'Shared with the community.'); f.reset(); loadCommunity(community&&community.q); }).catch(function(e){toast(e.message);}); }
     });
     var si;
     wsEl.addEventListener('input', function(ev){ if(ev.target.getAttribute('data-ws')==='commsearch'){ clearTimeout(si); var q=ev.target.value; si=setTimeout(function(){loadCommunity(q);},350); } });
   }
   function doAction(promise, okMsg){
-    promise.then(function(){ return loadWorkspace(currentRange); }).then(function(){ if(okMsg) toast(okMsg); }).catch(function(e){ toast(e.message); });
+    promise.then(function(){ return loadWorkspace(currentRange); }).then(function(){ if(okMsg) toast(okMsg); }).catch(function(e){ toast(e.message); if(/log in again/i.test(e.message||'')){ showAuth('login'); } });
   }
 
   /* ---------- firefly-bee: idle hover + flutter, swims on scroll, returns home ---------- */
