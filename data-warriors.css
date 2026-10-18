@@ -587,3 +587,11 @@ body.ws-mode{background:var(--bg-2)}
 .jb-reported{font-size:12px;color:var(--muted-2)}
 
 @media (max-width:760px){ .onboard-steps{grid-template-columns:1fr} }
+
+/* ---------- community feed: tools + badges ---------- */
+.comm-tools{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:16px 0 6px}
+.comm-tools .filter-chips{margin:0}
+.comm-search-input{flex:1;min-width:200px;border:1px solid var(--line);border-radius:11px;padding:10px 14px;font:14px var(--font);background:#fff;color:var(--ink)}
+.comm-search-input:focus{outline:2px solid rgba(240,25,32,.3);border-color:var(--red)}
+.jb-pop{font-size:10.5px;font-weight:700;color:var(--ink-2);background:var(--bg-2);border:1px solid var(--line);border-radius:999px;padding:3px 9px;white-space:nowrap}
+.jb-intracker{font-size:12px;font-weight:600;color:var(--green);white-space:nowrap}

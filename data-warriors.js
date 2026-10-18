@@ -179,6 +179,8 @@
   /* ================= WORKSPACE (registered users) ================= */
   var wsEl = document.getElementById('workspace');
   var prepCat = null, prepType = 'practice', jobStatus = 'applied', jobSource = 'LinkedIn', appFilter = 'all';
+  var commDays = 7, commFormOpen = false;
+  var COMM_FILTERS = [['24 hours',1],['3 days',3],['7 days',7],['All time',0]];
 
   function register(){
     if(!session){ try{localStorage.setItem('dw_pending_registration','1');}catch(_){ } showAuth('signup'); return Promise.resolve(); }
@@ -361,30 +363,45 @@
 
   /* ---- Community view ---- */
   function viewCommunity(){
-    var html='<section class="ws-sec"><div class="ws-sec-h"><h2>Community job board</h2><span class="ws-range-note">Share 5 · discover more</span></div>'+
-      '<div class="comm-reco">💡 <b>Real openings shared by members.</b> If a role fits your target, open it and apply — then hit <b>+ Track</b> to save it to your Applications. Share 5 of your own to keep the feed strong for everyone.</div>'+
-      '<form class="quick-add" data-ws-form="share">'+
+    var html='<section class="ws-sec"><div class="ws-sec-h"><h2>Community job board</h2>'+
+        '<button class="btn '+(commFormOpen?'ghost':'primary')+' sm" data-ws="toggle-share">'+(commFormOpen?'× Close':'+ Add a community post')+'</button></div>'+
+      '<div class="comm-reco">💡 <b>Opportunities members are tracking</b> — shared anonymously — plus roles posted directly. Open &amp; apply to what fits, then hit <b>+ Track</b> to add it to your Applications.</div>';
+    if(commFormOpen){
+      html+='<form class="quick-add" data-ws-form="share">'+
         '<div class="qa-row"><input name="company" placeholder="Company" required maxlength="120"><input name="role" placeholder="Role" required maxlength="120"></div>'+
         '<div class="qa-row"><input class="wide" name="url" type="text" inputmode="url" placeholder="Original job URL (https://…)" required maxlength="1000"></div>'+
         '<div class="qa-row"><input name="location" placeholder="Location (optional)" maxlength="80"><select name="work_mode"><option value="">Work mode</option><option value="remote">Remote</option><option value="hybrid">Hybrid</option><option value="onsite">On-site</option></select></div>'+
         '<div class="qa-actions"><span class="subtle">Please share only real, public listings.</span><button class="btn primary sm" type="submit">Share opportunity</button></div>'+
-      '</form>'+
-      '<div class="comm-search"><input type="search" placeholder="Search company, role, location…" data-ws="commsearch" value="'+esc(community&&community.q||'')+'"></div>';
+      '</form>';
+    }
+    html+='<div class="comm-tools"><div class="filter-chips">'+COMM_FILTERS.map(function(f){return '<button class="fchip'+(commDays===f[1]?' on':'')+'" data-ws="commdays" data-days="'+f[1]+'">'+f[0]+'</button>';}).join('')+'</div>'+
+      '<input type="search" class="comm-search-input" placeholder="Search company, role, location…" data-ws="commsearch" value="'+esc(community&&community.q||'')+'"></div>';
     if(!community){ html+='<div class="empty-note">Loading opportunities…</div>'; }
-    else if(!community.jobs.length){ html+='<div class="empty-state"><h3>No opportunities yet</h3><p>Be the first to share a role — it helps everyone preparing alongside you.</p></div>'; }
+    else if(!community.jobs.length){ html+='<div class="empty-state"><h3>No opportunities in this window</h3><p>Try <b>All time</b>, or add a post. As members log jobs with a link, they show up here automatically.</p></div>'; }
     else {
-      html+='<div class="ws-range-note" style="margin:4px 0 12px">'+community.total+' active opportunities</div><div class="job-board">'+community.jobs.map(function(j){
-        return '<div class="jb-card"><div class="jb-top"><div><b>'+esc(j.role)+'</b><span class="jb-co">'+esc(j.company)+'</span></div>'+(j.mine?'<span class="jb-mine">You shared</span>':'')+'</div>'+
-          '<div class="jb-meta">'+(j.location?'<span>'+esc(j.location)+'</span>':'')+(j.work_mode?'<span class="jb-mode">'+esc(j.work_mode)+'</span>':'')+(j.source?'<span>'+esc(j.source)+'</span>':'')+'<span>'+fmtDate(j.shared_date)+'</span></div>'+
-          '<div class="jb-actions"><a class="btn primary sm" href="'+esc(j.job_url)+'" target="_blank" rel="noopener noreferrer">Open &amp; apply →</a>'+(j.mine?'':'<button class="mini-btn" data-ws="trackjob" data-company="'+esc(j.company)+'" data-role="'+esc(j.role)+'" data-url="'+esc(j.job_url)+'">+ Track</button>')+(j.reported?'<span class="jb-reported">Reported</span>':'<button class="jb-report" data-ws="reportjob" data-id="'+j.id+'">Report</button>')+'</div></div>';
-      }).join('')+'</div>';
+      html+='<div class="ws-range-note" style="margin:4px 0 12px">'+community.total+' opportunit'+(community.total===1?'y':'ies')+'</div><div class="job-board">'+community.jobs.map(jobCard).join('')+'</div>';
     }
     html+='</section>';
     return html;
   }
-  async function loadCommunity(q){
-    try{ community = await rpc('dw_community_feed',{p_limit:40,p_offset:0,p_search:q||null}); community.q=q||''; }
-    catch(e){ community={jobs:[],total:0,q:q||''}; toast(e.message); }
+  function jobCard(j){
+    var meta='';
+    if(j.location) meta+='<span>'+esc(j.location)+'</span>';
+    if(j.work_mode) meta+='<span class="jb-mode">'+esc(j.work_mode)+'</span>';
+    if(j.source) meta+='<span>'+esc(j.source)+'</span>';
+    meta+='<span>added '+fmtAgo(j.last_at)+'</span>';
+    return '<div class="jb-card"><div class="jb-top"><div><b>'+esc(j.role)+'</b><span class="jb-co">'+esc(j.company)+'</span></div>'+(Number(j.members)>1?'<span class="jb-pop">'+j.members+' tracking</span>':'')+'</div>'+
+      '<div class="jb-meta">'+meta+'</div>'+
+      '<div class="jb-actions"><a class="btn primary sm" href="'+esc(j.job_url)+'" target="_blank" rel="noopener noreferrer">Open &amp; apply →</a>'+
+        (j.mine?'<span class="jb-intracker">✓ In your tracker</span>':'<button class="mini-btn" data-ws="trackjob" data-company="'+esc(j.company)+'" data-role="'+esc(j.role)+'" data-url="'+esc(j.job_url)+'">+ Track</button>')+
+        (j.reported?'<span class="jb-reported">Reported</span>':'<button class="jb-report" data-ws="reportjob" data-key="'+esc(j.url_key)+'">Report</button>')+
+      '</div></div>';
+  }
+  async function loadCommunity(days, q){
+    if(days!==undefined && days!==null) commDays=days;
+    if(q===undefined) q = (community && community.q) || '';
+    try{ community = await rpc('dw_community_feed',{p_days:commDays, p_search:q||null, p_limit:40, p_offset:0}); community.q=q||''; community.days=commDays; }
+    catch(e){ community={jobs:[],total:0,q:q||'',days:commDays}; toast(e.message); }
     if(currentView==='community') renderWorkspace();
   }
 
@@ -402,14 +419,16 @@
       if(b.hasAttribute('data-status') && b.classList.contains('seg-btn')){ jobStatus=b.getAttribute('data-status'); b.parentNode.querySelectorAll('.seg-btn').forEach(function(x){x.classList.toggle('on',x===b);}); return; }
       if(act==='view'){ setView(b.getAttribute('data-view')); return; }
       if(act==='dismiss-onboard'){ try{localStorage.setItem('dw_onboard_done','1');}catch(_){ } renderWorkspace(); return; }
-      if(act==='trackjob'){ doAction(rpc('dw_add_application',{p_company:b.getAttribute('data-company'),p_role:b.getAttribute('data-role'),p_source:'Community',p_url:b.getAttribute('data-url'),p_status:'saved'}),'Saved to your Applications.'); return; }
+      if(act==='trackjob'){ rpc('dw_add_application',{p_company:b.getAttribute('data-company'),p_role:b.getAttribute('data-role'),p_source:'Community',p_url:b.getAttribute('data-url'),p_status:'saved'}).then(function(){ toast('Saved to your Applications.'); return loadCommunity(commDays, community&&community.q); }).catch(function(e){ toast(e.message); }); return; }
+      if(act==='toggle-share'){ commFormOpen=!commFormOpen; renderWorkspace(); return; }
+      if(act==='commdays'){ loadCommunity(parseInt(b.getAttribute('data-days'),10), community&&community.q); return; }
       if(act==='logout'){ logout(); return; }
       if(act==='appfilter'){ appFilter=b.getAttribute('data-filter'); renderWorkspace(); return; }
       if(act==='delapp'){ doAction(rpc('dw_delete_application',{p_id:b.getAttribute('data-id')}),'Removed.'); return; }
       if(act==='delprep'){ doAction(rpc('dw_delete_prep',{p_id:b.getAttribute('data-id')}),'Removed.'); return; }
       if(act==='togglecat'){ doAction(rpc('dw_set_category_active',{p_id:b.getAttribute('data-id'),p_active:b.getAttribute('data-active')==='1'}),'Updated.'); return; }
       if(act==='delcat'){ doAction(rpc('dw_delete_category',{p_id:b.getAttribute('data-id')}),'Skill removed.'); return; }
-      if(act==='reportjob'){ var reason=prompt('Why report this? (expired, broken, duplicate, spam, other)'); if(reason){ rpc('dw_report_job',{p_job_id:b.getAttribute('data-id'),p_reason:reason.toLowerCase().trim()}).then(function(){toast('Thanks — reported.');loadCommunity(community&&community.q);}).catch(function(e){toast(e.message);}); } return; }
+      if(act==='reportjob'){ if(confirm('Report this opportunity as expired or no longer valid? After a few reports it is hidden from the feed.')){ rpc('dw_report_job',{p_url_key:b.getAttribute('data-key')}).then(function(){toast('Thanks — reported.');loadCommunity(commDays, community&&community.q);}).catch(function(e){toast(e.message);}); } return; }
     });
     wsEl.addEventListener('change', function(ev){
       var el=ev.target, act=el.getAttribute('data-ws');
@@ -426,7 +445,7 @@
       else if(kind==='share'){ rpc('dw_share_job',{p_company:fd.get('company'),p_role:fd.get('role'),p_url:normUrl(fd.get('url')),p_source:null,p_location:fd.get('location')||null,p_work_mode:fd.get('work_mode')||null}).then(function(r){ toast(r&&r.duplicate?'Already on the board — thanks!':'Shared with the community.'); f.reset(); loadCommunity(community&&community.q); }).catch(function(e){toast(e.message);}); }
     });
     var si;
-    wsEl.addEventListener('input', function(ev){ if(ev.target.getAttribute('data-ws')==='commsearch'){ clearTimeout(si); var q=ev.target.value; si=setTimeout(function(){loadCommunity(q);},350); } });
+    wsEl.addEventListener('input', function(ev){ if(ev.target.getAttribute('data-ws')==='commsearch'){ clearTimeout(si); var q=ev.target.value; si=setTimeout(function(){loadCommunity(commDays, q);},350); } });
   }
   function doAction(promise, okMsg){
     promise.then(function(){ return loadWorkspace(currentRange); }).then(function(){ if(okMsg) toast(okMsg); }).catch(function(e){ toast(e.message); if(/log in again/i.test(e.message||'')){ showAuth('login'); } });
