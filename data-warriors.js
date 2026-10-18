@@ -219,7 +219,7 @@
     var main=document.getElementById('main'), nav=document.getElementById('nav'), ft=document.querySelector('.footer');
     if(main) main.hidden=false; if(nav) nav.style.display=''; if(ft) ft.style.display='';
     document.body.classList.remove('ws-mode');
-    wsEl.hidden=true; wsEl.innerHTML='';
+    wsEl.hidden=true; wsEl.innerHTML=''; currentView='dashboard';
     try{ if(viewFromPath()) history.replaceState({},'','/data-warriors'); }catch(_){ }
   }
   function setView(v){ currentView=v; syncUrl(false); if(v==='community' && !community){ renderWorkspace(); loadCommunity(); } else { renderWorkspace(); } }
@@ -258,11 +258,29 @@
   }
 
   /* ---- Dashboard view ---- */
+  function onboardDone(){ try{return localStorage.getItem('dw_onboard_done')==='1';}catch(_){return false;} }
   function viewDashboard(){
     var k=state.kpis, t=state.today, tg=state.targets, s=state.streak, rangeLabel=(RANGES.filter(function(r){return r[1]===currentRange;})[0]||['',''])[0];
     var kpis=[['Applications',k.applications,'applied'],['Responses',k.responses,'heard back'],['Interviews',k.interviews,'reached'],['Prep sessions',k.prep_sessions,'logged'],['Active days',k.active_days,'in range'],['Saved',k.saved,'parked']];
-    var html='<section class="ws-sec"><div class="ws-sec-h"><h2>Your progress</h2><span class="ws-range-note">Last '+esc(rangeLabel)+'</span></div>'+
+    var isNew = (state.applications||[]).length===0 && (state.today_prep||[]).length===0 && Number(s.complete_days||0)===0 && k.applications===0 && k.prep_sessions===0;
+    var html='';
+    if(isNew && !onboardDone()){
+      html+='<section class="ws-sec"><div class="panel onboard">'+
+        '<button class="onboard-x" data-ws="dismiss-onboard" aria-label="Dismiss">×</button>'+
+        '<div class="onboard-eyebrow">GET STARTED</div>'+
+        '<h2 class="onboard-h">Welcome, '+esc(displayName())+' 👋</h2>'+
+        '<p class="onboard-sub">This is your free workspace to keep your <b>job applications</b> and <b>interview prep</b> in one place — so you can see what’s working. Three things to begin:</p>'+
+        '<div class="onboard-steps">'+
+          '<div class="ob-step"><span class="ob-n">1</span><div class="ob-c"><b>Track a job you applied to</b><p>Company, role, and where you found it.</p><button class="btn primary sm" data-ws="view" data-view="applications">Add an application</button></div></div>'+
+          '<div class="ob-step"><span class="ob-n">2</span><div class="ob-c"><b>Log what you studied today</b><p>Pick a skill (SQL, Excel…), note the topic.</p><button class="btn ghost sm" data-ws="view" data-view="prep">Log practice</button></div></div>'+
+          '<div class="ob-step"><span class="ob-n">3</span><div class="ob-c"><b>Explore roles members shared</b><p>Open &amp; apply to relevant openings.</p><button class="btn ghost sm" data-ws="view" data-view="community">Browse roles</button></div></div>'+
+        '</div>'+
+        '<p class="onboard-foot">Come back daily. Logging <b>'+tg.applications+' applications + '+tg.prep+' prep entries</b> completes a day and builds your streak toward the optional <b>10-day challenge</b>. Nothing is mandatory — use what helps you.</p>'+
+      '</div></section>';
+    }
+    html+='<section class="ws-sec"><div class="ws-sec-h"><h2>Your progress</h2><span class="ws-range-note">Last '+esc(rangeLabel)+'</span></div>'+
       '<div class="kpi-row">'+kpis.map(function(x){return '<div class="kpi"><span>'+x[0]+'</span><strong>'+x[1]+'</strong><em>'+x[2]+'</em></div>';}).join('')+'</div></section>';
+    html+='<section class="ws-sec"><a class="comm-nudge" data-ws="view" data-view="community"><span class="cn-ic">💼</span><span class="cn-txt"><b>Roles shared by the community</b><em>Explore openings other members posted — and apply to the ones relevant to you.</em></span><span class="cn-go">Explore →</span></a></section>';
     // today goal
     html+='<section class="ws-sec"><div class="ws-grid2">'+
       '<div class="panel goal"><h3>Today’s goal</h3><div class="goal-rings">'+
@@ -344,7 +362,7 @@
   /* ---- Community view ---- */
   function viewCommunity(){
     var html='<section class="ws-sec"><div class="ws-sec-h"><h2>Community job board</h2><span class="ws-range-note">Share 5 · discover more</span></div>'+
-      '<p class="section-intro" style="margin:0 0 18px">Post opportunities you find and discover roles other members shared. The feed grows as more people contribute.</p>'+
+      '<div class="comm-reco">💡 <b>Real openings shared by members.</b> If a role fits your target, open it and apply — then hit <b>+ Track</b> to save it to your Applications. Share 5 of your own to keep the feed strong for everyone.</div>'+
       '<form class="quick-add" data-ws-form="share">'+
         '<div class="qa-row"><input name="company" placeholder="Company" required maxlength="120"><input name="role" placeholder="Role" required maxlength="120"></div>'+
         '<div class="qa-row"><input class="wide" name="url" type="text" inputmode="url" placeholder="Original job URL (https://…)" required maxlength="1000"></div>'+
@@ -358,7 +376,7 @@
       html+='<div class="ws-range-note" style="margin:4px 0 12px">'+community.total+' active opportunities</div><div class="job-board">'+community.jobs.map(function(j){
         return '<div class="jb-card"><div class="jb-top"><div><b>'+esc(j.role)+'</b><span class="jb-co">'+esc(j.company)+'</span></div>'+(j.mine?'<span class="jb-mine">You shared</span>':'')+'</div>'+
           '<div class="jb-meta">'+(j.location?'<span>'+esc(j.location)+'</span>':'')+(j.work_mode?'<span class="jb-mode">'+esc(j.work_mode)+'</span>':'')+(j.source?'<span>'+esc(j.source)+'</span>':'')+'<span>'+fmtDate(j.shared_date)+'</span></div>'+
-          '<div class="jb-actions"><a class="btn primary sm" href="'+esc(j.job_url)+'" target="_blank" rel="noopener noreferrer">Open &amp; apply →</a>'+(j.reported?'<span class="subtle">Reported</span>':'<button class="mini-btn" data-ws="reportjob" data-id="'+j.id+'">Report</button>')+'</div></div>';
+          '<div class="jb-actions"><a class="btn primary sm" href="'+esc(j.job_url)+'" target="_blank" rel="noopener noreferrer">Open &amp; apply →</a>'+(j.mine?'':'<button class="mini-btn" data-ws="trackjob" data-company="'+esc(j.company)+'" data-role="'+esc(j.role)+'" data-url="'+esc(j.job_url)+'">+ Track</button>')+(j.reported?'<span class="jb-reported">Reported</span>':'<button class="jb-report" data-ws="reportjob" data-id="'+j.id+'">Report</button>')+'</div></div>';
       }).join('')+'</div>';
     }
     html+='</section>';
@@ -383,6 +401,8 @@
       if(b.hasAttribute('data-type')){ prepType=b.getAttribute('data-type'); b.parentNode.querySelectorAll('.seg-btn').forEach(function(x){x.classList.toggle('on',x===b);}); return; }
       if(b.hasAttribute('data-status') && b.classList.contains('seg-btn')){ jobStatus=b.getAttribute('data-status'); b.parentNode.querySelectorAll('.seg-btn').forEach(function(x){x.classList.toggle('on',x===b);}); return; }
       if(act==='view'){ setView(b.getAttribute('data-view')); return; }
+      if(act==='dismiss-onboard'){ try{localStorage.setItem('dw_onboard_done','1');}catch(_){ } renderWorkspace(); return; }
+      if(act==='trackjob'){ doAction(rpc('dw_add_application',{p_company:b.getAttribute('data-company'),p_role:b.getAttribute('data-role'),p_source:'Community',p_url:b.getAttribute('data-url'),p_status:'saved'}),'Saved to your Applications.'); return; }
       if(act==='logout'){ logout(); return; }
       if(act==='appfilter'){ appFilter=b.getAttribute('data-filter'); renderWorkspace(); return; }
       if(act==='delapp'){ doAction(rpc('dw_delete_application',{p_id:b.getAttribute('data-id')}),'Removed.'); return; }

@@ -554,3 +554,36 @@ body.ws-mode{background:var(--bg-2)}
   .app-ctrl{justify-content:space-between}
   .goal-rings{justify-content:space-around}
 }
+
+/* ---------- first-time onboarding ---------- */
+.onboard{position:relative;border:1px solid var(--red-line);background:linear-gradient(135deg,#fff,var(--pale));box-shadow:0 10px 30px rgba(240,25,32,.06)}
+.onboard-x{position:absolute;top:12px;right:12px;appearance:none;border:0;background:none;font-size:20px;line-height:1;color:var(--muted);cursor:pointer}
+.onboard-x:hover{color:var(--red)}
+.onboard-eyebrow{font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--red)}
+.onboard-h{font-family:var(--display);font-size:24px;font-weight:800;letter-spacing:-.03em;margin:8px 0 6px}
+.onboard-sub{color:var(--ink-2);font-size:14.5px;line-height:1.55;max-width:660px;margin-bottom:18px}
+.onboard-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.ob-step{display:flex;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
+.ob-n{flex:none;width:28px;height:28px;border-radius:50%;background:var(--red);color:#fff;font-family:var(--display);font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center}
+.ob-c b{font-size:14.5px;display:block;margin-bottom:3px}
+.ob-c p{font-size:13px;color:var(--muted);line-height:1.45;margin-bottom:10px}
+.onboard-foot{font-size:13px;color:var(--muted);line-height:1.55;border-top:1px solid var(--line-2);padding-top:14px;margin:0}
+.onboard-foot b{color:var(--ink-2)}
+
+/* ---------- community discovery nudge ---------- */
+.comm-nudge{display:flex;align-items:center;gap:14px;text-decoration:none;background:#fff;border:1px solid var(--line);border-left:3px solid var(--red);border-radius:14px;padding:14px 18px;transition:transform .15s var(--ease),box-shadow .15s}
+.comm-nudge:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.cn-ic{font-size:22px;flex:none}
+.cn-txt{flex:1;min-width:0}
+.cn-txt b{display:block;font-size:14.5px;color:var(--ink)}
+.cn-txt em{font-style:normal;font-size:13px;color:var(--muted)}
+.cn-go{color:var(--red);font-weight:700;font-size:14px;white-space:nowrap}
+
+/* ---------- community recommendation + card actions ---------- */
+.comm-reco{background:var(--pale);border:1px solid var(--red-line);border-radius:12px;padding:13px 16px;font-size:13.5px;line-height:1.55;color:#5c3335;margin:0 0 18px}
+.comm-reco b{color:var(--red-ink)}
+.jb-report{appearance:none;border:0;background:none;color:var(--muted);font:600 12px var(--font);cursor:pointer;padding:0 4px}
+.jb-report:hover{color:var(--red)}
+.jb-reported{font-size:12px;color:var(--muted-2)}
+
+@media (max-width:760px){ .onboard-steps{grid-template-columns:1fr} }
