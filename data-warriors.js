@@ -174,6 +174,11 @@
     if(pending){ await register(); }
   }
 
+  // ---- clean deep-link routing: /data-warriors/<view> ----
+  var WS_VIEWS=['dashboard','applications','prep','community'];
+  function viewFromPath(){ var m=location.pathname.replace(/\/+$/,'').match(/\/data-warriors\/([a-z]+)$/i); return (m && WS_VIEWS.indexOf(m[1].toLowerCase())>=0) ? m[1].toLowerCase() : null; }
+  function syncUrl(replace){ try{ var want='/data-warriors/'+currentView; if(location.pathname.replace(/\/+$/,'')!==want){ history[replace?'replaceState':'pushState']({dwView:currentView},'',want); } }catch(_){ } }
+
   function enterWorkspace(){
     var main=document.getElementById('main'), nav=document.getElementById('nav'), ft=document.querySelector('.footer');
     if(main) main.hidden=true; if(nav) nav.style.display='none'; if(ft) ft.style.display='none';
@@ -182,7 +187,10 @@
     document.body.classList.add('ws-mode');
     wsEl.hidden=false;
     if(!wsBound){ bindWorkspace(); wsBound=true; }
+    var pv=viewFromPath(); currentView = pv || currentView || 'dashboard';
     renderWorkspace();
+    syncUrl(true);
+    if(currentView==='community' && !community) loadCommunity();
     window.scrollTo(0,0);
   }
   function exitToLanding(){
@@ -190,8 +198,9 @@
     if(main) main.hidden=false; if(nav) nav.style.display=''; if(ft) ft.style.display='';
     document.body.classList.remove('ws-mode');
     wsEl.hidden=true; wsEl.innerHTML='';
+    try{ if(viewFromPath()) history.replaceState({},'','/data-warriors'); }catch(_){ }
   }
-  function setView(v){ currentView=v; if(v==='community' && !community){ renderWorkspace(); loadCommunity(); } else { renderWorkspace(); } }
+  function setView(v){ currentView=v; syncUrl(false); if(v==='community' && !community){ renderWorkspace(); loadCommunity(); } else { renderWorkspace(); } }
   function setRange(days){ loadWorkspace(days); }
 
   /* ---- small render helpers ---- */
@@ -341,6 +350,9 @@
 
   /* ---- workspace actions (delegated) ---- */
   function bindWorkspace(){
+    window.addEventListener('popstate', function(){
+      if(state && state.registered){ var pv=viewFromPath()||'dashboard'; if(pv!==currentView){ currentView=pv; if(pv==='community' && !community){ renderWorkspace(); loadCommunity(); } else renderWorkspace(); } }
+    });
     wsEl.addEventListener('click', function(ev){
       var b=ev.target.closest('[data-ws],[data-source],[data-cat],[data-status],[data-type]'); if(!b) return;
       var act=b.getAttribute('data-ws');
