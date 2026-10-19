@@ -181,11 +181,13 @@
   var prepCat = null, prepType = 'practice', jobStatus = 'applied', jobSource = 'LinkedIn', appFilter = 'all';
   var commDays = 7, commFormOpen = false;
   var COMM_FILTERS = [['24 hours',1],['3 days',3],['7 days',7],['All time',0]];
-  var profile = null, profilePrompted = false;
+  var profile = null, profilePrompted = false, profileEditMode = false;
   var TARGET_ROLES = ['Data Analyst','Business Analyst','Product Analyst','Marketing Analyst','Growth Analyst','BI Analyst','Analytics Engineer','MIS Analyst','Data Scientist','Data Engineer','Financial Analyst','Operations Analyst','Other'];
 
   function profileComplete(){ return !!(profile && profile.complete); }
-  function showProfileForm(){
+  function profileSubmitLabel(){ return profileEditMode ? 'Save changes' : 'Save &amp; start my journey →'; }
+  function showProfileForm(isEdit){
+    profileEditMode = !!isEdit;
     var pd=document.getElementById('profileDialog'), pc=document.getElementById('profileContent');
     if(!pd||!pc) return;
     var p=profile||{}, yNow=new Date().getFullYear(), years='';
@@ -193,8 +195,8 @@
     var name = p.full_name || (session&&session.user&&session.user.user_metadata&&(session.user.user_metadata.full_name||session.user.user_metadata.name)) || '';
     pc.innerHTML =
       '<form class="profile-form" id="profileForm">'+
-        '<div class="pf-head"><div class="pf-eyebrow">YOUR PROFILE</div><h2>One quick step to begin 🚀</h2>'+
-        '<p>Set up your profile so your effort counts and you show up job-ready. Takes under a minute — then your Data Warriors journey starts.</p></div>'+
+        '<div class="pf-head"><div class="pf-eyebrow">YOUR PROFILE</div><h2>'+(profileEditMode?'Edit your profile':'One quick step to begin 🚀')+'</h2>'+
+        '<p>'+(profileEditMode?'Keep your details current — your target role and links power your dashboard and keep you job-ready.':'Set up your profile so your effort counts and you show up job-ready. Takes under a minute — then your Data Warriors journey starts.')+'</p></div>'+
         '<div class="pf-grid">'+
           '<label class="pf-field"><span>Full name</span><input name="full_name" required maxlength="100" value="'+esc(name)+'"></label>'+
           '<label class="pf-field"><span>Target role</span><select name="target_role" required><option value="">Select…</option>'+TARGET_ROLES.map(function(r){return '<option'+(p.target_role===r?' selected':'')+'>'+r+'</option>';}).join('')+'</select></label>'+
@@ -205,7 +207,7 @@
           '<label class="pf-field wide"><span>GitHub <em>· optional</em></span><input name="github" type="text" inputmode="url" placeholder="github.com/yourname" value="'+esc(p.github_url||'')+'"></label>'+
         '</div>'+
         '<div class="pf-error" id="profileError"></div>'+
-        '<button class="btn primary" type="submit">Save &amp; start my journey →</button>'+
+        '<button class="btn primary" type="submit">'+profileSubmitLabel()+'</button>'+
       '</form>';
     if(!pd.open) pd.showModal();
   }
@@ -217,9 +219,9 @@
       await rpc('dw_save_profile',{p_full_name:fd.get('full_name'),p_target_role:fd.get('target_role'),p_education:fd.get('education'),p_passout_year:parseInt(fd.get('passout_year'),10),p_linkedin:fd.get('linkedin'),p_resume:fd.get('resume'),p_github:fd.get('github')||null});
       try{ profile=await rpc('dw_get_profile',{}); }catch(_){ profile={complete:true}; }
       try{ document.getElementById('profileDialog').close(); }catch(_){ }
-      toast('Profile complete — welcome aboard! 🚀');
+      toast(profileEditMode ? 'Profile updated.' : 'Profile complete — welcome aboard! 🚀');
       renderWorkspace();
-    }catch(e){ err.textContent=e.message; btn.disabled=false; btn.textContent='Save & start my journey →'; }
+    }catch(e){ err.textContent=e.message; btn.disabled=false; btn.textContent=(profileEditMode?'Save changes':'Save & start my journey →'); }
   }
 
   function register(){
@@ -239,7 +241,7 @@
   }
 
   // ---- clean deep-link routing: /data-warriors/<view> ----
-  var WS_VIEWS=['dashboard','applications','prep','community'];
+  var WS_VIEWS=['dashboard','applications','prep','community','profile'];
   function viewFromPath(){ var m=location.pathname.replace(/\/+$/,'').match(/\/data-warriors\/([a-z]+)$/i); return (m && WS_VIEWS.indexOf(m[1].toLowerCase())>=0) ? m[1].toLowerCase() : null; }
   function syncUrl(replace){ try{ var want='/data-warriors/'+currentView; if(location.pathname.replace(/\/+$/,'')!==want){ history[replace?'replaceState':'pushState']({dwView:currentView},'',want); } }catch(_){ } }
 
@@ -281,62 +283,92 @@
 
   function renderWorkspace(){
     if(!state) return;
-    var m=state.member, name=displayName();
+    var m=state.member, name=displayName(), ch=state.challenge||{day:0,target:45};
+    var role=(profile&&profile.target_role)?profile.target_role:'';
     wsEl.innerHTML =
       '<header class="ws-head"><div class="ws-head-in">'+
         '<a class="brand" href="/home">Analyst<span>World</span><em>Data Warriors</em></a>'+
-        '<div class="ws-streak"><b>'+(state.streak.current)+'</b> day streak · Day '+Math.max(1,m.day_number)+'</div>'+
+        '<div class="ws-head-mid">'+
+          '<span class="ws-daychip">🔥 Day '+Math.max(0,ch.day||0)+'<i>/'+(ch.target||45)+'</i></span>'+
+          (role?'<button class="ws-rolechip" data-ws="view" data-view="profile">🎯 '+esc(role)+'</button>':'')+
+        '</div>'+
         '<div class="ws-head-right">'+
           '<label class="ws-range-wrap">Range <select class="ws-range" data-ws="range">'+RANGES.map(function(r){return '<option value="'+r[1]+'"'+(r[1]===currentRange?' selected':'')+'>'+r[0]+'</option>';}).join('')+'</select></label>'+
           '<span class="ws-user">'+esc(session&&session.user&&session.user.email||name)+'</span>'+
           '<button class="link-btn" data-ws="logout">Log out</button>'+
         '</div>'+
       '</div></header>'+
-      '<nav class="ws-tabs">'+['dashboard','Dashboard','applications','Applications','prep','Prep','community','Community'].reduce(function(a,_,i,arr){if(i%2)return a;return a+'<button class="ws-tab'+(arr[i]===currentView?' on':'')+'" data-ws="view" data-view="'+arr[i]+'">'+arr[i+1]+'</button>';},'')+'</nav>'+
+      '<nav class="ws-tabs">'+['dashboard','Dashboard','applications','Applications','prep','Practice','community','Community','profile','Profile'].reduce(function(a,_,i,arr){if(i%2)return a;return a+'<button class="ws-tab'+(arr[i]===currentView?' on':'')+'" data-ws="view" data-view="'+arr[i]+'">'+arr[i+1]+'</button>';},'')+'</nav>'+
       '<main class="ws-body">'+ (
         currentView==='applications'?viewApplications():
         currentView==='prep'?viewPrep():
         currentView==='community'?viewCommunity():
+        currentView==='profile'?viewProfile():
         viewDashboard()
       )+'</main>';
   }
 
   /* ---- Dashboard view ---- */
   function onboardDone(){ try{return localStorage.getItem('dw_onboard_done')==='1';}catch(_){return false;} }
+  function restartBanner(ch){
+    var missed=ch.last_missed, rec=ch.recovery, recHtml;
+    if(rec && rec.status==='pending'){ recHtml='<span class="rb-pending">⏳ Continuation requested — an admin will review within 24h. If it isn’t approved in time, your new streak stands from today.</span>'; }
+    else if(rec && rec.status==='approved'){ recHtml='<span class="rb-ok">✓ Continuation approved — your streak carries on.</span>'; }
+    else if(rec && rec.status==='rejected'){ recHtml='<span class="rb-no">Continuation wasn’t approved. Rebuild from Day 1 — you’ve got this.</span>'; }
+    else { recHtml='<button class="btn ghost sm" data-ws="request-recovery" data-day="'+esc(missed||'')+'">Request a one-time continuation</button>'; }
+    return '<section class="ws-sec"><div class="panel restart-banner">'+
+      '<div class="rb-ic">↻</div><div class="rb-txt">'+
+        '<h3>You missed '+(missed?fmtDate(missed):'a day')+' — back to Day 1</h3>'+
+        '<p>The challenge is won on <b>consistency</b>, and the chain broke. That’s how it works — one missed day resets the count. Finish today’s mission to start a new streak, stronger this time.</p>'+
+        '<div class="rb-actions">'+recHtml+'</div>'+
+      '</div></div></section>';
+  }
   function viewDashboard(){
-    var k=state.kpis, t=state.today, tg=state.targets, s=state.streak, rangeLabel=(RANGES.filter(function(r){return r[1]===currentRange;})[0]||['',''])[0];
-    var kpis=[['Applications',k.applications,'applied'],['Responses',k.responses,'heard back'],['Interviews',k.interviews,'reached'],['Prep sessions',k.prep_sessions,'logged'],['Active days',k.active_days,'in range'],['Saved',k.saved,'parked']];
-    var isNew = (state.applications||[]).length===0 && (state.today_prep||[]).length===0 && Number(s.complete_days||0)===0 && k.applications===0 && k.prep_sessions===0;
+    var k=state.kpis, t=state.today, tg=state.targets, s=state.streak, ch=state.challenge||{}, cats=state.categories||[];
+    var active=cats.filter(function(c){return c.is_active;});
+    var rangeLabel=(RANGES.filter(function(r){return r[1]===currentRange;})[0]||['',''])[0];
+    var appsTarget=tg.applications, subjTarget=tg.prep;
+    var appsOk=t.applications_applied>=appsTarget, subjectsOk=active.length>0 && active.every(function(c){return c.today_count>=subjTarget;});
+    var todayComplete=!!ch.today_complete || (appsOk && subjectsOk);
+    var day=Math.max(0,ch.day||0), target=ch.target||45, phase1=ch.phase1||10;
+    var kpis=[['Applications',k.applications,'applied'],['Responses',k.responses,'heard back'],['Interviews',k.interviews,'reached'],['Prep entries',k.prep_sessions,'logged'],['Active days',k.active_days,'in range'],['Saved',k.saved,'parked']];
     var html='';
     if(!profileComplete()){
-      html+='<section class="ws-sec"><div class="panel profile-prompt"><div class="pp-txt"><div class="pp-eyebrow">ALMOST THERE</div><h2>Complete your profile to start logging 🚀</h2><p>Add your target role, education and links — under a minute, and it unlocks your tracker and keeps you job-ready.</p></div><button class="btn primary" data-ws="open-profile">Complete my profile</button></div></section>';
-    } else if(isNew && !onboardDone()){
-      html+='<section class="ws-sec"><div class="panel onboard">'+
-        '<button class="onboard-x" data-ws="dismiss-onboard" aria-label="Dismiss">×</button>'+
-        '<div class="onboard-eyebrow">GET STARTED</div>'+
-        '<h2 class="onboard-h">Welcome, '+esc(displayName())+' 👋</h2>'+
-        '<p class="onboard-sub">This is your free workspace to keep your <b>job applications</b> and <b>interview prep</b> in one place — so you can see what’s working. Three things to begin:</p>'+
-        '<div class="onboard-steps">'+
-          '<div class="ob-step"><span class="ob-n">1</span><div class="ob-c"><b>Track a job you applied to</b><p>Company, role, and where you found it.</p><button class="btn primary sm" data-ws="view" data-view="applications">Add an application</button></div></div>'+
-          '<div class="ob-step"><span class="ob-n">2</span><div class="ob-c"><b>Log what you studied today</b><p>Pick a skill (SQL, Excel…), note the topic.</p><button class="btn ghost sm" data-ws="view" data-view="prep">Log practice</button></div></div>'+
-          '<div class="ob-step"><span class="ob-n">3</span><div class="ob-c"><b>Explore roles members shared</b><p>Open &amp; apply to relevant openings.</p><button class="btn ghost sm" data-ws="view" data-view="community">Browse roles</button></div></div>'+
-        '</div>'+
-        '<p class="onboard-foot">Come back daily. Logging <b>'+tg.applications+' applications + '+tg.prep+' prep entries</b> completes a day and builds your streak toward the optional <b>10-day challenge</b>. Nothing is mandatory — use what helps you.</p>'+
-      '</div></section>';
+      html+='<section class="ws-sec"><div class="panel profile-prompt"><div class="pp-txt"><div class="pp-eyebrow">ALMOST THERE</div><h2>Complete your profile to start the challenge 🚀</h2><p>Add your target role, education and links — under a minute. It unlocks your tracker and keeps you job-ready.</p></div><button class="btn primary" data-ws="open-profile">Complete my profile</button></div></section>';
     }
+    // restart / missed banner
+    if(ch.restart){ html+=restartBanner(ch); }
+    // challenge hero
+    var phaseTxt, progPct=Math.min(100, Math.round(day/target*100));
+    if(day===0){ phaseTxt='Today is <b>Day 1</b>. Finish all of today’s missions below to start your streak.'; }
+    else if(day<phase1){ phaseTxt='<b>Day '+day+' of '+phase1+'</b> — proving your consistency. '+(phase1-day)+' more unbroken day'+(phase1-day===1?'':'s')+' to clear phase one.'; }
+    else if(day<target){ phaseTxt='Consistency proven ✓ · <b>Day '+day+' of '+target+'</b>. '+(target-day)+' day'+(target-day===1?'':'s')+' to the finish line.'; }
+    else { phaseTxt='🏆 45 days, every single one. You showed up — now go close the offer.'; }
+    html+='<section class="ws-sec"><div class="panel chal-hero">'+
+      '<div class="chal-top"><div class="chal-eyebrow">THE 45-DAY JOB CHALLENGE</div>'+
+        '<div class="chal-day">Day <b>'+day+'</b><i>/ '+target+'</i></div></div>'+
+      '<div class="chal-bar"><span style="width:'+progPct+'%"></span><i class="chal-tick" style="left:'+(phase1/target*100).toFixed(1)+'%" title="Day 10 — consistency proven"></i></div>'+
+      '<p class="chal-phase">'+phaseTxt+'</p>'+
+      '<div class="chal-stats"><span>🔥 Best streak <b>'+(ch.best||0)+'</b></span><span>✅ Complete days <b>'+(ch.complete_days||0)+'</b></span>'+(ch.qualified?'<span class="chal-q">Phase one cleared</span>':'')+'</div>'+
+    '</div></section>';
+    // today's mission — the 3 daily pillars
+    html+='<section class="ws-sec"><div class="panel mission'+(todayComplete?' is-done':'')+'">'+
+      '<div class="mission-h"><h3>Today’s mission</h3><span class="mission-date">'+fmtDate(state.today_date)+'</span></div>'+
+      '<p class="mission-sub">Every day, three moves: apply to <b>'+appsTarget+'</b> companies, and log <b>'+subjTarget+'</b> topics in <b>each</b> subject you’re practising (keep communication in there too).</p>'+
+      '<div class="mission-rings">'+
+        '<div class="mr"><div class="mr-ring">'+ring(t.applications_applied,appsTarget)+'</div><span class="mr-name">Apply</span><button class="btn primary xs" data-ws="view" data-view="applications">Log</button></div>'+
+        active.map(function(c){return '<div class="mr"><div class="mr-ring">'+ring(c.today_count,subjTarget)+'</div><span class="mr-name">'+esc(c.name)+'</span><button class="btn ghost xs" data-ws="view" data-view="prep">Log</button></div>';}).join('')+
+      '</div>'+
+      (active.length?'':'<p class="empty-note">Choose the subjects you’ll practise (SQL, Python, Communication…) in <a data-ws="view" data-view="prep">Practice</a> to switch on your daily mission.</p>')+
+      (todayComplete
+        ? '<div class="mission-done">✓ Today is complete — Day '+Math.max(1,day)+' locked in. Rest, and show up again tomorrow.</div>'
+        : '<div class="mission-todo">Fill every ring to complete today and move the challenge forward.</div>')+
+    '</div></section>';
+    // community nudge
+    html+='<section class="ws-sec"><a class="comm-nudge" data-ws="view" data-view="community"><span class="cn-ic">💼</span><span class="cn-txt"><b>Roles shared by the community</b><em>Explore openings other members posted — and apply to the ones relevant to you.</em></span><span class="cn-go">Explore →</span></a></section>';
+    // progress KPIs
     html+='<section class="ws-sec"><div class="ws-sec-h"><h2>Your progress</h2><span class="ws-range-note">Last '+esc(rangeLabel)+'</span></div>'+
       '<div class="kpi-row">'+kpis.map(function(x){return '<div class="kpi"><span>'+x[0]+'</span><strong>'+x[1]+'</strong><em>'+x[2]+'</em></div>';}).join('')+'</div></section>';
-    html+='<section class="ws-sec"><a class="comm-nudge" data-ws="view" data-view="community"><span class="cn-ic">💼</span><span class="cn-txt"><b>Roles shared by the community</b><em>Explore openings other members posted — and apply to the ones relevant to you.</em></span><span class="cn-go">Explore →</span></a></section>';
-    // today goal
-    html+='<section class="ws-sec"><div class="ws-grid2">'+
-      '<div class="panel goal"><h3>Today’s goal</h3><div class="goal-rings">'+
-        '<div class="gr">'+ring(t.applications_applied,tg.applications)+'<span>Applications</span></div>'+
-        '<div class="gr">'+ring(t.prep_total,tg.prep)+'<span>Prep entries</span></div>'+
-      '</div>'+(t.day_complete?'<div class="goal-done">✓ Day complete — streak counted</div>':'<div class="goal-todo">Hit both targets to complete today.</div>')+
-      '<div class="inline-cta"><button class="btn primary sm" data-ws="view" data-view="applications">Log a job</button><button class="btn ghost sm" data-ws="view" data-view="prep">Log prep</button></div></div>'+
-      '<div class="panel challenge-panel"><h3>10-day challenge</h3><div class="dots10">'+Array.apply(null,{length:10}).map(function(_,i){var on=i<s.current;return '<span class="d10'+(on?' on':'')+'">'+(i+1)+'</span>';}).join('')+'</div>'+
-        '<p class="subtle">'+(s.qualified?'🎉 You’ve completed a 10-day streak — Super Warriors (coming soon).':'Current streak '+s.current+' / 10 · longest '+s.max+'. Complete '+tg.applications+' apps + '+tg.prep+' prep on 10 straight days.')+'</p></div>'+
-      '</div></section>';
     // insights
     html+='<section class="ws-sec"><div class="ws-grid2">';
     // sources
@@ -350,6 +382,36 @@
     html+='<div class="panel"><h3>Consistency</h3><div class="consist">'+ state.consistency.map(function(c){var tot=c.apps+c.prep,h=Math.min(100,tot*8);return '<span class="cbar" title="'+c.date+': '+c.apps+' apps, '+c.prep+' prep" style="height:'+Math.max(6,h)+'%"></span>';}).join('') +'</div><p class="subtle">Daily activity over the range.</p></div>';
     html+='<div class="panel"><h3>Recent activity</h3>'+ (state.recent.length?'<div class="recent">'+state.recent.slice(0,8).map(function(r){return r.kind==='app'?'<div class="rc"><span class="rc-k app">Job</span>'+esc(r.company)+' · '+esc(r.role)+' <em>'+fmtAgo(r.at)+'</em></div>':'<div class="rc"><span class="rc-k prep">'+esc(r.type)+'</span>'+esc(r.category)+' · '+esc(r.topic)+' <em>'+fmtAgo(r.at)+'</em></div>';}).join('')+'</div>':'<p class="empty-note">Nothing logged yet.</p>') +'</div>';
     html+='</div></section>';
+    return html;
+  }
+
+  /* ---- Profile view ---- */
+  function pvField(label,val){ return '<div class="pvf"><span class="pvf-l">'+esc(label)+'</span><span class="pvf-v">'+(val?esc(val):'<em>—</em>')+'</span></div>'; }
+  function pvLink(label,url){
+    if(!url) return '<div class="pvf"><span class="pvf-l">'+esc(label)+'</span><span class="pvf-v"><em>Not added</em></span></div>';
+    var show=String(url).replace(/^https?:\/\//i,'').replace(/\/+$/,'');
+    return '<div class="pvf"><span class="pvf-l">'+esc(label)+'</span><a class="pvf-v link" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+esc(show)+' ↗</a></div>';
+  }
+  function viewProfile(){
+    var m=state.member, p=profile||{}, ch=state.challenge||{};
+    if(!profileComplete()){
+      return '<section class="ws-sec"><div class="panel profile-prompt"><div class="pp-txt"><div class="pp-eyebrow">INCOMPLETE</div><h2>Complete your profile</h2><p>Your target role and links power your dashboard and keep you job-ready. It takes under a minute.</p></div><button class="btn primary" data-ws="edit-profile">Complete profile</button></div></section>';
+    }
+    var name=p.full_name||displayName(), role=p.target_role||'', initial=(name||'W').trim().charAt(0).toUpperCase();
+    var html='<section class="ws-sec"><div class="panel profile-view">'+
+      '<div class="pv-head"><div class="pv-avatar">'+esc(initial)+'</div>'+
+        '<div class="pv-id"><h2>'+esc(name)+'</h2>'+(role?'<div class="pv-target">🎯 Targeting <b>'+esc(role)+'</b></div>':'')+
+          '<div class="pv-badges"><span class="pv-badge">Member #'+m.number+'</span>'+(m.is_founding?'<span class="pv-badge founding">Founding</span>':'')+'<span class="pv-badge day">🔥 Day '+Math.max(0,ch.day||0)+'/'+(ch.target||45)+'</span></div>'+
+        '</div><button class="btn ghost sm pv-edit" data-ws="edit-profile">Edit</button></div>'+
+      '<div class="pv-grid">'+
+        pvField('Target role',role)+
+        pvField('Highest qualification',p.education)+
+        pvField('Passout year',p.passout_year)+
+        pvLink('LinkedIn',p.linkedin_url)+
+        pvLink('Resume',p.resume_url)+
+        pvLink('GitHub',p.github_url)+
+      '</div>'+
+    '</div></section>';
     return html;
   }
 
@@ -463,7 +525,9 @@
       if(b.hasAttribute('data-status') && b.classList.contains('seg-btn')){ jobStatus=b.getAttribute('data-status'); b.parentNode.querySelectorAll('.seg-btn').forEach(function(x){x.classList.toggle('on',x===b);}); return; }
       if(act==='view'){ setView(b.getAttribute('data-view')); return; }
       if(act==='dismiss-onboard'){ try{localStorage.setItem('dw_onboard_done','1');}catch(_){ } renderWorkspace(); return; }
-      if(act==='open-profile'){ showProfileForm(); return; }
+      if(act==='open-profile'){ showProfileForm(false); return; }
+      if(act==='edit-profile'){ showProfileForm(true); return; }
+      if(act==='request-recovery'){ var rd=b.getAttribute('data-day'); if(!rd){ toast('Nothing to continue.'); return; } doAction(rpc('dw_request_recovery',{p_missed_day:rd}),'Continuation requested — an admin will review within 24h.'); return; }
       if(act==='trackjob'){ rpc('dw_add_application',{p_company:b.getAttribute('data-company'),p_role:b.getAttribute('data-role'),p_source:'Community',p_url:b.getAttribute('data-url'),p_status:'saved'}).then(function(){ toast('Saved to your Applications.'); return loadCommunity(commDays, community&&community.q); }).catch(function(e){ toast(e.message); }); return; }
       if(act==='toggle-share'){ commFormOpen=!commFormOpen; renderWorkspace(); return; }
       if(act==='commdays'){ loadCommunity(parseInt(b.getAttribute('data-days'),10), community&&community.q); return; }

@@ -546,7 +546,7 @@ body.ws-mode{background:var(--bg-2)}
 }
 @media (max-width:620px){
   .ws-head-in{flex-wrap:wrap;gap:10px}
-  .ws-streak{order:3;width:100%}
+  .ws-head-mid{order:3;width:100%}
   .ws-tabs{top:0;position:static;overflow-x:auto}
   .kpi-row{grid-template-columns:repeat(2,1fr)}
   .qa-row{grid-template-columns:1fr}
@@ -624,3 +624,87 @@ body.ws-mode{background:var(--bg-2)}
 .profile-prompt .btn.primary{white-space:nowrap}
 
 @media (max-width:620px){ .pf-grid{grid-template-columns:1fr} .profile-dialog{width:calc(100vw - 20px)} }
+
+/* ===================================================================
+   Challenge v2 — header chips, 45-day hero, today's mission,
+   restart banner, profile view
+   =================================================================== */
+.ws-head-mid{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ws-daychip{font-size:13px;font-weight:700;color:var(--red-ink);background:var(--pale);border:1px solid var(--red-line);padding:6px 12px;border-radius:999px;white-space:nowrap}
+.ws-daychip i{font-style:normal;color:var(--muted);font-weight:600}
+.ws-rolechip{appearance:none;cursor:pointer;font:600 13px var(--font);color:var(--ink-2);background:#fff;border:1px solid var(--line);padding:6px 12px;border-radius:999px;white-space:nowrap;max-width:230px;overflow:hidden;text-overflow:ellipsis}
+.ws-rolechip:hover{border-color:var(--ink);color:var(--ink)}
+
+.btn.xs{padding:6px 12px;font-size:12.5px;border-radius:9px;box-shadow:none}
+
+/* 45-day challenge hero */
+.chal-hero{position:relative;overflow:hidden;border:0;color:#fff;background:linear-gradient(135deg,#17181c,#111);box-shadow:0 18px 44px rgba(0,0,0,.18)}
+.chal-hero::before{content:'';position:absolute;inset:0 0 auto 0;height:4px;background:linear-gradient(90deg,var(--red),#ff6b70)}
+.chal-top{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.chal-eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;color:#ff8f93}
+.chal-day{font-family:var(--display);font-size:16px;font-weight:600;color:rgba(255,255,255,.7)}
+.chal-day b{font-size:40px;font-weight:800;letter-spacing:-.04em;color:#fff;margin:0 2px}
+.chal-day i{font-style:normal}
+.chal-bar{position:relative;height:10px;border-radius:999px;background:rgba(255,255,255,.14);margin:16px 0;overflow:visible}
+.chal-bar>span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--red),#ff6b70);transition:width .6s var(--ease)}
+.chal-tick{position:absolute;top:-4px;width:2px;height:18px;background:rgba(255,255,255,.55);transform:translateX(-1px)}
+.chal-tick::after{content:'Day 10';position:absolute;top:19px;left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:.03em;color:rgba(255,255,255,.5);font-weight:700;white-space:nowrap}
+.chal-phase{font-size:14.5px;color:rgba(255,255,255,.85);line-height:1.55;margin:26px 0 0}
+.chal-phase b{color:#fff}
+.chal-stats{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-top:16px;font-size:12.5px;color:rgba(255,255,255,.65);font-weight:600}
+.chal-stats b{color:#fff;font-family:var(--display);font-size:15px}
+.chal-q{color:#7df0c0;border:1px solid rgba(125,240,192,.4);border-radius:999px;padding:3px 10px}
+
+/* today's mission — the 3 daily pillars */
+.mission.is-done{border-color:var(--green-line);background:linear-gradient(135deg,#fff,var(--green-soft))}
+.mission-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:6px}
+.mission-h h3{margin:0}
+.mission-date{font-size:12.5px;color:var(--muted);font-weight:600}
+.mission-sub{font-size:13.5px;color:var(--muted);line-height:1.55;margin:0 0 18px;max-width:700px}
+.mission-sub b{color:var(--ink-2)}
+.mission-rings{display:flex;flex-wrap:wrap;gap:18px 24px;align-items:flex-start}
+.mr{display:flex;flex-direction:column;align-items:center;gap:8px;width:84px}
+.mr-name{font-size:12.5px;font-weight:700;color:var(--ink-2);text-align:center;line-height:1.2;max-width:84px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mission-done{margin-top:18px;font-size:13.5px;font-weight:700;color:var(--green);background:var(--green-soft);border:1px solid var(--green-line);border-radius:10px;padding:10px 13px}
+.mission-todo{margin-top:18px;font-size:13px;color:var(--muted)}
+
+/* restart / missed banner */
+.restart-banner{display:flex;gap:16px;border:1px solid var(--red-line);background:linear-gradient(135deg,#fff,var(--pale));box-shadow:0 10px 30px rgba(240,25,32,.07)}
+.rb-ic{flex:none;width:44px;height:44px;border-radius:12px;background:var(--red);color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center}
+.rb-txt{flex:1;min-width:0}
+.rb-txt h3{font-family:var(--display);font-size:18px;font-weight:800;margin:2px 0 6px;color:var(--red-ink)}
+.rb-txt p{font-size:13.5px;color:var(--ink-2);line-height:1.55;margin:0 0 12px;max-width:640px}
+.rb-txt p b{color:var(--red-ink)}
+.rb-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:13px}
+.rb-pending{color:var(--ink-2)}
+.rb-ok{color:var(--green);font-weight:700}
+.rb-no{color:var(--muted)}
+
+/* profile view */
+.profile-view{padding:0;overflow:hidden}
+.pv-head{display:flex;align-items:center;gap:18px;padding:24px;border-bottom:1px solid var(--line-2);background:linear-gradient(135deg,#fff,var(--bg-2))}
+.pv-avatar{flex:none;width:60px;height:60px;border-radius:16px;background:var(--red);color:#fff;font-family:var(--display);font-weight:800;font-size:28px;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(240,25,32,.26)}
+.pv-id{flex:1;min-width:0}
+.pv-id h2{font-family:var(--display);font-size:22px;font-weight:800;letter-spacing:-.03em;margin:0}
+.pv-target{font-size:13.5px;color:var(--ink-2);margin-top:3px}
+.pv-target b{color:var(--red-ink)}
+.pv-badges{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.pv-badge{font-size:11.5px;font-weight:700;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+.pv-badge.founding{color:var(--red-ink);background:var(--pale);border-color:var(--red-line)}
+.pv-badge.day{color:var(--ink-2)}
+.pv-edit{flex:none}
+.pv-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line-2)}
+.pvf{display:flex;flex-direction:column;gap:4px;background:#fff;padding:16px 24px}
+.pvf-l{font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.pvf-v{font-size:14.5px;color:var(--ink);font-weight:600;word-break:break-word}
+.pvf-v em{font-style:normal;color:var(--muted-2);font-weight:500}
+.pvf-v.link{color:var(--red-ink);text-decoration:none}
+.pvf-v.link:hover{text-decoration:underline}
+
+@media (max-width:620px){
+  .pv-grid{grid-template-columns:1fr}
+  .pv-head{flex-wrap:wrap}
+  .pv-edit{order:4}
+  .chal-day b{font-size:32px}
+  .restart-banner{flex-direction:column;gap:12px}
+}
