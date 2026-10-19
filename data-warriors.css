@@ -731,3 +731,8 @@ body.ws-mode{background:var(--bg-2)}
 .tour-right{display:flex;gap:8px;align-items:center}
 .tour-skip{appearance:none;border:0;background:none;color:var(--muted);font:600 13px var(--font);cursor:pointer;padding:0}
 .tour-skip:hover{color:var(--red)}
+
+/* view intros + manage notes (polish) */
+.view-intro{font-size:13.5px;color:var(--muted);line-height:1.55;margin:-4px 0 16px;max-width:700px}
+.view-intro b{color:var(--ink-2)}
+.manage-note{font-size:12.5px;color:var(--muted);line-height:1.5;margin:0 0 12px;padding:0}

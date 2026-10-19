@@ -346,7 +346,7 @@
     var appsOk=t.applications_applied>=appsTarget, subjectsOk=active.length>0 && active.every(function(c){return c.today_count>=subjTarget;});
     var todayComplete=!!ch.today_complete || (appsOk && subjectsOk);
     var day=Math.max(0,ch.day||0), target=ch.target||45, phase1=ch.phase1||10;
-    var kpis=[['Applications',k.applications,'applied'],['Responses',k.responses,'heard back'],['Interviews',k.interviews,'reached'],['Prep entries',k.prep_sessions,'logged'],['Active days',k.active_days,'in range'],['Saved',k.saved,'parked']];
+    var kpis=[['Applications',k.applications,'applied'],['Responses',k.responses,'heard back'],['Interviews',k.interviews,'reached'],['Practice',k.prep_sessions,'logged'],['Active days',k.active_days,'in range'],['Saved',k.saved,'parked']];
     var html='';
     if(!profileComplete()){
       html+='<section class="ws-sec"><div class="panel profile-prompt"><div class="pp-txt"><div class="pp-eyebrow">ALMOST THERE</div><h2>Complete your profile to start the challenge 🚀</h2><p>Add your target role, education and links — under a minute. It unlocks your tracker and keeps you job-ready.</p></div><button class="btn primary" data-ws="open-profile">Complete my profile</button></div></section>';
@@ -389,7 +389,7 @@
     // sources
     html+='<div class="panel"><h3>Which sources respond</h3>'+ (state.sources.length?state.sources.map(function(s2){return '<div class="src-rate"><span class="src">'+esc(s2.source)+'</span><i class="bar"><b style="width:'+pct(s2.responses,s2.applied)+'%"></b></i><strong>'+s2.responses+' / '+s2.applied+'</strong></div>';}).join(''):'<p class="empty-note">No applications in this range yet. Log a few to see which platforms reply.</p>') +'</div>';
     // prep by subject
-    html+='<div class="panel"><h3>Prep by subject</h3>'+ (state.prep_by_subject.length?state.prep_by_subject.map(function(p){var mx=state.prep_by_subject[0].total;return '<div class="src-rate"><span class="src">'+esc(p.name)+'</span><i class="bar"><b style="width:'+pct(p.total,mx)+'%"></b></i><strong>'+p.total+'</strong></div>';}).join(''):'<p class="empty-note">No prep logged in this range yet.</p>') +'</div>';
+    html+='<div class="panel"><h3>Practice by subject</h3>'+ (state.prep_by_subject.length?state.prep_by_subject.map(function(p){var mx=state.prep_by_subject[0].total;return '<div class="src-rate"><span class="src">'+esc(p.name)+'</span><i class="bar"><b style="width:'+pct(p.total,mx)+'%"></b></i><strong>'+p.total+'</strong></div>';}).join(''):'<p class="empty-note">No practice logged in this range yet.</p>') +'</div>';
     html+='</div></section>';
     // follow-ups + consistency + recent
     html+='<section class="ws-sec"><div class="ws-grid3">';
@@ -434,7 +434,8 @@
   function viewApplications(){
     var apps=state.applications, tg=state.targets, t=state.today;
     var filtered=apps.filter(function(a){ return appFilter==='all' ? true : a.status===appFilter; });
-    var html='<section class="ws-sec"><div class="ws-sec-h"><h2>Job applications</h2><span class="ws-range-note">'+t.applications_applied+' / '+tg.applications+' applied today</span></div>'+
+    var html='<section class="ws-sec"><div class="ws-sec-h"><h2>Applications</h2><span class="ws-range-note">'+t.applications_applied+' / '+tg.applications+' applied today</span></div>'+
+      '<p class="view-intro">Add every role you apply to, then move it through the stages as you hear back. Aim for <b>'+tg.applications+'</b> a day.</p>'+
       '<form class="quick-add" data-ws-form="job">'+
         '<div class="qa-row"><input name="company" placeholder="Company" required maxlength="120"><input name="role" placeholder="Role / title" required maxlength="120"></div>'+
         '<div class="qa-row"><input class="wide" name="url" type="text" inputmode="url" placeholder="Job URL (optional)" maxlength="1000"></div>'+
@@ -466,21 +467,25 @@
     var cats=state.categories, active=cats.filter(function(c){return c.is_active;});
     if(!prepCat || !active.some(function(c){return c.id===prepCat;})) prepCat = active.length?active[0].id:null;
     var tg=state.targets;
-    var html='<section class="ws-sec"><div class="ws-sec-h"><h2>Interview prep</h2><span class="ws-range-note">'+state.today.prep_total+' / '+tg.prep+' entries today</span></div>';
+    var subjectsDone=active.filter(function(c){return c.today_count>=tg.prep;}).length;
+    var html='<section class="ws-sec"><div class="ws-sec-h"><h2>Practice</h2><span class="ws-range-note">'+(active.length?subjectsDone+' / '+active.length+' subjects done today':'No active subjects')+'</span></div>'+
+      '<p class="view-intro">Log <b>'+tg.prep+'</b> topics, questions or concepts in <b>each</b> subject you’re practising — every day. Keep communication in the mix.</p>';
     html+='<form class="quick-add" data-ws-form="prep">'+
-      '<div class="chips" data-chips="cat">'+active.map(function(c){return '<button type="button" class="chip'+(c.id===prepCat?' on':'')+'" data-cat="'+c.id+'">'+esc(c.name)+'</button>';}).join('')+ (active.length?'':'<span class="empty-note">Activate a skill below to start logging.</span>') +'</div>'+
-      '<div class="qa-row"><input class="wide" name="topic" placeholder="What did you work on? (e.g. Window functions)" required maxlength="160"></div>'+
+      '<div class="chips" data-chips="cat">'+active.map(function(c){return '<button type="button" class="chip'+(c.id===prepCat?' on':'')+'" data-cat="'+c.id+'">'+esc(c.name)+'</button>';}).join('')+ (active.length?'':'<span class="empty-note">Activate a subject below to start logging.</span>') +'</div>'+
+      '<div class="qa-row"><input class="wide" name="topic" placeholder="What did you work on? (e.g. Window functions, STAR answer, OOP)" required maxlength="160"></div>'+
       '<div class="qa-row"><input class="wide" name="url" type="text" inputmode="url" placeholder="Resource link (optional)" maxlength="1000"></div>'+
       '<div class="qa-actions"><div class="seg"><button type="button" class="seg-btn'+(prepType==='practice'?' on':'')+'" data-type="practice">Practice</button><button type="button" class="seg-btn'+(prepType==='learn'?' on':'')+'" data-type="learn">Learn</button></div><button class="btn primary sm" type="submit"'+(active.length?'':' disabled')+'>Add entry</button></div>'+
     '</form>';
-    // category rings
-    html+='<div class="cat-rings">'+active.map(function(c){return '<div class="cr">'+ring(c.today_count,tg.prep)+'<span>'+esc(c.name)+'</span><em>'+c.streak+'🔥</em></div>';}).join('')+'</div>';
+    // subject rings
+    if(active.length) html+='<div class="cat-rings">'+active.map(function(c){return '<div class="cr">'+ring(c.today_count,tg.prep)+'<span>'+esc(c.name)+'</span><em>'+c.streak+'🔥</em></div>';}).join('')+'</div>';
     // today entries
     html+='<div class="ws-sec-h sub"><h3>Today’s entries</h3></div>';
-    html+= state.today_prep.length? '<div class="prep-list">'+state.today_prep.map(function(p){return '<div class="prep-row"><span class="dot '+esc(p.type)+'">'+esc(p.type)+'</span><span class="pr-cat">'+esc(p.category)+'</span><span class="pr-topic">'+esc(p.topic)+(p.resource_url?' · <a href="'+esc(p.resource_url)+'" target="_blank" rel="noopener noreferrer">link</a>':'')+'</span><button class="icon-btn" data-ws="delprep" data-id="'+p.id+'" aria-label="Delete">×</button></div>';}).join('')+'</div>' : '<p class="empty-note">No entries yet today. Pick a skill and log what you practised.</p>';
-    // manage skills
-    html+='<div class="ws-sec-h sub"><h3>Your skills</h3></div><div class="skills-manage">'+cats.map(function(c){return '<div class="skill-row'+(c.is_active?'':' off')+'"><span>'+esc(c.name)+(c.is_default?' <em>default</em>':'')+'</span><div class="skill-ctrl"><button class="mini-btn" data-ws="togglecat" data-id="'+c.id+'" data-active="'+(c.is_active?'0':'1')+'">'+(c.is_active?'Deactivate':'Activate')+'</button>'+(c.is_default?'':'<button class="icon-btn" data-ws="delcat" data-id="'+c.id+'" aria-label="Remove">×</button>')+'</div></div>';}).join('')+
-      '<form class="add-skill" data-ws-form="cat"><input name="name" placeholder="Add a skill (Python, Power BI, DAX…)" maxlength="40"><button class="mini-btn" type="submit">Add</button></form></div>';
+    html+= state.today_prep.length? '<div class="prep-list">'+state.today_prep.map(function(p){return '<div class="prep-row"><span class="dot '+esc(p.type)+'">'+esc(p.type)+'</span><span class="pr-cat">'+esc(p.category)+'</span><span class="pr-topic">'+esc(p.topic)+(p.resource_url?' · <a href="'+esc(p.resource_url)+'" target="_blank" rel="noopener noreferrer">link</a>':'')+'</span><button class="icon-btn" data-ws="delprep" data-id="'+p.id+'" aria-label="Delete">×</button></div>';}).join('')+'</div>' : '<p class="empty-note">Nothing logged today yet. Pick a subject above and add what you practised — aim for '+tg.prep+' in each.</p>';
+    // manage subjects
+    html+='<div class="ws-sec-h sub"><h3>Your subjects</h3></div><div class="skills-manage">'+
+      '<p class="manage-note">Keep only the subjects you’re actively practising — each active one needs '+tg.prep+' entries a day to complete.</p>'+
+      cats.map(function(c){return '<div class="skill-row'+(c.is_active?'':' off')+'"><span>'+esc(c.name)+(c.is_default?' <em>default</em>':'')+'</span><div class="skill-ctrl"><button class="mini-btn" data-ws="togglecat" data-id="'+c.id+'" data-active="'+(c.is_active?'0':'1')+'">'+(c.is_active?'Deactivate':'Activate')+'</button>'+(c.is_default?'':'<button class="icon-btn" data-ws="delcat" data-id="'+c.id+'" aria-label="Remove">×</button>')+'</div></div>';}).join('')+
+      '<form class="add-skill" data-ws-form="cat"><input name="name" placeholder="Add a subject (Python, Power BI, Communication…)" maxlength="40"><button class="mini-btn" type="submit">Add</button></form></div>';
     html+='</section>';
     return html;
   }
