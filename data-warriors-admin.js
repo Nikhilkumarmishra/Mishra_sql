@@ -11,7 +11,7 @@
 
   var root = document.getElementById('admRoot');
   var toastEl = document.getElementById('toast'), toastTimer;
-  var session = null, view = 'overview', overview = null, members = null, requests = null, reqFilter = 'pending', reported = null, bound = false, memberQ = '';
+  var session = null, view = 'overview', overview = null, members = null, requests = null, reqFilter = 'pending', reported = null, bound = false, memberQ = '', certQ = '';
 
   function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function toast(m){toastEl.textContent=m;toastEl.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){toastEl.classList.remove('show');},3400);}
@@ -47,7 +47,7 @@
 
   /* ---------- views ---------- */
   function shell(){
-    var tabs=[['overview','Overview'],['members','Members'],['requests','Requests'],['moderation','Moderation']];
+    var tabs=[['overview','Overview'],['members','Members'],['requests','Requests'],['certificates','Certificates'],['moderation','Moderation']];
     var pend = overview && overview.pending_recovery ? overview.pending_recovery : 0;
     root.innerHTML =
       '<header class="ws-head"><div class="ws-head-in">'+
@@ -59,6 +59,7 @@
       '<main class="ws-body">'+(
         view==='members'?viewMembers():
         view==='requests'?viewRequests():
+        view==='certificates'?viewCertificates():
         view==='moderation'?viewModeration():
         viewOverview()
       )+'</main>';
@@ -72,10 +73,11 @@
       ['Active today',o.active_today,'logged something'],
       ['Profiles complete',o.profiles_complete,'of '+o.members],
       ['Applications',o.apps_total,o.apps_today+' today'],
-      ['Prep entries',o.prep_total,o.prep_today+' today'],
+      ['Practice',o.prep_total,o.prep_today+' today'],
       ['Shared posts',o.community_active,'on the board'],
       ['Pending requests',o.pending_recovery,'need review'],
       ['Reported jobs',o.reported_jobs,'flagged'],
+      ['Certificates',o.certs_claimed||0,'claimed'],
       ['Completion rate',o.members?Math.round(o.profiles_complete/o.members*100)+'%':'0%','profiles'],
       ['Avg apps/member',o.members?(o.apps_total/o.members).toFixed(1):'0','all time']
     ];
@@ -92,7 +94,7 @@
     if(!members){ html+='<p class="empty-note">Loading members…</p></section>'; return html; }
     if(!members.members.length){ html+='<div class="empty-state"><h3>No members found</h3><p>Try a different search.</p></div></section>'; return html; }
     html+='<div class="adm-table-wrap"><table class="adm"><thead><tr>'+
-      '<th>#</th><th>Member</th><th>Target role</th><th>Day</th><th>Apps</th><th>Prep</th><th>Subjects</th><th>Profile</th><th>Last seen</th><th>Links</th>'+
+      '<th>#</th><th>Member</th><th>Target role</th><th>Day</th><th>Apps</th><th>Prep</th><th>Subjects</th><th>Profile</th><th>Cert</th><th>Last seen</th><th>Links</th>'+
       '</tr></thead><tbody>'+members.members.map(memberRow).join('')+'</tbody></table></div></section>';
     return html;
   }
@@ -110,6 +112,7 @@
       '<td>'+esc(m.prep)+'</td>'+
       '<td>'+esc(m.active_subjects)+'</td>'+
       '<td><span class="adm-tag '+(m.profile_complete?'ok':'no')+'">'+(m.profile_complete?'complete':'partial')+'</span></td>'+
+      '<td>'+(m.cert_claimed?'<span class="adm-tag ok" title="Earned '+esc(fmtDate(m.cert_claimed_at))+'">🏅 '+esc(m.cert_serial||'issued')+'</span>':(m.best>=45?'<span class="adm-tag no">eligible</span>':'<span style="color:var(--muted-2)">—</span>'))+'</td>'+
       '<td>'+fmtAgo(m.last_seen)+'</td>'+
       '<td class="adm-links">'+(links||'<span style="color:var(--muted-2)">—</span>')+'</td>'+
     '</tr>';
@@ -136,6 +139,35 @@
       '</div>'+st+'</div>';
   }
 
+  function certRow(m){
+    var status = m.cert_claimed
+      ? '<span class="adm-tag ok">🏅 '+esc(m.cert_serial||'issued')+' · '+esc(fmtDate(m.cert_claimed_at))+'</span>'
+      : (m.best>=45 ? '<span class="adm-tag no">Eligible</span>' : '<span style="color:var(--muted-2)">Not yet · best '+(m.best||0)+'</span>');
+    var action = m.cert_claimed
+      ? '<button class="mini-btn" data-adm="cert-revoke" data-m="'+m.member_number+'">Revoke</button>'
+      : '<button class="btn primary sm" data-adm="cert-issue" data-m="'+m.member_number+'" data-best="'+(m.best||0)+'">Issue</button>';
+    return '<tr><td>'+esc(m.member_number)+'</td><td class="adm-name"><b>'+esc(m.name||'')+'</b><span>'+esc(m.email||'')+'</span></td><td>'+(m.day||0)+' / '+(m.best||0)+'</td><td>'+status+'</td><td>'+action+'</td></tr>';
+  }
+  function viewCertificates(){
+    var html='<section class="ws-sec"><div class="ws-sec-h"><h2>Certificates</h2><span class="ws-range-note">'+(overview?(overview.certs_claimed||0)+' claimed':'')+'</span></div>'+
+      '<p class="empty-note" style="margin-bottom:12px">Members earn the <b>Data Warrior</b> certificate at a 45-day streak. Issue one manually if someone completed but didn’t auto-claim, or revoke one. Issuing overrides the 45-day gate — use it with care.</p>'+
+      '<input class="adm-search" type="search" placeholder="Search a member to issue…" data-adm="certsearch" value="'+esc(certQ)+'">';
+    if(!members){ html+='<p class="empty-note">Loading…</p></section>'; return html; }
+    var q=certQ.trim().toLowerCase();
+    var claimed=members.members.filter(function(m){return m.cert_claimed;}).length;
+    var eligible=members.members.filter(function(m){return m.best>=45 && !m.cert_claimed;}).length;
+    html+='<div class="adm-ov" style="grid-template-columns:repeat(2,1fr);max-width:440px;margin-bottom:16px">'+
+      '<div class="kpi"><span>Claimed</span><strong>'+claimed+'</strong><em>certificates</em></div>'+
+      '<div class="kpi"><span>Eligible, unclaimed</span><strong>'+eligible+'</strong><em>reached 45 days</em></div></div>';
+    var list=members.members.filter(function(m){
+      var match = !q || (String(m.name||'').toLowerCase().indexOf(q)>=0 || String(m.email||'').toLowerCase().indexOf(q)>=0 || String(m.member_number).indexOf(q)>=0);
+      if(!match) return false;
+      return q ? true : (m.cert_claimed || m.best>=45);
+    });
+    if(!list.length){ html+='<div class="empty-state"><h3>'+(q?'No matches':'No certificates yet')+'</h3><p>'+(q?'Try another name.':'Nobody has reached 45 days yet. Search a member above to issue one manually.')+'</p></div></section>'; return html; }
+    html+='<div class="adm-table-wrap"><table class="adm"><thead><tr><th>#</th><th>Member</th><th>Day / Best</th><th>Status</th><th>Action</th></tr></thead><tbody>'+list.map(certRow).join('')+'</tbody></table></div></section>';
+    return html;
+  }
   function viewModeration(){
     var html='<section class="ws-sec"><div class="ws-sec-h"><h2>Community moderation</h2></div>'+
       '<p class="empty-note" style="margin-bottom:12px">Jobs members reported, or that were auto-hidden after 3+ reports. Keep the board clean and real.</p>';
@@ -163,6 +195,7 @@
     if(view==='overview' && !overview) await loadOverview();
     else if(view==='members' && !members) await loadMembers();
     else if(view==='requests' && !requests) await loadRequests();
+    else if(view==='certificates' && !members) await loadMembers();
     else if(view==='moderation' && !reported) await loadReported();
     shell();
   }
@@ -182,6 +215,17 @@
         rpc('dw_admin_decide_recovery',{p_id:b.getAttribute('data-id'),p_approve:approve}).then(function(){ requests=null; overview=null; return Promise.all([loadRequests(),loadOverview()]); }).then(shell).then(function(){ toast(approve?'Approved — streak continued.':'Request rejected.'); }).catch(function(e){ toast(e.message); });
         return;
       }
+      if(act==='cert-issue'){
+        var mi=b.getAttribute('data-m'), best=parseInt(b.getAttribute('data-best'),10)||0;
+        if(best<45 && !confirm('This member hasn’t reached 45 days (best streak '+best+'). Issue the Data Warrior certificate anyway?')) return;
+        rpc('dw_admin_set_certificate',{p_member_number:parseInt(mi,10),p_grant:true}).then(function(){ members=null; overview=null; return Promise.all([loadMembers(),loadOverview()]); }).then(shell).then(function(){ toast('Certificate issued.'); }).catch(function(e){ toast(e.message); });
+        return;
+      }
+      if(act==='cert-revoke'){
+        var mr=b.getAttribute('data-m'); if(!confirm('Revoke this member’s Data Warrior certificate?')) return;
+        rpc('dw_admin_set_certificate',{p_member_number:parseInt(mr,10),p_grant:false}).then(function(){ members=null; overview=null; return Promise.all([loadMembers(),loadOverview()]); }).then(shell).then(function(){ toast('Certificate revoked.'); }).catch(function(e){ toast(e.message); });
+        return;
+      }
       if(act==='job'){
         var status=b.getAttribute('data-status');
         if(status==='removed' && !confirm('Remove this post from the community board?')) return;
@@ -190,7 +234,11 @@
       }
     });
     var si;
-    root.addEventListener('input', function(ev){ if(ev.target.getAttribute('data-adm')==='memsearch'){ clearTimeout(si); var q=ev.target.value; si=setTimeout(function(){ memberQ=q; loadMembers().then(shell); },350); } });
+    root.addEventListener('input', function(ev){
+      var a=ev.target.getAttribute('data-adm');
+      if(a==='memsearch'){ clearTimeout(si); var q=ev.target.value; si=setTimeout(function(){ memberQ=q; loadMembers().then(shell); },350); }
+      else if(a==='certsearch'){ clearTimeout(si); var cq=ev.target.value; si=setTimeout(function(){ certQ=cq; shell(); var el=root.querySelector('[data-adm="certsearch"]'); if(el){ el.focus(); var v=el.value; el.value=''; el.value=v; } },300); }
+    });
   }
 
   /* ---------- init ---------- */

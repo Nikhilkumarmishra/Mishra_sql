@@ -343,7 +343,8 @@
     var active=cats.filter(function(c){return c.is_active;});
     var rangeLabel=(RANGES.filter(function(r){return r[1]===currentRange;})[0]||['',''])[0];
     var appsTarget=tg.applications, subjTarget=tg.prep;
-    var appsOk=t.applications_applied>=appsTarget, subjectsOk=active.length>0 && active.every(function(c){return c.today_count>=subjTarget;});
+    function catTgt(c){ return c.target||subjTarget; }
+    var appsOk=t.applications_applied>=appsTarget, subjectsOk=active.length>0 && active.every(function(c){return c.today_count>=catTgt(c);});
     var todayComplete=!!ch.today_complete || (appsOk && subjectsOk);
     var day=Math.max(0,ch.day||0), target=ch.target||45, phase1=ch.phase1||10;
     var kpis=[['Applications',k.applications,'applied'],['Responses',k.responses,'heard back'],['Interviews',k.interviews,'reached'],['Practice',k.prep_sessions,'logged'],['Active days',k.active_days,'in range'],['Saved',k.saved,'parked']];
@@ -369,10 +370,10 @@
     // today's mission — the 3 daily pillars
     html+='<section class="ws-sec"><div class="panel mission'+(todayComplete?' is-done':'')+'">'+
       '<div class="mission-h"><h3>Today’s mission</h3><span class="mission-date">'+fmtDate(state.today_date)+'</span></div>'+
-      '<p class="mission-sub">Every day, three moves: apply to <b>'+appsTarget+'</b> companies, and log <b>'+subjTarget+'</b> topics in <b>each</b> subject you’re practising (keep communication in there too).</p>'+
+      '<p class="mission-sub">Every day, three moves: apply to <b>'+appsTarget+'</b> companies, and hit each subject’s target below — <b>'+subjTarget+'</b> per tech subject, just <b>1</b> for communication.</p>'+
       '<div class="mission-rings">'+
         '<div class="mr"><div class="mr-ring">'+ring(t.applications_applied,appsTarget)+'</div><span class="mr-name">Apply</span><button class="btn primary xs" data-ws="view" data-view="applications">Log</button></div>'+
-        active.map(function(c){return '<div class="mr"><div class="mr-ring">'+ring(c.today_count,subjTarget)+'</div><span class="mr-name">'+esc(c.name)+'</span><button class="btn ghost xs" data-ws="view" data-view="prep">Log</button></div>';}).join('')+
+        active.map(function(c){return '<div class="mr"><div class="mr-ring">'+ring(c.today_count,catTgt(c))+'</div><span class="mr-name">'+esc(c.name)+'</span><button class="btn ghost xs" data-ws="view" data-view="prep">Log</button></div>';}).join('')+
       '</div>'+
       (active.length?'':'<p class="empty-note">Choose the subjects you’ll practise (SQL, Python, Communication…) in <a data-ws="view" data-view="prep">Practice</a> to switch on your daily mission.</p>')+
       (todayComplete
@@ -571,9 +572,10 @@
     var cats=state.categories, active=cats.filter(function(c){return c.is_active;});
     if(!prepCat || !active.some(function(c){return c.id===prepCat;})) prepCat = active.length?active[0].id:null;
     var tg=state.targets;
-    var subjectsDone=active.filter(function(c){return c.today_count>=tg.prep;}).length;
+    function catTgt(c){ return c.target||tg.prep; }
+    var subjectsDone=active.filter(function(c){return c.today_count>=catTgt(c);}).length;
     var html='<section class="ws-sec"><div class="ws-sec-h"><h2>Practice</h2><span class="ws-range-note">'+(active.length?subjectsDone+' / '+active.length+' subjects done today':'No active subjects')+'</span></div>'+
-      '<p class="view-intro">Log <b>'+tg.prep+'</b> topics, questions or concepts in <b>each</b> subject you’re practising — every day. Keep communication in the mix.</p>';
+      '<p class="view-intro">Hit each subject’s daily target — <b>'+tg.prep+'</b> topics per tech subject, just <b>1</b> for communication. Every day.</p>';
     html+='<form class="quick-add" data-ws-form="prep">'+
       '<div class="chips" data-chips="cat">'+active.map(function(c){return '<button type="button" class="chip'+(c.id===prepCat?' on':'')+'" data-cat="'+c.id+'">'+esc(c.name)+'</button>';}).join('')+ (active.length?'':'<span class="empty-note">Activate a subject below to start logging.</span>') +'</div>'+
       '<div class="qa-row"><input class="wide" name="topic" placeholder="What did you work on? (e.g. Window functions, STAR answer, OOP)" required maxlength="160"></div>'+
@@ -581,14 +583,14 @@
       '<div class="qa-actions"><div class="seg"><button type="button" class="seg-btn'+(prepType==='practice'?' on':'')+'" data-type="practice">Practice</button><button type="button" class="seg-btn'+(prepType==='learn'?' on':'')+'" data-type="learn">Learn</button></div><button class="btn primary sm" type="submit"'+(active.length?'':' disabled')+'>Add entry</button></div>'+
     '</form>';
     // subject rings
-    if(active.length) html+='<div class="cat-rings">'+active.map(function(c){return '<div class="cr">'+ring(c.today_count,tg.prep)+'<span>'+esc(c.name)+'</span><em>'+c.streak+'🔥</em></div>';}).join('')+'</div>';
+    if(active.length) html+='<div class="cat-rings">'+active.map(function(c){return '<div class="cr">'+ring(c.today_count,catTgt(c))+'<span>'+esc(c.name)+'</span><em>'+c.streak+'🔥</em></div>';}).join('')+'</div>';
     // today entries
     html+='<div class="ws-sec-h sub"><h3>Today’s entries</h3></div>';
-    html+= state.today_prep.length? '<div class="prep-list">'+state.today_prep.map(function(p){return '<div class="prep-row"><span class="dot '+esc(p.type)+'">'+esc(p.type)+'</span><span class="pr-cat">'+esc(p.category)+'</span><span class="pr-topic">'+esc(p.topic)+(p.resource_url?' · <a href="'+esc(p.resource_url)+'" target="_blank" rel="noopener noreferrer">link</a>':'')+'</span><button class="icon-btn" data-ws="delprep" data-id="'+p.id+'" aria-label="Delete">×</button></div>';}).join('')+'</div>' : '<p class="empty-note">Nothing logged today yet. Pick a subject above and add what you practised — aim for '+tg.prep+' in each.</p>';
+    html+= state.today_prep.length? '<div class="prep-list">'+state.today_prep.map(function(p){return '<div class="prep-row"><span class="dot '+esc(p.type)+'">'+esc(p.type)+'</span><span class="pr-cat">'+esc(p.category)+'</span><span class="pr-topic">'+esc(p.topic)+(p.resource_url?' · <a href="'+esc(p.resource_url)+'" target="_blank" rel="noopener noreferrer">link</a>':'')+'</span><button class="icon-btn" data-ws="delprep" data-id="'+p.id+'" aria-label="Delete">×</button></div>';}).join('')+'</div>' : '<p class="empty-note">Nothing logged today yet. Pick a subject above and add what you practised — hit each one’s target (most '+tg.prep+', communication 1).</p>';
     // manage subjects
     html+='<div class="ws-sec-h sub"><h3>Your subjects</h3></div><div class="skills-manage">'+
-      '<p class="manage-note">Keep only the subjects you’re actively practising — each active one needs '+tg.prep+' entries a day to complete.</p>'+
-      cats.map(function(c){return '<div class="skill-row'+(c.is_active?'':' off')+'"><span>'+esc(c.name)+(c.is_default?' <em>default</em>':'')+'</span><div class="skill-ctrl"><button class="mini-btn" data-ws="togglecat" data-id="'+c.id+'" data-active="'+(c.is_active?'0':'1')+'">'+(c.is_active?'Deactivate':'Activate')+'</button>'+(c.is_default?'':'<button class="icon-btn" data-ws="delcat" data-id="'+c.id+'" aria-label="Remove">×</button>')+'</div></div>';}).join('')+
+      '<p class="manage-note">Keep only the subjects you’re actively practising. Each active one must hit its daily target — '+tg.prep+' for most, 1 for communication.</p>'+
+      cats.map(function(c){return '<div class="skill-row'+(c.is_active?'':' off')+'"><span>'+esc(c.name)+' <em class="skill-tgt">'+(c.target||tg.prep)+'/day</em>'+(c.is_default?' <em>default</em>':'')+'</span><div class="skill-ctrl"><button class="mini-btn" data-ws="togglecat" data-id="'+c.id+'" data-active="'+(c.is_active?'0':'1')+'">'+(c.is_active?'Deactivate':'Activate')+'</button>'+(c.is_default?'':'<button class="icon-btn" data-ws="delcat" data-id="'+c.id+'" aria-label="Remove">×</button>')+'</div></div>';}).join('')+
       '<form class="add-skill" data-ws-form="cat"><input name="name" placeholder="Add a subject (Python, Power BI, Communication…)" maxlength="40"><button class="mini-btn" type="submit">Add</button></form></div>';
     html+='</section>';
     return html;

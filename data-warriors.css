@@ -736,6 +736,7 @@ body.ws-mode{background:var(--bg-2)}
 .view-intro{font-size:13.5px;color:var(--muted);line-height:1.55;margin:-4px 0 16px;max-width:700px}
 .view-intro b{color:var(--ink-2)}
 .manage-note{font-size:12.5px;color:var(--muted);line-height:1.5;margin:0 0 12px;padding:0}
+.skill-tgt{text-transform:none!important;letter-spacing:0!important;color:var(--red-ink)!important;background:var(--pale);border:1px solid var(--red-line);border-radius:999px;padding:1px 7px;font-weight:600;margin-left:2px}
 
 /* ===================================================================
    Data Warrior certificate
