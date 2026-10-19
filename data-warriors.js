@@ -181,7 +181,7 @@
   var prepCat = null, prepType = 'practice', jobStatus = 'applied', jobSource = 'LinkedIn', appFilter = 'all';
   var commDays = 7, commFormOpen = false;
   var COMM_FILTERS = [['24 hours',1],['3 days',3],['7 days',7],['All time',0]];
-  var profile = null, profilePrompted = false, profileEditMode = false;
+  var profile = null, profilePrompted = false, profileEditMode = false, isAdmin = false;
   var TARGET_ROLES = ['Data Analyst','Business Analyst','Product Analyst','Marketing Analyst','Growth Analyst','BI Analyst','Analytics Engineer','MIS Analyst','Data Scientist','Data Engineer','Financial Analyst','Operations Analyst','Other'];
 
   function profileComplete(){ return !!(profile && profile.complete); }
@@ -253,7 +253,10 @@
     document.body.classList.add('ws-mode');
     wsEl.hidden=false;
     if(!wsBound){ bindWorkspace(); wsBound=true; }
-    try{ profile = await rpc('dw_get_profile',{}); }catch(_){ if(!profile) profile={complete:true}; }
+    try{
+      var pr=await Promise.all([ rpc('dw_get_profile',{}), rpc('dw_whoami',{}).catch(function(){return null;}) ]);
+      profile = pr[0]; isAdmin = !!(pr[1] && pr[1].is_admin);
+    }catch(_){ if(!profile) profile={complete:true}; }
     var pv=viewFromPath(); currentView = pv || currentView || 'dashboard';
     renderWorkspace();
     syncUrl(true);
@@ -293,6 +296,7 @@
           (role?'<button class="ws-rolechip" data-ws="view" data-view="profile">🎯 '+esc(role)+'</button>':'')+
         '</div>'+
         '<div class="ws-head-right">'+
+          (isAdmin?'<a class="link-btn ws-admin-link" href="/data-warriors/admin">⚙️ Admin</a>':'')+
           '<label class="ws-range-wrap">Range <select class="ws-range" data-ws="range">'+RANGES.map(function(r){return '<option value="'+r[1]+'"'+(r[1]===currentRange?' selected':'')+'>'+r[0]+'</option>';}).join('')+'</select></label>'+
           '<span class="ws-user">'+esc(session&&session.user&&session.user.email||name)+'</span>'+
           '<button class="link-btn" data-ws="logout">Log out</button>'+

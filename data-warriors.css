@@ -634,6 +634,7 @@ body.ws-mode{background:var(--bg-2)}
 .ws-daychip i{font-style:normal;color:var(--muted);font-weight:600}
 .ws-rolechip{appearance:none;cursor:pointer;font:600 13px var(--font);color:var(--ink-2);background:#fff;border:1px solid var(--line);padding:6px 12px;border-radius:999px;white-space:nowrap;max-width:230px;overflow:hidden;text-overflow:ellipsis}
 .ws-rolechip:hover{border-color:var(--ink);color:var(--ink)}
+.ws-admin-link{text-decoration:none;font-weight:700}
 
 .btn.xs{padding:6px 12px;font-size:12.5px;border-radius:9px;box-shadow:none}
 
