@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f01920">
+  <title>Data Career Roadmaps — SQL, Python, Excel, Power BI | Analyst World</title>
+  <meta name="description" content="Free, interactive roadmaps to land a data job — SQL, Python, Excel, Power BI & Statistics. Reverse-engineered from 28,000+ job descriptions across Naukri, LinkedIn & more. Curated & verified by Nikhil Mishra, Co-founder, Analyst World.">
+  <link rel="canonical" href="https://analystworld.in/roadmaps">
+  <meta property="og:title" content="Data Career Roadmaps — from zero to a data job | Analyst World">
+  <meta property="og:description" content="Interactive, verified roadmaps for SQL, Python, Excel, Power BI & Statistics — built from 28,000+ real data job descriptions. Download the PDF and follow your path.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://analystworld.in/roadmaps">
+  <meta name="twitter:card" content="summary_large_image">
+  <script>(function(){try{var t=localStorage.getItem('msql_theme')||'light';document.documentElement.setAttribute('data-theme',t);}catch(_){ }})()</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,700;0,800;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/roadmaps.css">
+</head>
+<body>
+  <nav class="rm-nav" id="rmNav">
+    <a class="rm-logo" href="/home">Analyst<span>World</span></a>
+    <div class="rm-nav-right">
+      <a class="rm-nav-link" href="/home">Home</a>
+      <a class="rm-nav-link" href="/data-warriors">Data Warriors</a>
+      <button class="rm-theme" id="rmThemeToggle" title="Switch theme" aria-label="Switch theme">🌙</button>
+    </div>
+  </nav>
+
+  <header class="rm-hero">
+    <div class="rm-hero-in">
+      <div class="rm-eyebrow">ANALYST WORLD · ROADMAPS</div>
+      <h1 class="rm-h1">The shortest <span>verified path</span><br>to a data job.</h1>
+      <p class="rm-lead">Interactive, step-by-step roadmaps for the skills that actually get people hired — reverse-engineered from <b>28,000+ job descriptions</b> across Naukri, LinkedIn and more. Pick a skill, expand your path, track your progress, and take the PDF with you.</p>
+      <div class="rm-roles-wrap"><span class="rm-roles-lbl">Built for</span><div class="rm-roles" id="rmRoles"></div></div>
+      <a class="rm-hero-cta" href="#rmPick">Explore the roadmaps ↓</a>
+    </div>
+    <div class="rm-hero-glow" aria-hidden="true"></div>
+  </header>
+
+  <main class="rm-main" id="rmMain">
+    <section class="rm-pick" id="rmPickWrap">
+      <div class="rm-pick-h" id="rmPick">
+        <h2>Choose your skill</h2>
+        <p>Each roadmap goes from absolute beginner to job-ready, structured so you can learn one layer at a time.</p>
+      </div>
+      <div class="rm-grid" id="rmGrid"></div>
+      <p class="rm-trust">✔ Curated &amp; verified by <b>Nikhil Mishra</b>, Co-founder · Analyst World &nbsp;·&nbsp; Updated from live job-market data</p>
+    </section>
+
+    <section class="rm-skill" id="rmSkill" hidden></section>
+  </main>
+
+  <footer class="rm-footer">
+    <a class="rm-logo" href="/home">Analyst<span>World</span></a>
+    <p>Free roadmaps and tools to help data aspirants land their dream role. Guidance only — Analyst World does not guarantee employment.</p>
+    <div class="rm-foot-links"><a href="/home">← Back to Analyst World</a><a href="/data-warriors">Data Warriors</a></div>
+  </footer>
+
+  <div class="rm-toast" id="rmToast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="/roadmaps.js" defer></script>
+</body>
+</html>
