@@ -116,6 +116,33 @@
     };
   var SKILL_ORDER = ['sql','python','excel','powerbi','stats'];
 
+  /* clean, cohesive monochrome icons (inherit currentColor) */
+  var S0='<svg class="rm-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">';
+  var IC = {
+    sql: S0+'<ellipse cx="12" cy="5.4" rx="7" ry="2.6"/><path d="M5 5.4V18c0 1.45 3.13 2.6 7 2.6s7-1.15 7-2.6V5.4"/><path d="M5 11.7c0 1.45 3.13 2.6 7 2.6s7-1.15 7-2.6"/></svg>',
+    python: S0+'<path d="M8.5 7.5l-4 4.5 4 4.5"/><path d="M15.5 7.5l4 4.5-4 4.5"/><path d="M13.6 5.5l-3.2 13"/></svg>',
+    excel: S0+'<rect x="4" y="4" width="16" height="16" rx="2.4"/><path d="M4 9.4h16M4 14.6h16M9.4 4v16M14.6 4v16"/></svg>',
+    powerbi: S0+'<path d="M3.5 20.5h17"/><rect x="5" y="12" width="3.1" height="6" rx="1"/><rect x="10.45" y="8" width="3.1" height="10" rx="1"/><rect x="15.9" y="4.5" width="3.1" height="13.5" rx="1"/></svg>',
+    stats: S0+'<path d="M3 19.5h18"/><path d="M3.5 19.5C7.2 19.5 8 6.5 12 6.5s4.8 13 8.5 13"/><circle cx="12" cy="6.5" r="1.1" fill="currentColor" stroke="none"/></svg>',
+    soon: S0+'<path d="M12 5v14M5 12h14"/></svg>'
+  };
+  var IC_DL   = '<svg class="rm-bic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4.2-4.2M12 15l4.2-4.2M4 20h16"/></svg>';
+  var IC_LINK = '<svg class="rm-bic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 13.5a4 4 0 0 0 5.66 0l2.5-2.5a4 4 0 1 0-5.66-5.66l-1.3 1.3"/><path d="M14.5 10.5a4 4 0 0 0-5.66 0l-2.5 2.5a4 4 0 1 0 5.66 5.66l1.3-1.3"/></svg>';
+  var IC_IN   = '<svg class="rm-bic li" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.86-3.04-1.86 0-2.14 1.45-2.14 2.95v5.66H9.34V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>';
+
+  /* role-based personalisation: recommended skills (in priority order) */
+  var RECO = {
+    'Data Analyst':['sql','excel','powerbi','stats'],
+    'Business Analyst':['excel','sql','powerbi','stats'],
+    'Product Analyst':['sql','stats','python','excel'],
+    'Marketing Analyst':['excel','sql','powerbi'],
+    'Data Scientist':['python','stats','sql'],
+    'Data Engineer':['sql','python'],
+    'Analytics Engineer':['sql','python','powerbi'],
+    'BI / MIS Analyst':['powerbi','excel','sql']
+  };
+  var currentRole = ''; try{ currentRole = localStorage.getItem('rm_role')||''; }catch(_){ }
+
   /* ===================== helpers ===================== */
   function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function byId(id){return document.getElementById(id);}
@@ -160,16 +187,26 @@
 
   function ringSvg(pct){ var r=20,c=2*Math.PI*r,off=c*(1-pct/100); return '<svg class="rm-ring" viewBox="0 0 48 48" aria-hidden="true"><circle class="rt" cx="24" cy="24" r="'+r+'"/><circle class="rf" cx="24" cy="24" r="'+r+'" style="stroke-dasharray:'+c.toFixed(1)+';stroke-dashoffset:'+off.toFixed(1)+'"/></svg><span class="rm-ring-num">'+pct+'%</span>'; }
 
+  function renderRoleBar(){
+    var bar=byId('rmRoleBar'); if(!bar) return;
+    var lead = currentRole ? ('Recommended skills for a <b>'+esc(currentRole)+'</b> appear first.') : 'Targeting a specific role? Personalise your path.';
+    bar.innerHTML = '<div class="rm-role-lead">'+(currentRole?'🎯 ':'')+lead+(currentRole?' <button class="rm-role-clear" data-role-clear="1">Clear</button>':'')+'</div>'+
+      '<div class="rm-role-chips">'+ROLES.map(function(r){return '<button class="rm-role-chip'+(currentRole===r?' on':'')+'" data-role="'+esc(r)+'">'+esc(r)+'</button>';}).join('')+'</div>';
+  }
   function renderGrid(){
-    gridView.innerHTML = SKILL_ORDER.map(function(k){
-      var s=ROADMAPS[k], total=countTopics(k), done=skillDone(k), pct=total?Math.round(done/total*100):0;
-      return '<button class="rm-card" data-skill="'+k+'">'+
-        '<div class="rm-card-top"><span class="rm-ic">'+s.icon+'</span>'+(done?'<span class="rm-card-ring">'+ringSvg(pct)+'</span>':'<span class="rm-card-arrow">→</span>')+'</div>'+
+    var order=SKILL_ORDER.slice();
+    var reco = currentRole && RECO[currentRole] ? RECO[currentRole] : null;
+    if(reco){ order.sort(function(a,b){ var ia=reco.indexOf(a), ib=reco.indexOf(b); ia=ia<0?99:ia; ib=ib<0?99:ib; return ia-ib; }); }
+    gridView.innerHTML = order.map(function(k){
+      var s=ROADMAPS[k], total=countTopics(k), done=skillDone(k), pct=total?Math.round(done/total*100):0, rec = reco && reco.indexOf(k)>=0;
+      return '<button class="rm-card'+(rec?' rec':'')+'" data-skill="'+k+'">'+
+        (rec?'<span class="rm-reco">★ For '+esc(currentRole)+'</span>':'')+
+        '<div class="rm-card-top"><span class="rm-ic">'+IC[k]+'</span>'+(done?'<span class="rm-card-ring">'+ringSvg(pct)+'</span>':'<span class="rm-card-arrow">→</span>')+'</div>'+
         '<h3>'+esc(s.name)+'</h3>'+
         '<p class="rm-card-tag">'+esc(s.tagline)+'</p>'+
         '<div class="rm-card-meta"><span>'+total+' topics</span><span>•</span><span>'+esc(s.hours)+'</span></div>'+
       '</button>';
-    }).join('') + '<div class="rm-card rm-card-soon"><span class="rm-ic">✨</span><h3>More roadmaps</h3><p class="rm-card-tag">Tableau, Machine Learning, Cloud & more — curated next.</p><div class="rm-card-meta"><span>Coming soon</span></div></div>';
+    }).join('') + '<div class="rm-card rm-card-soon"><div class="rm-card-top"><span class="rm-ic">'+IC.soon+'</span></div><h3>More roadmaps</h3><p class="rm-card-tag">Tableau, Machine Learning, Cloud &amp; more — curated next.</p><div class="rm-card-meta"><span>Coming soon</span></div></div>';
   }
 
   /* ===================== render: one skill ===================== */
@@ -210,7 +247,7 @@
       '<div class="rm-sk-head">'+
         '<button class="rm-back" data-back="1">← All roadmaps</button>'+
         '<div class="rm-sk-hero">'+
-          '<div class="rm-sk-hero-l"><div class="rm-sk-ic">'+s.icon+'</div>'+
+          '<div class="rm-sk-hero-l"><div class="rm-sk-ic">'+IC[key]+'</div>'+
             '<div><div class="rm-sk-eyebrow">ROADMAP · BEGINNER → JOB-READY</div><h1>'+esc(s.name)+' <span>Roadmap</span></h1>'+
             '<p>'+esc(s.blurb)+'</p>'+
             '<div class="rm-sk-meta"><span>📚 '+total+' topics</span><span>⏱ '+esc(s.hours)+'</span><span>🎯 '+s.tracks.length+' tracks</span></div></div>'+
@@ -223,15 +260,15 @@
       '<div class="rm-dlbar">'+
         '<div class="rm-dl-txt"><b>Take this roadmap with you.</b><span>Download a clean, branded PDF — curated &amp; verified by Nikhil Mishra, Co-founder.</span></div>'+
         '<div class="rm-dl-actions">'+
-          '<button class="rm-btn ghost" data-share="linkedin">in Share</button>'+
-          '<button class="rm-btn ghost" data-share="copy">Copy link</button>'+
-          '<button class="rm-btn primary" data-dl="1">'+(loggedIn()?'Download PDF ↓':'Log in with Google to download')+'</button>'+
+          '<button class="rm-btn li" data-share="linkedin">'+IC_IN+'Share on LinkedIn</button>'+
+          '<button class="rm-btn ghost" data-share="copy">'+IC_LINK+'Copy link</button>'+
+          '<button class="rm-btn primary" data-dl="1">'+IC_DL+'Download PDF</button>'+
         '</div>'+
       '</div>';
     window.scrollTo(0,0);
   }
 
-  function showGrid(){ currentSkill=null; skillView.hidden=true; gridView.parentElement.hidden=false; if(heroEl) heroEl.style.display=''; renderGrid(); try{ if(location.search) history.replaceState({},'','/roadmaps'); }catch(_){} window.scrollTo(0,0); }
+  function showGrid(){ currentSkill=null; skillView.hidden=true; gridView.parentElement.hidden=false; if(heroEl) heroEl.style.display=''; renderRoleBar(); renderGrid(); try{ if(location.search) history.replaceState({},'','/roadmaps'); }catch(_){} window.scrollTo(0,0); }
   function showSkill(key){ gridView.parentElement.hidden=true; skillView.hidden=false; if(heroEl) heroEl.style.display='none'; renderSkill(key); try{ history.replaceState({},'','/roadmaps?skill='+key); }catch(_){} }
 
   /* ===================== PDF ===================== */
@@ -290,6 +327,8 @@
     var el;
     if((el=ev.target.closest('[data-skill]'))){ showSkill(el.getAttribute('data-skill')); return; }
     if(ev.target.closest('[data-back]')){ showGrid(); return; }
+    if(ev.target.closest('[data-role-clear]')){ currentRole=''; try{localStorage.removeItem('rm_role');}catch(_){} renderRoleBar(); renderGrid(); return; }
+    if((el=ev.target.closest('[data-role]'))){ var r=el.getAttribute('data-role'); currentRole=(currentRole===r?'':r); try{ currentRole?localStorage.setItem('rm_role',currentRole):localStorage.removeItem('rm_role'); }catch(_){} renderRoleBar(); renderGrid(); return; }
     if((el=ev.target.closest('.rm-track-head'))){ el.parentElement.classList.toggle('open'); return; }
     if((el=ev.target.closest('.rm-sec-head'))){ el.parentElement.classList.toggle('open'); return; }
     if((el=ev.target.closest('[data-subtoggle]'))){ el.closest('.rm-topic').classList.toggle('sub-open'); return; }
