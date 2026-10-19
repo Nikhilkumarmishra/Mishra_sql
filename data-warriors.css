@@ -709,3 +709,25 @@ body.ws-mode{background:var(--bg-2)}
   .chal-day b{font-size:32px}
   .restart-banner{flex-direction:column;gap:12px}
 }
+
+/* applications stage pipeline */
+.pipeline{display:flex;gap:8px;overflow-x:auto;margin-bottom:16px;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.pstage{flex:1 0 auto;min-width:86px;appearance:none;cursor:pointer;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 10px 10px;text-align:center;transition:border-color .15s var(--ease),transform .15s var(--ease),background .15s}
+.pstage:hover{border-color:var(--ink-2);transform:translateY(-1px)}
+.pstage.on{border-color:var(--red);background:var(--pale)}
+.pstage b{display:block;font-family:var(--display);font-size:22px;font-weight:800;letter-spacing:-.04em;line-height:1.05}
+.pstage span{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.pstage.on span{color:var(--red-ink)}
+
+/* first-run guided tour */
+#dwTour{position:fixed;inset:0;z-index:100;background:transparent}
+.tour-spot{position:fixed;border-radius:14px;box-shadow:0 0 0 9999px rgba(10,11,14,.66);transition:top .25s var(--ease),left .25s var(--ease),width .25s var(--ease),height .25s var(--ease);pointer-events:none}
+.tour-pop{position:fixed;z-index:101;width:min(330px,calc(100vw - 24px));background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.28);padding:18px 18px 16px}
+.tour-step{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--red);margin-bottom:6px}
+.tour-pop h4{font-family:var(--display);font-size:17px;font-weight:800;letter-spacing:-.02em;margin:0 0 6px}
+.tour-pop p{font-size:13.5px;color:var(--ink-2);line-height:1.55;margin:0 0 14px}
+.tour-pop p b{color:var(--ink)}
+.tour-nav{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tour-right{display:flex;gap:8px;align-items:center}
+.tour-skip{appearance:none;border:0;background:none;color:var(--muted);font:600 13px var(--font);cursor:pointer;padding:0}
+.tour-skip:hover{color:var(--red)}

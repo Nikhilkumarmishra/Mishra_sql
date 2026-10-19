@@ -181,6 +181,13 @@
   var prepCat = null, prepType = 'practice', jobStatus = 'applied', jobSource = 'LinkedIn', appFilter = 'all';
   var commDays = 7, commFormOpen = false;
   var COMM_FILTERS = [['24 hours',1],['3 days',3],['7 days',7],['All time',0]];
+  var TOUR_STEPS = [
+    {sel:'.chal-hero', title:'Your 45-day challenge', body:'“Day X / 45” only moves forward when you finish <b>everything</b> for the day. Miss a day and you restart at Day 1 — showing up daily is the whole point.'},
+    {sel:'.mission', title:'Today’s mission', body:'Every day: apply to <b>5 companies</b> and log <b>5 topics in each subject</b> you’re practising. Fill every ring to complete the day.'},
+    {sel:'.ws-tabs', title:'Everything in one place', body:'<b>Applications</b> tracks your jobs by stage, <b>Practice</b> logs your study, <b>Community</b> shares real openings, and <b>Profile</b> holds your details.'},
+    {sel:'.ws-daychip', title:'Keep the streak alive', body:'Your current day lives up here. Come back and log daily — small steps, 45 days, one offer.'}
+  ];
+  var tourIdx = 0, tourActive = false, tourStep = null, tourTarget = null;
   var profile = null, profilePrompted = false, profileEditMode = false, isAdmin = false;
   var TARGET_ROLES = ['Data Analyst','Business Analyst','Product Analyst','Marketing Analyst','Growth Analyst','BI Analyst','Analytics Engineer','MIS Analyst','Data Scientist','Data Engineer','Financial Analyst','Operations Analyst','Other'];
 
@@ -220,7 +227,9 @@
       try{ profile=await rpc('dw_get_profile',{}); }catch(_){ profile={complete:true}; }
       try{ document.getElementById('profileDialog').close(); }catch(_){ }
       toast(profileEditMode ? 'Profile updated.' : 'Profile complete — welcome aboard! 🚀');
+      var wasOnboarding = !profileEditMode;
       renderWorkspace();
+      if(wasOnboarding && !tourSeen()){ setTimeout(function(){ if(!tourActive) startTour(); }, 400); }
     }catch(e){ err.textContent=e.message; btn.disabled=false; btn.textContent=(profileEditMode?'Save changes':'Save & start my journey →'); }
   }
 
@@ -263,6 +272,7 @@
     if(currentView==='community' && !community) loadCommunity();
     window.scrollTo(0,0);
     if(!profileComplete() && !profilePrompted){ profilePrompted=true; showProfileForm(); }
+    else if(profileComplete() && !tourSeen()){ setTimeout(function(){ if(!tourActive && currentView==='dashboard' && !document.getElementById('profileDialog').open) startTour(); }, 500); }
   }
   function exitToLanding(){
     var main=document.getElementById('main'), nav=document.getElementById('nav'), ft=document.querySelector('.footer');
@@ -299,6 +309,7 @@
           (isAdmin?'<a class="link-btn ws-admin-link" href="/data-warriors/admin">⚙️ Admin</a>':'')+
           '<label class="ws-range-wrap">Range <select class="ws-range" data-ws="range">'+RANGES.map(function(r){return '<option value="'+r[1]+'"'+(r[1]===currentRange?' selected':'')+'>'+r[0]+'</option>';}).join('')+'</select></label>'+
           '<span class="ws-user">'+esc(session&&session.user&&session.user.email||name)+'</span>'+
+          '<button class="link-btn" data-ws="tour" title="Replay the guided tour">Tour</button>'+
           '<button class="link-btn" data-ws="logout">Log out</button>'+
         '</div>'+
       '</div></header>'+
@@ -422,7 +433,7 @@
   /* ---- Applications view ---- */
   function viewApplications(){
     var apps=state.applications, tg=state.targets, t=state.today;
-    var filtered=apps.filter(function(a){ if(appFilter==='all')return true; if(appFilter==='saved')return a.status==='saved'; if(appFilter==='applied')return a.status!=='saved'; return a.status===appFilter; });
+    var filtered=apps.filter(function(a){ return appFilter==='all' ? true : a.status===appFilter; });
     var html='<section class="ws-sec"><div class="ws-sec-h"><h2>Job applications</h2><span class="ws-range-note">'+t.applications_applied+' / '+tg.applications+' applied today</span></div>'+
       '<form class="quick-add" data-ws-form="job">'+
         '<div class="qa-row"><input name="company" placeholder="Company" required maxlength="120"><input name="role" placeholder="Role / title" required maxlength="120"></div>'+
@@ -430,8 +441,11 @@
         '<div class="chips" data-chips="source">'+SOURCES.map(function(s){return '<button type="button" class="chip'+(s===jobSource?' on':'')+'" data-source="'+esc(s)+'">'+esc(s)+'</button>';}).join('')+'</div>'+
         '<div class="qa-actions"><div class="seg"><button type="button" class="seg-btn'+(jobStatus==='applied'?' on':'')+'" data-status="applied">Applied</button><button type="button" class="seg-btn'+(jobStatus==='saved'?' on':'')+'" data-status="saved">Saved for later</button></div><button class="btn primary sm" type="submit">Add</button></div>'+
       '</form>';
-    html+='<div class="filter-chips">'+[['all','All'],['applied','Applied'],['saved','Saved'],['interview','Interview'],['offer','Offer'],['rejected','Rejected']].map(function(f){return '<button class="fchip'+(appFilter===f[0]?' on':'')+'" data-ws="appfilter" data-filter="'+f[0]+'">'+f[1]+'</button>';}).join('')+'</div>';
-    html+= filtered.length? '<div class="app-list">'+filtered.map(appRow).join('')+'</div>' : '<div class="empty-state"><h3>No applications here yet</h3><p>Add your first one above — company, role, where you found it. It takes seconds.</p></div>';
+    var counts={all:apps.length,saved:0,applied:0,screening:0,interview:0,offer:0,rejected:0};
+    apps.forEach(function(a){ if(counts[a.status]!=null) counts[a.status]++; });
+    var stages=[['all','All'],['saved','Saved'],['applied','Applied'],['screening','Screening'],['interview','Interview'],['offer','Offer'],['rejected','Rejected']];
+    html+='<div class="pipeline">'+stages.map(function(s){return '<button class="pstage'+(appFilter===s[0]?' on':'')+'" data-ws="appfilter" data-filter="'+s[0]+'"><b>'+counts[s[0]]+'</b><span>'+s[1]+'</span></button>';}).join('')+'</div>';
+    html+= filtered.length? '<div class="app-list">'+filtered.map(appRow).join('')+'</div>' : '<div class="empty-state"><h3>Nothing in '+esc((stages.filter(function(s){return s[0]===appFilter;})[0]||['','this stage'])[1])+'</h3><p>'+(appFilter==='all'?'Add your first application above — company, role, where you found it. It takes seconds.':'Move an application here by changing its stage, or add a new one above.')+'</p></div>';
     html+='</section>';
     return html;
   }
@@ -529,6 +543,7 @@
       if(b.hasAttribute('data-status') && b.classList.contains('seg-btn')){ jobStatus=b.getAttribute('data-status'); b.parentNode.querySelectorAll('.seg-btn').forEach(function(x){x.classList.toggle('on',x===b);}); return; }
       if(act==='view'){ setView(b.getAttribute('data-view')); return; }
       if(act==='dismiss-onboard'){ try{localStorage.setItem('dw_onboard_done','1');}catch(_){ } renderWorkspace(); return; }
+      if(act==='tour'){ startTour(); return; }
       if(act==='open-profile'){ showProfileForm(false); return; }
       if(act==='edit-profile'){ showProfileForm(true); return; }
       if(act==='request-recovery'){ var rd=b.getAttribute('data-day'); if(!rd){ toast('Nothing to continue.'); return; } doAction(rpc('dw_request_recovery',{p_missed_day:rd}),'Continuation requested — an admin will review within 24h.'); return; }
@@ -564,6 +579,61 @@
   function doAction(promise, okMsg){
     promise.then(function(){ return loadWorkspace(currentRange); }).then(function(){ if(okMsg) toast(okMsg); }).catch(function(e){ toast(e.message); if(/log in again/i.test(e.message||'')){ showAuth('login'); } });
   }
+
+  /* ---------- first-run guided tour ---------- */
+  function tourSeen(){ try{return localStorage.getItem('dw_tour_done')==='1';}catch(_){return false;} }
+  function startTour(){
+    if(!state || !state.registered) return;
+    if(currentView!=='dashboard'){ currentView='dashboard'; syncUrl(false); renderWorkspace(); }
+    tourIdx=0; tourActive=true;
+    window.addEventListener('scroll', repaintTour, {passive:true});
+    window.addEventListener('resize', repaintTour);
+    showTourStep();
+  }
+  function endTour(done){
+    tourActive=false; tourStep=null; tourTarget=null;
+    window.removeEventListener('scroll', repaintTour); window.removeEventListener('resize', repaintTour);
+    var ov=document.getElementById('dwTour'); if(ov) ov.remove();
+    if(done){ try{localStorage.setItem('dw_tour_done','1');}catch(_){ } }
+  }
+  function showTourStep(){
+    tourStep=TOUR_STEPS[tourIdx];
+    if(!tourStep){ endTour(true); return; }
+    tourTarget=document.querySelector(tourStep.sel);
+    if(!tourTarget){ tourIdx++; return showTourStep(); }
+    try{ tourTarget.scrollIntoView({block:'center',behavior:'smooth'}); }catch(_){ tourTarget.scrollIntoView(); }
+    setTimeout(repaintTour, 260);
+  }
+  function repaintTour(){ if(tourActive && tourStep && tourTarget) paintTour(tourStep, tourTarget); }
+  function paintTour(step, target){
+    var ov=document.getElementById('dwTour'); if(!ov){ ov=document.createElement('div'); ov.id='dwTour'; document.body.appendChild(ov); }
+    var r=target.getBoundingClientRect(), pad=8;
+    var top=r.top-pad, left=r.left-pad, w=r.width+pad*2, h=r.height+pad*2;
+    var last=tourIdx===TOUR_STEPS.length-1;
+    ov.innerHTML=
+      '<div class="tour-spot" style="top:'+top+'px;left:'+left+'px;width:'+w+'px;height:'+h+'px"></div>'+
+      '<div class="tour-pop" id="tourPop" role="dialog" aria-label="Guided tour">'+
+        '<div class="tour-step">'+(tourIdx+1)+' / '+TOUR_STEPS.length+'</div>'+
+        '<h4>'+esc(step.title)+'</h4><p>'+step.body+'</p>'+
+        '<div class="tour-nav"><button class="tour-skip" data-tour="skip">Skip tour</button>'+
+          '<div class="tour-right">'+(tourIdx>0?'<button class="mini-btn" data-tour="back">Back</button>':'')+
+          '<button class="btn primary sm" data-tour="next">'+(last?'Finish':'Next')+'</button></div>'+
+        '</div>'+
+      '</div>';
+    var pop=document.getElementById('tourPop'), ph=pop.offsetHeight, pw=pop.offsetWidth;
+    var vh=window.innerHeight, vw=window.innerWidth;
+    var popTop=top+h+14; if(popTop+ph>vh-10){ popTop=Math.max(10, top-ph-14); }
+    if(popTop<10) popTop=Math.min(vh-ph-10, top+h+14);
+    var popLeft=Math.min(Math.max(12, left), vw-pw-12);
+    pop.style.top=popTop+'px'; pop.style.left=popLeft+'px';
+  }
+  document.addEventListener('click', function(ev){
+    var b=ev.target.closest('[data-tour]'); if(!b) return;
+    var a=b.getAttribute('data-tour');
+    if(a==='skip'){ endTour(true); return; }
+    if(a==='back'){ if(tourIdx>0){ tourIdx--; showTourStep(); } return; }
+    if(a==='next'){ tourIdx++; showTourStep(); return; }
+  });
 
   /* ---------- firefly-bee: idle hover + flutter, swims on scroll, returns home ---------- */
   (function bee(){
