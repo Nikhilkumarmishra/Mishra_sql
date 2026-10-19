@@ -134,7 +134,7 @@
     try{var u=await fetch(AUTH+'/user',{headers:{apikey:SUPABASE_ANON,Authorization:'Bearer '+access}}).then(function(r){return r.json();});if(u.id)s.user=u;}catch(_){}
     saveSession(s);history.replaceState({},'', '/data-warriors');
   }
-  function logout(){session=null;state=null;community=null;try{localStorage.removeItem('msql_sess');}catch(_){}exitToLanding();renderAccount();toast('You are signed out.');}
+  function logout(){session=null;state=null;community=null;profile=null;profilePrompted=false;try{localStorage.removeItem('msql_sess');}catch(_){}exitToLanding();renderAccount();toast('You are signed out.');}
 
   /* ---------- delegated events ---------- */
   document.addEventListener('click',function(ev){
@@ -145,7 +145,7 @@
     else if(act==='google-login')google();
     else if(act==='logout')logout();
   });
-  document.addEventListener('submit',function(ev){if(ev.target.id==='authForm')authenticate(ev);});
+  document.addEventListener('submit',function(ev){if(ev.target.id==='authForm')authenticate(ev);else if(ev.target.id==='profileForm')saveProfileForm(ev);});
 
   /* ---------- nav: scrolled state + mobile toggle + smooth close ---------- */
   var nav=document.getElementById('nav'),navLinks=document.getElementById('navLinks'),navToggle=document.getElementById('navToggle');
@@ -181,6 +181,46 @@
   var prepCat = null, prepType = 'practice', jobStatus = 'applied', jobSource = 'LinkedIn', appFilter = 'all';
   var commDays = 7, commFormOpen = false;
   var COMM_FILTERS = [['24 hours',1],['3 days',3],['7 days',7],['All time',0]];
+  var profile = null, profilePrompted = false;
+  var TARGET_ROLES = ['Data Analyst','Business Analyst','Product Analyst','Marketing Analyst','Growth Analyst','BI Analyst','Analytics Engineer','MIS Analyst','Data Scientist','Data Engineer','Financial Analyst','Operations Analyst','Other'];
+
+  function profileComplete(){ return !!(profile && profile.complete); }
+  function showProfileForm(){
+    var pd=document.getElementById('profileDialog'), pc=document.getElementById('profileContent');
+    if(!pd||!pc) return;
+    var p=profile||{}, yNow=new Date().getFullYear(), years='';
+    for(var y=yNow+1; y>=yNow-14; y--){ years+='<option value="'+y+'"'+(Number(p.passout_year)===y?' selected':'')+'>'+y+'</option>'; }
+    var name = p.full_name || (session&&session.user&&session.user.user_metadata&&(session.user.user_metadata.full_name||session.user.user_metadata.name)) || '';
+    pc.innerHTML =
+      '<form class="profile-form" id="profileForm">'+
+        '<div class="pf-head"><div class="pf-eyebrow">YOUR PROFILE</div><h2>One quick step to begin 🚀</h2>'+
+        '<p>Set up your profile so your effort counts and you show up job-ready. Takes under a minute — then your Data Warriors journey starts.</p></div>'+
+        '<div class="pf-grid">'+
+          '<label class="pf-field"><span>Full name</span><input name="full_name" required maxlength="100" value="'+esc(name)+'"></label>'+
+          '<label class="pf-field"><span>Target role</span><select name="target_role" required><option value="">Select…</option>'+TARGET_ROLES.map(function(r){return '<option'+(p.target_role===r?' selected':'')+'>'+r+'</option>';}).join('')+'</select></label>'+
+          '<label class="pf-field"><span>Highest qualification</span><input name="education" required maxlength="80" placeholder="e.g. B.Tech (CSE), B.Sc Statistics, MBA" value="'+esc(p.education||'')+'"></label>'+
+          '<label class="pf-field"><span>Passout year</span><select name="passout_year" required><option value="">Select…</option>'+years+'</select></label>'+
+          '<label class="pf-field wide"><span>LinkedIn profile</span><input name="linkedin" type="text" inputmode="url" required placeholder="linkedin.com/in/yourname" value="'+esc(p.linkedin_url||'')+'"></label>'+
+          '<label class="pf-field wide"><span>Resume link <em>· Google Drive, public</em></span><input name="resume" type="text" inputmode="url" required placeholder="drive.google.com/file/…" value="'+esc(p.resume_url||'')+'"><small class="pf-hint">Upload your resume to Google Drive → <b>Share</b> → "Anyone with the link" → paste it here.</small></label>'+
+          '<label class="pf-field wide"><span>GitHub <em>· optional</em></span><input name="github" type="text" inputmode="url" placeholder="github.com/yourname" value="'+esc(p.github_url||'')+'"></label>'+
+        '</div>'+
+        '<div class="pf-error" id="profileError"></div>'+
+        '<button class="btn primary" type="submit">Save &amp; start my journey →</button>'+
+      '</form>';
+    if(!pd.open) pd.showModal();
+  }
+  async function saveProfileForm(ev){
+    ev.preventDefault();
+    var f=ev.target, fd=new FormData(f), err=document.getElementById('profileError'), btn=f.querySelector('button[type=submit]');
+    err.textContent=''; btn.disabled=true; btn.textContent='Saving…';
+    try{
+      await rpc('dw_save_profile',{p_full_name:fd.get('full_name'),p_target_role:fd.get('target_role'),p_education:fd.get('education'),p_passout_year:parseInt(fd.get('passout_year'),10),p_linkedin:fd.get('linkedin'),p_resume:fd.get('resume'),p_github:fd.get('github')||null});
+      try{ profile=await rpc('dw_get_profile',{}); }catch(_){ profile={complete:true}; }
+      try{ document.getElementById('profileDialog').close(); }catch(_){ }
+      toast('Profile complete — welcome aboard! 🚀');
+      renderWorkspace();
+    }catch(e){ err.textContent=e.message; btn.disabled=false; btn.textContent='Save & start my journey →'; }
+  }
 
   function register(){
     if(!session){ try{localStorage.setItem('dw_pending_registration','1');}catch(_){ } showAuth('signup'); return Promise.resolve(); }
@@ -203,7 +243,7 @@
   function viewFromPath(){ var m=location.pathname.replace(/\/+$/,'').match(/\/data-warriors\/([a-z]+)$/i); return (m && WS_VIEWS.indexOf(m[1].toLowerCase())>=0) ? m[1].toLowerCase() : null; }
   function syncUrl(replace){ try{ var want='/data-warriors/'+currentView; if(location.pathname.replace(/\/+$/,'')!==want){ history[replace?'replaceState':'pushState']({dwView:currentView},'',want); } }catch(_){ } }
 
-  function enterWorkspace(){
+  async function enterWorkspace(){
     var main=document.getElementById('main'), nav=document.getElementById('nav'), ft=document.querySelector('.footer');
     if(main) main.hidden=true; if(nav) nav.style.display='none'; if(ft) ft.style.display='none';
     var bee=document.getElementById('bee'); if(bee) bee.style.display='none';
@@ -211,11 +251,13 @@
     document.body.classList.add('ws-mode');
     wsEl.hidden=false;
     if(!wsBound){ bindWorkspace(); wsBound=true; }
+    try{ profile = await rpc('dw_get_profile',{}); }catch(_){ if(!profile) profile={complete:true}; }
     var pv=viewFromPath(); currentView = pv || currentView || 'dashboard';
     renderWorkspace();
     syncUrl(true);
     if(currentView==='community' && !community) loadCommunity();
     window.scrollTo(0,0);
+    if(!profileComplete() && !profilePrompted){ profilePrompted=true; showProfileForm(); }
   }
   function exitToLanding(){
     var main=document.getElementById('main'), nav=document.getElementById('nav'), ft=document.querySelector('.footer');
@@ -266,7 +308,9 @@
     var kpis=[['Applications',k.applications,'applied'],['Responses',k.responses,'heard back'],['Interviews',k.interviews,'reached'],['Prep sessions',k.prep_sessions,'logged'],['Active days',k.active_days,'in range'],['Saved',k.saved,'parked']];
     var isNew = (state.applications||[]).length===0 && (state.today_prep||[]).length===0 && Number(s.complete_days||0)===0 && k.applications===0 && k.prep_sessions===0;
     var html='';
-    if(isNew && !onboardDone()){
+    if(!profileComplete()){
+      html+='<section class="ws-sec"><div class="panel profile-prompt"><div class="pp-txt"><div class="pp-eyebrow">ALMOST THERE</div><h2>Complete your profile to start logging 🚀</h2><p>Add your target role, education and links — under a minute, and it unlocks your tracker and keeps you job-ready.</p></div><button class="btn primary" data-ws="open-profile">Complete my profile</button></div></section>';
+    } else if(isNew && !onboardDone()){
       html+='<section class="ws-sec"><div class="panel onboard">'+
         '<button class="onboard-x" data-ws="dismiss-onboard" aria-label="Dismiss">×</button>'+
         '<div class="onboard-eyebrow">GET STARTED</div>'+
@@ -419,6 +463,7 @@
       if(b.hasAttribute('data-status') && b.classList.contains('seg-btn')){ jobStatus=b.getAttribute('data-status'); b.parentNode.querySelectorAll('.seg-btn').forEach(function(x){x.classList.toggle('on',x===b);}); return; }
       if(act==='view'){ setView(b.getAttribute('data-view')); return; }
       if(act==='dismiss-onboard'){ try{localStorage.setItem('dw_onboard_done','1');}catch(_){ } renderWorkspace(); return; }
+      if(act==='open-profile'){ showProfileForm(); return; }
       if(act==='trackjob'){ rpc('dw_add_application',{p_company:b.getAttribute('data-company'),p_role:b.getAttribute('data-role'),p_source:'Community',p_url:b.getAttribute('data-url'),p_status:'saved'}).then(function(){ toast('Saved to your Applications.'); return loadCommunity(commDays, community&&community.q); }).catch(function(e){ toast(e.message); }); return; }
       if(act==='toggle-share'){ commFormOpen=!commFormOpen; renderWorkspace(); return; }
       if(act==='commdays'){ loadCommunity(parseInt(b.getAttribute('data-days'),10), community&&community.q); return; }
@@ -439,6 +484,7 @@
     wsEl.addEventListener('submit', function(ev){
       var f=ev.target, kind=f.getAttribute('data-ws-form'); if(!kind) return; ev.preventDefault();
       var fd=new FormData(f);
+      if((kind==='job'||kind==='prep'||kind==='share') && !profileComplete()){ toast('Complete your profile to start logging.'); showProfileForm(); return; }
       if(kind==='job'){ doAction(rpc('dw_add_application',{p_company:fd.get('company'),p_role:fd.get('role'),p_source:jobSource,p_url:normUrl(fd.get('url')),p_status:jobStatus}),'Application added.'); }
       else if(kind==='prep'){ if(!prepCat){toast('Add or activate a skill first.');return;} doAction(rpc('dw_add_prep',{p_category_id:prepCat,p_type:prepType,p_topic:fd.get('topic'),p_url:normUrl(fd.get('url'))}),'Logged. Keep going!'); }
       else if(kind==='cat'){ var n=(fd.get('name')||'').trim(); if(!n)return; doAction(rpc('dw_add_category',{p_name:n}),'Skill added.'); }

@@ -595,3 +595,32 @@ body.ws-mode{background:var(--bg-2)}
 .comm-search-input:focus{outline:2px solid rgba(240,25,32,.3);border-color:var(--red)}
 .jb-pop{font-size:10.5px;font-weight:700;color:var(--ink-2);background:var(--bg-2);border:1px solid var(--line);border-radius:999px;padding:3px 9px;white-space:nowrap}
 .jb-intracker{font-size:12px;font-weight:600;color:var(--green);white-space:nowrap}
+
+/* ---------- profile card modal ---------- */
+.profile-dialog{width:min(620px,calc(100vw - 28px));padding:0;overflow:hidden}
+.profile-dialog .dialog-close{z-index:2}
+.profile-form{padding:30px 32px 28px}
+.pf-head{margin-bottom:20px;padding-right:20px}
+.pf-eyebrow{font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--red)}
+.pf-head h2{font-family:var(--display);font-size:25px;font-weight:800;letter-spacing:-.03em;margin:8px 0 6px}
+.pf-head p{color:var(--muted);font-size:14px;line-height:1.55}
+.pf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pf-field{display:flex;flex-direction:column;gap:6px}
+.pf-field.wide{grid-column:1/-1}
+.pf-field>span{font-size:12px;font-weight:700;color:var(--ink-2)}
+.pf-field>span em{font-style:normal;color:var(--muted);font-weight:500}
+.pf-field input,.pf-field select{border:1px solid #dcdcdc;border-radius:11px;padding:11px 13px;font:14px var(--font);background:#fff;color:var(--ink);width:100%}
+.pf-field input:focus,.pf-field select:focus{outline:2px solid rgba(240,25,32,.3);border-color:var(--red)}
+.pf-hint{font-size:11.5px;color:var(--muted);line-height:1.4}
+.pf-hint b{color:var(--ink-2)}
+.pf-error{color:var(--red-ink);font-size:13px;min-height:18px;margin-top:10px}
+.profile-form .btn.primary{width:100%;justify-content:center;margin-top:14px}
+
+/* ---------- dashboard profile prompt ---------- */
+.profile-prompt{display:flex;align-items:center;gap:20px;justify-content:space-between;border:1px solid var(--red-line);background:linear-gradient(135deg,#fff,var(--pale));box-shadow:0 10px 30px rgba(240,25,32,.06);flex-wrap:wrap}
+.pp-eyebrow{font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--red)}
+.pp-txt h2{font-family:var(--display);font-size:21px;font-weight:800;letter-spacing:-.03em;margin:6px 0 5px}
+.pp-txt p{color:var(--muted);font-size:14px;line-height:1.5;max-width:560px}
+.profile-prompt .btn.primary{white-space:nowrap}
+
+@media (max-width:620px){ .pf-grid{grid-template-columns:1fr} .profile-dialog{width:calc(100vw - 20px)} }
