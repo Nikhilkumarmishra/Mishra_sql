@@ -188,7 +188,7 @@
     {sel:'.ws-daychip', title:'Keep the streak alive', body:'Your current day lives up here. Come back and log daily — small steps, 45 days, one offer.'}
   ];
   var tourIdx = 0, tourActive = false, tourStep = null, tourTarget = null;
-  var profile = null, profilePrompted = false, profileEditMode = false, isAdmin = false;
+  var profile = null, profilePrompted = false, profileEditMode = false, isAdmin = false, certJustClaimed = false;
   var TARGET_ROLES = ['Data Analyst','Business Analyst','Product Analyst','Marketing Analyst','Growth Analyst','BI Analyst','Analytics Engineer','MIS Analyst','Data Scientist','Data Engineer','Financial Analyst','Operations Analyst','Other'];
 
   function profileComplete(){ return !!(profile && profile.complete); }
@@ -400,6 +400,110 @@
     return html;
   }
 
+  /* ---- Data Warrior certificate ---- */
+  function fmtLongDate(ts){ if(!ts) return ''; try{ return new Date(ts).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}); }catch(_){ return ''; } }
+  function certSerial(){ var c=profile&&profile.certificate; if(c&&c.serial) return c.serial; var n=(profile&&profile.member_number)||0; return 'DW-'+String(n).padStart(4,'0'); }
+  function certCorner(x,y,sx,sy){ return '<g transform="translate('+x+','+y+') scale('+sx+','+sy+')" fill="none" stroke="url(#cfoil)" stroke-width="1.6"><path d="M0,34 L0,10 Q0,0 10,0 L34,0"/><circle cx="12" cy="12" r="2.4" fill="url(#cfoil)" stroke="none"/></g>'; }
+  function certSVG(opts){
+    opts=opts||{}; var name=opts.name||'Your Name', date=opts.date||'', serial=opts.serial||'DW-0000';
+    return '<svg viewBox="0 0 1000 707" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Data Warrior certificate">'+
+      '<defs>'+
+        '<radialGradient id="cbg" cx="50%" cy="34%" r="80%"><stop offset="0" stop-color="#20222c"/><stop offset=".6" stop-color="#15161d"/><stop offset="1" stop-color="#0d0e13"/></radialGradient>'+
+        '<linearGradient id="cfoil" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8a6a2f"/><stop offset=".3" stop-color="#f3e4bb"/><stop offset=".52" stop-color="#caa24a"/><stop offset=".74" stop-color="#f5e8c2"/><stop offset="1" stop-color="#9a7a38"/></linearGradient>'+
+        '<linearGradient id="cred" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6323a"/><stop offset="1" stop-color="#b10f14"/></linearGradient>'+
+        '<path id="csealtop" d="M -60,0 A 60,60 0 0 1 60,0" fill="none"/>'+
+        '<path id="csealbot" d="M -60,0 A 60,60 0 0 0 60,0" fill="none"/>'+
+      '</defs>'+
+      '<rect width="1000" height="707" fill="url(#cbg)"/>'+
+      '<rect x="24" y="24" width="952" height="659" rx="10" fill="none" stroke="url(#cfoil)" stroke-width="2.5"/>'+
+      '<rect x="36" y="36" width="928" height="635" rx="7" fill="none" stroke="url(#cfoil)" stroke-width="1" opacity=".45"/>'+
+      certCorner(40,40,1,1)+certCorner(960,40,-1,1)+certCorner(40,667,1,-1)+certCorner(960,667,-1,-1)+
+      '<text x="500" y="78" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="17" letter-spacing="8" font-weight="700" fill="url(#cfoil)">ANALYST&#160;&#160;WORLD</text>'+
+      '<g transform="translate(500,150)">'+
+        '<circle r="52" fill="#14151c" stroke="url(#cfoil)" stroke-width="2.5"/>'+
+        '<circle r="44" fill="none" stroke="url(#cfoil)" stroke-width="1" opacity=".55"/>'+
+        '<text font-family="DM Sans,sans-serif" font-size="8.5" letter-spacing="3.1" font-weight="700" fill="url(#cfoil)"><textPath href="#csealtop" startOffset="50%" text-anchor="middle">DATA&#160;WARRIOR</textPath></text>'+
+        '<text font-family="DM Sans,sans-serif" font-size="8.5" letter-spacing="3.1" font-weight="700" fill="url(#cfoil)"><textPath href="#csealbot" startOffset="50%" text-anchor="middle">45-DAY&#160;HONOUR</textPath></text>'+
+        '<text y="12" text-anchor="middle" font-family="Playfair Display,serif" font-size="34" font-weight="800" fill="url(#cfoil)">DW</text>'+
+        '<path d="M-15,44 L-24,76 L-7,65 Z" fill="url(#cred)"/><path d="M15,44 L24,76 L7,65 Z" fill="url(#cred)"/>'+
+      '</g>'+
+      '<text x="500" y="285" text-anchor="middle" font-family="Playfair Display,serif" font-size="54" font-weight="800" letter-spacing="1.5" fill="url(#cfoil)">Data Warrior</text>'+
+      '<text x="500" y="312" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12.5" letter-spacing="5.5" fill="#cabf9f">CERTIFICATE&#160;OF&#160;45-DAY&#160;CONSISTENCY</text>'+
+      '<g fill="url(#cfoil)"><circle cx="455" cy="336" r="2"/><circle cx="500" cy="336" r="2.6"/><circle cx="545" cy="336" r="2"/></g>'+
+      '<text x="500" y="378" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12.5" letter-spacing="4" fill="#8d876f">THIS&#160;HONOURS</text>'+
+      '<text x="500" y="428" text-anchor="middle" font-family="Playfair Display,serif" font-style="italic" font-size="46" font-weight="700" fill="#f5efe0">'+esc(name)+'</text>'+
+      '<line x1="315" y1="448" x2="685" y2="448" stroke="url(#cfoil)" stroke-width="1.4"/>'+
+      '<text x="500" y="492" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="14.5" fill="#b7af97">for completing the <tspan fill="#e9d8ab" font-weight="600">45-Day Job Challenge</tspan> on Analyst World —</text>'+
+      '<text x="500" y="515" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="14.5" fill="#b7af97">45 unbroken days of applying, practising, and sharpening communication.</text>'+
+      '<text x="215" y="604" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" letter-spacing="2.5" fill="#8d876f">DATE&#160;EARNED</text>'+
+      '<text x="215" y="624" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="14" font-weight="600" fill="#e7deca">'+esc(date||'—')+'</text>'+
+      '<text x="785" y="604" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" letter-spacing="2.5" fill="#8d876f">CREDENTIAL&#160;No.</text>'+
+      '<text x="785" y="624" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="14" font-weight="600" fill="#e7deca">'+esc(serial)+'</text>'+
+      '<text x="500" y="600" text-anchor="middle" font-family="Playfair Display,serif" font-style="italic" font-size="26" font-weight="600" fill="url(#cfoil)">Analyst World</text>'+
+      '<line x1="430" y1="614" x2="570" y2="614" stroke="#5a543f" stroke-width="1"/>'+
+      '<text x="500" y="632" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10.5" letter-spacing="2" fill="#8d876f">ISSUED&#160;BY&#160;ANALYST&#160;WORLD</text>'+
+      '<text x="500" y="662" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#6a654f">Awarded for proven consistency. Analyst World does not guarantee employment.</text>'+
+    '</svg>';
+  }
+  function certCard(){
+    var ce=(profile&&profile.certificate)||{}, name=(profile&&profile.full_name)||displayName();
+    var claimed=!!ce.claimed_at, eligible=!!ce.eligible, day=Math.max(0,ce.day||0), target=ce.target||45;
+    if(claimed){
+      return '<section class="ws-sec"><div class="ws-sec-h"><h2>Your certificate</h2><span class="ws-range-note">Earned '+fmtLongDate(ce.claimed_at)+' · '+esc(certSerial())+'</span></div>'+
+        '<div class="cert-card claimed'+(certJustClaimed?' revealing':'')+'"><div class="cert-shell" id="certShell">'+certSVG({name:name,date:fmtLongDate(ce.claimed_at),serial:certSerial()})+'</div>'+
+        '<div class="cert-foot"><span>🏅 You’re a <b>Data Warrior</b>. Carry it proudly.</span><button class="btn ghost sm" data-ws="download-cert">Download</button></div></div></section>';
+    }
+    if(eligible){
+      return '<section class="ws-sec"><div class="ws-sec-h"><h2>Your certificate</h2></div>'+
+        '<div class="cert-card claimable"><div class="cert-shell">'+certSVG({name:name,date:'',serial:certSerial()})+'</div>'+
+        '<div class="cert-claim"><div class="cc-glow">🏆</div><h3>You did it — 45 days.</h3><p>Claim your Data Warrior certificate. It will carry your name and credential number forever.</p><button class="btn primary" data-ws="claim-cert">Claim my certificate →</button></div></div></section>';
+    }
+    var pctv=Math.min(100,Math.round(day/target*100)), left=Math.max(0,target-day);
+    return '<section class="ws-sec"><div class="ws-sec-h"><h2>Your certificate</h2><span class="ws-range-note">Locked</span></div>'+
+      '<div class="cert-card locked"><div class="cert-shell">'+certSVG({name:name,date:'',serial:certSerial()})+'</div>'+
+      '<div class="cert-frost"><div class="cf-lock">🔒</div><b>Day '+day+' of '+target+'</b><span>'+(left?left+' more unbroken day'+(left===1?'':'s')+' to earn your certificate':'Reach Day 45 to unlock')+'</span><div class="cf-bar"><i style="width:'+pctv+'%"></i></div></div></div></section>';
+  }
+  function claimCert(btn){
+    if(btn){ btn.disabled=true; btn.textContent='Claiming…'; }
+    rpc('dw_claim_certificate',{}).then(function(){ return rpc('dw_get_profile',{}); }).then(function(p){ profile=p; certJustClaimed=true; renderWorkspace(); confettiBurst(); setTimeout(function(){ certJustClaimed=false; },2600); toast('Certificate claimed — congratulations, Data Warrior! 🏅'); }).catch(function(e){ if(btn){ btn.disabled=false; btn.textContent='Claim my certificate →'; } toast(e.message); });
+  }
+  function downloadCert(){
+    var shell=document.getElementById('certShell'), svg=shell&&shell.querySelector('svg'); if(!svg){ toast('Open your certificate first.'); return; }
+    try{
+      var clone=svg.cloneNode(true);
+      var st=document.createElementNS('http://www.w3.org/2000/svg','style');
+      st.textContent="@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Playfair+Display:ital,wght@0,700;0,800;1,700&display=swap');";
+      clone.insertBefore(st, clone.firstChild);
+      var xml=new XMLSerializer().serializeToString(clone);
+      var svgBlob=new Blob([xml],{type:'image/svg+xml;charset=utf-8'});
+      var url=URL.createObjectURL(svgBlob), img=new Image();
+      img.onload=function(){
+        var scale=2, cv=document.createElement('canvas'); cv.width=1000*scale; cv.height=707*scale;
+        var ctx=cv.getContext('2d'); ctx.fillStyle='#0d0e13'; ctx.fillRect(0,0,cv.width,cv.height); ctx.drawImage(img,0,0,cv.width,cv.height);
+        URL.revokeObjectURL(url);
+        cv.toBlob(function(blob){
+          if(!blob){ toast('Could not render — try a screenshot.'); return; }
+          var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='data-warrior-certificate.png'; document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(function(){ URL.revokeObjectURL(a.href); },1000); toast('Certificate downloaded.');
+        },'image/png');
+      };
+      img.onerror=function(){ URL.revokeObjectURL(url); toast('Could not render — try a screenshot.'); };
+      img.src=url;
+    }catch(e){ toast('Could not render — try a screenshot.'); }
+  }
+  function confettiBurst(){
+    if(reduce) return;
+    var cv=document.createElement('canvas'); cv.className='cert-confetti'; document.body.appendChild(cv);
+    var ctx=cv.getContext('2d'), W=cv.width=innerWidth, H=cv.height=innerHeight, cols=['#caa24a','#f3e4bb','#f01920','#e7deca','#ffffff'];
+    var P=[]; for(var i=0;i<140;i++){ P.push({x:W/2+(Math.random()-.5)*160,y:H*0.28,vx:(Math.random()-.5)*11,vy:-6-Math.random()*9,g:0.22+Math.random()*0.12,s:4+Math.random()*5,c:cols[i%cols.length],r:Math.random()*6,vr:(Math.random()-.5)*0.4,life:1}); }
+    var t0=performance.now();
+    (function tick(now){ var el=now-t0; ctx.clearRect(0,0,W,H);
+      P.forEach(function(p){ p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.r+=p.vr; p.life=Math.max(0,1-el/2200);
+        ctx.save(); ctx.globalAlpha=p.life; ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.fillStyle=p.c; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); ctx.restore(); });
+      if(el<2300) requestAnimationFrame(tick); else cv.remove();
+    })(t0);
+  }
+
   /* ---- Profile view ---- */
   function pvField(label,val){ return '<div class="pvf"><span class="pvf-l">'+esc(label)+'</span><span class="pvf-v">'+(val?esc(val):'<em>—</em>')+'</span></div>'; }
   function pvLink(label,url){
@@ -427,7 +531,7 @@
         pvLink('GitHub',p.github_url)+
       '</div>'+
     '</div></section>';
-    return html;
+    return html + certCard();
   }
 
   /* ---- Applications view ---- */
@@ -552,6 +656,8 @@
       if(act==='open-profile'){ showProfileForm(false); return; }
       if(act==='edit-profile'){ showProfileForm(true); return; }
       if(act==='request-recovery'){ var rd=b.getAttribute('data-day'); if(!rd){ toast('Nothing to continue.'); return; } doAction(rpc('dw_request_recovery',{p_missed_day:rd}),'Continuation requested — an admin will review within 24h.'); return; }
+      if(act==='claim-cert'){ claimCert(b); return; }
+      if(act==='download-cert'){ downloadCert(); return; }
       if(act==='trackjob'){ rpc('dw_add_application',{p_company:b.getAttribute('data-company'),p_role:b.getAttribute('data-role'),p_source:'Community',p_url:b.getAttribute('data-url'),p_status:'saved'}).then(function(){ toast('Saved to your Applications.'); return loadCommunity(commDays, community&&community.q); }).catch(function(e){ toast(e.message); }); return; }
       if(act==='toggle-share'){ commFormOpen=!commFormOpen; renderWorkspace(); return; }
       if(act==='commdays'){ loadCommunity(parseInt(b.getAttribute('data-days'),10), community&&community.q); return; }
@@ -692,6 +798,7 @@
   (async function init(){
     try{await handleCallback();session=await validSession();}catch(_){ }
     renderAccount();
+    try{ var rc=document.getElementById('rewardCert'); if(rc) rc.innerHTML=certSVG({name:'Your Name',serial:'DW-0000'}); }catch(_){ }
     if(!session) return;
     try{ var st=await rpc('dw_get_state',{p_days:currentRange}); if(st&&st.registered){ state=st; enterWorkspace(); return; } }catch(_){ }
     var pending=false; try{pending=localStorage.getItem('dw_pending_registration')==='1';}catch(_){ }
