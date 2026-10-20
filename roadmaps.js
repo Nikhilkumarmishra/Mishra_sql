@@ -112,9 +112,65 @@
             { name:'Relationships & modelling', topics:['Correlation vs causation','Simple & multiple linear regression','Logistic regression (intuition)','R² & evaluating a model'] },
             { name:'Experimentation', topics:['A/B testing end-to-end','Choosing metrics & guardrails','Statistical vs practical significance','Reading & questioning results'] }
           ] }
+      ] },
+    ml: {
+      name:'Machine Learning', icon:'🤖', color:'#f01920',
+      tagline:'Turn data into predictions',
+      blurb:'Machine learning is the leap from describing the past to predicting the future — and the core of every data-scientist role. Learn the workflow, the models, and how to ship them, without the maths overwhelm.',
+      hours:'~50–65 hrs', outcome:'Frame a problem, build & evaluate models in scikit-learn, and explain the results.',
+      tracks:[
+        { name:'ML Foundations', summary:'The concepts and workflow behind every model.',
+          sections:[
+            { name:'Core concepts', topics:['What machine learning is (vs rule-based code)','Supervised vs unsupervised vs reinforcement','Features, labels & the train/test split','Overfitting, underfitting & the bias–variance tradeoff','The end-to-end ML workflow'] },
+            { name:'Preparing data', topics:['Cleaning & handling missing values','Encoding categorical variables','Feature scaling (normalise vs standardise)','Feature engineering & selection','Cross-validation'] },
+            { name:'Evaluating models', topics:['Regression metrics (MAE, RMSE, R²)','Classification metrics (accuracy, precision, recall, F1)','Confusion matrix & ROC-AUC','Choosing the right metric for the problem'] }
+          ] },
+        { name:'Algorithms & Applied ML', summary:'The models you’ll actually use on the job.',
+          sections:[
+            { name:'Supervised models', topics:['Linear & logistic regression',{t:'Tree-based models',sub:['Decision trees','Random forests','Gradient boosting (XGBoost, LightGBM)']},'k-Nearest Neighbours','Support Vector Machines','Naive Bayes'] },
+            { name:'Unsupervised models', topics:['k-Means clustering','Hierarchical clustering','PCA & dimensionality reduction','Anomaly detection basics'] },
+            { name:'Doing ML in Python', topics:['scikit-learn: fit / predict / score','Pipelines & preprocessing','Hyperparameter tuning (grid & random search)','Saving & loading models'] },
+            { name:'Toward production', topics:['Intro to neural networks & deep learning','Avoiding data leakage','Model drift & monitoring (concept)','Explaining model results to stakeholders'] }
+          ] }
+      ] },
+    genai: {
+      name:'Gen AI', icon:'✨', color:'#f01920',
+      tagline:'The skill every data pro now needs',
+      blurb:'Generative AI has changed how every data role works. Start from “what is an LLM and an API” and build up to RAG, agents, and using AI safely in real data workflows — no ML background required.',
+      hours:'~20–30 hrs', outcome:'Understand LLMs, prompt them well, and build grounded AI workflows for data tasks.',
+      tracks:[
+        { name:'Gen AI Foundations', summary:'What everyone in data should understand now.',
+          sections:[
+            { name:'The basics', topics:['What Generative AI is (vs traditional ML)','What an LLM (Large Language Model) is','Tokens, context windows & how models “read” text','What an API is & how an app calls an LLM','Models & providers (GPT, Claude, Gemini, open models)','Cost, latency & rate limits — the practical trade-offs'] },
+            { name:'Prompting well', topics:['Anatomy of a strong prompt','Zero-shot, few-shot & role prompting','System vs user messages','Structured output (JSON) & formatting','Reducing hallucinations — grounding & constraints','Iterating & evaluating prompts'] }
+          ] },
+        { name:'Building with Gen AI', summary:'From chatbot to real data workflows.',
+          sections:[
+            { name:'Core building blocks', topics:['Embeddings & vector search (what & why)',{t:'Retrieval-Augmented Generation (RAG)',sub:['Chunking & indexing your documents','Retrieve → augment → generate']},'Function / tool calling','Agents & multi-step workflows (intro)'] },
+            { name:'Gen AI for data roles', topics:['Writing SQL & Python with AI assistance','Summarising & extracting from documents','Exploring & cleaning data with LLMs','“Chat with your data” tools (concept)'] },
+            { name:'Use it responsibly', topics:['Data privacy — what not to paste into public tools','Bias, accuracy & verifying outputs','Prompt injection & basic safety','Keeping a human in the loop'] }
+          ] }
+      ] },
+    cloud: {
+      name:'Cloud', icon:'☁️', color:'#f01920',
+      tagline:'A must for data engineering',
+      blurb:'Modern data runs on the cloud. This path takes you from “what is the cloud” to the storage, compute and data-platform services data engineers are hired for — vendor-agnostic, with AWS/Azure/GCP mapped along the way.',
+      hours:'~35–45 hrs', outcome:'Understand cloud building blocks and stand up a basic cloud data pipeline.',
+      tracks:[
+        { name:'Cloud Foundations', summary:'The backbone of every modern data stack.',
+          sections:[
+            { name:'Cloud basics', topics:['What “the cloud” actually is','IaaS vs PaaS vs SaaS','The big three (AWS, Azure, GCP) at a glance','Regions, zones & the shared-responsibility model','Cost basics & free tiers'] },
+            { name:'Core building blocks', topics:['Compute (VMs & serverless functions)','Object storage (S3 / Blob / GCS)','Managed databases (SQL & NoSQL)','Identity & access (IAM, roles, least privilege)','Networking basics (VPC, security groups)'] }
+          ] },
+        { name:'Cloud for Data & Engineering', summary:'What data engineers are actually hired for.',
+          sections:[
+            { name:'Data platforms', topics:['Cloud data warehouses (BigQuery, Redshift, Snowflake)','Data lakes & lakehouses','Managed ETL / ELT services','Orchestration (Airflow / managed schedulers)'] },
+            { name:'Pipelines & practice', topics:[{t:'Building a data pipeline',sub:['Ingest → store → transform → serve','Batch vs streaming']},'Infrastructure as Code (Terraform basics)','Containers & Docker (intro)','CI/CD for data (concept)'] },
+            { name:'Run it well', topics:['Monitoring & logging','Cost optimisation for data workloads','Security & compliance basics','Choosing the right service for the job'] }
+          ] }
       ] }
     };
-  var SKILL_ORDER = ['sql','python','excel','powerbi','stats'];
+  var SKILL_ORDER = ['sql','python','excel','powerbi','stats','ml','genai','cloud'];
 
   /* clean, cohesive monochrome icons (inherit currentColor) */
   var S0='<svg class="rm-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">';
@@ -124,6 +180,9 @@
     excel: S0+'<rect x="4" y="4" width="16" height="16" rx="2.4"/><path d="M4 9.4h16M4 14.6h16M9.4 4v16M14.6 4v16"/></svg>',
     powerbi: S0+'<path d="M3.5 20.5h17"/><rect x="5" y="12" width="3.1" height="6" rx="1"/><rect x="10.45" y="8" width="3.1" height="10" rx="1"/><rect x="15.9" y="4.5" width="3.1" height="13.5" rx="1"/></svg>',
     stats: S0+'<path d="M3 19.5h18"/><path d="M3.5 19.5C7.2 19.5 8 6.5 12 6.5s4.8 13 8.5 13"/><circle cx="12" cy="6.5" r="1.1" fill="currentColor" stroke="none"/></svg>',
+    ml: S0+'<rect x="7" y="7" width="10" height="10" rx="1.6"/><rect x="10" y="10" width="4" height="4" rx="1"/><path d="M10 7V4.5M14 7V4.5M10 19.5V17M14 19.5V17M7 10H4.5M7 14H4.5M19.5 10H17M19.5 14H17"/></svg>',
+    genai: '<svg class="rm-svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.3C12.6 8 13.2 8.6 17.7 9.2 13.2 9.8 12.6 10.4 12 15.1 11.4 10.4 10.8 9.8 6.3 9.2 10.8 8.6 11.4 8 12 3.3Z"/><path d="M18.2 13.8c.22 1.6.4 1.78 2 2-1.6.22-1.78.4-2 2-.22-1.6-.4-1.78-2-2 1.6-.22 1.78-.4 2-2Z"/></svg>',
+    cloud: S0+'<path d="M17.5 10.3h-1.2A6 6 0 1 0 8 19.5h9.5a4.6 4.6 0 0 0 0-9.2Z"/></svg>',
     soon: S0+'<path d="M12 5v14M5 12h14"/></svg>'
   };
   var IC_DL   = '<svg class="rm-bic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4.2-4.2M12 15l4.2-4.2M4 20h16"/></svg>';
@@ -132,14 +191,14 @@
 
   /* role-based personalisation: recommended skills (in priority order) */
   var RECO = {
-    'Data Analyst':['sql','excel','powerbi','stats'],
-    'Business Analyst':['excel','sql','powerbi','stats'],
-    'Product Analyst':['sql','stats','python','excel'],
-    'Marketing Analyst':['excel','sql','powerbi'],
-    'Data Scientist':['python','stats','sql'],
-    'Data Engineer':['sql','python'],
-    'Analytics Engineer':['sql','python','powerbi'],
-    'BI / MIS Analyst':['powerbi','excel','sql']
+    'Data Analyst':['sql','excel','powerbi','stats','genai'],
+    'Business Analyst':['excel','sql','powerbi','stats','genai'],
+    'Product Analyst':['sql','stats','python','genai'],
+    'Marketing Analyst':['excel','sql','powerbi','genai'],
+    'Data Scientist':['python','stats','ml','sql','genai'],
+    'Data Engineer':['sql','python','cloud','genai'],
+    'Analytics Engineer':['sql','python','cloud','powerbi','genai'],
+    'BI / MIS Analyst':['powerbi','excel','sql','genai']
   };
   var currentRole = ''; try{ currentRole = localStorage.getItem('rm_role')||''; }catch(_){ }
 
@@ -206,7 +265,7 @@
         '<p class="rm-card-tag">'+esc(s.tagline)+'</p>'+
         '<div class="rm-card-meta"><span>'+total+' topics</span><span>•</span><span>'+esc(s.hours)+'</span></div>'+
       '</button>';
-    }).join('') + '<div class="rm-card rm-card-soon"><div class="rm-card-top"><span class="rm-ic">'+IC.soon+'</span></div><h3>More roadmaps</h3><p class="rm-card-tag">Tableau, Machine Learning, Cloud &amp; more — curated next.</p><div class="rm-card-meta"><span>Coming soon</span></div></div>';
+    }).join('') + '<div class="rm-card rm-card-soon"><div class="rm-card-top"><span class="rm-ic">'+IC.soon+'</span></div><h3>More roadmaps</h3><p class="rm-card-tag">Tableau, Deep Learning, MLOps, Git &amp; more — curated next.</p><div class="rm-card-meta"><span>Coming soon</span></div></div>';
   }
 
   /* ===================== render: one skill ===================== */
