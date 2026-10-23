@@ -397,17 +397,18 @@
     <div class="hero-visual">
 <!-- ===== HERO STORY v2 (isolated · prefix aw-hs-) ===== -->
       <div class="aw-hp" id="awHp" data-scene="0" role="img" aria-label="From learning data skills, to getting certified, to getting placed with an offer">
+        <div class="aw-hp-cap" aria-hidden="true">
+          <span class="aw-hp-cap-t on" data-cap="0"><i>01</i> Learn the skills</span>
+          <span class="aw-hp-cap-t" data-cap="1"><i>02</i> Get certified</span>
+          <span class="aw-hp-cap-t" data-cap="2"><i>03</i> Get placed</span>
+        </div>
         <div class="aw-hp-stage">
           <div class="aw-hp-glow"></div>
+          <div class="aw-hp-confetti" aria-hidden="true"></div>
           <div class="aw-hp-img" data-phase="0"><div class="aw-hp-bob"><img src="/images/hero-learn.webp" alt="Learning data skills on a laptop" draggable="false"></div></div>
           <div class="aw-hp-img" data-phase="1"><div class="aw-hp-bob"><img src="/images/hero-certified.webp" alt="Earning the Analyst World certificate" draggable="false"></div></div>
           <div class="aw-hp-img" data-phase="2"><div class="aw-hp-bob"><img src="/images/hero-placed.webp" alt="Getting placed with an offer letter in hand" draggable="false"></div></div>
           <div class="aw-hp-sweep" aria-hidden="true"></div>
-          <div class="aw-hp-cap" aria-hidden="true">
-            <span class="aw-hp-cap-t on" data-cap="0"><i>01</i> Learn the skills</span>
-            <span class="aw-hp-cap-t" data-cap="1"><i>02</i> Get certified</span>
-            <span class="aw-hp-cap-t" data-cap="2"><i>03</i> Get placed</span>
-          </div>
         </div>
         <div class="aw-hs-steps" aria-hidden="true">
           <div class="aw-hs-steps-track"><div class="aw-hs-steps-fill"></div></div>
@@ -420,16 +421,25 @@
       (function(){
         var hp=document.getElementById("awHp"); if(!hp) return;
         var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion:reduce)").matches;
-        var steps=hp.querySelectorAll(".aw-hs-step"), fill=hp.querySelector(".aw-hs-steps-fill"), sweep=hp.querySelector(".aw-hp-sweep"), caps=hp.querySelectorAll(".aw-hp-cap-t");
-        var i=0, N=3;
+        var steps=hp.querySelectorAll(".aw-hs-step"), fill=hp.querySelector(".aw-hs-steps-fill"), sweep=hp.querySelector(".aw-hp-sweep"), caps=hp.querySelectorAll(".aw-hp-cap-t"), conf=hp.querySelector(".aw-hp-confetti");
+        var i=0, N=3, ct, COLS=["#1fe3a8","#00c896","#ffc83d","#ffffff","#8b7bff","#ff7aa2"];
+        function burst(){ if(!conf||reduce) return; conf.innerHTML=""; var frag=document.createDocumentFragment();
+          for(var p=0;p<46;p++){ var el=document.createElement("i");
+            var tx=(Math.random()*2-1)*(120+Math.random()*180), ty=-(80+Math.random()*180), dur=1.5+Math.random()*1.4, delay=Math.random()*0.28, rot=Math.random()*360, w=7+Math.random()*7;
+            el.style.cssText="--tx:"+tx.toFixed(0)+"px;--ty:"+ty.toFixed(0)+"px;--dur:"+dur.toFixed(2)+"s;--delay:"+delay.toFixed(2)+"s;--rot:"+rot.toFixed(0)+"deg;--w:"+w.toFixed(1)+"px;--h:"+(w*0.6).toFixed(1)+"px;background:"+COLS[p%COLS.length];
+            frag.appendChild(el); }
+          conf.appendChild(frag); clearTimeout(ct); ct=setTimeout(function(){ if(conf) conf.innerHTML=""; }, 3200);
+        }
+        function clearC(){ if(conf){ clearTimeout(ct); conf.innerHTML=""; } }
         function go(n){ i=((n%N)+N)%N;
           if(sweep&&!reduce){ sweep.classList.remove("go"); void sweep.offsetWidth; sweep.classList.add("go"); }
           hp.setAttribute("data-scene", i);
           for(var k=0;k<steps.length;k++){ steps[k].classList.toggle("on",k<=i); steps[k].classList.toggle("cur",k===i); }
           for(var c=0;c<caps.length;c++){ caps[c].classList.toggle("on",c===i); }
           if(fill) fill.style.width=(i/(N-1)*100)+"%";
+          if(i===2) setTimeout(burst,260); else clearC();
         }
-        go(0); setInterval(function(){ go(i+1); }, 3400);
+        go(0); setInterval(function(){ go(i+1); }, 3600);
         if(reduce) return;
         var tx=0,ty=0,cx=0,cy=0,raf=null;
         function loop(){ if(raf) return; raf=requestAnimationFrame(function(){ raf=null;

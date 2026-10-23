@@ -2983,3 +2983,35 @@ details[open] .cert-req-sent-summary::before { content: "▼ "; }
 @media (max-width:560px){ .aw-hp{max-width:360px;gap:24px} .aw-hp-stage{max-width:320px} .aw-hp-cap-t{font-size:12px} }
 /* keep the hero character clear of the headline at tight desktop widths */
 @media (max-width:1180px){ .hero-visual{right:24px;width:400px} .aw-hp{max-width:380px} .aw-hp-stage{max-width:340px} .aw-hp-cap-t{font-size:12.5px} }
+
+/* ===================================================================
+   HERO PHASES v3.1 — caption as clean top row, no overlap, confetti pop
+   =================================================================== */
+.aw-hp{gap:14px}
+/* caption: out of the stage, its own centered row (no overlap on the character) */
+.aw-hp-cap{position:static;top:auto;left:auto;transform:none;z-index:auto;display:grid;justify-items:center;min-height:40px}
+.aw-hp-cap-t{position:relative;transform:translateY(-7px) scale(.95)}
+.aw-hp-cap-t.on{transform:none}
+/* character: padded so it floats clear of caption (above) and stepper (below) */
+.aw-hp-stage{aspect-ratio:1.06/1}
+.aw-hp-img img{width:88%;height:88%;margin:auto}
+/* celebration confetti (Placed phase only) */
+.aw-hp-confetti{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:visible}
+.aw-hp-confetti i{position:absolute;left:50%;top:30%;width:var(--w,7px);height:var(--h,4px);border-radius:1.5px;opacity:0;will-change:transform,opacity;
+  animation:awHpPop var(--dur,1.8s) cubic-bezier(.26,.7,.45,1) var(--delay,0s) forwards}
+@keyframes awHpPop{
+  0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--rot)) scale(.4)}
+  12%{opacity:1}
+  38%{transform:translate(calc(-50% + var(--tx)*.55), calc(-50% + var(--ty))) rotate(calc(var(--rot) + 150deg)) scale(1)}
+  100%{opacity:0;transform:translate(calc(-50% + var(--tx)), calc(-50% + 200px)) rotate(calc(var(--rot) + 430deg)) scale(.9)}
+}
+/* stepper picks up the gold accent on the final (Placed) phase, in sync with the caption */
+.aw-hp[data-scene="2"] .aw-hs-steps-fill{background:linear-gradient(90deg,#0fb488,#1fe3a8 55%,#ffc83d)}
+.aw-hp[data-scene="2"] .aw-hs-step:nth-child(4) .node{background:#ffc83d}
+.aw-hp[data-scene="2"] .aw-hs-step.cur .node{box-shadow:0 0 0 5px rgba(255,200,61,.18)}
+@media (prefers-reduced-motion:reduce){ .aw-hp-confetti{display:none} }
+@media (max-width:560px){ .aw-hp-img img{width:90%;height:90%} }
+/* confetti polish: a little glow + shape variety */
+.aw-hp-confetti i{box-shadow:0 1px 5px rgba(0,0,0,.22)}
+.aw-hp-confetti i:nth-child(3n){border-radius:50%}
+.aw-hp-confetti i:nth-child(4n){height:var(--w,8px)}
