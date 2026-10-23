@@ -3015,3 +3015,24 @@ details[open] .cert-req-sent-summary::before { content: "▼ "; }
 .aw-hp-confetti i{box-shadow:0 1px 5px rgba(0,0,0,.22)}
 .aw-hp-confetti i:nth-child(3n){border-radius:50%}
 .aw-hp-confetti i:nth-child(4n){height:var(--w,8px)}
+
+/* ===================================================================
+   HERO ROLE ROTATOR — "crack roles like [role]" with yellow highlighter
+   =================================================================== */
+.hero-roleline{display:flex;flex-wrap:wrap;align-items:center;gap:8px 11px;margin-top:48px;padding-top:34px;border-top:1px solid var(--border);
+  font-family:var(--display);font-size:clamp(15.5px,1.55vw,19px);font-weight:600;color:var(--muted);max-width:580px;line-height:1.5}
+.hrl-pre{color:var(--muted)}
+[data-theme="light"] .hero-roleline{color:#4b5563}
+.rr{position:relative;display:inline-flex;align-items:center;height:1.62em;overflow:hidden;vertical-align:middle;
+  transition:width .42s cubic-bezier(.4,.85,.3,1)}
+.rr-hl{position:absolute;inset:0;z-index:0;border-radius:8px;transform:rotate(-1.3deg);
+  background:linear-gradient(180deg,#ffe066,#ffd21f);box-shadow:0 5px 16px rgba(255,201,30,.38)}
+.rr.sweep .rr-hl{animation:rrPulse .5s ease}
+@keyframes rrPulse{0%{filter:brightness(1.2) saturate(1.1)}100%{filter:brightness(1)}}
+.rr-word{position:relative;z-index:1;white-space:nowrap;padding:1px 12px;font-weight:800;color:#141414;letter-spacing:-.01em}
+.rr-word.out{animation:rrOut .3s cubic-bezier(.5,0,.75,.2) forwards}
+.rr-word.in{animation:rrIn .5s cubic-bezier(.18,.9,.3,1)}
+@keyframes rrOut{to{transform:translateY(-120%);opacity:0}}
+@keyframes rrIn{from{transform:translateY(120%);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){ .rr{transition:none} .rr-word.out,.rr-word.in,.rr.sweep .rr-hl{animation:none} }
+@media (max-width:560px){ .hero-roleline{margin-top:36px;padding-top:26px} }

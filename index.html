@@ -383,13 +383,37 @@
         </div>
       </div>
 
-      <!-- ── STATS ROW — always visible ── -->
-      <div class="hero-stats fade-up fade-up-5" id="heroStats">
-        <div><div class="hero-stat-num">60</div><div class="hero-stat-label">Questions</div></div>
-        <div><div class="hero-stat-num">16</div><div class="hero-stat-label">Topics</div></div>
-        <div><div class="hero-stat-num">100%</div><div class="hero-stat-label">Free forever</div></div>
-        <div><div class="hero-stat-num">🎓</div><div class="hero-stat-label">Certificate</div></div>
+      <!-- ── ROLE ROTATOR — always visible ── -->
+      <div class="hero-roleline fade-up fade-up-5" id="heroStats">
+        <span class="hrl-pre">Using Analyst&nbsp;World to crack roles like</span>
+        <span class="rr" id="roleRotator"><span class="rr-hl" aria-hidden="true"></span><span class="rr-word">Analytics Engineer</span></span>
       </div>
+      <script>
+      (function(){
+        var rr=document.getElementById("roleRotator"); if(!rr) return;
+        var word=rr.querySelector(".rr-word");
+        var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+        var roles=["Analytics Engineer","Data Analyst","Data Engineer","Business Analyst","Data Scientist","Marketing Analyst","Product Analyst"];
+        var meas=document.createElement("span"); meas.className="rr-word"; meas.style.cssText="position:absolute;left:-9999px;top:0;visibility:hidden;white-space:nowrap"; rr.appendChild(meas);
+        function wid(t){ meas.textContent=t; return Math.ceil(meas.getBoundingClientRect().width); }
+        function setW(t){ rr.style.width=wid(t)+"px"; }
+        var i=0; word.textContent=roles[0]; setW(roles[0]);
+        window.addEventListener("resize", function(){ setW(roles[i]); });
+        if(reduce) return;
+        function tick(){
+          var ni=(i+1)%roles.length, next=roles[ni];
+          word.classList.remove("in"); word.classList.add("out"); setW(next);
+          setTimeout(function(){
+            i=ni; word.textContent=next;
+            word.classList.remove("out");
+            rr.classList.remove("sweep"); void rr.offsetWidth; rr.classList.add("sweep");
+            void word.offsetWidth; word.classList.add("in");
+            setTimeout(function(){ word.classList.remove("in"); }, 520);
+          }, 300);
+        }
+        setInterval(tick, 2300);
+      })();
+      </script>
 
     </div>
 
