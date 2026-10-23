@@ -2944,3 +2944,42 @@ details[open] .cert-req-sent-summary::before { content: "▼ "; }
   .aw-hs-s2,.aw-hs-s3{transform:none}
 }
 @media(max-width:560px){ .aw-hs{max-width:340px} }
+
+/* ===================================================================
+   HERO PHASES v3 — real 3D character sequence (Learn → Certified → Placed)
+   Replaces the .aw-hs SVG character. Reuses .aw-hs-steps stepper.
+   =================================================================== */
+.aw-hp{position:relative;width:100%;max-width:470px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:30px;perspective:1200px}
+.aw-hp-stage{position:relative;width:100%;max-width:420px;aspect-ratio:1/1;transform-style:preserve-3d;
+  transform:rotateX(calc(var(--my,0)*-3.2deg)) rotateY(calc(var(--mx,0)*4.6deg));transition:transform .25s ease}
+.aw-hp-glow{position:absolute;inset:3% 2% 9% 2%;z-index:0;border-radius:50%;pointer-events:none;filter:blur(3px);
+  background:radial-gradient(46% 42% at 50% 44%, rgba(0,200,150,.22), rgba(0,200,150,.05) 46%, transparent 72%);transition:background .6s ease}
+.aw-hp[data-scene="2"] .aw-hp-glow{background:radial-gradient(46% 42% at 50% 44%, rgba(255,200,61,.22), rgba(0,200,150,.05) 46%, transparent 72%)}
+.aw-hp-img{position:absolute;inset:0;z-index:1;display:grid;place-items:center;opacity:0;pointer-events:none;backface-visibility:hidden;
+  transform:rotateY(80deg) scale(.84);transform-origin:center;transition:opacity .5s ease, transform .55s cubic-bezier(.3,.82,.3,1)}
+.aw-hp-img img{width:100%;height:100%;object-fit:contain;-webkit-user-drag:none;filter:drop-shadow(0 24px 30px rgba(0,0,0,.42))}
+.aw-hp[data-scene="0"] .aw-hp-img[data-phase="0"],
+.aw-hp[data-scene="1"] .aw-hp-img[data-phase="1"],
+.aw-hp[data-scene="2"] .aw-hp-img[data-phase="2"]{opacity:1;transform:rotateY(0) scale(1)}
+.aw-hp-bob{width:100%;height:100%;display:grid;place-items:center;animation:awHpBob 4.4s ease-in-out infinite}
+@keyframes awHpBob{0%,100%{transform:translateY(-1.8%) rotate(-1deg)}50%{transform:translateY(3%) rotate(1deg)}}
+/* light sweep on each phase change */
+.aw-hp-sweep{position:absolute;top:-8%;bottom:-8%;left:102%;width:46%;z-index:3;pointer-events:none;opacity:0;transform:skewX(-14deg);mix-blend-mode:screen;filter:blur(2px);
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.06) 28%,rgba(120,255,214,.5) 48%,rgba(255,255,255,.92) 53%,rgba(120,255,214,.4) 60%,transparent)}
+.aw-hp-sweep.go{animation:awHpSweep .62s cubic-bezier(.4,0,.5,1)}
+@keyframes awHpSweep{0%{opacity:0;left:102%}12%{opacity:1}88%{opacity:1}100%{opacity:0;left:-52%}}
+/* phase caption pill */
+.aw-hp-cap{position:absolute;top:4%;left:50%;transform:translateX(-50%);z-index:4;display:grid}
+.aw-hp-cap-t{grid-area:1/1;display:inline-flex;align-items:center;gap:9px;white-space:nowrap;padding:7px 16px 7px 9px;border-radius:999px;
+  font-size:13.5px;font-weight:700;letter-spacing:.01em;color:#eafff7;background:rgba(8,16,14,.72);border:1px solid rgba(31,227,168,.34);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 12px 28px rgba(0,0,0,.32);
+  opacity:0;transform:translateY(-7px) scale(.95);transition:opacity .45s ease,transform .45s ease;pointer-events:none}
+.aw-hp-cap-t.on{opacity:1;transform:none}
+.aw-hp-cap-t i{font-style:normal;display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#1fe3a8,#0fb488);color:#04140e;font-size:11px;font-weight:800}
+.aw-hp[data-scene="2"] .aw-hp-cap-t.on{border-color:rgba(255,200,61,.42)}
+.aw-hp[data-scene="2"] .aw-hp-cap-t.on i{background:linear-gradient(135deg,#ffd467,#f0a92a)}
+[data-theme="light"] .aw-hp-cap-t{color:#0e3b2f;background:rgba(255,255,255,.84);border-color:rgba(15,180,136,.3);box-shadow:0 12px 28px rgba(16,40,30,.12)}
+@media (prefers-reduced-motion:reduce){ .aw-hp-bob{animation:none} .aw-hp-img{transition:opacity .5s ease;transform:none!important} .aw-hp-stage{transform:none!important} .aw-hp-sweep{display:none} }
+@media (max-width:560px){ .aw-hp{max-width:360px;gap:24px} .aw-hp-stage{max-width:320px} .aw-hp-cap-t{font-size:12px} }
+/* keep the hero character clear of the headline at tight desktop widths */
+@media (max-width:1180px){ .hero-visual{right:24px;width:400px} .aw-hp{max-width:380px} .aw-hp-stage{max-width:340px} .aw-hp-cap-t{font-size:12.5px} }
