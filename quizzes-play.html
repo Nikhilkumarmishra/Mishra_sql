@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Join a quiz — AnalystWorld Quizz</title>
+<meta name="description" content="Join a live AnalystWorld Quizz game with your game PIN."/>
+<meta name="robots" content="noindex"/>
+<link rel="icon" type="image/x-icon" href="/favicon.ico"/>
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Clash+Display:wght@500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/quizzes.css"/>
+</head>
+<body>
+
+<header class="q-top">
+  <div class="q-top-inner">
+    <a class="q-logo" href="/quizzes">
+      <span class="q-logo-mark">Q</span>
+      <span class="q-logo-txt">AnalystWorld<b>&nbsp;Quizz</b></span>
+    </a>
+    <div class="q-top-spacer"></div>
+    <button class="q-btn-icon" id="qThemeToggle" title="Toggle theme" aria-label="Toggle light / dark">◐</button>
+  </div>
+</header>
+
+<main class="q-wrap">
+  <section class="q-screen is-active" style="max-width:440px;margin:0 auto">
+    <div class="q-hero" style="padding:48px 0 22px">
+      <span class="q-pill"><span class="q-pill-dot"></span> Join a live game</span>
+      <h1 style="font-size:clamp(32px,7vw,44px)">You're nearly in</h1>
+      <p>Enter your game PIN and pick a nickname.</p>
+    </div>
+
+    <div class="q-card" style="padding:26px">
+      <label class="q-field">
+        <span class="q-label">Game PIN</span>
+        <input class="q-input mono" id="pin" inputmode="numeric" maxlength="6" placeholder="------"
+               style="letter-spacing:.3em;font-size:22px;text-align:center;font-weight:700"/>
+      </label>
+      <label class="q-field">
+        <span class="q-label">Nickname</span>
+        <input class="q-input" id="nick" maxlength="24" placeholder="e.g. DataNinja"/>
+      </label>
+      <div class="q-err-msg" id="playError"></div>
+      <button class="q-btn q-btn-primary q-btn-block q-btn-lg" id="joinBtn">Join game</button>
+    </div>
+
+    <div class="q-foot">Part of <a href="/">AnalystWorld</a> · <a href="/quizzes">Host a quiz</a></div>
+  </section>
+</main>
+
+<div class="q-toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+  // Phase B placeholder. The live participant engine (PIN validation, lobby,
+  // synced questions, scoring) is wired in Phases D–E. For now we prefill the
+  // PIN from the welcome screen and keep theme + layout consistent.
+  (function () {
+    function $(id){ return document.getElementById(id); }
+    try {
+      var saved = localStorage.getItem('quizz_theme');
+      if (saved === 'dark' || saved === 'light') document.documentElement.setAttribute('data-theme', saved);
+    } catch (e) {}
+    $('qThemeToggle').addEventListener('click', function () {
+      var cur = document.documentElement.getAttribute('data-theme')
+        || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      var next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('quizz_theme', next); } catch (e) {}
+    });
+    var params = new URLSearchParams(window.location.search);
+    var pin = (params.get('pin') || '').replace(/\D/g, '').slice(0, 6);
+    if (pin) $('pin').value = pin;
+    $('pin').addEventListener('input', function () { this.value = this.value.replace(/\D/g,'').slice(0,6); });
+    $('joinBtn').addEventListener('click', function () {
+      var err = $('playError'); err.textContent = '';
+      var p = ($('pin').value||'').replace(/\D/g,'');
+      var n = ($('nick').value||'').trim();
+      if (p.length !== 6) { err.textContent = 'Enter the 6-digit game PIN.'; return; }
+      if (!n) { err.textContent = 'Pick a nickname.'; return; }
+      err.textContent = 'Live games open in the next build — hang tight! 🎮';
+    });
+  })();
+</script>
+</body>
+</html>
