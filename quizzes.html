@@ -163,6 +163,51 @@ Time: 20"></textarea>
     <div class="q-foot">Part of <a href="/">AnalystWorld</a> · <a href="/">Back to main site</a></div>
   </section>
 
+  <!-- ── HOST LOBBY ────────────────────────────────────────────── -->
+  <section class="q-screen" id="screen-lobby">
+    <div class="q-studio-bar">
+      <button class="q-btn q-btn-ghost" id="lobbyEnd">✕ End game</button>
+      <span class="q-tag q-tag-published" id="lobbyTitle" style="visibility:hidden"></span>
+      <div class="q-top-spacer"></div>
+      <button class="q-btn q-btn-primary" id="lobbyStart" disabled>Start game</button>
+    </div>
+
+    <!-- lobby (waiting for players) -->
+    <div id="lobbyWaiting">
+      <div class="q-lobby-join q-card">
+        <div class="q-lobby-join-txt">
+          <div class="q-lobby-step">1 · On your phone, go to</div>
+          <div class="q-lobby-url" id="lobbyUrl">analystworld.in/quizzes</div>
+          <div class="q-lobby-step" style="margin-top:18px">2 · Enter the game PIN</div>
+          <div class="q-lobby-pin" id="lobbyPin">------</div>
+          <button class="q-btn q-btn-ghost" id="lobbyCopy">🔗 Copy join link</button>
+        </div>
+        <div class="q-lobby-qr">
+          <div id="lobbyQr"></div>
+          <span class="q-lobby-qr-cap">Scan to join</span>
+        </div>
+      </div>
+
+      <div class="q-lobby-players">
+        <div class="q-section-head">
+          <h2>Players <span class="q-count-chip" id="lobbyCount">0</span></h2>
+          <span class="q-hint" id="lobbyHint">Waiting for players to join…</span>
+        </div>
+        <div class="q-players-grid" id="playersGrid"></div>
+      </div>
+    </div>
+
+    <!-- live placeholder (Phase E builds the real host question view here) -->
+    <div id="lobbyLive" class="q-hidden">
+      <div class="q-card" style="text-align:center;padding:48px 24px">
+        <div class="q-empty-ico">📺</div>
+        <h2 id="liveHeading">Question 1 is live</h2>
+        <p class="q-hint" id="liveSub">Students are answering on their phones. The full projector view &amp; scoring arrive in the next build.</p>
+        <div style="margin-top:20px"><button class="q-btn q-btn-ghost" id="liveEnd">End game</button></div>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <!-- ── PREVIEW (as participant) ─────────────────────────────────── -->
@@ -222,8 +267,9 @@ Time: 20"></textarea>
 
 <div class="q-toasts" id="toasts" aria-live="polite"></div>
 
-<!-- supabase-js loaded ONLY here (never on the existing production pages) -->
+<!-- supabase-js + QR loaded ONLY here (never on the existing production pages) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="/quizzes.js"></script>
 </body>
 </html>

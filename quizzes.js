@@ -267,6 +267,7 @@
           '<div class="q-quiz-meta"><span>' + (q.question_count || 0) + ' question' + (q.question_count === 1 ? '' : 's') + '</span>' +
             (q.games_count ? '<span>· ' + q.games_count + ' game' + (q.games_count === 1 ? '' : 's') + '</span>' : '') + '</div>' +
           '<div class="q-qcard-foot" style="margin-top:14px">' +
+            (q.question_count ? '<button class="q-btn q-btn-primary q-host" data-id="' + esc(q.id) + '">▶ Host</button>' : '') +
             '<button class="q-btn q-btn-ghost q-edit" data-id="' + esc(q.id) + '">Edit</button>' +
             '<button class="q-btn q-btn-ghost q-del" data-id="' + esc(q.id) + '" title="Delete quiz">🗑</button>' +
           '</div>' +
@@ -277,7 +278,7 @@
     // wire
     Array.prototype.forEach.call(body.querySelectorAll('.q-quiz-card'), function (card) {
       card.addEventListener('click', function (e) {
-        if (e.target.closest('.q-del') || e.target.closest('.q-edit')) return;
+        if (e.target.closest('.q-del') || e.target.closest('.q-edit') || e.target.closest('.q-host')) return;
         openStudio(card.getAttribute('data-id'));
       });
     });
@@ -286,6 +287,9 @@
     });
     Array.prototype.forEach.call(body.querySelectorAll('.q-del'), function (b) {
       b.addEventListener('click', function () { deleteQuiz(b.getAttribute('data-id')); });
+    });
+    Array.prototype.forEach.call(body.querySelectorAll('.q-host'), function (b) {
+      b.addEventListener('click', function () { hostQuiz(b.getAttribute('data-id')); });
     });
   }
 
@@ -518,6 +522,146 @@
   }
 
   // =====================================================================
+  //  HOST LOBBY (live session)
+  // =====================================================================
+  var ANS_COLORS = ['#ef4e6b', '#2f86ff', '#f5a524', '#2fd27a', '#7c5cff', '#00c896', '#ff8a3d', '#12b5cb'];
+  function avatarColor(name) {
+    var h = 0; name = name || '?';
+    for (var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+    return ANS_COLORS[h % ANS_COLORS.length];
+  }
+
+  var lobby = { sessionId: null, pin: null, channel: null, debounce: null };
+
+  async function hostQuiz(quizId) {
+    try {
+      var info = await rpc('quiz_start_session', { p_quiz_id: quizId });
+      openLobby(info);
+    } catch (e) { toast(e.message, 'err'); }
+  }
+
+  function openLobby(info) {
+    lobby.sessionId = info.session_id;
+    lobby.pin = info.pin;
+    goScreen('lobby');
+    show($('lobbyWaiting'), true); show($('lobbyLive'), false);
+    var titleChip = $('lobbyTitle');
+    titleChip.style.visibility = 'visible'; titleChip.textContent = info.title || 'Live game';
+    $('lobbyPin').textContent = info.pin;
+    var joinUrl = window.location.origin + '/quizzes/join?pin=' + info.pin;
+    lobby.joinUrl = joinUrl;
+    var host = window.location.host.replace(/^www\./, '');
+    $('lobbyUrl').textContent = host + '/quizzes';
+    renderQr(joinUrl);
+    $('lobbyStart').disabled = true;
+    $('playersGrid').innerHTML = '<div class="q-lobby-empty">No players yet — share the PIN above.</div>';
+    $('lobbyCount').textContent = '0';
+    subscribeLobby();
+    loadLobby();
+  }
+
+  function renderQr(url) {
+    var el = $('lobbyQr'); el.innerHTML = '';
+    if (window.QRCode) {
+      try { new window.QRCode(el, { text: url, width: 168, height: 168,
+        colorDark: '#16131f', colorLight: '#ffffff', correctLevel: window.QRCode.CorrectLevel.M }); return; }
+      catch (e) { /* fall through */ }
+    }
+    el.innerHTML = '<div style="padding:20px;color:#888;font-size:12px">QR unavailable</div>';
+  }
+
+  async function loadLobby() {
+    if (!lobby.sessionId) return;
+    try {
+      var data = await rpc('quiz_lobby', { p_session_id: lobby.sessionId });
+      var s = data.session;
+      if (s.state === 'COMPLETED') { leaveLobby(); goScreen('dashboard'); loadDashboard(); return; }
+      if (s.state === 'LOBBY') {
+        show($('lobbyWaiting'), true); show($('lobbyLive'), false);
+        renderPlayers(data.participants || []);
+        $('lobbyCount').textContent = (data.participants || []).length;
+        $('lobbyStart').disabled = (data.participants || []).length < 1;
+        $('lobbyHint').textContent = (data.participants || []).length
+          ? 'Players are in — start when ready.' : 'Waiting for players to join…';
+      } else {
+        showLive(s);
+      }
+    } catch (e) { /* transient; realtime will re-trigger */ }
+  }
+
+  function renderPlayers(list) {
+    var grid = $('playersGrid');
+    if (!list.length) { grid.innerHTML = '<div class="q-lobby-empty">No players yet — share the PIN above.</div>'; return; }
+    grid.innerHTML = list.map(function (p) {
+      var c = avatarColor(p.name);
+      return '<div class="q-player-chip" data-pid="' + esc(p.id) + '">' +
+        '<span class="q-player-ava" style="background:' + c + '">' + esc((p.name[0] || '?').toUpperCase()) + '</span>' +
+        '<span class="q-player-name">' + esc(p.name) + '</span>' +
+        '<button class="q-player-kick" title="Remove ' + esc(p.name) + '">✕</button></div>';
+    }).join('');
+    Array.prototype.forEach.call(grid.querySelectorAll('.q-player-chip'), function (chip) {
+      chip.querySelector('.q-player-kick').addEventListener('click', function () {
+        kickPlayer(chip.getAttribute('data-pid'));
+      });
+    });
+  }
+
+  function subscribeLobby() {
+    if (lobby.channel) { try { sb.removeChannel(lobby.channel); } catch (e) {} lobby.channel = null; }
+    var sid = lobby.sessionId;
+    lobby.channel = sb.channel('lobby:' + sid)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'quiz_participants', filter: 'session_id=eq.' + sid }, debouncedLobby)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'quiz_sessions', filter: 'id=eq.' + sid }, function (payload) {
+        var st = payload.new;
+        $('lobbyCount').textContent = st.participant_count;
+        if (st.state === 'LOBBY') debouncedLobby();
+        else if (st.state === 'COMPLETED') { leaveLobby(); goScreen('dashboard'); loadDashboard(); }
+        else showLive(st);
+      })
+      .subscribe();
+  }
+  function debouncedLobby() {
+    if (lobby.debounce) clearTimeout(lobby.debounce);
+    lobby.debounce = setTimeout(loadLobby, 180);
+  }
+
+  async function startGame() {
+    $('lobbyStart').disabled = true;
+    try { var r = await rpc('quiz_start_game', { p_session_id: lobby.sessionId }); showLive(r); }
+    catch (e) { toast(e.message, 'err'); $('lobbyStart').disabled = false; }
+  }
+
+  function showLive(state) {
+    show($('lobbyWaiting'), false); show($('lobbyLive'), true);
+    var cq = (state.current_q != null ? state.current_q : 0) + 1;
+    $('liveHeading').textContent = 'Question ' + cq + ' is live';
+  }
+
+  async function kickPlayer(pid) {
+    try { await rpc('quiz_kick', { p_session_id: lobby.sessionId, p_participant_id: pid }); loadLobby(); }
+    catch (e) { toast(e.message, 'err'); }
+  }
+
+  async function endGame() {
+    if (!window.confirm('End this game for everyone?')) return;
+    try { await rpc('quiz_end_session', { p_session_id: lobby.sessionId }); } catch (e) {}
+    leaveLobby(); toast('Game ended.'); goScreen('dashboard'); loadDashboard();
+  }
+
+  function leaveLobby() {
+    if (lobby.channel) { try { sb.removeChannel(lobby.channel); } catch (e) {} }
+    lobby = { sessionId: null, pin: null, channel: null, debounce: null };
+  }
+
+  function copyJoinLink() {
+    var url = lobby.joinUrl || (window.location.origin + '/quizzes/join?pin=' + lobby.pin);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function () { toast('Join link copied.', 'ok'); })
+        .catch(function () { toast(url); });
+    } else { window.prompt('Copy the join link:', url); }
+  }
+
+  // =====================================================================
   //  PREVIEW (as a participant)
   // =====================================================================
   var pv = { i: 0, revealed: false };
@@ -590,6 +734,12 @@
     $('addQBtn').addEventListener('click', addBlankQuestion);
     $('parseBtn').addEventListener('click', doParse);
     $('pasteSample').addEventListener('click', function () { $('pasteBox').value = SAMPLE; });
+
+    // lobby
+    $('lobbyStart').addEventListener('click', startGame);
+    $('lobbyEnd').addEventListener('click', endGame);
+    $('liveEnd').addEventListener('click', endGame);
+    $('lobbyCopy').addEventListener('click', copyJoinLink);
 
     // preview
     $('pvClose').addEventListener('click', closePreview);

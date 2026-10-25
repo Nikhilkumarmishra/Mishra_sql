@@ -26,64 +26,74 @@
   </div>
 </header>
 
-<main class="q-wrap">
-  <section class="q-screen is-active" style="max-width:440px;margin:0 auto">
-    <div class="q-hero" style="padding:48px 0 22px">
-      <span class="q-pill"><span class="q-pill-dot"></span> Join a live game</span>
-      <h1 style="font-size:clamp(32px,7vw,44px)">You're nearly in</h1>
-      <p>Enter your game PIN and pick a nickname.</p>
-    </div>
+<main class="q-play-wrap">
 
-    <div class="q-card" style="padding:26px">
-      <label class="q-field">
-        <span class="q-label">Game PIN</span>
+  <!-- JOIN -->
+  <section class="q-screen is-active" id="p-join">
+    <div class="q-play-center" style="padding-bottom:10px">
+      <span class="q-pill"><span class="q-pill-dot"></span> Join a live game</span>
+      <h1 class="q-play-big">You're nearly in</h1>
+      <p class="q-hint">Enter your game PIN and pick a nickname.</p>
+    </div>
+    <div class="q-card q-play-card">
+      <label class="q-field"><span class="q-label">Game PIN</span>
         <input class="q-input mono" id="pin" inputmode="numeric" maxlength="6" placeholder="------"
-               style="letter-spacing:.3em;font-size:22px;text-align:center;font-weight:700"/>
-      </label>
-      <label class="q-field">
-        <span class="q-label">Nickname</span>
-        <input class="q-input" id="nick" maxlength="24" placeholder="e.g. DataNinja"/>
-      </label>
-      <div class="q-err-msg" id="playError"></div>
+               style="letter-spacing:.3em;font-size:22px;text-align:center;font-weight:700"/></label>
+      <label class="q-field"><span class="q-label">Nickname</span>
+        <input class="q-input" id="nick" maxlength="24" placeholder="e.g. DataNinja"/></label>
+      <div class="q-err-msg" id="joinError"></div>
       <button class="q-btn q-btn-primary q-btn-block q-btn-lg" id="joinBtn">Join game</button>
     </div>
-
     <div class="q-foot">Part of <a href="/">AnalystWorld</a> · <a href="/quizzes">Host a quiz</a></div>
   </section>
+
+  <!-- LOBBY (waiting) -->
+  <section class="q-screen" id="p-lobby">
+    <div class="q-play-center">
+      <div class="q-play-you"><span class="q-play-dot"></span><span id="youName">—</span></div>
+      <h1 class="q-play-big q-play-pulse">You're in!</h1>
+      <p class="q-hint" id="lobbyTitle2">Waiting for the host to start the game…</p>
+      <div class="q-play-wait-ring"></div>
+      <p class="q-hint"><span id="playerCount">1</span> player<span id="playerCountS"></span> in the room</p>
+    </div>
+    <div class="q-foot"><button class="q-btn q-btn-ghost" id="leaveBtn" style="border:none">Leave game</button></div>
+  </section>
+
+  <!-- LIVE (question active — Phase E builds the real question UI) -->
+  <section class="q-screen" id="p-live">
+    <div class="q-play-center">
+      <div class="q-play-you"><span class="q-play-dot"></span><span id="youName2">—</span></div>
+      <h1 class="q-play-big" id="liveQnum">Question 1</h1>
+      <p class="q-hint">Look up at the screen — answer options arrive here in the next build. 👀</p>
+      <div class="q-play-wait-ring"></div>
+    </div>
+  </section>
+
+  <!-- END -->
+  <section class="q-screen" id="p-end">
+    <div class="q-play-center">
+      <div class="q-empty-ico" style="font-size:48px">🎉</div>
+      <h1 class="q-play-big">Game over</h1>
+      <p class="q-hint">Thanks for playing! Final results &amp; the podium arrive in the next build.</p>
+      <div style="margin-top:20px"><a class="q-btn q-btn-ghost" href="/quizzes/play">Join another</a></div>
+    </div>
+  </section>
+
+  <!-- KICKED -->
+  <section class="q-screen" id="p-kicked">
+    <div class="q-play-center">
+      <div class="q-empty-ico" style="font-size:48px">👋</div>
+      <h1 class="q-play-big">You left the game</h1>
+      <p class="q-hint">The host removed you from this game.</p>
+      <div style="margin-top:20px"><a class="q-btn q-btn-ghost" href="/quizzes/play">Join another</a></div>
+    </div>
+  </section>
+
 </main>
 
 <div class="q-toasts" id="toasts" aria-live="polite"></div>
 
-<script>
-  // Phase B placeholder. The live participant engine (PIN validation, lobby,
-  // synced questions, scoring) is wired in Phases D–E. For now we prefill the
-  // PIN from the welcome screen and keep theme + layout consistent.
-  (function () {
-    function $(id){ return document.getElementById(id); }
-    try {
-      var saved = localStorage.getItem('quizz_theme');
-      if (saved === 'dark' || saved === 'light') document.documentElement.setAttribute('data-theme', saved);
-    } catch (e) {}
-    $('qThemeToggle').addEventListener('click', function () {
-      var cur = document.documentElement.getAttribute('data-theme')
-        || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      var next = cur === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      try { localStorage.setItem('quizz_theme', next); } catch (e) {}
-    });
-    var params = new URLSearchParams(window.location.search);
-    var pin = (params.get('pin') || '').replace(/\D/g, '').slice(0, 6);
-    if (pin) $('pin').value = pin;
-    $('pin').addEventListener('input', function () { this.value = this.value.replace(/\D/g,'').slice(0,6); });
-    $('joinBtn').addEventListener('click', function () {
-      var err = $('playError'); err.textContent = '';
-      var p = ($('pin').value||'').replace(/\D/g,'');
-      var n = ($('nick').value||'').trim();
-      if (p.length !== 6) { err.textContent = 'Enter the 6-digit game PIN.'; return; }
-      if (!n) { err.textContent = 'Pick a nickname.'; return; }
-      err.textContent = 'Live games open in the next build — hang tight! 🎮';
-    });
-  })();
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="/quizzes-play.js"></script>
 </body>
 </html>
