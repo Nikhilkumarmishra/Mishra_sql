@@ -474,6 +474,48 @@ h1,h2,h3 { font-family:var(--display); letter-spacing:-0.02em; margin:0; line-he
 
 @media (max-width:560px){ .q-live-tiles { grid-template-columns:1fr; } }
 
+/* ── podium (host + participant) ────────────────────────────────── */
+.q-podium-wrap { text-align:center; padding:12px 0 4px; }
+.q-podium-title { font-family:var(--display); font-size:clamp(26px,4vw,40px); font-weight:700; margin-bottom:6px; }
+.q-podium-sub { color:var(--muted); font-size:14px; margin-bottom:24px; }
+.q-podium { display:flex; align-items:flex-end; justify-content:center; gap:14px; max-width:620px; margin:0 auto; min-height:260px; }
+.q-pod { flex:1; max-width:170px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+  opacity:0; transform:translateY(24px); transition:opacity .5s ease, transform .5s cubic-bezier(.2,.9,.3,1.2); }
+.q-pod.revealed { opacity:1; transform:none; }
+.q-pod-ava { width:56px; height:56px; border-radius:50%; display:grid; place-items:center; color:#fff;
+  font-family:var(--display); font-weight:700; font-size:22px; margin-bottom:8px; box-shadow:var(--shadow); }
+.q-pod-medal { font-size:26px; line-height:1; margin-bottom:2px; }
+.q-pod-name { font-weight:700; font-size:16px; margin-bottom:2px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.q-pod-score { font-family:var(--mono); font-weight:700; color:var(--brand); font-size:15px; margin-bottom:10px; }
+.q-pod-bar { width:100%; border-radius:14px 14px 0 0; display:grid; place-items:start center; padding-top:14px;
+  font-family:var(--display); font-weight:700; font-size:34px; color:rgba(255,255,255,.9); }
+.q-pod-1 .q-pod-bar { height:180px; background:linear-gradient(180deg,#ffd54a,#f1b400); color:#5a4500; }
+.q-pod-2 .q-pod-bar { height:132px; background:linear-gradient(180deg,#d7dce4,#b7bfcb); color:#2f3742; }
+.q-pod-3 .q-pod-bar { height:100px; background:linear-gradient(180deg,#eaa676,#d98b4e); color:#4a2a0c; }
+.q-podium-rest { max-width:420px; margin:22px auto 0; }
+.q-podium-actions { display:flex; gap:10px; justify-content:center; margin-top:24px; flex-wrap:wrap; }
+.q-summary-line { color:var(--muted); font-size:14px; margin-top:16px; }
+.q-summary-line b { color:var(--text); }
+
+.q-confetti { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:200; }
+
+/* history / recent games */
+.q-history { margin-top:10px; }
+.q-hist-row { display:flex; align-items:center; gap:12px; padding:13px 16px; border-radius:var(--r);
+  background:var(--surface); border:1px solid var(--border); margin-bottom:9px; cursor:pointer; transition:border-color .15s; }
+.q-hist-row:hover { border-color:var(--brand); }
+.q-hist-ico { width:34px; height:34px; border-radius:9px; background:var(--brand-dim); display:grid; place-items:center; font-size:16px; flex:none; }
+.q-hist-main { flex:1; min-width:0; }
+.q-hist-title { font-weight:600; font-size:14.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.q-hist-meta { color:var(--hint); font-size:12px; margin-top:1px; }
+.q-hist-when { color:var(--hint); font-size:12px; flex:none; }
+
+@media (max-width:560px){
+  .q-podium { gap:8px; min-height:220px; }
+  .q-pod-1 .q-pod-bar{height:150px} .q-pod-2 .q-pod-bar{height:112px} .q-pod-3 .q-pod-bar{height:86px}
+  .q-pod-ava{width:46px;height:46px;font-size:18px}
+}
+
 /* ── animations ─────────────────────────────────────────────────── */
 @keyframes q-fade { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
 @keyframes q-pop  { from{opacity:0; transform:scale(.94);} to{opacity:1; transform:scale(1);} }

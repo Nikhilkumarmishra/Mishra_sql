@@ -176,13 +176,38 @@
     } catch (e) {}
   }
 
+  function pAva(name) {
+    var colors=['#ef4e6b','#2f86ff','#f5a524','#2fd27a','#7c5cff','#00c896','#ff8a3d','#12b5cb'];
+    var h=0; name=name||'?'; for(var i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))>>>0;
+    return '<span class="q-pod-ava" style="background:'+colors[h%colors.length]+'">'+esc((name[0]||'?').toUpperCase())+'</span>';
+  }
+  function pPodiumHTML(st) {
+    function pod(p,rank,medal){
+      if(!p) return '<div class="q-pod q-pod-'+rank+'" style="visibility:hidden"></div>';
+      return '<div class="q-pod q-pod-'+rank+' revealed"><div class="q-pod-medal">'+medal+'</div>'+pAva(p.name)+
+        '<div class="q-pod-name">'+esc(p.name)+'</div><div class="q-pod-score">'+p.score+'</div>'+
+        '<div class="q-pod-bar">'+rank+'</div></div>';
+    }
+    return '<div class="q-podium">'+pod(st[1],2,'🥈')+pod(st[0],1,'🥇')+pod(st[2],3,'🥉')+'</div>';
+  }
+
   async function pCompleted() {
+    go('p-end');
     try {
-      var lb = await sb.rpc('quiz_leaderboard', { p_session_id: me.sessionId, p_token: me.token });
-      var you = (lb.data && lb.data.you) || {};
-      $('finalRank') && ($('finalRank').textContent = '#' + (you.rank || '–'));
+      var r = await sb.rpc('quiz_session_summary', { p_session_id: me.sessionId, p_token: me.token });
+      var sum = r.data || {}; var you = sum.you || {}; var st = sum.standings || [];
+      var rank = you.rank || null;
+      var head = rank === 1 ? 'You won! 🏆' : (rank && rank <= 3) ? 'On the podium! 🎉' : 'Game over';
+      $('pEndBody').innerHTML =
+        '<div class="q-play-center" style="padding:28px 0 6px">'+
+          '<div class="q-play-big" style="margin:0">'+head+'</div>'+
+          (rank?'<div class="q-standing-rank">#'+rank+'</div><div class="q-standing-lbl">of '+(sum.total_players||0)+' players</div>':'')+
+          '<div class="q-standing-score">'+(you.score||0)+' pts · '+(you.correct_count||0)+' correct</div>'+
+        '</div>'+
+        '<div class="q-podium-wrap">'+pPodiumHTML(st)+'</div>';
+      if (rank && rank <= 3 && window.QuizzFX) QuizzFX.confetti();
     } catch (e) {}
-    go('p-end'); teardown();
+    teardown();
   }
 
   function subscribe() {

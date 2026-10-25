@@ -240,6 +240,59 @@
     } catch (e) {
       body.innerHTML = '<div class="q-empty"><div class="q-empty-ico">⚠️</div><h3>Couldn’t load your quizzes</h3><p>' + esc(e.message) + '</p></div>';
     }
+    loadRecentGames();
+  }
+
+  function timeAgo(iso) {
+    if (!iso) return '';
+    var d = (Date.now() - Date.parse(iso)) / 1000;
+    if (d < 60) return 'just now';
+    if (d < 3600) return Math.floor(d / 60) + 'm ago';
+    if (d < 86400) return Math.floor(d / 3600) + 'h ago';
+    if (d < 604800) return Math.floor(d / 86400) + 'd ago';
+    try { return new Date(iso).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }); } catch (e) { return ''; }
+  }
+
+  async function loadRecentGames() {
+    try {
+      var data = await rpc('quiz_my_sessions', { p_limit: 12 });
+      var sessions = (data && data.sessions) || [];
+      var head = $('recentHead'), box = $('recentGames');
+      if (!sessions.length) { show(head, false); box.innerHTML = ''; return; }
+      show(head, true);
+      box.innerHTML = sessions.map(function (s) {
+        var live = s.state !== 'COMPLETED';
+        var meta = (s.participant_count || 0) + ' player' + (s.participant_count === 1 ? '' : 's') +
+          ' · ' + (s.q_count || 0) + ' Qs' + (live ? ' · <b style="color:var(--brand2)">live</b>' : '');
+        return '<div class="q-hist-row" data-sid="' + esc(s.id) + '" data-live="' + live + '">' +
+          '<span class="q-hist-ico">' + (live ? '🔴' : '🏁') + '</span>' +
+          '<div class="q-hist-main"><div class="q-hist-title">' + esc(s.title || 'Quiz') + '</div>' +
+          '<div class="q-hist-meta">' + meta + '</div></div>' +
+          '<span class="q-hist-when">' + timeAgo(s.created_at) + '</span></div>';
+      }).join('');
+      Array.prototype.forEach.call(box.querySelectorAll('.q-hist-row'), function (row) {
+        row.addEventListener('click', function () {
+          viewSession(row.getAttribute('data-sid'), row.getAttribute('data-live') === 'true');
+        });
+      });
+    } catch (e) { /* history is non-critical */ }
+  }
+
+  function viewSession(sessionId, isLive) {
+    leaveLobby();
+    lobby.sessionId = sessionId; lobby.quizId = null;
+    goScreen('lobby');
+    if (isLive) {
+      // reconnect to the running game
+      subscribeLobby();
+      loadLobby();
+    } else {
+      // read-only final podium for a past game
+      lobby.hostState = 'COMPLETED';
+      show($('lobbyBar'), false); show($('lobbyWaiting'), false); show($('lobbyLive'), true);
+      hostHideStage();
+      hostPodium();
+    }
   }
 
   function renderQuizGrid(quizzes) {
@@ -536,6 +589,7 @@
   async function hostQuiz(quizId) {
     try {
       var info = await rpc('quiz_start_session', { p_quiz_id: quizId });
+      info.quiz_id = quizId;
       openLobby(info);
     } catch (e) { toast(e.message, 'err'); }
   }
@@ -543,8 +597,9 @@
   function openLobby(info) {
     lobby.sessionId = info.session_id;
     lobby.pin = info.pin;
+    lobby.quizId = info.quiz_id || null;
     goScreen('lobby');
-    show($('lobbyWaiting'), true); show($('lobbyLive'), false);
+    show($('lobbyWaiting'), true); show($('lobbyLive'), false); show($('lobbyBar'), true);
     var titleChip = $('lobbyTitle');
     titleChip.style.visibility = 'visible'; titleChip.textContent = info.title || 'Live game';
     $('lobbyPin').textContent = info.pin;
@@ -577,7 +632,7 @@
       var s = data.session;
       if (s.state === 'COMPLETED') { leaveLobby(); goScreen('dashboard'); loadDashboard(); return; }
       if (s.state === 'LOBBY') {
-        show($('lobbyWaiting'), true); show($('lobbyLive'), false);
+        show($('lobbyWaiting'), true); show($('lobbyLive'), false); show($('lobbyBar'), true);
         renderPlayers(data.participants || []);
         $('lobbyCount').textContent = (data.participants || []).length;
         $('lobbyStart').disabled = (data.participants || []).length < 1;
@@ -637,15 +692,92 @@
   }
 
   function showLive(state) {
-    show($('lobbyWaiting'), false); show($('lobbyLive'), true);
+    show($('lobbyWaiting'), false); show($('lobbyLive'), true); show($('lobbyBar'), false);
     clearLiveTimers();
+    if (state.state !== 'COMPLETED') { show($('livePodium'), false); $('liveQ').style.display = ''; }
     lobby.hostState = state.state;
     lobby.curQ = (state.current_q != null ? state.current_q : (lobby.curQ || 0));
     lobby.qCount = state.q_count || lobby.qCount || 1;
     if (state.state === 'QUESTION_ACTIVE') hostActive();
     else if (state.state === 'QUESTION_RESULTS') hostResults();
     else if (state.state === 'LEADERBOARD') hostLeaderboard(false);
-    else if (state.state === 'COMPLETED') hostLeaderboard(true);
+    else if (state.state === 'COMPLETED') hostPodium();
+  }
+
+  function hostHideStage() {
+    $('liveTiles').innerHTML = ''; $('liveMeta').innerHTML = '';
+    show($('liveLeader'), false);
+    $('liveTimer').style.visibility = 'hidden';
+  }
+
+  // ── podium builder (reused host-side) ─────────────────────────────
+  function medalAva(name) {
+    return '<span class="q-pod-ava" style="background:' + avatarColor(name) + '">' + esc((name[0] || '?').toUpperCase()) + '</span>';
+  }
+  function podiumHTML(standings) {
+    // standings ranked; take distinct top positions for 3 pedestals
+    var p1 = standings[0], p2 = standings[1], p3 = standings[2];
+    function pod(p, rank, medal) {
+      if (!p) return '<div class="q-pod q-pod-' + rank + '" style="visibility:hidden"></div>';
+      return '<div class="q-pod q-pod-' + rank + '" data-rank="' + rank + '">' +
+        '<div class="q-pod-medal">' + medal + '</div>' + medalAva(p.name) +
+        '<div class="q-pod-name">' + esc(p.name) + '</div>' +
+        '<div class="q-pod-score">' + p.score + '</div>' +
+        '<div class="q-pod-bar">' + rank + '</div></div>';
+    }
+    // visual order: 2nd, 1st, 3rd
+    return '<div class="q-podium">' + pod(p2, 2, '🥈') + pod(p1, 1, '🥇') + pod(p3, 3, '🥉') + '</div>';
+  }
+  function revealPodium(container, onFirst) {
+    var order = ['3', '2', '1'];
+    var i = 0;
+    (function step() {
+      if (i >= order.length) return;
+      var el = container.querySelector('.q-pod-' + order[i]);
+      if (el && el.getAttribute('data-rank')) {
+        el.classList.add('revealed');
+        if (order[i] === '1' && onFirst) onFirst();
+      }
+      i++;
+      setTimeout(step, QuizzFX.reduceMotion() ? 0 : 750);
+    })();
+  }
+
+  async function hostPodium() {
+    clearLiveTimers(); hostHideStage();
+    $('liveProgress').textContent = 'Final results';
+    $('liveQ').textContent = '';
+    $('liveNext').textContent = 'Back to dashboard';
+    try {
+      var sum = await rpc('quiz_session_summary', { p_session_id: lobby.sessionId });
+      var st = sum.standings || [];
+      var rest = st.slice(3).map(function (p) {
+        return '<div class="q-lb-row"><span class="q-lb-rank">' + p.rank + '</span>' +
+          '<span class="q-lb-name">' + esc(p.name) + '</span><span class="q-lb-score">' + p.score + '</span></div>';
+      }).join('');
+      var pod = $('livePodium');
+      pod.innerHTML =
+        '<div class="q-podium-wrap"><div class="q-podium-title">🏆 ' + esc(sum.title || 'Final results') + '</div>' +
+        '<div class="q-podium-sub">' + (sum.total_players || 0) + ' player' + (sum.total_players === 1 ? '' : 's') + ' · ' + (sum.q_count || 0) + ' questions</div>' +
+        podiumHTML(st) +
+        (rest ? '<div class="q-podium-rest">' + rest + '</div>' : '') +
+        '<div class="q-podium-actions">' +
+          '<button class="q-btn q-btn-ghost" id="podSkip">Skip animation</button>' +
+          (lobby.quizId ? '<button class="q-btn q-btn-primary" id="podAgain">Host again</button>' : '') +
+        '</div></div>';
+      show(pod, true);
+      var skip = $('podSkip');
+      if (skip) skip.addEventListener('click', function () {
+        Array.prototype.forEach.call(pod.querySelectorAll('.q-pod[data-rank]'), function (e) { e.classList.add('revealed'); });
+      });
+      var again = $('podAgain');
+      if (again) again.addEventListener('click', function () { var qid = lobby.quizId; leaveLobby(); hostQuiz(qid); });
+      // sequential reveal + celebration
+      revealPodium(pod, function () {
+        if (!QuizzFX.reduceMotion()) QuizzFX.confetti();
+        if (lobby.soundOn) QuizzFX.chime();
+      });
+    } catch (e) { toast(e.message, 'err'); }
   }
 
   function hostTilesHTML(q, counts, correct) {
@@ -856,6 +988,11 @@
     $('lobbyEnd').addEventListener('click', endGame);
     $('liveEnd').addEventListener('click', endGame);
     $('liveNext').addEventListener('click', liveNext);
+    $('liveSound').addEventListener('click', function () {
+      lobby.soundOn = !lobby.soundOn;
+      $('liveSound').textContent = lobby.soundOn ? '🔊' : '🔇';
+      if (lobby.soundOn) QuizzFX.chime();   // confirm + satisfy autoplay gesture
+    });
     $('lobbyCopy').addEventListener('click', copyJoinLink);
 
     // preview

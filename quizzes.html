@@ -97,6 +97,9 @@
       <div class="q-center"><div class="q-spinner"></div></div>
     </div>
 
+    <div class="q-section-head q-hidden" id="recentHead"><h2>Recent games</h2></div>
+    <div class="q-history" id="recentGames"></div>
+
     <div class="q-foot">
       Part of <a href="/">AnalystWorld</a> · <a href="/">Back to main site</a>
     </div>
@@ -165,7 +168,7 @@ Time: 20"></textarea>
 
   <!-- ── HOST LOBBY ────────────────────────────────────────────── -->
   <section class="q-screen" id="screen-lobby">
-    <div class="q-studio-bar">
+    <div class="q-studio-bar" id="lobbyBar">
       <button class="q-btn q-btn-ghost" id="lobbyEnd">✕ End game</button>
       <span class="q-tag q-tag-published" id="lobbyTitle" style="visibility:hidden"></span>
       <div class="q-top-spacer"></div>
@@ -207,8 +210,10 @@ Time: 20"></textarea>
       <div class="q-live-tiles" id="liveTiles"></div>
       <div class="q-live-meta" id="liveMeta"></div>
       <div class="q-live-leader q-hidden" id="liveLeader"></div>
+      <div class="q-hidden" id="livePodium"></div>
       <div class="q-live-controls">
         <button class="q-btn q-btn-ghost" id="liveEnd">✕ End game</button>
+        <button class="q-btn-icon" id="liveSound" title="Celebration sound" aria-label="Toggle celebration sound">🔇</button>
         <div class="q-top-spacer"></div>
         <button class="q-btn q-btn-primary q-btn-lg" id="liveNext">Next →</button>
       </div>
@@ -277,6 +282,7 @@ Time: 20"></textarea>
 <!-- supabase-js + QR loaded ONLY here (never on the existing production pages) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="/quizzes-fx.js"></script>
 <script src="/quizzes.js"></script>
 </body>
 </html>

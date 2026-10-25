@@ -73,13 +73,13 @@
 
   <!-- END -->
   <section class="q-screen" id="p-end">
-    <div class="q-play-center">
-      <div class="q-empty-ico" style="font-size:48px">🎉</div>
-      <h1 class="q-play-big">Game over</h1>
-      <div class="q-standing-rank" id="finalRank">#–</div>
-      <p class="q-hint">Thanks for playing! The animated podium arrives in the next build.</p>
-      <div style="margin-top:20px"><a class="q-btn q-btn-ghost" href="/quizzes/play">Join another</a></div>
+    <div id="pEndBody">
+      <div class="q-play-center">
+        <div class="q-empty-ico" style="font-size:48px">🎉</div>
+        <h1 class="q-play-big">Game over</h1>
+      </div>
     </div>
+    <div class="q-foot"><a class="q-btn q-btn-ghost" href="/quizzes/play" style="border:none">Join another game</a></div>
   </section>
 
   <!-- KICKED -->
@@ -97,6 +97,7 @@
 <div class="q-toasts" id="toasts" aria-live="polite"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="/quizzes-fx.js"></script>
 <script src="/quizzes-play.js"></script>
 </body>
 </html>
