@@ -102,7 +102,86 @@
     </div>
   </section>
 
+  <!-- ── QUIZ STUDIO ───────────────────────────────────────────── -->
+  <section class="q-screen" id="screen-studio">
+    <div class="q-studio-bar">
+      <button class="q-btn q-btn-ghost" id="studioBack">← Dashboard</button>
+      <span class="q-tag" id="studioStatus" style="visibility:hidden"></span>
+      <div class="q-top-spacer"></div>
+      <button class="q-btn q-btn-ghost" id="studioPreview">▶ Preview</button>
+      <button class="q-btn q-btn-ghost" id="studioSave">Save draft</button>
+      <button class="q-btn q-btn-primary" id="studioPublish">Publish</button>
+    </div>
+
+    <div class="q-studio-meta q-card">
+      <div class="q-meta-cover">
+        <input class="q-cover-input" id="metaCover" maxlength="2" placeholder="📊" aria-label="Cover emoji"/>
+        <span class="q-cover-hint">cover</span>
+      </div>
+      <div class="q-meta-fields">
+        <input class="q-input q-title-input" id="metaTitle" maxlength="160" placeholder="Untitled quiz"/>
+        <input class="q-input" id="metaDesc" maxlength="200" placeholder="Short description (optional)"/>
+      </div>
+      <div class="q-meta-timer">
+        <span class="q-label">Default timer</span>
+        <div class="q-timer-pick">
+          <input class="q-input mono" id="metaTimer" type="number" min="5" max="300" value="20"/>
+          <span class="q-timer-unit">sec</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- bulk paste -->
+    <details class="q-paste q-card" id="pastePanel" open>
+      <summary><span>⚡ Paste questions in bulk</span><span class="q-paste-caret">▾</span></summary>
+      <div class="q-paste-body">
+        <p class="q-paste-tip">Paste your MCQs below — one block per question. We'll parse them into editable cards. We never guess the correct answer; anything unclear gets flagged for you to fix.</p>
+        <textarea class="q-textarea mono" id="pasteBox" spellcheck="false" placeholder="Quiz: Excel Fundamentals
+Q1. Which function adds values in Excel?
+A. COUNT
+B. SUM
+C. MAX
+D. AVERAGE
+Correct: B
+Explanation: SUM adds the supplied numeric values.
+Time: 20"></textarea>
+        <div class="q-paste-actions">
+          <button class="q-btn q-btn-ghost" id="pasteSample">Load sample</button>
+          <div class="q-top-spacer"></div>
+          <span class="q-parse-note" id="parseNote"></span>
+          <button class="q-btn q-btn-primary" id="parseBtn">Parse &amp; add →</button>
+        </div>
+      </div>
+    </details>
+
+    <div class="q-section-head">
+      <h2>Questions <span class="q-count-chip" id="qCountChip">0</span></h2>
+      <button class="q-btn q-btn-ghost" id="addQBtn">+ Add question</button>
+    </div>
+    <div id="qList"></div>
+
+    <div class="q-foot">Part of <a href="/">AnalystWorld</a> · <a href="/">Back to main site</a></div>
+  </section>
+
 </main>
+
+<!-- ── PREVIEW (as participant) ─────────────────────────────────── -->
+<div class="q-modal-back" id="previewModal">
+  <div class="q-preview" id="previewStage">
+    <div class="q-preview-top">
+      <span class="q-preview-badge">Preview · as a student</span>
+      <div class="q-top-spacer"></div>
+      <span class="q-preview-count" id="pvCount"></span>
+      <button class="q-btn-icon" id="pvClose" title="Close preview" aria-label="Close preview">✕</button>
+    </div>
+    <div class="q-preview-body" id="pvBody"></div>
+    <div class="q-preview-nav">
+      <button class="q-btn q-btn-ghost" id="pvPrev">← Prev</button>
+      <button class="q-btn q-btn-ghost" id="pvReveal">Reveal answer</button>
+      <button class="q-btn q-btn-primary" id="pvNext">Next →</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── AUTH MODAL ──────────────────────────────────────────────── -->
 <div class="q-modal-back" id="authModal">
