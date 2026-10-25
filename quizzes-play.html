@@ -59,14 +59,16 @@
     <div class="q-foot"><button class="q-btn q-btn-ghost" id="leaveBtn" style="border:none">Leave game</button></div>
   </section>
 
-  <!-- LIVE (question active — Phase E builds the real question UI) -->
+  <!-- LIVE (answer / lock / reveal / standings) -->
   <section class="q-screen" id="p-live">
-    <div class="q-play-center">
-      <div class="q-play-you"><span class="q-play-dot"></span><span id="youName2">—</span></div>
-      <h1 class="q-play-big" id="liveQnum">Question 1</h1>
-      <p class="q-hint">Look up at the screen — answer options arrive here in the next build. 👀</p>
-      <div class="q-play-wait-ring"></div>
+    <div class="q-plive-head">
+      <div class="q-play-you"><span class="q-play-dot" id="pDot"></span><span id="youName2">—</span></div>
+      <div class="q-plive-right">
+        <span class="q-plive-score" id="pScore">0</span>
+        <span class="q-plive-timer" id="pTimer"></span>
+      </div>
     </div>
+    <div id="pLiveBody"></div>
   </section>
 
   <!-- END -->
@@ -74,7 +76,8 @@
     <div class="q-play-center">
       <div class="q-empty-ico" style="font-size:48px">🎉</div>
       <h1 class="q-play-big">Game over</h1>
-      <p class="q-hint">Thanks for playing! Final results &amp; the podium arrive in the next build.</p>
+      <div class="q-standing-rank" id="finalRank">#–</div>
+      <p class="q-hint">Thanks for playing! The animated podium arrives in the next build.</p>
       <div style="margin-top:20px"><a class="q-btn q-btn-ghost" href="/quizzes/play">Join another</a></div>
     </div>
   </section>

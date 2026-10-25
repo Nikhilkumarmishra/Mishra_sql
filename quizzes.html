@@ -197,13 +197,20 @@ Time: 20"></textarea>
       </div>
     </div>
 
-    <!-- live placeholder (Phase E builds the real host question view here) -->
+    <!-- live projector view -->
     <div id="lobbyLive" class="q-hidden">
-      <div class="q-card" style="text-align:center;padding:48px 24px">
-        <div class="q-empty-ico">📺</div>
-        <h2 id="liveHeading">Question 1 is live</h2>
-        <p class="q-hint" id="liveSub">Students are answering on their phones. The full projector view &amp; scoring arrive in the next build.</p>
-        <div style="margin-top:20px"><button class="q-btn q-btn-ghost" id="liveEnd">End game</button></div>
+      <div class="q-live-head">
+        <span class="q-live-progress" id="liveProgress">Question 1 / 1</span>
+        <div class="q-live-timer" id="liveTimer"><span id="liveTimerNum">–</span></div>
+      </div>
+      <h2 class="q-live-q" id="liveQ">…</h2>
+      <div class="q-live-tiles" id="liveTiles"></div>
+      <div class="q-live-meta" id="liveMeta"></div>
+      <div class="q-live-leader q-hidden" id="liveLeader"></div>
+      <div class="q-live-controls">
+        <button class="q-btn q-btn-ghost" id="liveEnd">✕ End game</button>
+        <div class="q-top-spacer"></div>
+        <button class="q-btn q-btn-primary q-btn-lg" id="liveNext">Next →</button>
       </div>
     </div>
   </section>

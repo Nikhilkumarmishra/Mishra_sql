@@ -40,7 +40,9 @@
   });
 
   var me = { sessionId: null, token: null, participantId: null, name: null, pin: null };
-  var channel = null, heartbeat = null;
+  var channel = null, heartbeat = null, ptimer = null;
+  var GLYPH = { A: '▲', B: '●', C: '■', D: '◆' };
+  var live = { state: null, qid: null, answered: false, picked: null, score: 0, renderedQ: -1 };
 
   function saveMe() { try { localStorage.setItem('quizz_play_' + me.pin, JSON.stringify(me)); } catch (e) {} }
   function clearMe() { try { localStorage.removeItem('quizz_play_' + me.pin); } catch (e) {} }
@@ -63,12 +65,124 @@
     return d;
   }
 
+  function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function clearPTimer(){ if (ptimer){ clearInterval(ptimer); ptimer=null; } }
+
   function applyState(state) {
-    if (state === 'LOBBY') go('p-lobby');
-    else if (state === 'COMPLETED') { go('p-end'); teardown(); }
-    else { // QUESTION_ACTIVE / QUESTION_RESULTS / LEADERBOARD
-      go('p-live');
+    if (state === live.state && (state === 'QUESTION_RESULTS' || state === 'LEADERBOARD')) return; // avoid re-fetch loops
+    live.state = state;
+    if (state === 'LOBBY') { clearPTimer(); go('p-lobby'); }
+    else if (state === 'QUESTION_ACTIVE') { go('p-live'); pActive(); }
+    else if (state === 'QUESTION_RESULTS') { clearPTimer(); go('p-live'); pResults(); }
+    else if (state === 'LEADERBOARD') { clearPTimer(); go('p-live'); pLeaderboard(); }
+    else if (state === 'COMPLETED') { clearPTimer(); pCompleted(); }
+  }
+
+  async function pActive() {
+    try {
+      var q = await sb.rpc('quiz_question', { p_session_id: me.sessionId, p_token: me.token });
+      q = q.data; if (!q || q.state !== 'QUESTION_ACTIVE') { if (q) applyState(q.state); return; }
+      live.qid = q.question_id;
+      live.answered = !!q.answered; live.picked = q.your_option || null;
+      live.opts = { A: q.a, B: q.b, C: q.c, D: q.d };
+      renderActive(q);
+    } catch (e) {}
+  }
+
+  function renderActive(q) {
+    $('pTimer').style.display = '';
+    var map = [['a','A'],['b','B'],['c','C'],['d','D']];
+    var tiles = map.map(function (m) {
+      var low=m[0], L=m[1];
+      return '<button class="q-ptile '+low+(live.picked===L?' picked':'')+'" data-opt="'+L+'">'+
+        '<span class="glyph">'+GLYPH[L]+'</span><span>'+esc(q[low]||('Option '+L))+'</span></button>';
+    }).join('');
+    var locked = live.answered
+      ? '<div class="q-plocked"><div class="q-lock-ico">🔒</div>Answer locked in — waiting for the others…</div>' : '';
+    $('pLiveBody').innerHTML =
+      '<div class="q-plive-q">'+esc(q.text||'')+'</div>'+
+      '<div class="q-ptiles'+(live.answered?' locked':'')+'" id="ptiles">'+tiles+'</div>'+locked;
+    if (!live.answered) {
+      Array.prototype.forEach.call(document.querySelectorAll('#ptiles .q-ptile'), function (b) {
+        b.addEventListener('click', function () { submitAnswer(b.getAttribute('data-opt'), q); });
+      });
     }
+    clearPTimer();
+    var offset = Date.now() - Date.parse(q.server_now);
+    var deadline = Date.parse(q.q_started_at) + q.q_duration * 1000;
+    var tick = function () {
+      var remaining = Math.max(0, Math.ceil((deadline - (Date.now() - offset)) / 1000));
+      $('pTimer').textContent = remaining; $('pTimer').classList.toggle('low', remaining <= 5);
+      if (remaining <= 0) clearPTimer();
+    };
+    tick(); ptimer = setInterval(tick, 250);
+  }
+
+  async function submitAnswer(opt, q) {
+    if (live.answered || !live.qid) return;
+    live.answered = true; live.picked = opt;          // optimistic lock
+    renderActive(q);
+    try {
+      var res = await sb.rpc('quiz_submit_answer',
+        { p_session_id: me.sessionId, p_token: me.token, p_question_id: live.qid, p_option: opt });
+      if (res.error) { live.answered = false; live.picked = null; toast(res.error.message, 'err'); renderActive(q); }
+    } catch (e) { live.answered = false; live.picked = null; toast('Could not submit.', 'err'); renderActive(q); }
+  }
+
+  async function pResults() {
+    try {
+      var rr = await sb.rpc('quiz_results', { p_session_id: me.sessionId, p_token: me.token });
+      var r = rr.data; if (!r) return;
+      // option texts (robust even on a reconnect during results)
+      if (!live.opts || !live.opts.A) {
+        var qq = await sb.rpc('quiz_question', { p_session_id: me.sessionId, p_token: me.token });
+        if (qq.data && qq.data.a) live.opts = { A:qq.data.a, B:qq.data.b, C:qq.data.c, D:qq.data.d };
+      }
+      var you = r.you || {};
+      if (you.score != null) { live.score = you.score; $('pScore').textContent = you.score; }
+      var answered = you.answered;
+      var correct = you.was_correct === true;
+      var headline = !answered ? ['no','Too slow!'] : correct ? ['ok','Correct! 🎉'] : ['no','Not this time'];
+      var ctext = r.correct_option ? (GLYPH[r.correct_option] + ' ' + esc((live.opts||{})[r.correct_option] || r.correct_option)) : '';
+      $('pLiveBody').innerHTML =
+        '<div class="q-preveal">'+
+          '<div class="q-reveal-badge '+headline[0]+'">'+headline[1]+'</div>'+
+          (correct && you.points_earned!=null ? '<div class="q-reveal-pts ok">+'+you.points_earned+'</div>' : '')+
+          (!correct && r.correct_option ? '<div class="q-reveal-sub">Correct answer: <b>'+ctext+'</b></div>' : '')+
+          (r.explanation?'<div class="q-reveal-sub"><b>Why:</b> '+esc(r.explanation)+'</div>':'')+
+          '<div class="q-reveal-sub">Your score: <b>'+(you.score||0)+'</b> · rank <b>#'+(you.rank||'–')+'</b></div>'+
+        '</div>';
+      $('pTimer').style.display = 'none';
+    } catch (e) {}
+  }
+
+  async function pLeaderboard() {
+    try {
+      var lb = await sb.rpc('quiz_leaderboard', { p_session_id: me.sessionId, p_token: me.token });
+      lb = lb.data; if (!lb) return;
+      var you = lb.you || {};
+      if (you.score != null) { live.score = you.score; $('pScore').textContent = you.score; }
+      var top = (lb.top||[]).slice(0,5).map(function(p){
+        var mine = you && p.name===you.name && p.rank===you.rank;
+        return '<div class="q-lb-row'+(p.rank===1?' top1':p.rank===2?' top2':p.rank===3?' top3':'')+'" style="'+(mine?'outline:2px solid var(--brand)':'')+'">'+
+          '<span class="q-lb-rank">'+p.rank+'</span><span class="q-lb-name">'+esc(p.name)+'</span><span class="q-lb-score">'+p.score+'</span></div>';
+      }).join('');
+      $('pLiveBody').innerHTML =
+        '<div class="q-standing"><div class="q-standing-rank">#'+(you.rank||'–')+'</div>'+
+        '<div class="q-standing-lbl">of '+(lb.total||0)+' players</div>'+
+        '<div class="q-standing-score">'+(you.score||0)+' pts</div></div>'+
+        '<div style="max-width:420px;margin:0 auto">'+top+'</div>';
+      $('pTimer').style.display = 'none';
+    } catch (e) {}
+  }
+
+  async function pCompleted() {
+    try {
+      var lb = await sb.rpc('quiz_leaderboard', { p_session_id: me.sessionId, p_token: me.token });
+      var you = (lb.data && lb.data.you) || {};
+      $('finalRank') && ($('finalRank').textContent = '#' + (you.rank || '–'));
+    } catch (e) {}
+    go('p-end'); teardown();
   }
 
   function subscribe() {
@@ -77,11 +191,10 @@
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'quiz_sessions', filter: 'id=eq.' + me.sessionId },
         function (payload) {
           var st = payload.new;
-          if ($('playerCount')) {
+          if (st.state === 'LOBBY' && $('playerCount')) {
             $('playerCount').textContent = st.participant_count;
             $('playerCountS').textContent = st.participant_count === 1 ? '' : 's';
           }
-          if ($('liveQnum')) $('liveQnum').textContent = 'Question ' + ((st.current_q != null ? st.current_q : 0) + 1);
           applyState(st.state);
         })
       .subscribe();
@@ -104,7 +217,8 @@
       var d = res.data;
       if (!d.found) { return; }
       if (d.connection_state === 'kicked') { go('p-kicked'); clearMe(); teardown(); return; }
-      if ($('playerCount')) $('playerCount').textContent = d.participant_count;
+      if (d.score != null) { live.score = d.score; if ($('pScore')) $('pScore').textContent = d.score; }
+      if (d.session_state === 'LOBBY' && $('playerCount')) $('playerCount').textContent = d.participant_count;
       applyState(d.session_state);
     } catch (e) {}
   }

@@ -399,6 +399,81 @@ h1,h2,h3 { font-family:var(--display); letter-spacing:-0.02em; margin:0; line-he
 .q-play-pulse { animation:q-breathe 2.2s ease-in-out infinite; }
 @keyframes q-breathe { 0%,100%{ transform:scale(1); opacity:1 } 50%{ transform:scale(1.03); opacity:.9 } }
 
+/* ── host live (projector) ──────────────────────────────────────── */
+.q-live-head { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 0 10px; }
+.q-live-progress { font-family:var(--mono); font-size:14px; font-weight:600; color:var(--muted);
+  background:var(--surface2); border-radius:999px; padding:6px 14px; }
+.q-live-timer { width:72px; height:72px; border-radius:50%; display:grid; place-items:center;
+  font-family:var(--display); font-size:30px; font-weight:700; color:var(--brand-ink);
+  background:conic-gradient(var(--brand) var(--deg,0deg), var(--surface2) 0deg);
+  position:relative; }
+.q-live-timer span { width:58px; height:58px; border-radius:50%; background:var(--surface); display:grid; place-items:center; color:var(--text); }
+.q-live-timer.low span { color:var(--err); }
+.q-live-q { font-size:clamp(24px,4vw,40px); font-weight:600; text-align:center; margin:14px 0 24px; line-height:1.14; }
+.q-live-tiles { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.q-live-tile { position:relative; display:flex; align-items:center; gap:14px; padding:20px; border-radius:var(--r2);
+  color:#fff; font-weight:600; font-size:clamp(16px,2.2vw,20px); overflow:hidden; transition:filter .3s, transform .2s; }
+.q-live-tile .glyph { font-size:24px; flex:none; }
+.q-live-tile .txt { flex:1; }
+.q-live-tile.a{background:var(--ans-a)} .q-live-tile.b{background:var(--ans-b)}
+.q-live-tile.c{background:var(--ans-c);color:var(--ans-c-ink)} .q-live-tile.d{background:var(--ans-d);color:var(--ans-d-ink)}
+.q-live-tile .q-tile-count { font-family:var(--mono); font-weight:700; font-size:18px; background:rgba(0,0,0,.18);
+  border-radius:999px; padding:3px 12px; flex:none; }
+.q-live-tiles.revealed .q-live-tile:not(.correct) { filter:grayscale(.7) opacity(.4); }
+.q-live-tiles.revealed .q-live-tile.correct { box-shadow:0 0 0 4px var(--ok), 0 0 0 7px rgba(47,210,122,.3); transform:scale(1.02); }
+.q-live-tile .q-tile-check { position:absolute; top:10px; right:12px; font-size:20px; opacity:0; }
+.q-live-tiles.revealed .q-live-tile.correct .q-tile-check { opacity:1; }
+.q-live-meta { text-align:center; color:var(--muted); font-size:15px; margin-top:18px; min-height:22px; }
+.q-live-meta .q-expl-box { background:var(--surface2); border-radius:var(--r2); padding:14px 18px; margin-top:12px; display:inline-block; color:var(--text); }
+.q-live-controls { display:flex; align-items:center; gap:12px; margin-top:26px; padding-top:18px; border-top:1px solid var(--border); }
+
+.q-live-leader { max-width:620px; margin:10px auto 0; }
+.q-lb-row { display:flex; align-items:center; gap:14px; padding:14px 18px; border-radius:var(--r2);
+  background:var(--surface); border:1px solid var(--border); margin-bottom:10px;
+  animation:q-slidein .4s cubic-bezier(.2,.9,.3,1.1) both; }
+.q-lb-rank { width:34px; height:34px; border-radius:10px; display:grid; place-items:center; font-family:var(--display);
+  font-weight:700; font-size:16px; background:var(--surface2); color:var(--muted); flex:none; }
+.q-lb-row.top1 .q-lb-rank{background:#ffd54a;color:#4a3a00} .q-lb-row.top2 .q-lb-rank{background:#cfd4dc;color:#2a2f38}
+.q-lb-row.top3 .q-lb-rank{background:#e8a06a;color:#3a2206}
+.q-lb-name { flex:1; font-weight:600; font-size:16px; }
+.q-lb-score { font-family:var(--mono); font-weight:700; color:var(--brand); font-size:17px; }
+@keyframes q-slidein { from{opacity:0; transform:translateX(-12px);} to{opacity:1; transform:none;} }
+
+/* ── participant live ───────────────────────────────────────────── */
+.q-plive-head { display:flex; align-items:center; justify-content:space-between; padding:14px 0; }
+.q-plive-right { display:flex; align-items:center; gap:12px; }
+.q-plive-score { font-family:var(--mono); font-weight:700; color:var(--brand); font-size:16px; }
+.q-plive-timer { font-family:var(--display); font-weight:700; font-size:22px; min-width:34px; text-align:right; }
+.q-plive-timer.low { color:var(--err); }
+.q-plive-q { font-family:var(--display); font-size:clamp(20px,5.5vw,26px); font-weight:600; text-align:center; margin:14px 0 20px; line-height:1.2; }
+.q-ptiles { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.q-ptile { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+  min-height:96px; border-radius:var(--r2); color:#fff; font-weight:600; font-size:15px; cursor:pointer; border:none;
+  padding:14px; text-align:center; transition:transform .12s, filter .2s; }
+.q-ptile:active { transform:scale(.97); }
+.q-ptile .glyph { font-size:26px; }
+.q-ptile.a{background:var(--ans-a)} .q-ptile.b{background:var(--ans-b)}
+.q-ptile.c{background:var(--ans-c);color:var(--ans-c-ink)} .q-ptile.d{background:var(--ans-d);color:var(--ans-d-ink)}
+.q-ptiles.locked .q-ptile { cursor:default; }
+.q-ptiles.locked .q-ptile:not(.picked){ filter:grayscale(.6) opacity(.45); }
+.q-ptiles.locked .q-ptile.picked{ box-shadow:0 0 0 4px #fff, 0 0 0 7px var(--brand); }
+.q-plocked { text-align:center; margin-top:22px; color:var(--muted); }
+.q-plocked .q-lock-ico { font-size:30px; }
+
+.q-preveal { text-align:center; padding:30px 0 10px; }
+.q-reveal-badge { display:inline-block; font-family:var(--display); font-size:clamp(28px,8vw,40px); font-weight:700; }
+.q-reveal-badge.ok { color:var(--ok); } .q-reveal-badge.no { color:var(--err); }
+.q-reveal-pts { font-family:var(--mono); font-weight:700; font-size:22px; margin-top:4px; }
+.q-reveal-pts.ok { color:var(--ok); }
+.q-reveal-sub { color:var(--muted); margin-top:10px; font-size:14.5px; }
+.q-reveal-sub b { color:var(--text); }
+.q-standing { text-align:center; padding:26px 0; }
+.q-standing-rank { font-family:var(--display); font-size:clamp(44px,13vw,72px); font-weight:700; color:var(--brand); line-height:1; }
+.q-standing-lbl { color:var(--muted); margin-top:4px; }
+.q-standing-score { font-family:var(--mono); font-weight:700; font-size:20px; margin-top:10px; }
+
+@media (max-width:560px){ .q-live-tiles { grid-template-columns:1fr; } }
+
 /* ── animations ─────────────────────────────────────────────────── */
 @keyframes q-fade { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
 @keyframes q-pop  { from{opacity:0; transform:scale(.94);} to{opacity:1; transform:scale(1);} }
