@@ -718,7 +718,7 @@
 
   function showLive(state) {
     show($('lobbyWaiting'), false); show($('lobbyLive'), true); show($('lobbyBar'), false);
-    clearLiveTimers();
+    clearLiveTimers(); show($('liveTimeup'), false);
     if (state.state !== 'COMPLETED') { show($('livePodium'), false); $('liveQ').style.display = ''; }
     lobby.hostState = state.state;
     lobby.curQ = (state.current_q != null ? state.current_q : (lobby.curQ || 0));
@@ -800,7 +800,6 @@
       // sequential reveal + celebration
       revealPodium(pod, function () {
         if (!QuizzFX.reduceMotion()) QuizzFX.confetti();
-        if (lobby.soundOn) QuizzFX.chime();
       });
     } catch (e) { toast(e.message, 'err'); }
   }
@@ -837,17 +836,16 @@
       var offset = Date.now() - Date.parse(q.server_now);
       var deadline = Date.parse(q.q_started_at) + q.q_duration * 1000;
       var total = q.q_duration;
-      lobby.lastTickSec = null;
+      show($('liveTimeup'), false);
       var tick = function () {
         var remaining = (deadline - (Date.now() - offset)) / 1000;
         QuizzFX.updateRing($('liveTimer'), remaining, total);
-        var sec = Math.max(0, Math.ceil(remaining));
-        if (lobby.tickOn && sec > 0 && sec !== lobby.lastTickSec) QuizzFX.tick(sec <= 5);
-        lobby.lastTickSec = sec;
-        if (remaining <= 0) { clearInterval(lobby.timer); lobby.timer = null; }
+        if (remaining <= 0) { clearInterval(lobby.timer); lobby.timer = null; show($('liveTimeup'), true); }
       };
+      if (lobby.timer) clearInterval(lobby.timer);   // never stack intervals
       tick(); lobby.timer = setInterval(tick, 200);
       // poll live answer count (host-only tally)
+      if (lobby.poll) clearInterval(lobby.poll);
       lobby.poll = setInterval(async function () {
         try {
           var r = await rpc('quiz_results', { p_session_id: lobby.sessionId });
@@ -1013,18 +1011,6 @@
     $('lobbyEnd').addEventListener('click', endGame);
     $('liveEnd').addEventListener('click', endGame);
     $('liveNext').addEventListener('click', liveNext);
-    $('liveSound').addEventListener('click', function () {
-      lobby.soundOn = !lobby.soundOn;
-      $('liveSound').classList.toggle('is-on', lobby.soundOn);
-      $('liveSound').title = 'Celebration sound — ' + (lobby.soundOn ? 'on' : 'off');
-      if (lobby.soundOn) { QuizzFX.unlockAudio(); QuizzFX.chime(); }  // gesture unlock + confirm
-    });
-    $('liveTick').addEventListener('click', function () {
-      lobby.tickOn = !lobby.tickOn;
-      $('liveTick').classList.toggle('is-on', lobby.tickOn);
-      $('liveTick').title = 'Countdown ticking sound — ' + (lobby.tickOn ? 'on' : 'off');
-      if (lobby.tickOn) { QuizzFX.unlockAudio(); QuizzFX.tick(false); }  // gesture unlock + confirm
-    });
     $('lobbyCopy').addEventListener('click', copyJoinLink);
 
     // preview

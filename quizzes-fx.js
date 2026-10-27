@@ -1,6 +1,6 @@
 /* =====================================================================
    AnalystWorld Quizz — celebration effects (shared by host + player)
-   Restrained canvas confetti + an optional short WebAudio chime.
+   Restrained canvas confetti + a shared SVG ring-timer updater.
    Both are self-contained (no assets, no CDN) and reduced-motion aware.
    ===================================================================== */
 (function () {
@@ -57,56 +57,6 @@
     window.addEventListener('resize', size, { once: true });
   }
 
-  // short triumphant arpeggio — must be called from a user gesture (autoplay)
-  function chime() {
-    try {
-      var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
-      var ac = new AC();
-      var notes = [523.25, 659.25, 783.99, 1046.5]; // C5 E5 G5 C6
-      notes.forEach(function (f, i) {
-        var o = ac.createOscillator(), g = ac.createGain();
-        o.type = 'triangle'; o.frequency.value = f;
-        var t0 = ac.currentTime + i * 0.12;
-        g.gain.setValueAtTime(0.0001, t0);
-        g.gain.exponentialRampToValueAtTime(0.18, t0 + 0.02);
-        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.4);
-        o.connect(g); g.connect(ac.destination);
-        o.start(t0); o.stop(t0 + 0.45);
-      });
-      setTimeout(function () { try { ac.close(); } catch (e) {} }, 1200);
-    } catch (e) {}
-  }
-
-  // shared AudioContext for short UI sounds (ticks)
-  var _ac = null;
-  function audioCtx() {
-    try {
-      var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
-      if (!_ac) _ac = new AC();
-      if (_ac.state === 'suspended') _ac.resume();
-      return _ac;
-    } catch (e) { return null; }
-  }
-  // call from a user gesture to satisfy autoplay policies
-  function unlockAudio() { audioCtx(); }
-
-  // a short countdown "tick" — call once per second while a timer runs.
-  // urgent = true in the final seconds (higher, a touch louder).
-  function tick(urgent) {
-    var ac = audioCtx(); if (!ac) return;
-    try {
-      var o = ac.createOscillator(), g = ac.createGain();
-      o.type = 'square';
-      o.frequency.value = urgent ? 1500 : 980;
-      var t0 = ac.currentTime;
-      g.gain.setValueAtTime(0.0001, t0);
-      g.gain.exponentialRampToValueAtTime(urgent ? 0.13 : 0.07, t0 + 0.004);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.05);
-      o.connect(g); g.connect(ac.destination);
-      o.start(t0); o.stop(t0 + 0.06);
-    } catch (e) {}
-  }
-
   // update an SVG ring timer (shared host + participant, so they match exactly)
   var RING_C = 2 * Math.PI * 44; // r = 44 in the 100x100 viewBox
   function updateRing(el, remaining, total) {
@@ -120,6 +70,5 @@
     el.classList.toggle('low', r <= 5 && r > 0);
   }
 
-  window.QuizzFX = { confetti: confetti, chime: chime, tick: tick, unlockAudio: unlockAudio,
-    updateRing: updateRing, reduceMotion: reduceMotion };
+  window.QuizzFX = { confetti: confetti, updateRing: updateRing, reduceMotion: reduceMotion };
 })();
