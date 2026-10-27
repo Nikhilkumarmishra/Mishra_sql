@@ -156,6 +156,7 @@ h1,h2,h3 { font-family:var(--display); letter-spacing:-0.02em; margin:0; line-he
 .q-btn-icon { background:transparent; border:1px solid var(--border); border-radius:10px;
   width:38px; height:38px; padding:0; color:var(--muted); }
 .q-btn-icon:hover { color:var(--brand); border-color:var(--brand); }
+.q-btn-icon.is-on { border-color:var(--brand); background:var(--brand-dim); box-shadow:0 0 0 2px var(--brand-glow); }
 
 /* ── cards / inputs ─────────────────────────────────────────────── */
 .q-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r2);
@@ -475,12 +476,18 @@ h1,h2,h3 { font-family:var(--display); letter-spacing:-0.02em; margin:0; line-he
 .q-live-head { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 0 10px; }
 .q-live-progress { font-family:var(--mono); font-size:14px; font-weight:600; color:var(--muted);
   background:var(--surface2); border-radius:999px; padding:6px 14px; }
-.q-live-timer { width:72px; height:72px; border-radius:50%; display:grid; place-items:center;
-  font-family:var(--display); font-size:30px; font-weight:700; color:var(--brand-ink);
-  background:conic-gradient(var(--brand) var(--deg,0deg), var(--surface2) 0deg);
-  position:relative; }
-.q-live-timer span { width:58px; height:58px; border-radius:50%; background:var(--surface); display:grid; place-items:center; color:var(--text); }
-.q-live-timer.low span { color:var(--err); }
+/* shared SVG ring timer (host + participant render identically) */
+.q-ring { position:relative; display:grid; place-items:center; flex:none; }
+.q-ring svg { width:100%; height:100%; transform:rotate(-90deg); display:block; }
+.q-ring circle { fill:none; stroke-width:8; }
+.q-ring-track { stroke:var(--surface2); }
+.q-ring-fill { stroke:var(--brand); stroke-linecap:round; transition:stroke-dashoffset .3s linear, stroke .25s; }
+.q-ring-num { position:absolute; font-family:var(--display); font-weight:800; color:var(--text); line-height:1; }
+.q-ring.low .q-ring-fill { stroke:var(--err); }
+.q-ring.low .q-ring-num { color:var(--err); }
+.q-ring.low { animation:q-pulse 1s ease-in-out infinite; }
+.q-live-timer { width:76px; height:76px; }
+.q-live-timer .q-ring-num { font-size:27px; }
 .q-live-q { font-size:clamp(24px,4vw,40px); font-weight:600; text-align:center; margin:14px 0 24px; line-height:1.14; }
 .q-live-tiles { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 .q-live-tile { position:relative; display:flex; align-items:center; gap:14px; padding:20px; border-radius:var(--r2);
@@ -515,8 +522,8 @@ h1,h2,h3 { font-family:var(--display); letter-spacing:-0.02em; margin:0; line-he
 .q-plive-head { display:flex; align-items:center; justify-content:space-between; padding:14px 0; }
 .q-plive-right { display:flex; align-items:center; gap:12px; }
 .q-plive-score { font-family:var(--mono); font-weight:700; color:var(--brand); font-size:16px; }
-.q-plive-timer { font-family:var(--display); font-weight:700; font-size:22px; min-width:34px; text-align:right; }
-.q-plive-timer.low { color:var(--err); }
+.q-plive-timer { width:46px; height:46px; }
+.q-plive-timer .q-ring-num { font-size:16px; }
 .q-plive-q { font-family:var(--display); font-size:clamp(20px,5.5vw,26px); font-weight:600; text-align:center; margin:14px 0 20px; line-height:1.2; }
 .q-ptiles { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 .q-ptile { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;

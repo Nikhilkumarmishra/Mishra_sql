@@ -77,5 +77,49 @@
     } catch (e) {}
   }
 
-  window.QuizzFX = { confetti: confetti, chime: chime, reduceMotion: reduceMotion };
+  // shared AudioContext for short UI sounds (ticks)
+  var _ac = null;
+  function audioCtx() {
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
+      if (!_ac) _ac = new AC();
+      if (_ac.state === 'suspended') _ac.resume();
+      return _ac;
+    } catch (e) { return null; }
+  }
+  // call from a user gesture to satisfy autoplay policies
+  function unlockAudio() { audioCtx(); }
+
+  // a short countdown "tick" — call once per second while a timer runs.
+  // urgent = true in the final seconds (higher, a touch louder).
+  function tick(urgent) {
+    var ac = audioCtx(); if (!ac) return;
+    try {
+      var o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'square';
+      o.frequency.value = urgent ? 1500 : 980;
+      var t0 = ac.currentTime;
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(urgent ? 0.13 : 0.07, t0 + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.05);
+      o.connect(g); g.connect(ac.destination);
+      o.start(t0); o.stop(t0 + 0.06);
+    } catch (e) {}
+  }
+
+  // update an SVG ring timer (shared host + participant, so they match exactly)
+  var RING_C = 2 * Math.PI * 44; // r = 44 in the 100x100 viewBox
+  function updateRing(el, remaining, total) {
+    if (!el) return;
+    var num = el.querySelector('.q-ring-num');
+    var fill = el.querySelector('.q-ring-fill');
+    var r = Math.max(0, Math.ceil(remaining));
+    if (num) num.textContent = r;
+    var frac = total > 0 ? Math.max(0, Math.min(1, remaining / total)) : 0;
+    if (fill) { fill.style.strokeDasharray = RING_C.toFixed(1); fill.style.strokeDashoffset = (RING_C * (1 - frac)).toFixed(1); }
+    el.classList.toggle('low', r <= 5 && r > 0);
+  }
+
+  window.QuizzFX = { confetti: confetti, chime: chime, tick: tick, unlockAudio: unlockAudio,
+    updateRing: updateRing, reduceMotion: reduceMotion };
 })();

@@ -819,14 +819,6 @@
     }).join('');
   }
 
-  function setTimerRing(el, remaining, total) {
-    var num = $('liveTimerNum');
-    var r = Math.max(0, Math.ceil(remaining));
-    num.textContent = r;
-    var frac = total > 0 ? Math.max(0, Math.min(1, remaining / total)) : 0;
-    el.style.setProperty('--deg', (frac * 360) + 'deg');
-    el.classList.toggle('low', r <= 5);
-  }
 
   async function hostActive() {
     show($('liveLeader'), false); $('liveTiles').classList.remove('revealed');
@@ -845,12 +837,16 @@
       var offset = Date.now() - Date.parse(q.server_now);
       var deadline = Date.parse(q.q_started_at) + q.q_duration * 1000;
       var total = q.q_duration;
+      lobby.lastTickSec = null;
       var tick = function () {
         var remaining = (deadline - (Date.now() - offset)) / 1000;
-        setTimerRing($('liveTimer'), remaining, total);
-        if (remaining <= 0) { clearInterval(lobby.timer); lobby.timer = null; $('liveMeta').textContent = $('liveMeta').textContent + ' · time up'; }
+        QuizzFX.updateRing($('liveTimer'), remaining, total);
+        var sec = Math.max(0, Math.ceil(remaining));
+        if (lobby.tickOn && sec > 0 && sec !== lobby.lastTickSec) QuizzFX.tick(sec <= 5);
+        lobby.lastTickSec = sec;
+        if (remaining <= 0) { clearInterval(lobby.timer); lobby.timer = null; }
       };
-      tick(); lobby.timer = setInterval(tick, 250);
+      tick(); lobby.timer = setInterval(tick, 200);
       // poll live answer count (host-only tally)
       lobby.poll = setInterval(async function () {
         try {
@@ -1019,8 +1015,15 @@
     $('liveNext').addEventListener('click', liveNext);
     $('liveSound').addEventListener('click', function () {
       lobby.soundOn = !lobby.soundOn;
-      $('liveSound').textContent = lobby.soundOn ? '🔊' : '🔇';
-      if (lobby.soundOn) QuizzFX.chime();   // confirm + satisfy autoplay gesture
+      $('liveSound').classList.toggle('is-on', lobby.soundOn);
+      $('liveSound').title = 'Celebration sound — ' + (lobby.soundOn ? 'on' : 'off');
+      if (lobby.soundOn) { QuizzFX.unlockAudio(); QuizzFX.chime(); }  // gesture unlock + confirm
+    });
+    $('liveTick').addEventListener('click', function () {
+      lobby.tickOn = !lobby.tickOn;
+      $('liveTick').classList.toggle('is-on', lobby.tickOn);
+      $('liveTick').title = 'Countdown ticking sound — ' + (lobby.tickOn ? 'on' : 'off');
+      if (lobby.tickOn) { QuizzFX.unlockAudio(); QuizzFX.tick(false); }  // gesture unlock + confirm
     });
     $('lobbyCopy').addEventListener('click', copyJoinLink);
 

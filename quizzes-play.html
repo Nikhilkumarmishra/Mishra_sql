@@ -65,7 +65,10 @@
       <div class="q-play-you"><span class="q-play-dot" id="pDot"></span><span id="youName2">—</span></div>
       <div class="q-plive-right">
         <span class="q-plive-score" id="pScore">0</span>
-        <span class="q-plive-timer" id="pTimer"></span>
+        <span class="q-ring q-plive-timer" id="pTimer" style="display:none">
+          <svg viewBox="0 0 100 100" aria-hidden="true"><circle class="q-ring-track" cx="50" cy="50" r="44"/><circle class="q-ring-fill" cx="50" cy="50" r="44"/></svg>
+          <span class="q-ring-num" id="pTimerNum"></span>
+        </span>
       </div>
     </div>
     <div id="pLiveBody"></div>

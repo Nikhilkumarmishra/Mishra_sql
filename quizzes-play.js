@@ -108,14 +108,15 @@
       });
     }
     clearPTimer();
+    var total = q.q_duration;
     var offset = Date.now() - Date.parse(q.server_now);
     var deadline = Date.parse(q.q_started_at) + q.q_duration * 1000;
-    var tick = function () {
-      var remaining = Math.max(0, Math.ceil((deadline - (Date.now() - offset)) / 1000));
-      $('pTimer').textContent = remaining; $('pTimer').classList.toggle('low', remaining <= 5);
+    var tk = function () {
+      var remaining = (deadline - (Date.now() - offset)) / 1000;
+      window.QuizzFX.updateRing($('pTimer'), remaining, total);
       if (remaining <= 0) clearPTimer();
     };
-    tick(); ptimer = setInterval(tick, 250);
+    tk(); ptimer = setInterval(tk, 200);
   }
 
   async function submitAnswer(opt, q) {
