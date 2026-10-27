@@ -156,6 +156,31 @@
     var s = document.querySelectorAll('.q-screen');
     for (var i = 0; i < s.length; i++) s[i].classList.toggle('is-active', s[i].id === 'screen-' + name);
     window.scrollTo(0, 0);
+    // keep the URL in step for the two public screens (distinct, shareable)
+    try {
+      var p = window.location.pathname;
+      if (name === 'welcome' && !/\/quizzes\/?$/.test(p)) history.pushState({}, '', '/quizzes');
+      else if (name === 'dashboard' && !/\/quizzes\/dashboard\/?$/.test(p)) history.pushState({}, '', '/quizzes/dashboard');
+    } catch (e) {}
+  }
+
+  function routeByPath() {
+    var dash = /\/quizzes\/dashboard\/?$/.test(window.location.pathname);
+    if (dash && currentUser) { goScreen('dashboard'); loadDashboard(); }
+    else if (dash && !currentUser) { goScreen('welcome'); openAuth(); }
+    else { goScreen('welcome'); }
+  }
+
+  // scroll-reveal for landing sections
+  function initReveal() {
+    var els = document.querySelectorAll('[data-reveal]');
+    if (!('IntersectionObserver' in window)) {
+      Array.prototype.forEach.call(els, function (e) { e.classList.add('revealed'); }); return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('revealed'); io.unobserve(en.target); } });
+    }, { threshold: 0.12 });
+    Array.prototype.forEach.call(els, function (e) { io.observe(e); });
   }
 
   // ── auth ──────────────────────────────────────────────────────────
@@ -962,9 +987,11 @@
     })(tabs[i]);
 
     // welcome
-    $('pathCreate').addEventListener('click', function () {
-      if (currentUser) { goScreen('dashboard'); loadDashboard(); } else openAuth();
-    });
+    var goCreate = function () { if (currentUser) { goScreen('dashboard'); loadDashboard(); } else openAuth(); };
+    var focusJoin = function () { var el = $('pathJoin'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(function () { $('joinPin').focus(); }, 300); };
+    $('pathCreate').addEventListener('click', goCreate);
+    $('ctaCreate').addEventListener('click', goCreate);
+    $('ctaJoin').addEventListener('click', focusJoin);
     $('pathJoin').addEventListener('click', function () { $('joinPin').focus(); });
     $('joinGoBtn').addEventListener('click', tryJoin);
     $('joinPin').addEventListener('keydown', function (e) { if (e.key === 'Enter') tryJoin(); });
@@ -972,6 +999,8 @@
 
     // dashboard
     $('newQuizBtn').addEventListener('click', function () { openStudio(null); });
+    $('dashJoinBtn').addEventListener('click', function () { window.location.href = '/quizzes/play'; });
+    $('qDashBtn').addEventListener('click', function () { goScreen('dashboard'); loadDashboard(); });
     document.querySelector('[data-nav="welcome"]').addEventListener('click', function (e) { e.preventDefault(); goScreen('welcome'); });
 
     // studio
@@ -1009,24 +1038,18 @@
     window.location.href = '/quizzes/play?pin=' + pin;
   }
 
-  function applySession(session) {
-    currentUser = session ? session.user : null;
-    renderAuthUI();
-    if (currentUser) {
-      // don't yank the user out of the studio on a token refresh
-      var active = document.querySelector('.q-screen.is-active');
-      if (!active || active.id === 'screen-welcome') { goScreen('dashboard'); loadDashboard(); }
-    } else { goScreen('welcome'); }
-  }
-
   async function init() {
     bind();
+    initReveal();
     try {
       var res = await sb.auth.getSession();
       var session = res && res.data ? res.data.session : null;
-      applySession(session);
+      currentUser = session ? session.user : null;
+      renderAuthUI();
       if (session) touchHost('quizzes_session');
-    } catch (e) { applySession(null); }
+    } catch (e) { currentUser = null; renderAuthUI(); }
+    routeByPath();
+    window.addEventListener('popstate', routeByPath);
     sb.auth.onAuthStateChange(function (event, session) {
       var wasUser = !!currentUser;
       currentUser = session ? session.user : null;

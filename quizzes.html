@@ -15,7 +15,7 @@
 <meta property="og:type" content="website"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Clash+Display:wght@500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@1,500;1,600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/quizzes.css"/>
 </head>
 <body>
@@ -33,6 +33,7 @@
       <button class="q-btn q-btn-ghost" id="qTopLoginBtn">Host login</button>
     </div>
     <div id="qTopUser" class="q-top-user q-hidden">
+      <button class="q-btn q-btn-ghost q-top-dash" id="qDashBtn">Dashboard</button>
       <span class="q-avatar" id="qAvatar">?</span>
       <span class="q-top-name" id="qUserName">—</span>
       <button class="q-btn-icon" id="qLogoutBtn" title="Sign out" aria-label="Sign out">⎋</button>
@@ -42,20 +43,20 @@
 
 <main class="q-wrap">
 
-  <!-- ── WELCOME ───────────────────────────────────────────────── -->
+  <!-- ── WELCOME / LANDING ─────────────────────────────────────── -->
   <section class="q-screen is-active" id="screen-welcome">
-    <div class="q-hero">
-      <span class="q-pill"><span class="q-pill-dot"></span> Live classroom quizzes</span>
-      <h1>Make every class a <span class="g">game</span>.</h1>
-      <p>Paste your questions, host a live quiz on the big screen, and let your students buzz in from their phones — scored in real time.</p>
+    <div class="q-land-hero">
+      <span class="q-eyebrow">LIVE LEARNING QUIZZES</span>
+      <h1 class="q-land-h1">Make every concept <span>stick</span>.</h1>
+      <p class="q-land-lead">Quizzing is the most effective way to lock ideas into memory — far better than re-reading notes. Turn any topic into a fast, friendly live game: <b>paste your questions, host on the big screen, and let everyone buzz in from their phones</b> — scored in real time.</p>
     </div>
 
     <div class="q-paths">
       <!-- Join -->
       <div class="q-path q-path-join" id="pathJoin" role="button" tabindex="0">
         <div class="q-path-ico">🎮</div>
-        <h3>Join a quiz</h3>
-        <p>Your teacher gave you a 6-digit game PIN? Hop in — no account needed.</p>
+        <h3>Join a game</h3>
+        <p>Got a 6-digit game PIN from your host? Jump in — no account needed.</p>
         <div class="q-joinbar" onclick="event.stopPropagation()">
           <input class="q-input mono" id="joinPin" inputmode="numeric" maxlength="6" placeholder="------" aria-label="Game PIN"/>
           <button class="q-btn q-btn-primary" id="joinGoBtn">Enter</button>
@@ -66,10 +67,48 @@
       <div class="q-path q-path-create" id="pathCreate" role="button" tabindex="0">
         <div class="q-path-ico">✨</div>
         <h3>Create a quiz</h3>
-        <p>Teachers: build a quiz in minutes, then host it live. Sign in with your AnalystWorld account.</p>
+        <p>Teachers, trainers &amp; self-learners: build a quiz in minutes and host it live. Sign in with your AnalystWorld account.</p>
         <span class="q-path-cta">Go to host dashboard →</span>
       </div>
     </div>
+
+    <!-- why it works -->
+    <section class="q-land-sec" data-reveal>
+      <div class="q-land-sec-h">
+        <span class="q-eyebrow">WHY IT WORKS</span>
+        <h2>Playing a quiz beats re-reading notes</h2>
+        <p>Decades of learning science point to one thing: you remember what you actively recall. A quiz turns revision into recall — and makes it fun enough that people want to do it again.</p>
+      </div>
+      <div class="q-benefit-grid">
+        <div class="q-benefit"><div class="q-benefit-ic">🧠</div><h3>Active recall</h3><p>Pulling an answer from memory cements it far deeper than simply reading it again.</p></div>
+        <div class="q-benefit"><div class="q-benefit-ic">🔁</div><h3>Effortless revision</h3><p>Turn a whole chapter into a five-minute game, and revisit tricky topics the moment they slip.</p></div>
+        <div class="q-benefit"><div class="q-benefit-ic">⚡</div><h3>Instant feedback</h3><p>See exactly what landed and what didn't — question by question, for the entire room at once.</p></div>
+        <div class="q-benefit"><div class="q-benefit-ic">🏆</div><h3>Friendly competition</h3><p>A live leaderboard and an animated podium turn revision into something everyone wants to win.</p></div>
+      </div>
+    </section>
+
+    <!-- how it works -->
+    <section class="q-land-sec" data-reveal>
+      <div class="q-land-sec-h">
+        <span class="q-eyebrow">HOW IT WORKS</span>
+        <h2>From questions to a live game in a minute</h2>
+      </div>
+      <div class="q-steps">
+        <div class="q-step"><span class="q-step-n">1</span><div><h3>Paste your questions</h3><p>Drop in your multiple-choice questions as plain text — we parse them into a clean, editable quiz.</p></div></div>
+        <div class="q-step"><span class="q-step-n">2</span><div><h3>Host it live</h3><p>Share a 6-digit PIN or a QR code. Everyone joins from any phone — no app, no account.</p></div></div>
+        <div class="q-step"><span class="q-step-n">3</span><div><h3>Play &amp; learn</h3><p>Synced questions, a running timer, live scores, and a podium finish that makes it memorable.</p></div></div>
+      </div>
+    </section>
+
+    <!-- cta -->
+    <section class="q-land-sec q-land-cta" data-reveal>
+      <h2>Ready to make learning stick?</h2>
+      <p>Built for classrooms, training sessions and solo revision alike — free, with your AnalystWorld account.</p>
+      <div class="q-land-cta-btns">
+        <button class="q-btn q-btn-primary q-btn-lg" id="ctaCreate">Create a quiz →</button>
+        <button class="q-btn q-btn-ghost q-btn-lg" id="ctaJoin">Join a game</button>
+      </div>
+    </section>
 
     <div class="q-foot">
       Part of <a href="/">AnalystWorld</a> · <a href="/">Back to main site</a>
@@ -83,7 +122,10 @@
         <h1>Your quizzes</h1>
         <p id="dashGreeting">Welcome back.</p>
       </div>
-      <button class="q-btn q-btn-primary q-btn-lg" id="newQuizBtn">+ New quiz</button>
+      <div class="q-dash-actions">
+        <button class="q-btn q-btn-ghost" id="dashJoinBtn">🎮 Join a game</button>
+        <button class="q-btn q-btn-primary q-btn-lg" id="newQuizBtn">+ New quiz</button>
+      </div>
     </div>
 
     <div class="q-stats">
