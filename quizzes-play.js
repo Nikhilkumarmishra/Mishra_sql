@@ -71,6 +71,7 @@
   function applyState(state) {
     if (state === live.state && (state === 'QUESTION_RESULTS' || state === 'LEADERBOARD')) return; // avoid re-fetch loops
     live.state = state;
+    var tu = $('pTimeup'); if (tu && state !== 'QUESTION_ACTIVE') tu.classList.add('q-hidden');
     if (state === 'LOBBY') { clearPTimer(); go('p-lobby'); }
     else if (state === 'QUESTION_ACTIVE') { go('p-live'); pActive(); }
     else if (state === 'QUESTION_RESULTS') { clearPTimer(); go('p-live'); pResults(); }
@@ -107,15 +108,17 @@
         b.addEventListener('click', function () { submitAnswer(b.getAttribute('data-opt'), q); });
       });
     }
+    $('pTimeup').classList.add('q-hidden');
     clearPTimer();
+    var total = q.q_duration;
     var offset = Date.now() - Date.parse(q.server_now);
     var deadline = Date.parse(q.q_started_at) + q.q_duration * 1000;
-    var tick = function () {
-      var remaining = Math.max(0, Math.ceil((deadline - (Date.now() - offset)) / 1000));
-      $('pTimer').textContent = remaining; $('pTimer').classList.toggle('low', remaining <= 5);
-      if (remaining <= 0) clearPTimer();
+    var tk = function () {
+      var remaining = (deadline - (Date.now() - offset)) / 1000;
+      window.QuizzFX.updateRing($('pTimer'), remaining, total);
+      if (remaining <= 0) { clearPTimer(); $('pTimeup').classList.remove('q-hidden'); }
     };
-    tick(); ptimer = setInterval(tick, 250);
+    tk(); ptimer = setInterval(tk, 200);
   }
 
   async function submitAnswer(opt, q) {

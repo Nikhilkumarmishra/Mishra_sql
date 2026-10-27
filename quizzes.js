@@ -718,7 +718,7 @@
 
   function showLive(state) {
     show($('lobbyWaiting'), false); show($('lobbyLive'), true); show($('lobbyBar'), false);
-    clearLiveTimers();
+    clearLiveTimers(); show($('liveTimeup'), false);
     if (state.state !== 'COMPLETED') { show($('livePodium'), false); $('liveQ').style.display = ''; }
     lobby.hostState = state.state;
     lobby.curQ = (state.current_q != null ? state.current_q : (lobby.curQ || 0));
@@ -800,7 +800,6 @@
       // sequential reveal + celebration
       revealPodium(pod, function () {
         if (!QuizzFX.reduceMotion()) QuizzFX.confetti();
-        if (lobby.soundOn) QuizzFX.chime();
       });
     } catch (e) { toast(e.message, 'err'); }
   }
@@ -819,14 +818,6 @@
     }).join('');
   }
 
-  function setTimerRing(el, remaining, total) {
-    var num = $('liveTimerNum');
-    var r = Math.max(0, Math.ceil(remaining));
-    num.textContent = r;
-    var frac = total > 0 ? Math.max(0, Math.min(1, remaining / total)) : 0;
-    el.style.setProperty('--deg', (frac * 360) + 'deg');
-    el.classList.toggle('low', r <= 5);
-  }
 
   async function hostActive() {
     show($('liveLeader'), false); $('liveTiles').classList.remove('revealed');
@@ -845,13 +836,16 @@
       var offset = Date.now() - Date.parse(q.server_now);
       var deadline = Date.parse(q.q_started_at) + q.q_duration * 1000;
       var total = q.q_duration;
+      show($('liveTimeup'), false);
       var tick = function () {
         var remaining = (deadline - (Date.now() - offset)) / 1000;
-        setTimerRing($('liveTimer'), remaining, total);
-        if (remaining <= 0) { clearInterval(lobby.timer); lobby.timer = null; $('liveMeta').textContent = $('liveMeta').textContent + ' · time up'; }
+        QuizzFX.updateRing($('liveTimer'), remaining, total);
+        if (remaining <= 0) { clearInterval(lobby.timer); lobby.timer = null; show($('liveTimeup'), true); }
       };
-      tick(); lobby.timer = setInterval(tick, 250);
+      if (lobby.timer) clearInterval(lobby.timer);   // never stack intervals
+      tick(); lobby.timer = setInterval(tick, 200);
       // poll live answer count (host-only tally)
+      if (lobby.poll) clearInterval(lobby.poll);
       lobby.poll = setInterval(async function () {
         try {
           var r = await rpc('quiz_results', { p_session_id: lobby.sessionId });
@@ -1017,11 +1011,6 @@
     $('lobbyEnd').addEventListener('click', endGame);
     $('liveEnd').addEventListener('click', endGame);
     $('liveNext').addEventListener('click', liveNext);
-    $('liveSound').addEventListener('click', function () {
-      lobby.soundOn = !lobby.soundOn;
-      $('liveSound').textContent = lobby.soundOn ? '🔊' : '🔇';
-      if (lobby.soundOn) QuizzFX.chime();   // confirm + satisfy autoplay gesture
-    });
     $('lobbyCopy').addEventListener('click', copyJoinLink);
 
     // preview

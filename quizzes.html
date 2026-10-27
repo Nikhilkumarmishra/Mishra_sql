@@ -48,7 +48,7 @@
     <div class="q-land-hero">
       <span class="q-eyebrow">LIVE LEARNING QUIZZES</span>
       <h1 class="q-land-h1">Make every concept <span>stick</span>.</h1>
-      <p class="q-land-lead">Quizzing is the most effective way to lock ideas into memory — far better than re-reading notes. Turn any topic into a fast, friendly live game: <b>paste your questions, host on the big screen, and let everyone buzz in from their phones</b> — scored in real time.</p>
+      <p class="q-land-lead">Quizzing is the most effective way to lock ideas into memory — far better than re-reading notes. Turn any topic into a fast, friendly live game your whole class will remember.</p>
     </div>
 
     <div class="q-paths">
@@ -246,16 +246,19 @@ Time: 20"></textarea>
     <div id="lobbyLive" class="q-hidden">
       <div class="q-live-head">
         <span class="q-live-progress" id="liveProgress">Question 1 / 1</span>
-        <div class="q-live-timer" id="liveTimer"><span id="liveTimerNum">–</span></div>
+        <div class="q-ring q-live-timer" id="liveTimer">
+          <svg viewBox="0 0 100 100" aria-hidden="true"><circle class="q-ring-track" cx="50" cy="50" r="44"/><circle class="q-ring-fill" cx="50" cy="50" r="44"/></svg>
+          <span class="q-ring-num" id="liveTimerNum">–</span>
+        </div>
       </div>
       <h2 class="q-live-q" id="liveQ">…</h2>
       <div class="q-live-tiles" id="liveTiles"></div>
       <div class="q-live-meta" id="liveMeta"></div>
+      <div class="q-timeup q-hidden" id="liveTimeup">⏰ Time's up!</div>
       <div class="q-live-leader q-hidden" id="liveLeader"></div>
       <div class="q-hidden" id="livePodium"></div>
       <div class="q-live-controls">
         <button class="q-btn q-btn-ghost" id="liveEnd">✕ End game</button>
-        <button class="q-btn-icon" id="liveSound" title="Celebration sound" aria-label="Toggle celebration sound">🔇</button>
         <div class="q-top-spacer"></div>
         <button class="q-btn q-btn-primary q-btn-lg" id="liveNext">Next →</button>
       </div>
