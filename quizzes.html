@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>AnalystWorld Quizz — live classroom quizzes</title>
+<meta name="description" content="Run beautiful, live, Kahoot-style quizzes in your class. Paste your questions, host in seconds, and let students join from their phones."/>
+<meta name="robots" content="index,follow"/>
+<link rel="canonical" href="https://analystworld.in/quizzes"/>
+<link rel="icon" type="image/x-icon" href="/favicon.ico"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"/>
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
+<meta property="og:title" content="AnalystWorld Quizz — live classroom quizzes"/>
+<meta property="og:description" content="Paste your questions, host a live quiz, students join by PIN."/>
+<meta property="og:type" content="website"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Clash+Display:wght@500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/quizzes.css"/>
+</head>
+<body>
+
+<!-- ── top bar ─────────────────────────────────────────────────── -->
+<header class="q-top">
+  <div class="q-top-inner">
+    <a class="q-logo" href="/quizzes" data-nav="welcome">
+      <span class="q-logo-mark">Q</span>
+      <span class="q-logo-txt">AnalystWorld<b>&nbsp;Quizz</b></span>
+    </a>
+    <div class="q-top-spacer"></div>
+    <button class="q-btn-icon" id="qThemeToggle" title="Toggle theme" aria-label="Toggle light / dark">◐</button>
+    <div id="qTopAuth">
+      <button class="q-btn q-btn-ghost" id="qTopLoginBtn">Host login</button>
+    </div>
+    <div id="qTopUser" class="q-top-user q-hidden">
+      <span class="q-avatar" id="qAvatar">?</span>
+      <span class="q-top-name" id="qUserName">—</span>
+      <button class="q-btn-icon" id="qLogoutBtn" title="Sign out" aria-label="Sign out">⎋</button>
+    </div>
+  </div>
+</header>
+
+<main class="q-wrap">
+
+  <!-- ── WELCOME ───────────────────────────────────────────────── -->
+  <section class="q-screen is-active" id="screen-welcome">
+    <div class="q-hero">
+      <span class="q-pill"><span class="q-pill-dot"></span> Live classroom quizzes</span>
+      <h1>Make every class a <span class="g">game</span>.</h1>
+      <p>Paste your questions, host a live quiz on the big screen, and let your students buzz in from their phones — scored in real time.</p>
+    </div>
+
+    <div class="q-paths">
+      <!-- Join -->
+      <div class="q-path q-path-join" id="pathJoin" role="button" tabindex="0">
+        <div class="q-path-ico">🎮</div>
+        <h3>Join a quiz</h3>
+        <p>Your teacher gave you a 6-digit game PIN? Hop in — no account needed.</p>
+        <div class="q-joinbar" onclick="event.stopPropagation()">
+          <input class="q-input mono" id="joinPin" inputmode="numeric" maxlength="6" placeholder="------" aria-label="Game PIN"/>
+          <button class="q-btn q-btn-primary" id="joinGoBtn">Enter</button>
+        </div>
+      </div>
+
+      <!-- Create -->
+      <div class="q-path q-path-create" id="pathCreate" role="button" tabindex="0">
+        <div class="q-path-ico">✨</div>
+        <h3>Create a quiz</h3>
+        <p>Teachers: build a quiz in minutes, then host it live. Sign in with your AnalystWorld account.</p>
+        <span class="q-path-cta">Go to host dashboard →</span>
+      </div>
+    </div>
+
+    <div class="q-foot">
+      Part of <a href="/">AnalystWorld</a> · <a href="/">Back to main site</a>
+    </div>
+  </section>
+
+  <!-- ── HOST DASHBOARD (shell) ────────────────────────────────── -->
+  <section class="q-screen" id="screen-dashboard">
+    <div class="q-dash-head">
+      <div>
+        <h1>Your quizzes</h1>
+        <p id="dashGreeting">Welcome back.</p>
+      </div>
+      <button class="q-btn q-btn-primary q-btn-lg" id="newQuizBtn">+ New quiz</button>
+    </div>
+
+    <div class="q-stats">
+      <div class="q-stat"><div class="q-stat-num" id="statQuizzes">0</div><div class="q-stat-lbl">Quizzes</div></div>
+      <div class="q-stat"><div class="q-stat-num" id="statPublished">0</div><div class="q-stat-lbl">Published</div></div>
+      <div class="q-stat"><div class="q-stat-num" id="statGames">0</div><div class="q-stat-lbl">Games hosted</div></div>
+    </div>
+
+    <div class="q-section-head"><h2>My quizzes</h2></div>
+    <div id="dashBody">
+      <div class="q-center"><div class="q-spinner"></div></div>
+    </div>
+
+    <div class="q-section-head q-hidden" id="recentHead"><h2>Recent games</h2></div>
+    <div class="q-history" id="recentGames"></div>
+
+    <div class="q-foot">
+      Part of <a href="/">AnalystWorld</a> · <a href="/">Back to main site</a>
+    </div>
+  </section>
+
+  <!-- ── QUIZ STUDIO ───────────────────────────────────────────── -->
+  <section class="q-screen" id="screen-studio">
+    <div class="q-studio-bar">
+      <button class="q-btn q-btn-ghost" id="studioBack">← Dashboard</button>
+      <span class="q-tag" id="studioStatus" style="visibility:hidden"></span>
+      <div class="q-top-spacer"></div>
+      <button class="q-btn q-btn-ghost" id="studioPreview">▶ Preview</button>
+      <button class="q-btn q-btn-ghost" id="studioSave">Save draft</button>
+      <button class="q-btn q-btn-primary" id="studioPublish">Publish</button>
+    </div>
+
+    <div class="q-studio-meta q-card">
+      <div class="q-meta-cover">
+        <input class="q-cover-input" id="metaCover" maxlength="2" placeholder="📊" aria-label="Cover emoji"/>
+        <span class="q-cover-hint">cover</span>
+      </div>
+      <div class="q-meta-fields">
+        <input class="q-input q-title-input" id="metaTitle" maxlength="160" placeholder="Untitled quiz"/>
+        <input class="q-input" id="metaDesc" maxlength="200" placeholder="Short description (optional)"/>
+      </div>
+      <div class="q-meta-timer">
+        <span class="q-label">Default timer</span>
+        <div class="q-timer-pick">
+          <input class="q-input mono" id="metaTimer" type="number" min="5" max="300" value="20"/>
+          <span class="q-timer-unit">sec</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- bulk paste -->
+    <details class="q-paste q-card" id="pastePanel" open>
+      <summary><span>⚡ Paste questions in bulk</span><span class="q-paste-caret">▾</span></summary>
+      <div class="q-paste-body">
+        <p class="q-paste-tip">Paste your MCQs below — one block per question. We'll parse them into editable cards. We never guess the correct answer; anything unclear gets flagged for you to fix.</p>
+        <textarea class="q-textarea mono" id="pasteBox" spellcheck="false" placeholder="Quiz: Excel Fundamentals
+Q1. Which function adds values in Excel?
+A. COUNT
+B. SUM
+C. MAX
+D. AVERAGE
+Correct: B
+Explanation: SUM adds the supplied numeric values.
+Time: 20"></textarea>
+        <div class="q-paste-actions">
+          <button class="q-btn q-btn-ghost" id="pasteSample">Load sample</button>
+          <div class="q-top-spacer"></div>
+          <span class="q-parse-note" id="parseNote"></span>
+          <button class="q-btn q-btn-primary" id="parseBtn">Parse &amp; add →</button>
+        </div>
+      </div>
+    </details>
+
+    <div class="q-section-head">
+      <h2>Questions <span class="q-count-chip" id="qCountChip">0</span></h2>
+      <button class="q-btn q-btn-ghost" id="addQBtn">+ Add question</button>
+    </div>
+    <div id="qList"></div>
+
+    <div class="q-foot">Part of <a href="/">AnalystWorld</a> · <a href="/">Back to main site</a></div>
+  </section>
+
+  <!-- ── HOST LOBBY ────────────────────────────────────────────── -->
+  <section class="q-screen" id="screen-lobby">
+    <div class="q-studio-bar" id="lobbyBar">
+      <button class="q-btn q-btn-ghost" id="lobbyEnd">✕ End game</button>
+      <span class="q-tag q-tag-published" id="lobbyTitle" style="visibility:hidden"></span>
+      <div class="q-top-spacer"></div>
+      <button class="q-btn q-btn-primary" id="lobbyStart" disabled>Start game</button>
+    </div>
+
+    <!-- lobby (waiting for players) -->
+    <div id="lobbyWaiting">
+      <div class="q-lobby-join q-card">
+        <div class="q-lobby-join-txt">
+          <div class="q-lobby-step">1 · On your phone, go to</div>
+          <div class="q-lobby-url" id="lobbyUrl">analystworld.in/quizzes</div>
+          <div class="q-lobby-step" style="margin-top:18px">2 · Enter the game PIN</div>
+          <div class="q-lobby-pin" id="lobbyPin">------</div>
+          <button class="q-btn q-btn-ghost" id="lobbyCopy">🔗 Copy join link</button>
+        </div>
+        <div class="q-lobby-qr">
+          <div id="lobbyQr"></div>
+          <span class="q-lobby-qr-cap">Scan to join</span>
+        </div>
+      </div>
+
+      <div class="q-lobby-players">
+        <div class="q-section-head">
+          <h2>Players <span class="q-count-chip" id="lobbyCount">0</span></h2>
+          <span class="q-hint" id="lobbyHint">Waiting for players to join…</span>
+        </div>
+        <div class="q-players-grid" id="playersGrid"></div>
+      </div>
+    </div>
+
+    <!-- live projector view -->
+    <div id="lobbyLive" class="q-hidden">
+      <div class="q-live-head">
+        <span class="q-live-progress" id="liveProgress">Question 1 / 1</span>
+        <div class="q-live-timer" id="liveTimer"><span id="liveTimerNum">–</span></div>
+      </div>
+      <h2 class="q-live-q" id="liveQ">…</h2>
+      <div class="q-live-tiles" id="liveTiles"></div>
+      <div class="q-live-meta" id="liveMeta"></div>
+      <div class="q-live-leader q-hidden" id="liveLeader"></div>
+      <div class="q-hidden" id="livePodium"></div>
+      <div class="q-live-controls">
+        <button class="q-btn q-btn-ghost" id="liveEnd">✕ End game</button>
+        <button class="q-btn-icon" id="liveSound" title="Celebration sound" aria-label="Toggle celebration sound">🔇</button>
+        <div class="q-top-spacer"></div>
+        <button class="q-btn q-btn-primary q-btn-lg" id="liveNext">Next →</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ── PREVIEW (as participant) ─────────────────────────────────── -->
+<div class="q-modal-back" id="previewModal">
+  <div class="q-preview" id="previewStage">
+    <div class="q-preview-top">
+      <span class="q-preview-badge">Preview · as a student</span>
+      <div class="q-top-spacer"></div>
+      <span class="q-preview-count" id="pvCount"></span>
+      <button class="q-btn-icon" id="pvClose" title="Close preview" aria-label="Close preview">✕</button>
+    </div>
+    <div class="q-preview-body" id="pvBody"></div>
+    <div class="q-preview-nav">
+      <button class="q-btn q-btn-ghost" id="pvPrev">← Prev</button>
+      <button class="q-btn q-btn-ghost" id="pvReveal">Reveal answer</button>
+      <button class="q-btn q-btn-primary" id="pvNext">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── AUTH MODAL ──────────────────────────────────────────────── -->
+<div class="q-modal-back" id="authModal">
+  <div class="q-card q-modal" style="position:relative">
+    <h2 id="authTitle">Host login</h2>
+    <p class="q-sub">Use your AnalystWorld account — the same one you use on the main site.</p>
+
+    <button class="q-oauth" id="googleBtn">
+      <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Continue with Google
+    </button>
+
+    <div class="q-or">or</div>
+
+    <div class="q-tabs">
+      <button class="q-tab is-active" data-authtab="login">Sign in</button>
+      <button class="q-tab" data-authtab="signup">Sign up</button>
+    </div>
+
+    <form id="authForm">
+      <label class="q-field">
+        <span class="q-label">Email</span>
+        <input class="q-input" id="authEmail" type="email" autocomplete="email" placeholder="you@example.com"/>
+      </label>
+      <label class="q-field">
+        <span class="q-label">Password</span>
+        <input class="q-input" id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••"/>
+      </label>
+      <div class="q-err-msg" id="authError"></div>
+      <button class="q-btn q-btn-primary q-btn-block" id="authSubmit" type="submit">Sign in</button>
+    </form>
+
+    <div style="text-align:center;margin-top:16px">
+      <button class="q-btn q-btn-ghost" id="authCancel" style="border:none">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="q-toasts" id="toasts" aria-live="polite"></div>
+
+<!-- supabase-js + QR loaded ONLY here (never on the existing production pages) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="/quizzes-fx.js"></script>
+<script src="/quizzes.js"></script>
+</body>
+</html>

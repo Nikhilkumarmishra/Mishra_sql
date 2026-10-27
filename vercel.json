@@ -21,6 +21,10 @@
     { "source": "/data-warriors", "destination": "/data-warriors.html" },
     { "source": "/data-warriors/", "destination": "/data-warriors.html" },
     { "source": "/data-warriors/(.*)", "destination": "/data-warriors.html" },
+    { "source": "/quizzes", "destination": "/quizzes.html" },
+    { "source": "/quizzes/", "destination": "/quizzes.html" },
+    { "source": "/quizzes/play", "destination": "/quizzes-play.html" },
+    { "source": "/quizzes/join", "destination": "/quizzes-play.html" },
     { "source": "/u/:username", "destination": "/api/profile?u=:username" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]

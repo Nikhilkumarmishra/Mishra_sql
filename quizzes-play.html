@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Join a quiz — AnalystWorld Quizz</title>
+<meta name="description" content="Join a live AnalystWorld Quizz game with your game PIN."/>
+<meta name="robots" content="noindex"/>
+<link rel="icon" type="image/x-icon" href="/favicon.ico"/>
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Clash+Display:wght@500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/quizzes.css"/>
+</head>
+<body>
+
+<header class="q-top">
+  <div class="q-top-inner">
+    <a class="q-logo" href="/quizzes">
+      <span class="q-logo-mark">Q</span>
+      <span class="q-logo-txt">AnalystWorld<b>&nbsp;Quizz</b></span>
+    </a>
+    <div class="q-top-spacer"></div>
+    <button class="q-btn-icon" id="qThemeToggle" title="Toggle theme" aria-label="Toggle light / dark">◐</button>
+  </div>
+</header>
+
+<main class="q-play-wrap">
+
+  <!-- JOIN -->
+  <section class="q-screen is-active" id="p-join">
+    <div class="q-play-center" style="padding-bottom:10px">
+      <span class="q-pill"><span class="q-pill-dot"></span> Join a live game</span>
+      <h1 class="q-play-big">You're nearly in</h1>
+      <p class="q-hint">Enter your game PIN and pick a nickname.</p>
+    </div>
+    <div class="q-card q-play-card">
+      <label class="q-field"><span class="q-label">Game PIN</span>
+        <input class="q-input mono" id="pin" inputmode="numeric" maxlength="6" placeholder="------"
+               style="letter-spacing:.3em;font-size:22px;text-align:center;font-weight:700"/></label>
+      <label class="q-field"><span class="q-label">Nickname</span>
+        <input class="q-input" id="nick" maxlength="24" placeholder="e.g. DataNinja"/></label>
+      <div class="q-err-msg" id="joinError"></div>
+      <button class="q-btn q-btn-primary q-btn-block q-btn-lg" id="joinBtn">Join game</button>
+    </div>
+    <div class="q-foot">Part of <a href="/">AnalystWorld</a> · <a href="/quizzes">Host a quiz</a></div>
+  </section>
+
+  <!-- LOBBY (waiting) -->
+  <section class="q-screen" id="p-lobby">
+    <div class="q-play-center">
+      <div class="q-play-you"><span class="q-play-dot"></span><span id="youName">—</span></div>
+      <h1 class="q-play-big q-play-pulse">You're in!</h1>
+      <p class="q-hint" id="lobbyTitle2">Waiting for the host to start the game…</p>
+      <div class="q-play-wait-ring"></div>
+      <p class="q-hint"><span id="playerCount">1</span> player<span id="playerCountS"></span> in the room</p>
+    </div>
+    <div class="q-foot"><button class="q-btn q-btn-ghost" id="leaveBtn" style="border:none">Leave game</button></div>
+  </section>
+
+  <!-- LIVE (answer / lock / reveal / standings) -->
+  <section class="q-screen" id="p-live">
+    <div class="q-plive-head">
+      <div class="q-play-you"><span class="q-play-dot" id="pDot"></span><span id="youName2">—</span></div>
+      <div class="q-plive-right">
+        <span class="q-plive-score" id="pScore">0</span>
+        <span class="q-plive-timer" id="pTimer"></span>
+      </div>
+    </div>
+    <div id="pLiveBody"></div>
+  </section>
+
+  <!-- END -->
+  <section class="q-screen" id="p-end">
+    <div id="pEndBody">
+      <div class="q-play-center">
+        <div class="q-empty-ico" style="font-size:48px">🎉</div>
+        <h1 class="q-play-big">Game over</h1>
+      </div>
+    </div>
+    <div class="q-foot"><a class="q-btn q-btn-ghost" href="/quizzes/play" style="border:none">Join another game</a></div>
+  </section>
+
+  <!-- KICKED -->
+  <section class="q-screen" id="p-kicked">
+    <div class="q-play-center">
+      <div class="q-empty-ico" style="font-size:48px">👋</div>
+      <h1 class="q-play-big">You left the game</h1>
+      <p class="q-hint">The host removed you from this game.</p>
+      <div style="margin-top:20px"><a class="q-btn q-btn-ghost" href="/quizzes/play">Join another</a></div>
+    </div>
+  </section>
+
+</main>
+
+<div class="q-toasts" id="toasts" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="/quizzes-fx.js"></script>
+<script src="/quizzes-play.js"></script>
+</body>
+</html>
