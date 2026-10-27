@@ -623,3 +623,67 @@ h1,h2,h3 { font-family:var(--display); letter-spacing:-0.02em; margin:0; line-he
   }
   .q-path:hover, .q-quiz-card:hover, .q-btn:hover { transform:none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Rich content — safe markdown (code / tables), code-option lists,
+   letter tiles, and multi-line editor fields (SQL / Python quizzes).
+   ═══════════════════════════════════════════════════════════════════ */
+.q-md { line-height:1.55; }
+.q-md > p { margin:0 0 10px; }
+.q-md > p:last-child { margin-bottom:0; }
+.q-md > *:first-child { margin-top:0; }
+.q-md code { font-family:var(--mono); font-size:.88em; background:var(--bg2);
+  border:1px solid var(--border2); border-radius:6px; padding:.08em .4em; white-space:pre-wrap; }
+.q-md pre.q-code { font-family:var(--mono); font-size:13.5px; line-height:1.5; text-align:left;
+  background:var(--surface2); border:1.5px solid var(--border2); border-radius:var(--r);
+  padding:13px 15px; margin:10px 0; overflow-x:auto; color:var(--text); max-width:100%; position:relative; }
+.q-md pre.q-code code { background:none; border:none; padding:0; font-size:inherit; white-space:pre; }
+.q-md pre.q-code[data-lang]::before { content:attr(data-lang); position:absolute; top:5px; right:10px;
+  font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); opacity:.65; }
+.q-tablewrap { overflow-x:auto; margin:10px 0; max-width:100%; }
+.q-table { border-collapse:collapse; font-size:13.5px; width:auto; text-align:left; }
+.q-table th, .q-table td { border:1px solid var(--border2); padding:6px 12px; white-space:nowrap; }
+.q-table th { background:var(--bg2); font-weight:700; }
+.q-table td.r, .q-table th.r { text-align:right; }
+.q-table td.c, .q-table th.c { text-align:center; }
+.q-table td.l, .q-table th.l { text-align:left; }
+
+/* centre code/tables that sit inside a centred question stem */
+.q-plive-q.q-md pre.q-code, .q-plive-q.q-md .q-tablewrap,
+.q-live-q.q-md pre.q-code,  .q-live-q.q-md .q-tablewrap,
+.q-pv-q.q-md pre.q-code,    .q-pv-q.q-md .q-tablewrap {
+  width:fit-content; max-width:100%; margin-left:auto; margin-right:auto; }
+
+/* code-as-options: labelled A–D blocks in the body, letter-only tiles */
+.q-codeopts { display:grid; gap:10px; max-width:880px; margin:0 auto 20px; text-align:left; }
+.q-codeopt { display:flex; gap:12px; align-items:flex-start; background:var(--bg2);
+  border:1.5px solid var(--border2); border-radius:var(--r); padding:12px 14px; }
+.q-codeopt-lbl { font-family:var(--mono); font-weight:800; font-size:15px; color:var(--brand);
+  width:28px; height:28px; flex:none; display:flex; align-items:center; justify-content:center;
+  background:var(--surface); border:1.5px solid var(--border2); border-radius:8px; }
+.q-codeopt-body { flex:1; min-width:0; }
+.q-codeopt-body pre.q-code { margin:0; }
+.q-codeopt-body > p:first-child { margin-top:2px; }
+.q-codeopt.correct { border-color:var(--ok); box-shadow:0 0 0 2px rgba(47,210,122,.2); }
+.q-codeopt.correct .q-codeopt-lbl { background:var(--ok); color:#05230f; border-color:var(--ok); }
+
+/* letter tiles (for code-option questions) */
+.q-tile-letter { font-family:var(--mono); font-weight:800; line-height:1; }
+.q-ptile.letter { min-height:92px; }
+.q-ptile.letter .q-tile-letter { font-size:34px; }
+.q-live-tile.letter { justify-content:center; }
+.q-live-tile.letter .q-tile-letter { font-size:30px; flex:none; }
+.q-pv-tile.letter { justify-content:center; }
+.q-pv-tile.letter .q-tile-letter { font-family:var(--mono); font-weight:800; font-size:22px; }
+
+/* host live question body container */
+.q-live-qbody { max-width:900px; margin:0 auto 12px; }
+
+/* editor: multi-line option / question / explanation fields */
+.q-opt { align-items:flex-start; }
+.q-opt .q-opt-pick, .q-opt .q-opt-glyph { margin-top:3px; }
+.q-ta { width:100%; border:none; background:none; resize:none; outline:none; overflow:hidden;
+  font-family:var(--mono); font-size:13px; line-height:1.5; color:var(--text); min-height:22px; padding:3px 0; }
+.q-ta::placeholder { font-family:var(--sans, inherit); }
+.q-qtext { resize:none; overflow:hidden; min-height:26px; line-height:1.4; }
+.q-expl { resize:none; overflow:hidden; min-height:26px; line-height:1.5; }

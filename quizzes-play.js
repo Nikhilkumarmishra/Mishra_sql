@@ -92,17 +92,22 @@
 
   function renderActive(q) {
     $('pTimer').style.display = '';
+    var FX = window.QuizzFX;
+    var codeOpts = FX.isCodeOpts(q);
     var map = [['a','A'],['b','B'],['c','C'],['d','D']];
     var tiles = map.map(function (m) {
       var low=m[0], L=m[1];
-      return '<button class="q-ptile '+low+(live.picked===L?' picked':'')+'" data-opt="'+L+'">'+
-        '<span class="glyph">'+GLYPH[L]+'</span><span>'+esc(q[low]||('Option '+L))+'</span></button>';
+      var inner = codeOpts
+        ? '<span class="glyph">'+GLYPH[L]+'</span><span class="q-tile-letter">'+L+'</span>'
+        : '<span class="glyph">'+GLYPH[L]+'</span><span>'+FX.mdInline(q[low]||('Option '+L))+'</span>';
+      return '<button class="q-ptile '+low+(codeOpts?' letter':'')+(live.picked===L?' picked':'')+'" data-opt="'+L+'">'+inner+'</button>';
     }).join('');
     var locked = live.answered
       ? '<div class="q-plocked"><div class="q-lock-ico">🔒</div>Answer locked in — waiting for the others…</div>' : '';
     $('pLiveBody').innerHTML =
-      '<div class="q-plive-q">'+esc(q.text||'')+'</div>'+
-      '<div class="q-ptiles'+(live.answered?' locked':'')+'" id="ptiles">'+tiles+'</div>'+locked;
+      '<div class="q-plive-q q-md">'+FX.md(q.text||'')+'</div>'+
+      (codeOpts ? FX.codeOptionsHTML(q) : '')+
+      '<div class="q-ptiles'+(live.answered?' locked':'')+(codeOpts?' letters':'')+'" id="ptiles">'+tiles+'</div>'+locked;
     if (!live.answered) {
       Array.prototype.forEach.call(document.querySelectorAll('#ptiles .q-ptile'), function (b) {
         b.addEventListener('click', function () { submitAnswer(b.getAttribute('data-opt'), q); });
@@ -146,13 +151,17 @@
       var answered = you.answered;
       var correct = you.was_correct === true;
       var headline = !answered ? ['no','Too slow!'] : correct ? ['ok','Correct! 🎉'] : ['no','Not this time'];
-      var ctext = r.correct_option ? (GLYPH[r.correct_option] + ' ' + esc((live.opts||{})[r.correct_option] || r.correct_option)) : '';
+      // for code/multi-line options, reference the letter (the full code is in the question);
+      // for short text options, show the option text inline.
+      var copt = (live.opts||{})[r.correct_option] || '';
+      var codeOpts = window.QuizzFX.isCodeOpts({ a:(live.opts||{}).A, b:(live.opts||{}).B, c:(live.opts||{}).C, d:(live.opts||{}).D });
+      var ctext = r.correct_option ? (GLYPH[r.correct_option] + ' ' + (codeOpts ? r.correct_option : window.QuizzFX.mdInline(copt || r.correct_option))) : '';
       $('pLiveBody').innerHTML =
         '<div class="q-preveal">'+
           '<div class="q-reveal-badge '+headline[0]+'">'+headline[1]+'</div>'+
           (correct && you.points_earned!=null ? '<div class="q-reveal-pts ok">+'+you.points_earned+'</div>' : '')+
           (!correct && r.correct_option ? '<div class="q-reveal-sub">Correct answer: <b>'+ctext+'</b></div>' : '')+
-          (r.explanation?'<div class="q-reveal-sub"><b>Why:</b> '+esc(r.explanation)+'</div>':'')+
+          (r.explanation?'<div class="q-reveal-sub"><b>Why:</b> <span class="q-md">'+window.QuizzFX.md(r.explanation)+'</span></div>':'')+
           '<div class="q-reveal-sub">Your score: <b>'+(you.score||0)+'</b> · rank <b>#'+(you.rank||'–')+'</b></div>'+
         '</div>';
       $('pTimer').style.display = 'none';

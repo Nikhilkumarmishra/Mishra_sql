@@ -86,41 +86,106 @@
     var correct = resolveCorrect(q.correctRaw, o);
     var text = (q.text || '').trim();
     if (!text) errors.push('Missing the question text.');
-    var missing = ['A', 'B', 'C', 'D'].filter(function (L) { return !o[L] || !o[L].trim(); });
+    var val = function (L) { return (o[L] || '').replace(/^\n+|\n+$/g, '').trim(); };
+    var missing = ['A', 'B', 'C', 'D'].filter(function (L) { return !val(L); });
     if (missing.length) errors.push('Missing option' + (missing.length > 1 ? 's' : '') + ' ' + missing.join(', ') + '.');
     if (!q.correctRaw) errors.push('No correct answer marked.');
     else if (!correct) errors.push('Couldn’t match the correct answer “' + q.correctRaw + '” to an option.');
     var time = q.time;
     if (time != null && (isNaN(time) || time < 5 || time > 300)) time = null;
-    return { text: text, a: o.A || '', b: o.B || '', c: o.C || '', d: o.D || '',
-             correct: correct, explanation: (q.explanation || '').trim(), time: time, errors: errors };
+    return { text: text, a: val('A'), b: val('B'), c: val('C'), d: val('D'),
+             correct: correct, explanation: (q.explanation || '').replace(/^\n+|\n+$/g, '').trim(), time: time, errors: errors };
   }
+
+  // markdown-aware: understands ### Q headers, fenced ``` code blocks,
+  // | pipe tables |, multi-line A–D options (a letter line then a code block),
+  // **Correct Answer: X**, **Explanation:** (may span lines/tables), and stops
+  // cleanly at a "Quick Answer Key" section or trailing footer.
+  var reOptHead  = /^([A-Da-d])\s*[\.\)\:\-]\s*(.*)$/;   // "A." / "A) text" / "A. text" (content may be empty)
+  var reExplHead = /^(?:explanation|explain|reason)\b\s*[:\-=\.]?\s*(.*)$/i;
+  var reCorrHead = /^(?:correct(?:\s*answer)?|answer|ans)\b\s*[:\-=\.]?\s*(.*)$/i;
 
   function parseMCQ(raw) {
     var lines = String(raw || '').split(/\r?\n/);
-    var title = null, questions = [], cur = null;
-    function pushCur() { if (cur) { questions.push(cur); cur = null; } }
-    function newCur(text) { pushCur(); cur = { text: (text || '').trim(), options: {}, correctRaw: null, explanation: null, time: null }; }
+    var title = null, questions = [], cur = null, target = null;
+    var inFence = false, fenceBuf = [], fenceLang = '';
+
+    function pushCur() { if (cur) questions.push(cur); cur = null; target = null; }
+    function newCur(stem) { pushCur(); cur = { text: (stem || '').trim(), options: {}, correctRaw: null, explanation: null, time: null }; target = 'stem'; }
+    function appendTo(tgt, textLine) {
+      if (!cur || !tgt) return;
+      var set = function (k, store) {
+        var existing = store[k];
+        store[k] = (existing == null || existing === '') ? textLine : existing + '\n' + textLine;
+      };
+      if (tgt === 'stem') set('text', cur);
+      else if (tgt === 'expl') set('explanation', cur);
+      else if ('ABCD'.indexOf(tgt) >= 0) set(tgt, cur.options);
+    }
+    function flushFence() {
+      appendTo(target, '```' + (fenceLang || '') + '\n' + fenceBuf.join('\n') + '\n```');
+      inFence = false; fenceBuf = []; fenceLang = '';
+    }
 
     for (var i = 0; i < lines.length; i++) {
-      var line = lines[i].trim();
-      if (!line) continue;
+      var rawLine = lines[i];
+      var line = rawLine.trim();
+      var det = line.replace(/\*\*/g, '').trim();   // bold-stripped, for metadata detection
       var m;
-      if (!title && (m = line.match(reQuiz))) { title = m[1].trim(); continue; }
-      if (cur && (m = line.match(reCorrect))) { cur.correctRaw = m[1].trim(); continue; }
-      if (cur && (m = line.match(reExpl)))    { cur.explanation = m[1].trim(); continue; }
-      if (cur && (m = line.match(reTime)))    { cur.time = parseInt(m[1], 10); continue; }
-      if ((m = line.match(reOpt)) || (m = line.match(reOptTight))) {
-        if (!cur) newCur('');
-        cur.options[m[1].toUpperCase()] = m[2].trim();
+
+      // inside a fenced code block: copy verbatim until the closing ```
+      if (inFence) {
+        if (/^```\s*$/.test(line)) { flushFence(); }
+        else fenceBuf.push(rawLine);
         continue;
       }
-      if ((m = line.match(reQNum))) { newCur(m[2].trim()); continue; }
-      // plain line
-      if (!cur) { newCur(line); continue; }
-      if (Object.keys(cur.options).length > 0 || cur.correctRaw) { newCur(line); }
-      else { cur.text = (cur.text ? cur.text + ' ' : '') + line; }
+      if (/^```/.test(line)) { inFence = true; fenceLang = (line.match(/^```[ \t]*([A-Za-z0-9_+-]*)/) || [])[1] || ''; fenceBuf = []; continue; }
+
+      if (/^-{3,}\s*$/.test(line)) { pushCur(); continue; }   // section separator ends a question
+
+      if (line === '') { if (cur && target) appendTo(target, ''); continue; }
+
+      // headings: a "### Q1. ..." starts a question; "Quick Answer Key" stops capture
+      if (/^#{1,6}\s/.test(line)) {
+        var h = line.replace(/^#{1,6}\s*/, '').trim().replace(/\*\*/g, '');
+        var qh = h.match(/^q(?:uestion)?\s*\.?\s*(\d+)\s*[\.\):\-]?\s*(.*)$/i);
+        if (qh) { newCur(qh[2] || ''); continue; }
+        if (/answer key|answer\s*sheet/i.test(h)) { pushCur(); continue; }
+        if (!title && /quiz/i.test(h)) title = (h.split(/[:\-]/)[0] || h).trim();
+        continue;
+      }
+
+      if (!title && (m = det.match(reQuiz))) { title = m[1].trim(); continue; }
+      if (/^difficulty\b/i.test(det)) continue;                       // drop "**Difficulty: ...**"
+      if (cur && (m = det.match(reCorrHead))) { cur.correctRaw = m[1].trim(); target = null; continue; }
+      if (cur && (m = det.match(reExplHead))) { cur.explanation = m[1].trim(); target = 'expl'; continue; }
+      if (cur && (m = det.match(reTime)))     { cur.time = parseInt(m[1], 10); target = null; continue; }
+
+      // an option marker line (content may be empty — a code block usually follows)
+      if ((m = line.match(reOptHead)) && /[A-Da-d]/.test(m[1])) {
+        if (!cur) newCur('');
+        var L = m[1].toUpperCase();
+        cur.options[L] = (m[2] || '').trim();
+        target = L;
+        continue;
+      }
+
+      // explicit "Q1." / "Question 1:" always starts a question
+      if (/^q/i.test(line) && (m = line.match(/^q(?:uestion)?\s*\.?\s*(\d+)\s*[\.\):\-]?\s*(.*)$/i))) {
+        newCur(m[2].trim()); continue;
+      }
+      // a bare "1." starts a question only once we're past the stem (otherwise
+      // it's an ordered-list item inside the question body, e.g. "1. Have …")
+      if ((m = line.match(/^(\d+)\s*[\.\)\-:]\s+(.+)$/))) {
+        if (!cur || Object.keys(cur.options).length > 0 || cur.correctRaw) { newCur(m[2].trim()); continue; }
+      }
+
+      // plain content line → append to the active target (default: the stem)
+      if (!cur) continue;                         // stray text before the first question
+      if (!target) target = 'stem';
+      appendTo(target, rawLine);
     }
+    if (inFence) flushFence();
     pushCur();
     return { title: title, questions: questions.map(finalizeQ) };
   }
@@ -445,21 +510,28 @@
       return '<div class="q-opt q-opt-' + lc + sel + '" data-opt="' + L + '">' +
         '<button type="button" class="q-opt-pick" data-pick="' + L + '" title="Mark correct">' + (q.correct === L ? '✓' : '') + '</button>' +
         '<span class="q-opt-glyph">' + GLYPH[L] + '</span>' +
-        '<input data-f="' + lc + '" value="' + esc(val) + '" placeholder="Option ' + L + '"/></div>';
+        '<textarea class="q-ta mono" data-f="' + lc + '" rows="1" spellcheck="false" placeholder="Option ' + L + '">' + esc(val) + '</textarea></div>';
     }
     return '<div class="q-qcard' + (q.errors && q.errors.length ? ' has-err' : '') + '" data-i="' + i + '">' +
       '<div class="q-qcard-head">' +
         '<span class="q-qnum">' + (i + 1) + '</span>' +
-        '<input class="q-input" data-f="text" value="' + esc(q.text) + '" placeholder="Question text"/>' +
+        '<textarea class="q-input q-qtext" data-f="text" rows="1" placeholder="Question text — supports `code`, ``` fenced blocks ``` and | tables |">' + esc(q.text) + '</textarea>' +
         '<div class="q-qcard-tools">' +
           '<button class="up" title="Move up">↑</button><button class="down" title="Move down">↓</button>' +
           '<button class="del" title="Delete">🗑</button></div>' +
       '</div>' +
       '<div class="q-opts">' + opt('A', q.a) + opt('B', q.b) + opt('C', q.c) + opt('D', q.d) + '</div>' +
       '<div class="q-qcard-foot">' +
-        '<input class="q-input q-expl" data-f="explanation" value="' + esc(q.explanation) + '" placeholder="Explanation (optional)"/>' +
+        '<textarea class="q-input q-expl" data-f="explanation" rows="1" placeholder="Explanation (optional) — supports code & tables">' + esc(q.explanation) + '</textarea>' +
         '<div class="q-qtime"><input class="q-input mono" data-f="time" type="number" min="5" max="300" value="' + (q.time || '') + '" placeholder="timer"/><span class="q-timer-unit">sec</span></div>' +
       '</div>' + errs + '</div>';
+  }
+
+  // grow a textarea to fit its content (code/tables can be many lines)
+  function autoGrow(el) {
+    if (!el || el.tagName !== 'TEXTAREA') return;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 420) + 'px';
   }
 
   function bindCard(i) {
@@ -467,10 +539,12 @@
     if (!card) return;
     // text fields
     Array.prototype.forEach.call(card.querySelectorAll('[data-f]'), function (inp) {
+      autoGrow(inp);
       inp.addEventListener('input', function () {
         var f = inp.getAttribute('data-f');
         if (f === 'time') studio.questions[i].time = inp.value ? parseInt(inp.value, 10) : null;
         else studio.questions[i][f] = inp.value;
+        autoGrow(inp);
       });
     });
     // correct pickers
@@ -731,6 +805,7 @@
 
   function hostHideStage() {
     $('liveTiles').innerHTML = ''; $('liveMeta').innerHTML = '';
+    var body = $('liveQBody'); if (body) { body.innerHTML = ''; show(body, false); }
     show($('liveLeader'), false);
     $('liveTimer').style.visibility = 'hidden';
   }
@@ -806,16 +881,27 @@
 
   function hostTilesHTML(q, counts, correct) {
     var map = [['a', 'A'], ['b', 'B'], ['c', 'C'], ['d', 'D']];
+    var codeOpts = QuizzFX.isCodeOpts(q);
     return map.map(function (m) {
       var low = m[0], L = m[1];
       var cnt = counts ? (counts[L] || 0) : null;
       var isC = correct && correct === L;
-      return '<div class="q-live-tile ' + low + (isC ? ' correct' : '') + '">' +
-        '<span class="glyph">' + GLYPH[L] + '</span>' +
-        '<span class="txt">' + esc(q[low] || '') + '</span>' +
+      var txt = codeOpts
+        ? '<span class="txt q-tile-letter">' + L + '</span>'
+        : '<span class="txt">' + QuizzFX.mdInline(q[low] || '') + '</span>';
+      return '<div class="q-live-tile ' + low + (codeOpts ? ' letter' : '') + (isC ? ' correct' : '') + '">' +
+        '<span class="glyph">' + GLYPH[L] + '</span>' + txt +
         (cnt != null ? '<span class="q-tile-count">' + cnt + '</span>' : '') +
         '<span class="q-tile-check">✓</span></div>';
     }).join('');
+  }
+
+  // render the host question area: stem (markdown) + optional A–D code list
+  function hostQuestionArea(q, correct) {
+    $('liveQ').innerHTML = QuizzFX.md(q.text || '');
+    var body = $('liveQBody');
+    if (QuizzFX.isCodeOpts(q)) { body.innerHTML = QuizzFX.codeOptionsHTML(q, correct || null); show(body, true); }
+    else { body.innerHTML = ''; show(body, false); }
   }
 
 
@@ -828,7 +914,7 @@
       if (q.state && q.state !== 'QUESTION_ACTIVE') { showLive(q); return; }
       lobby.qCount = q.q_count; lobby.curQ = q.idx;
       $('liveProgress').textContent = 'Question ' + (q.idx + 1) + ' / ' + q.q_count;
-      $('liveQ').textContent = q.text;
+      hostQuestionArea(q, null);
       $('liveTiles').innerHTML = hostTilesHTML(q, null, null);
       $('liveTiles').classList.remove('revealed');
       $('liveMeta').textContent = '0 answered';
@@ -864,12 +950,12 @@
       var r = await rpc('quiz_results', { p_session_id: lobby.sessionId });
       var q = await rpc('quiz_question', { p_session_id: lobby.sessionId });
       $('liveProgress').textContent = 'Question ' + (r.idx + 1) + ' / ' + r.q_count;
-      if (q.text) $('liveQ').textContent = q.text;
+      if (q.text) hostQuestionArea(q, r.correct_option);
       $('liveTiles').innerHTML = hostTilesHTML(q, r.counts, r.correct_option);
       $('liveTiles').classList.add('revealed');
       show($('liveLeader'), false);
       var meta = (r.total_answered || 0) + ' of ' + (r.total_players || 0) + ' answered';
-      if (r.explanation) meta += '<div class="q-expl-box"><b>Why:</b> ' + esc(r.explanation) + '</div>';
+      if (r.explanation) meta += '<div class="q-expl-box"><b>Why:</b> <span class="q-md">' + QuizzFX.md(r.explanation) + '</span></div>';
       $('liveMeta').innerHTML = meta;
     } catch (e) { toast(e.message, 'err'); }
   }
@@ -943,18 +1029,22 @@
   function renderPreview() {
     var q = studio.questions[pv.i];
     $('pvCount').textContent = (pv.i + 1) + ' / ' + studio.questions.length;
+    var codeOpts = QuizzFX.isCodeOpts(q);
     var letters = ['a', 'b', 'c', 'd'], LMAP = { a: 'A', b: 'B', c: 'C', d: 'D' };
     var tiles = letters.map(function (l) {
       var L = LMAP[l];
       var correct = q.correct === L ? ' correct' : '';
-      return '<button class="q-pv-tile ' + l + correct + '"><span class="glyph">' + GLYPH[L] + '</span>' +
-        '<span>' + esc(q[l] || ('Option ' + L)) + '</span></button>';
+      var inner = codeOpts
+        ? '<span class="glyph">' + GLYPH[L] + '</span><span class="q-tile-letter">' + L + '</span>'
+        : '<span class="glyph">' + GLYPH[L] + '</span><span>' + QuizzFX.mdInline(q[l] || ('Option ' + L)) + '</span>';
+      return '<button class="q-pv-tile ' + l + (codeOpts ? ' letter' : '') + correct + '">' + inner + '</button>';
     }).join('');
     var expl = (pv.revealed && q.explanation)
-      ? '<div class="q-pv-expl"><b>Why:</b> ' + esc(q.explanation) + '</div>' : '';
+      ? '<div class="q-pv-expl"><b>Why:</b> <span class="q-md">' + QuizzFX.md(q.explanation) + '</span></div>' : '';
     $('pvBody').innerHTML =
-      '<div class="q-pv-q">' + esc(q.text || 'Untitled question') + '</div>' +
-      '<div class="q-pv-tiles' + (pv.revealed ? ' revealed' : '') + '">' + tiles + '</div>' + expl;
+      '<div class="q-pv-q q-md">' + QuizzFX.md(q.text || 'Untitled question') + '</div>' +
+      (codeOpts ? QuizzFX.codeOptionsHTML(q, pv.revealed ? q.correct : null) : '') +
+      '<div class="q-pv-tiles' + (pv.revealed ? ' revealed' : '') + (codeOpts ? ' letters' : '') + '">' + tiles + '</div>' + expl;
     $('pvReveal').textContent = pv.revealed ? 'Hide answer' : 'Reveal answer';
     $('pvPrev').disabled = pv.i === 0;
     $('pvNext').disabled = pv.i === studio.questions.length - 1;

@@ -19,7 +19,7 @@ RPC was modified, so the live SQL-practice site is untouched.
 
 `git diff main --stat` touches only: `vercel.json`, `quizzes.html`,
 `quizzes.css`, `quizzes.js`, `quizzes-play.html`, `quizzes-play.js`,
-`quizzes-fx.js`, `QUIZZ.md`, and `supabase/migrations/202610240001…202610250005`.
+`quizzes-fx.js`, `QUIZZ.md`, and `supabase/migrations/202610240001…202610270001`.
 
 ## 2. Routes (vercel.json rewrites)
 
@@ -64,6 +64,21 @@ Migrations under `supabase/migrations/` (apply in order):
 | `202610250003_quiz_engine.sql` (+ question_id) | submit_answer/next/question/results/leaderboard |
 | `202610250004_quiz_session_read.sql`| widen `quiz_sessions` read policy to `true` (Realtime finale) |
 | `202610250005_quiz_summary.sql`     | session_summary + my_sessions |
+| `202610270001_quiz_rich.sql`        | widen text→5000 / option→2000 / explanation→4000 limits + `quiz_save_questions` truncation, for SQL/Python quizzes (code blocks, datasets) |
+
+### Rich content (SQL / Python quizzes)
+
+Question stems and options are plain text in the DB; the client renders a
+**safe markdown subset** — fenced ```` ``` ```` code blocks, `| pipe tables |`,
+inline `` `code` `` and `**bold**` — via `QuizzFX.md()` in `quizzes-fx.js`.
+Everything is HTML-escaped first and only a fixed tag whitelist is emitted, so
+author content can never inject markup (answer-secrecy / RLS model unchanged).
+When a question's options are themselves code/multi-line (`QuizzFX.isCodeOpts`),
+the four options render as labelled **A–D code blocks in the question body** and
+the tiles become big **A / B / C / D** letters (readable on phones). The paste
+importer (`QUIZZ_parseMCQ`) is markdown-aware: it understands `### Qn` headers,
+fenced code, tables, multi-line options, `**Correct Answer: X**`,
+`**Explanation:**` blocks, and stops at a trailing "Quick Answer Key" section.
 
 All migrations have already been applied to the live project via the Supabase
 MCP tooling. If re-applying to a fresh project, run them in filename order.
